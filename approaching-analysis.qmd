@@ -61,42 +61,42 @@ A descriptive assessment of the dataset includes a set of diagnostic measures an
 
 belc_tokens <- 
   getTokens(corpusName = "slabank",
-            corpora = c("slabank", "English", "BELC", "compositions"))
+            corpora = c("slabank", "English", "BELC", "compositions")) # get tokens from BELC
 
 belc_participants <- 
   getParticipants(corpusName = "slabank",
-                  corpora = c("slabank", "English", "BELC", "compositions"))
+                  corpora = c("slabank", "English", "BELC", "compositions")) # get participants from BELC
 
 belc_compositions_tokens <- 
-  left_join(belc_participants, belc_tokens) %>% # join participants and tokens information
-  unnest(everything()) %>% # unnest lists from variables
-  filter(str_detect(path, "/compositions/")) %>% # remove compositions-2014 data
-  separate(col = filename, into = c("time_group", "participant_id"), sep = "c") %>% # isolate participant_id
-  mutate(time = str_extract(time_group, "^\\d")) %>% # isolate the testing time
-  mutate(group = str_extract(time_group, "[AB]")) %>%  # isolate the group
-  filter(group == "A") %>% # only keep participants from group A
-  filter(!is.na(pos)) %>% # remove lines with no pos
-  filter(pos != "L2") %>% # remove lines with no pos as L2
-  filter(!is.na(stem)) %>% # remove lines with no stem
+  left_join(belc_participants, belc_tokens) |> # join participants and tokens information
+  unnest(everything()) |> # unnest lists from variables
+  filter(str_detect(path, "/compositions/")) |> # remove compositions-2014 data
+  separate(col = filename, into = c("time_group", "participant_id"), sep = "c") |> # isolate participant_id
+  mutate(time = str_extract(time_group, "^\\d")) |> # isolate the testing time
+  mutate(group = str_extract(time_group, "[AB]")) |>  # isolate the group
+  filter(group == "A") |> # only keep participants from group A
+  filter(!is.na(pos)) |> # remove lines with no pos
+  filter(pos != "L2") |> # remove lines with no pos as L2
+  filter(!is.na(stem)) |> # remove lines with no stem
   select(participant_id, age_group = time, sex, word, num_utterances = numutts, stem, pos) # select only relevant variables
 
 belc <- 
-  belc_compositions_tokens %>% 
-  group_by(participant_id, age_group) %>% # grouping by participant composition
+  belc_compositions_tokens |> 
+  group_by(participant_id, age_group) |> # grouping by participant composition
   mutate(num_tokens = n(), # number of words
          num_types = n_distinct(word), # number of distinct words
-         ttr = round(num_types/ num_tokens, 3)) %>% # ratio of distinct words to words
-  ungroup() %>% # clear grouping
-  select(participant_id, age_group, sex, num_tokens, num_types, ttr) %>% # select relevant variables
-  distinct() %>% # simplify the dataset to only the unique values for each row
+         ttr = round(num_types/ num_tokens, 3)) |> # ratio of distinct words to words
+  ungroup() |> # clear grouping
+  select(participant_id, age_group, sex, num_tokens, num_types, ttr) |> # select relevant variables
+  distinct() |> # simplify the dataset to only the unique values for each row
   mutate(age_group = case_when( # recode group numbers to text 
     age_group == "1" ~ "10-year-olds",
     age_group == "2" ~ "12-year-olds",
     age_group == "3" ~ "16-year-olds",
     age_group == "4" ~ "17-year-olds"
-  )) %>% 
-  arrange(age_group, sex) %>% # sort the dataset
-  mutate_if(is.character, as.factor) %>% # create factors from character variables
+  )) |> 
+  arrange(age_group, sex) |> # sort the dataset
+  mutate_if(is.character, as.factor) |> # create factors from character variables
   mutate(age_group = factor(age_group, ordered = TRUE)) # create ordered variable for age_group
 
 write_rds(x = belc, file = "data/approaching-analysis/belc.rds")
@@ -116,9 +116,9 @@ To ground this discussion I will introduce a new dataset. This dataset is drawn 
 #| label: tbl-belc-overview
 #| tbl-cap: 'First 10 observations of the BELC dataset for demonstration.'
 
-belc |> 
-  slice_head(n = 10) |> 
-  kable()
+belc |> # dataset
+  slice_head(n = 10) |> # preview first 10 observations
+  kable() # render table
 ```
 
 The entire dataset includes 79 observations from 36 participants. Each observation in the BELC dataset corresponds to an individual learner's composition. It includes which participant wrote the composition (`participant_id`), the age group they were part of at the time (`age_group`), their sex (`sex`), and the number of English words they produced (`num_tokens`), the number of unique English words they produced (`num_types`). The final variable (`ttr`) is the calculated ratio of number of unique words (`num_types`) to total words (`num_tokens`) for each composition. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity. 
@@ -136,10 +136,27 @@ Turning to continuous variables, another subdivision can be made which hinges on
 An hierarchical overview of the relationship between the two main and four sub-types of levels of measurement appear in @fig-info-values.
 
 ```{r}
-#| label: fig-info-values
+#| label: fig-info-values-paper
 #| fig-cap: 'Levels of measurement graphic representation.'
 
 include_graphics("figures/approaching-analysis/Informational-values-paper.png")
+```
+
+
+
+```{mermaid}
+%%| label: fig-intro-values
+%%| fig-cap: "Levels of measurement graphic representation."
+graph TD
+style A fill:#aaa,stroke:#333,stroke-width:1px
+classDef tier2 fill:#ccc,stroke:#333,stroke-width:1px;
+classDef tier3 fill:#eee    ,stroke:#333,stroke-width:1px;
+A[All variables] -- "Classes" --> B[Categorical]
+A[All variables] -- "Degrees" --> C[Continuous]
+B:::tier2-- No order -->D[Nominal]:::tier3
+B-- Order -->E[Ordinal]:::tier3
+C:::tier2-- No zero -->F[Interval]:::tier3
+C-- Zero -->G[Ratio]:::tier3
 ```
 
 A few notes of practical importance; First, the distinction between interval and ratio variables is often not applicable in text analysis and therefore often treated together as continuous variables. Second, the distinction between ordinal and interval/continuous variables is not as clear cut as it may seem. Both variables contain values which have an ordered relationship. By definition the values of an ordinal variable do not reflect regular intervals between the units of measurement. But in practice interval/continuous variables with a defined number of values (say from a Likert scale used on a survey) may be treated as an ordinal variable as they may be better understood as reflecting class membership. Third, all continuous variables can be converted to categorical variables, but the reverse is not true. We could, for example, define a criterion for binning the word counts in `num_tokens` for each composition into ordered classes such as "low", "mid", "high". On the other hand, `sex` (as it has been measured here) cannot take intermediate values on a unfixed range. The upshot is that variables can be down-typed but not up-typed. In most cases it is preferred to treat continuous variables as such, if the nature of the variable permits it, as the down-typing of continuous data to categorical data results in a loss of information --which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data [@Baayen2004]. 
@@ -182,21 +199,21 @@ These are important measures for assessing the central tendency and dispersion a
 #| fig-cap: 'Boxplots for each of the continuous variables in the BELC dataset.'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(y = num_tokens)) + 
   geom_boxplot(outlier.colour = "red") + 
   theme(axis.title.x=element_blank(), axis.text.x = element_blank()) +
   labs(y = "Number of tokens")
 
 p2 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(y = num_types)) + 
   geom_boxplot(outlier.colour = "red") + 
   theme(axis.title.x=element_blank(), axis.text.x = element_blank()) +
   labs(y = "Number of types")
 
 p3 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(y = ttr)) + 
   geom_boxplot(outlier.colour = "red") + 
   theme(axis.title.x=element_blank(), axis.text.x = element_blank()) +
@@ -216,37 +233,37 @@ In @fig-summaries-histograms-belc I've plotted histograms in the top row and den
 #| fig-cap: 'Histograms and density plots for the continuous variables in the BELC dataset.'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_tokens)) + 
   geom_histogram(binwidth = 20, color="black", fill = "white") + 
   labs(x = "Number of tokens")
 
 p2 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_types)) + 
   geom_histogram(binwidth = 10, color="black", fill = "white") +
   labs(x = "Number of types")
 
 p3 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = ttr)) + 
   geom_histogram(binwidth = .05, color="black", fill = "white") + 
   labs(x = "Type-Token Ratio")
 
 p4 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_tokens)) + 
   geom_density(alpha=.2, fill="#7dced8", color = "#7dced8") + 
   labs(x = "Number of tokens", y = "Density")
 
 p5 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_types)) + 
   geom_density(alpha=.2, fill="#7dced8", color = "#7dced8") + 
   labs(x = "Number of types", y = "Density")
 
 p6 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = ttr)) + 
   geom_density(alpha=.2, fill="#7dced8", color = "#7dced8") + 
   labs(x = "Type-Token Ratio", y = "Density")
@@ -272,19 +289,19 @@ Another and potentially more informative way to inspect the normality of a distr
 #| fig-cap: 'QQ Plots for the continuous variables in the BELC dataset.'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(sample = num_tokens)) +
   stat_qq() + stat_qq_line() +
   labs(title = "Number of tokens")
 
 p2 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(sample = num_types)) +
   stat_qq() + stat_qq_line() +
   labs(title = "Number of types")
 
 p3 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(sample = ttr)) +
   stat_qq() + stat_qq_line() +
   labs(title = "Type-Token Ratio")
@@ -299,22 +316,22 @@ A visual inspection can often be enough to detect non-normality, but in cases wh
 #| label: tbl-summaries-normality-test-belc
 #| tbl-cap: 'Results from Shapiro-Wilk test of normality for continuous variables in the BELC dataset.'
 
-t1 <- shapiro.test(belc$num_tokens) %>% broom::tidy()
-t2 <- shapiro.test(belc$num_types) %>% broom::tidy()
-t3 <- shapiro.test(belc$ttr) %>% broom::tidy()
+t1 <- shapiro.test(belc$num_tokens) |> broom::tidy()
+t2 <- shapiro.test(belc$num_types) |> broom::tidy()
+t3 <- shapiro.test(belc$ttr) |> broom::tidy()
 
 t <- rbind(t1, t2, t3)
 
-t %>% 
-  mutate(variable = c("Number of tokens", "Number of types", "Type-Token Ratio")) %>% 
-  mutate(p_value = round(p.value, 3)) %>% 
-  select(variable, statistic, p_value) %>% 
+t |> 
+  mutate(variable = c("Number of tokens", "Number of types", "Type-Token Ratio")) |> 
+  mutate(p_value = round(p.value, 3)) |> 
+  select(variable, statistic, p_value) |> 
   kable(booktabs = TRUE)
 ```
 
 Downstream in the analytic analysis, the distribution of continuous variables will need to be taken into account for certain statistical tests. Tests that assume 'normality' are parametric tests, those that do not are non-parametric. Distributions which approximate the normal distribution can sometimes be transformed to conform to the normal distribution either by outlier trimming or through statistical procedures (e.g. square root, log, or inverse transformation), if necessary. At this stage, however, the most important thing is to recognize whether the distributions approximate or wildly diverge from the normal distribution.
 
-Before we leave continuous variables, let's consider another approach for visually summarizing a single continuous variable. The Empirical Cumulative Distribution Frequency, or _ECDF_, is a summary of the cumulative proportion of each of the values of a continuous variable. An ECDF plot can be useful in determining what proportion of the values fall above or below a certain percentage of the data.
+Before we leave continuous variables, let's consider another approach for visually summarizing a single continuous variable. The Empirical Cumulative Distribution Function, or _ECDF_, is a summary of the cumulative proportion of each of the values of a continuous variable over the domain of possible values. An ECDF plot can be useful in determining what proportion of the values fall above or below a certain percentage of the data.
 
 In @fig-summarize-ecdf-belc we see ECDF plots for our three continuous variables.
 
@@ -323,17 +340,17 @@ In @fig-summarize-ecdf-belc we see ECDF plots for our three continuous variables
 #| fig-cap: 'ECDF plots for the continuous variables in the BELC dataset.'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_tokens)) +
   stat_ecdf(geom = "step") +
   labs(x = "Number of tokens", y = "Cumulative proportion")
 p2 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_types)) +
   stat_ecdf(geom = "step") +
   labs(x = "Number of types", y = "")
 p3 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = ttr)) +
   stat_ecdf(geom = "step") +
   labs(x = "Type-Token Ratio", y = "")
@@ -355,9 +372,9 @@ Below is a list of the central tendency metrics for the categorical variables in
 ```{r}
 #| label: summaries-categorical-measures-belc
 
-belc %>% 
-  select(participant_id:sex) %>% 
-  skim() %>% 
+belc |> 
+  select(participant_id:sex) |> 
+  skim() |> 
   yank("factor")
 ```
 
@@ -376,7 +393,7 @@ Correlation measures are important for reporting but to really appreciate a rela
 #| fig-cap: 'Scatterplot...'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_tokens, y = ttr)) + 
   geom_point() +
   labs(x = "Number of tokens", y = "Type-Token Ratio", title = "Data points")
@@ -400,7 +417,7 @@ Let's add another variable to the mix, in this case the categorical variable `se
 #| fig-cap: 'Scatterplot visualizing the relationship between `num_tokens` and `ttr`.'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = num_tokens, y = ttr, color = sex)) + 
   geom_point() + 
   labs(x = "Number of tokens", y = "Type-Token Ratio", color = "Sex")
@@ -420,12 +437,12 @@ Characterizing the relationship between two continuous variables, as we have see
 #| label: tbl-summarize-bivariate-cont-cat-belc
 #| tbl-cap: 'Summary table for `tokens` by `age_group`.'
 
-belc %>% 
-  group_by(age_group) %>% 
+belc |> 
+  group_by(age_group) |> 
   summarize(mean_num_tokens = mean(num_tokens),
             sem = sd(num_tokens)/ sqrt(n()),
-            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) %>% 
-  ungroup() %>% 
+            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) |> 
+  ungroup() |> 
   kable(booktabs = TRUE)
 ```
 
@@ -439,24 +456,24 @@ Because we are assessing a categorical variable in combination with a continuous
 
 
 p1 <- 
-  belc %>% 
-  group_by(age_group) %>% 
+  belc |> 
+  group_by(age_group) |> 
   summarize(mean_num_tokens = mean(num_tokens),
             sem = sd(num_tokens)/ sqrt(n()),
-            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) %>% 
-  ungroup() %>% 
+            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) |> 
+  ungroup() |> 
   ggplot(aes(x = age_group, y = mean_num_tokens)) + 
   geom_col() +
   ylim(0, 140) +
   labs(x = "Age group", y = "Number of tokens (mean)")
 
 p2 <- 
-  belc %>% 
-  group_by(age_group) %>% 
+  belc |> 
+  group_by(age_group) |> 
   summarize(mean_num_tokens = mean(num_tokens),
             sem = sd(num_tokens)/ sqrt(n()),
-            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) %>% 
-  ungroup() %>% 
+            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) |> 
+  ungroup() |> 
   ggplot(aes(x = age_group, y = mean_num_tokens)) + 
   geom_col() +
   geom_errorbar(aes(ymin = mean_num_tokens-ci, ymax = mean_num_tokens+ci),
@@ -477,12 +494,12 @@ Now, if we want to explore a multivariate relationship and add `sex` to the curr
 #| label: fig-summaries-multivariate-barplot-belc
 #| fig-cap: 'Barplot comparing the mean `num_tokens` by `age_group` and `sex` from the BELC dataset.'
 
-belc %>% 
-  group_by(age_group, sex) %>% 
+belc |> 
+  group_by(age_group, sex) |> 
   summarize(mean_num_tokens = mean(num_tokens),
             sem = sd(num_tokens)/ sqrt(n()),
-            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) %>% 
-  ungroup() %>% 
+            ci = qnorm(.95)*(sd(num_tokens)/ sqrt(n()))) |> 
+  ungroup() |> 
   ggplot(aes(x = age_group, y = mean_num_tokens, fill = sex)) + 
   geom_col(position = position_dodge()) +
   geom_errorbar(aes(ymin = mean_num_tokens-ci, ymax = mean_num_tokens+ci),
@@ -500,13 +517,13 @@ Barplots are a familiar and common visualization for summaries of continuous var
 #| fig-cap: 'Boxplot of the relationship between `age_group` and `num_tokens` from the BELC dataset.'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = age_group, y = num_tokens)) + 
   geom_boxplot(outlier.color = "red", notch = FALSE) +
   labs(x = "Age group", y = "Number of tokens")
 
 p2 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = age_group, y = num_tokens)) + 
   geom_boxplot(outlier.color = "red", notch = TRUE) +
   labs(x = "Age group", y = "")
@@ -523,7 +540,7 @@ We can also add a third variable to our exploration. As in the barplot in @fig-s
 #| label: fig-summaries-multivariate-boxplots-belc
 #| fig-cap: 'Boxplot of the relationship between `age_group`, `num_tokens` and `sex` from the BELC dataset.'
 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = age_group, y = num_tokens, fill = sex)) + 
   geom_boxplot(outlier.color = "red", notch = TRUE) +
   labs(x = "Age group", y = "Number of tokens", fill = "Sex")
@@ -537,13 +554,13 @@ Let's explore the relationship between the categorical variables `sex` and `age_
 #| label: tbl-summaries-bivariate-categorical-table-belc
 #| tbl-cap: "Contingency table for `age_group` and `sex`."
 
-belc %>% 
-  tabyl(sex, age_group) %>% 
-  adorn_totals(c("row", "col")) %>%
-  adorn_percentages("col") %>% 
-  adorn_pct_formatting(rounding = "half up", digits = 0) %>%
-  adorn_ns() %>%
-  adorn_title("combined") %>% 
+belc |> 
+  tabyl(sex, age_group) |> 
+  adorn_totals(c("row", "col")) |>
+  adorn_percentages("col") |> 
+  adorn_pct_formatting(rounding = "half up", digits = 0) |>
+  adorn_ns() |>
+  adorn_title("combined") |> 
   kable(booktabs = TRUE)
 ```
 
@@ -555,13 +572,13 @@ As the size of the contingency table increases, visual inspection becomes more d
 #| fig-cap: 'Barplot...'
 
 p1 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = age_group, fill = sex)) +
   geom_bar() +
   labs(y = "Count", x = "Age group")
 
 p2 <- 
-  belc %>% 
+  belc |> 
   ggplot(aes(x = age_group, fill = sex)) +
   geom_bar(position = "fill") +
   labs(y = "Proportion", x = "Age group", fill = "Sex")
@@ -569,7 +586,7 @@ p2 <-
 p1 <- p1 + theme(legend.position = "none") 
 
 chi_test <- 
-  table(belc$sex, belc$age_group) %>% 
+  table(belc$sex, belc$age_group) |> 
   chisq.test()
 cv <- effectsize(chi_test)
 
@@ -588,17 +605,17 @@ Adding a second categorical independent variable ups the complexity of our analy
 #| tbl-cap: 'Contingency table for `age_group`, `rank_tokens`, and `sex` (female).'
 
 tab <- 
-  belc %>% 
-  mutate(rank_tokens = cut(num_tokens, breaks = 3, labels = c("low", "mid", "high"))) %>% 
-  select(participant_id, age_group, sex, rank_tokens) %>% 
-  tabyl(rank_tokens, age_group, sex) %>% 
-  adorn_totals(c("row", "col")) %>%
-  adorn_percentages("all") %>% 
-  adorn_pct_formatting(rounding = "half up", digits = 0) %>%
-  adorn_ns() %>%
+  belc |> 
+  mutate(rank_tokens = cut(num_tokens, breaks = 3, labels = c("low", "mid", "high"))) |> 
+  select(participant_id, age_group, sex, rank_tokens) |> 
+  tabyl(rank_tokens, age_group, sex) |> 
+  adorn_totals(c("row", "col")) |>
+  adorn_percentages("all") |> 
+  adorn_pct_formatting(rounding = "half up", digits = 0) |>
+  adorn_ns() |>
   adorn_title("combined")
 
-tab$female %>% 
+tab$female |> 
   kable(booktabs = TRUE)
 ```
 
@@ -607,7 +624,7 @@ tab$female %>%
 #| label: tbl-summaries-multivariate-categorical-table-belc-male
 #| tbl-cap: 'Contingency table for `age_group`, `rank_tokens`, and `sex` (male).'
 
-tab$male %>% 
+tab$male |> 
     kable(booktabs = TRUE)
 ```
 
@@ -617,13 +634,13 @@ Contingency tables with this many levels are notoriously difficult to interpret.
 #| label: fig-summaries-multivariate-mosaic-belc
 #| fig-cap: 'Mosaic plot for three categorical variables `age_group`, `rank_tokens`, and `sex` in the BELC dataset.'
 
-# belc %>% 
-#   mutate(rank_tokens = cut(num_tokens, breaks = 3, labels = c("low", "mid", "high"))) %>% 
-#   select(participant_id, age_group, sex, rank_tokens) %>% 
+# belc |> 
+#   mutate(rank_tokens = cut(num_tokens, breaks = 3, labels = c("low", "mid", "high"))) |> 
+#   select(participant_id, age_group, sex, rank_tokens) |> 
 #   ggplot()
 
 belc_cats <- 
-  belc %>% 
+  belc |> 
   mutate(rank_tokens = cut(num_tokens, breaks = 3, labels = c("low", "mid", "high")))
 
 mosaicplot(~ sex + age_group + rank_tokens, data = belc_cats, xlab = c("Sex"), ylab = c("Age group"), main = "")
@@ -726,8 +743,8 @@ monofactorial <-
   "Continuous", "Categorical", "Student's t-Test",
   "Continuous", "Continuous", "Pearson's correlation test"
 )
-monofactorial %>% 
-  knitr::kable(booktabs = TRUE) %>% 
+monofactorial |> 
+  knitr::kable(booktabs = TRUE) |> 
   add_header_above(c("Variable roles" = 2, " "))
 ```
 
@@ -744,9 +761,9 @@ multifactorial <-
   "Categorical", "varied", "varied", "Logistic regression",
   "Continuous", "varied", "varied", "Linear regression"
 )
-multifactorial %>% 
-  knitr::kable(booktabs = TRUE) %>% 
-  column_spec(2:3, italic = TRUE) %>% 
+multifactorial |> 
+  knitr::kable(booktabs = TRUE) |> 
+  column_spec(2:3, italic = TRUE) |> 
   add_header_above(c("Variable roles" = 3, " "))
 ```
 
@@ -787,8 +804,8 @@ To give an example, let's consider a language task in which the goal is to take 
 #| label: tbl-pda-sma-preview
 #| tbl-cap: 'First ten observations from the SMS Spam Collection (v.1)'
 
-sms %>% 
-  slice_head(n = 10) %>% 
+sms |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -820,15 +837,17 @@ algorithms_listing <-
     "Neural Network", "",
     "Decision Tree", ""
   )
-algorithms_listing %>% 
+algorithms_listing |> 
   kable(booktabs = TRUE)
 ```
 
 <!-- TODO: add shortcomings -->
 
-```{r , echo=FALSE, eval=FALSE}
+```{r}
 #| label: tbl-pda-classification-algorithms
 #| tbl-cap: 'Common classification algorithms.'
+#| echo: false
+#| eval: false
 
 classification_listing <- 
   tribble(
@@ -839,7 +858,7 @@ classification_listing <-
     "Decision Trees", "...", "..."
   )
 
-classification_listing %>% 
+classification_listing |> 
   kable(booktabs = TRUE)
 
 ```
@@ -856,7 +875,7 @@ regression_listing <-
     "Poisson Regresssion", "...", "..."
   )
 
-regression_listing %>% 
+regression_listing |> 
   kable(booktabs = TRUE)
 ```
 
@@ -916,20 +935,22 @@ For illustrative purposes let's consider the State of the Union Corpus (SOTU) [@
 ```{r}
 #| label: tbl-eda-sotu-corpus
 #| tbl-cap: 'First ten addresses from the SOTU Corpus.'
+#| echo: false
 
-library(quanteda)
+library(quanteda) # for corpus()
 sotu_corpus <- 
-  quanteda.corpora::data_corpus_sotu %>% 
-  corpus() |> 
-  corpus_subset(Date > "1946-01-01")
+  quanteda.corpora::data_corpus_sotu |> # load the corpus
+  corpus_subset(Date > "1946-01-01") # subset to only include presidents since 1946
 
-data.frame(docvars(sotu_corpus[1:10]), 
-           addresses = as.character(sotu_corpus[1:10])) %>% 
-  select(president = President,
-         date = Date,
-         delivery, party, addresses) %>% 
-  mutate(addresses = str_squish(addresses)) |> 
-  mutate(addresses = str_trunc(addresses, 50, "right")) %>% 
+sotu_tbl  <- 
+  sotu_corpus |> # select the corpus
+  tidy() |> # convert to tibble 
+  select(president = President, date = Date, delivery, party, addresses = text) |> # select variables
+  mutate(addresses = str_squish(addresses)) # remove line breaks
+
+sotu_tbl |> # select the tibble
+  slice_head(n = 10) |> # select first 10 addresses
+  mutate(addresses = str_trunc(addresses, 50, "right")) |> # truncate addresses
   kable()
 ```
 
@@ -948,7 +969,7 @@ eda_approaches <-
     "Term keyness analysis", "Topic Modeling",
     "Collocation analysis", "Dimensionality reduction"
   )
-eda_approaches %>% 
+eda_approaches |> 
   kable(booktabs = TRUE)
 ```
 
@@ -956,102 +977,103 @@ EDA leans heavily on visual representations of both descriptive and unsupervised
 
 ```{r}
 #| label: fig-eda-sotu-freq
+#| echo: false
 
-library(quanteda.textstats)
-library(quanteda.textplots)
+library(quanteda.textstats) # for textstat_frequency()
+library(quanteda.textplots) # for plot_frequency()
 
 p1 <- # Frequency plots
-  sotu_corpus %>% 
-  tokens(remove_punct = TRUE) %>% 
-  tokens_remove(pattern = stopwords("en")) %>% 
-  dfm() %>% 
-  textstat_frequency(n = 20, groups = party) %>% 
-  ggplot(aes(x = reorder(feature, frequency), y = frequency, color = group)) + 
-  geom_point() +
+  sotu_corpus |> 
+  tokens(remove_punct = TRUE) |> # remove punctuation
+  tokens_remove(pattern = stopwords("en")) |> # remove stopwords
+  dfm() |> # convert to dfm
+  textstat_frequency(n = 20, groups = party) |> # get top 20 terms for each party
+  ggplot(aes(x = reorder(feature, frequency), y = frequency, color = group)) + # plot
+  geom_point() + # point plot
   labs(x = "Terms", y = "Term frequency", color = "Party", 
        title = "20 Most Frequent Terms") +
-  scale_color_manual(values = c("blue", "red")) +
-  coord_flip()
+  scale_color_manual(values = c("blue", "red")) + # color by party
+  coord_flip() # flip axes
 ```
 
 ```{r}
 #| label: fig-eda-sotu-keyness
+#| echo: false
 
 p2 <- # Barplot: keyness
-  sotu_corpus %>% 
-  tokens(remove_punct = TRUE) %>% 
-  tokens_remove(pattern = stopwords("en")) %>% 
-  dfm() %>% 
-  textstat_keyness(target = .$Date > "2001-09-10") %>% 
+  sotu_corpus |> 
+  tokens(remove_punct = TRUE) |> 
+  tokens_remove(pattern = stopwords("en")) |> 
+  dfm() |> 
+  textstat_keyness(target = docvars(sotu_corpus, "Date") > "2001-09-10") |> 
   mutate(period = case_when(
     n_target > n_reference ~ "Post 9-11",
     n_reference > n_target ~ "Pre 9-11"
-  )) %>% 
-  filter(!is.na(period)) %>% 
-  group_by(period) %>% 
-  slice_head(n = 10) %>% 
+  )) |> 
+  filter(!is.na(period)) |> 
+  group_by(period) |> 
+  slice_head(n = 10) |> 
   ggplot(aes(x = reorder(feature, chi2), y = chi2)) +
   geom_col(width = .5) +
   labs(x = "Terms", y = "Keyness statistic (Chi-squared)",
        title = "Term keyness") +
   facet_wrap(~ period, scales = "free_y") +
   coord_flip()
-  
 ```
 
 ```{r }
 #| label: fig-eda-sotu-collocation
-
+#| echo: false
+ 
 # collocation analysis
 # network graph
 
-library(igraph)
-library(ggraph)
-
-sotu_df <- 
-  data.frame(docvars(sotu_corpus), address = as.character(sotu_corpus))
+library(igraph) # for graph_from_data_frame()
+library(ggraph) # for ggraph()
 
 bigrams <- 
-  sotu_df %>% 
-  unnest_tokens(bigram, address, token = "ngrams", n = 2) %>% 
-  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  sotu_tbl |> 
+  unnest_tokens(bigram, addresses, token = "ngrams", n = 2) |> 
+  separate(bigram, c("word1", "word2"), sep = " ") |>
   filter(!word1 %in% stopwords::stopwords('en'),
-           !word2 %in% stopwords::stopwords('en')) %>%
-  count(word1, word2, sort = TRUE) %>% 
+           !word2 %in% stopwords::stopwords('en')) |>
+  count(word1, word2, sort = TRUE) |> 
   filter(word1 == "free", n > 1)
   
   # set.seed(2016)
   a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
   
 p3 <- 
-    bigrams %>%
-    graph_from_data_frame() %>%
+    bigrams |>
+    graph_from_data_frame() |>
     ggraph(layout = "fr") +
     geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
-    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_point(color = "lightblue") +
     geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
     theme_void() +
-    labs(title = "N-grams with 'Free'")
+    labs(title = "Bigrams with 'Free' as the first word")
 
 ```
 
 
 ```{r}
 #| label: fig-eda-sotu-clustering
-
+#| echo: false
+#| warning: false
+ 
 # clustering (hierarchical) analysis
 # dendrogram
 
-library(factoextra)
+library(factoextra) # for fviz_dend()
 
 sotu_hclust <- 
-  sotu_corpus %>% 
-  tokens() %>% 
-  dfm() %>% 
-  dfm_remove(pattern = stopwords('en')) %>% 
-  dfm_group(groups = President) %>% 
-  textstat_dist() %>% 
-  as.dist() %>% 
+  sotu_corpus |> 
+  tokens() |> 
+  dfm() |> 
+  dfm_remove(pattern = stopwords('en')) |> 
+  dfm_group(groups = President) |> 
+  textstat_dist() |> 
+  as.dist() |> 
   hclust()
 
 p4 <- fviz_dend(sotu_hclust, rect = TRUE, cex = .5, k = 2)
@@ -1092,7 +1114,7 @@ I rounded out this chapter with a short description of the importance of reporti
 
 ## Activities {.unnumbered}
 
-::: callout-tip
+::: {.callout-tip}
 ## Recipe
 
 **What**: [Descriptive assessment of datasets](https://lin380.github.io/tadr/articles/recipe_4.html)\
@@ -1100,7 +1122,7 @@ I rounded out this chapter with a short description of the importance of reporti
 **Why**: To explore appropriate methods for summarizing variables in datasets given the number and informational values of the variable(s). 
 :::
 
-::: callout-tip
+::: {.callout-tip}
 ## Lab
 
 **What**: [Descriptive assessment of datasets](https://github.com/lin380/lab_4)\
@@ -1109,6 +1131,17 @@ I rounded out this chapter with a short description of the importance of reporti
 :::
 
 ## Questions {.unnumbered}
+
+::: callout-note
+## Conceptual questions
+
+1. ...
+2. ...
+
+:::
+
+::: callout-note
+## Technical exercises
 
 1. ...
 2. ...

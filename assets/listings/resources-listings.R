@@ -16,9 +16,9 @@ pacman::p_load(tidyverse, jsonlite)
 
 get_pinboard_info <- function(url) {
   document <- fromJSON(txt=url)
-  document %>%
-    mutate(Resource = paste0('<a href="', document$u, '">', document$d, '</a>')) %>%
-    arrange(d) %>%
+  document |>
+    mutate(Resource = paste0('<a href="', document$u, '">', document$d, '</a>')) |>
+    arrange(d) |>
     select(Resource, Description = n)
 }
 

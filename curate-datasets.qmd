@@ -71,7 +71,7 @@ Looking at the first 10 lines of the first file, we can see that this is running
 ```{r}
 #| label: unstructured-data-europarle-sample
 #| comment: ">"
-#| linewidth: 80
+#| linewidth: 0.9
 #| echo: false
 
 readtext::readtext("data/understanding-data/formats_europarle-en_sample.txt") |>
@@ -92,7 +92,7 @@ tribble(
   ~type, ~sentence_id, ~sentence,
   "Source", 1, "...sentence from source language",
   "Target", 1, "...sentence from target language"
-) %>% 
+) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -135,7 +135,7 @@ Now there are a couple things to note about thbe `europarle_en` and `europarle_e
 
 ```{r}
 #| label: cd-unstructured-inspect-europarle-readtext-structure
-#| linewidth: 80
+#| linewidth: 0.9
 
 str(europarle_en) # inspect the structure of the object
 ```
@@ -153,15 +153,15 @@ First let's change the type of data frame that we are working with to a tibble. 
 #| label: cd-unstructured-modify-dataset-structure
 
 europarle_target <- 
-  europarle_en %>% # readtext data frame
-  as_tibble() %>% # convert to tibble
-  rename(type = doc_id) %>% # rename doc_id to type
+  europarle_en |> # readtext data frame
+  as_tibble() |> # convert to tibble
+  rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Target") # change type value to 'Target'
 
 europarle_source <- 
-  europarle_es %>% # readtext data frame
-  as_tibble() %>% # convert to tibble
-  rename(type = doc_id) %>% # rename doc_id to type
+  europarle_es |> # readtext data frame
+  as_tibble() |> # convert to tibble
+  rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Source") # change type value to 'Source'
 ```
 
@@ -186,7 +186,7 @@ To break up the text into sentences we are going to turn to the tidytext package
 #| label: cd-unstructured-europarle-unnest-sentences
 
 europarle_sentences <- 
-  europarle %>% 
+  europarle |> 
   tidytext::unnest_tokens(output = sentence, # new column
                           input = text, # column to find text
                           token = "regex", # use a regular expression to break up the text
@@ -208,15 +208,15 @@ Our new `europarle_sentences` object is a data frame with almost 4 million rows!
 #| tbl-cap: "First ten sentences in the Europarle Corpus curated dataset."
 
 europarle_sentences_id <- 
-  europarle_sentences %>% # dataset
-  group_by(type) %>% # group by type
-  mutate(sentence_id = row_number()) %>% # add a row number for each sentence for each level of type
-  select(type, sentence_id, sentence) %>% # select the relevant columns to keep
-  ungroup() %>%  # ungroup by type
+  europarle_sentences |> # dataset
+  group_by(type) |> # group by type
+  mutate(sentence_id = row_number()) |> # add a row number for each sentence for each level of type
+  select(type, sentence_id, sentence) |> # select the relevant columns to keep
+  ungroup() |>  # ungroup by type
   arrange(sentence_id, type) # arrange the dataset
 
-europarle_sentences_id %>% 
-  slice_head(n = 10) %>% 
+europarle_sentences_id |> 
+  slice_head(n = 10) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -270,16 +270,16 @@ In our discussion we worked step by step to curate the Europarle Corpus, adding 
 # Read data and set up `type` column
 europarle_en <-  
   readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-                     verbosity = 0) %>% # don't show warnings
-  as_tibble() %>% # covert to tibble
-  rename(type = doc_id) %>% # rename doc_id to type
+                     verbosity = 0) |> # don't show warnings
+  as_tibble() |> # covert to tibble
+  rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Target") # change type value to 'Target'
 
 europarle_es <- 
   readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-                     verbosity = 0) %>%  # don't show warnings
-  as_tibble() %>% # covert to tibble
-  rename(type = doc_id) %>% # rename doc_id to type
+                     verbosity = 0) |>  # don't show warnings
+  as_tibble() |> # covert to tibble
+  rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Source") # change type value to 'Source'
 
 # Join the datasets by rows
@@ -288,7 +288,7 @@ europarle <-
 
 # Segment the `text` column into `sentence` units
 europarle <- 
-  europarle %>% # dataset
+  europarle |> # dataset
   tidytext::unnest_tokens(output = sentence, # new column
                           input = text, # column to find text
                           token = "regex", # use a regular expression to break up the text
@@ -297,11 +297,11 @@ europarle <-
 
 # Add `sentence_id` to each `type`
 europarle <- 
-  europarle %>% # dataset
-  group_by(type) %>% # group by type
-  mutate(sentence_id = row_number()) %>% # add a row number for each sentence for each level of type
-  select(type, sentence_id, sentence) %>% # select the relevant columns to keep
-  ungroup() %>%  # ungroup by type
+  europarle |> # dataset
+  group_by(type) |> # group by type
+  mutate(sentence_id = row_number()) |> # add a row number for each sentence for each level of type
+  select(type, sentence_id, sentence) |> # select the relevant columns to keep
+  ungroup() |>  # ungroup by type
   arrange(sentence_id, type) # arrange the dataset
 
 # Write the curated dataset to disk
@@ -331,7 +331,7 @@ When read into R, the .csv file format is converted to a data frame with the app
 
 csv_file_example <- 
   read_csv(file = "data/curate-datasets/csv_file_example.csv")
-csv_file_example %>% 
+csv_file_example |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -368,8 +368,8 @@ Let's take a look at the structure of one of genres from these set of lyrics to 
 #| eval: false
 
 lf_country <- read_csv(file = "../data/original/lastfm/country.csv") # read the csv file
-lf_country %>% # dataset
-  slice_head(n = 10) %>% # first 10 observations 
+lf_country |> # dataset
+  slice_head(n = 10) |> # first 10 observations 
 knitr::kable(booktabs = TRUE) # print pretty table
 ```
 
@@ -380,8 +380,8 @@ knitr::kable(booktabs = TRUE) # print pretty table
 #| message: false
 
 lf_country <- read_csv(file = "data/curate-datasets/lastfm/country.csv") # read the csv file
-lf_country %>% # dataset
-  slice_head(n = 10) %>% # first 10 observations 
+lf_country |> # dataset
+  slice_head(n = 10) |> # first 10 observations 
   knitr::kable(booktabs = TRUE) # print pretty table
 ```
 
@@ -407,7 +407,7 @@ tribble(
   ~artist, ~song, ~lyrics, ~genre,
   "Johnny Cash", "Hurt", "...lyrics for the song...", "country",
   "Johnny Cash", "Ring of Fire", "...lyrics for the song...", "country",
-) %>% 
+) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -443,7 +443,7 @@ Great, that will capture the files we are looking for but when working with `rea
 
 lastfm <- 
   readtext(file = "../data/original/lastfm/*.csv", # files to match using *.csv
-           text_field = "lyrics") %>% # text column from the datasets
+           text_field = "lyrics") |> # text column from the datasets
   as_tibble() # convert to a tibble
 
 glimpse(lastfm) # preview
@@ -455,7 +455,7 @@ glimpse(lastfm) # preview
 
 lastfm <- 
   readtext::readtext(file = "data/curate-datasets/lastfm/*.csv", # files to match using *.csv
-           text_field = "lyrics") %>% # text column from the datasets
+           text_field = "lyrics") |> # text column from the datasets
   as_tibble() # convert to a tibble
 
 glimpse(lastfm) # preview
@@ -481,9 +481,9 @@ Now let's work to collapse the lyrics in the `text` column by each distinct `art
 #| label: cd-structure-lastfm-collapse-text
 
 lastfm <- 
-  lastfm %>% # dataset
-  group_by(artist, song, genre) %>% # grouping
-  summarise(lyrics = str_flatten(text, collapse = " ")) %>%  # collapse text into the new column `lyrics` (dropping `text`)
+  lastfm |> # dataset
+  group_by(artist, song, genre) |> # grouping
+  summarise(lyrics = str_flatten(text, collapse = " ")) |>  # collapse text into the new column `lyrics` (dropping `text`)
   ungroup() # unset the groupings
 
 glimpse(lastfm) # preview
@@ -495,8 +495,8 @@ Let's take a look at the first 5 observations from this collapsed dataset.
 #| label: tbl-cd-structure-lastfm-collapse-table
 #| tbl-cap: "Sample lyrics from Last.fm dataset collapsed by artist, song, and genre."
 
-lastfm %>% # dataset
-  slice_head(n = 5) %>% # first 5 observations
+lastfm |> # dataset
+  slice_head(n = 5) |> # first 5 observations
   knitr::kable(booktabs = TRUE) # print pretty table
 ```
 
@@ -507,12 +507,12 @@ At this point, the only thing left to do to get this dataset to align with our i
 #| tbl-cap: "Sample lyrics from curated Last.fm dataset."
 
 lastfm <- 
-  lastfm %>% # original dataset
-  select(artist, song, lyrics, genre) %>% # order columns (and rename `text` to `lyrics`)
+  lastfm |> # original dataset
+  select(artist, song, lyrics, genre) |> # order columns (and rename `text` to `lyrics`)
   arrange(genre, artist) # arrange rows by `genre` and `artist`
 
-lastfm %>% # curated dataset
-  slice_head(n = 5) %>% # first 5 observations
+lastfm |> # curated dataset
+  slice_head(n = 5) |> # first 5 observations
   knitr::kable(booktabs = TRUE) # print pretty table
 ```
 
@@ -558,21 +558,21 @@ Again, to summarize, here is the code that will accomplish the steps we covered 
 # Read Last.fm lyrics and subset relevant columns
 lastfm <- 
   readtext(file = "../data/original/lastfm/*.csv", # files to match using *.csv
-           text_field = "lyrics") %>% # text column from the datasets
-  as_tibble() %>% # convert to a tibble
+           text_field = "lyrics") |> # text column from the datasets
+  as_tibble() |> # convert to a tibble
   select(-doc_id, -lyrics_url) # drop these columns
 
 # Collapse text by artist, song, and genre grouping
 lastfm <- 
-  lastfm %>% # dataset
-  group_by(artist, song, genre) %>% # grouping
-  summarise(lyrics = str_flatten(text, collapse = " ")) %>%  # collapse text into the new column `lyrics` (dropping `text`)
+  lastfm |> # dataset
+  group_by(artist, song, genre) |> # grouping
+  summarise(lyrics = str_flatten(text, collapse = " ")) |>  # collapse text into the new column `lyrics` (dropping `text`)
   ungroup() # unset the groupings
 
 # Order columns and arrange rows
 lastfm <- 
-  lastfm %>% # original dataset
-  select(artist, song, lyrics, genre) %>% # order columns (and rename `text` to `lyrics`)
+  lastfm |> # original dataset
+  select(artist, song, lyrics, genre) |> # order columns (and rename `text` to `lyrics`)
   arrange(genre, artist) # arrange rows by `genre` and `artist`
 
 # Write curated dataset to disk
@@ -639,7 +639,7 @@ Let's take a look at the first conversation file (`sw_0001_4325.utt`) to see how
 #| label: cd-semi-sdac-text-preview
 #| echo: false
 #| comment: ">"
-#| linewidth: 80
+#| linewidth: 0.9
 
 readtext::readtext("data/understanding-data/formats_sdac_sample.txt", verbosity = 0) |> # sw_0001_4325.utt
     pull(text) |>
@@ -690,7 +690,7 @@ structure(list(doc_id = c("4325", "4325", "4325"), damsl_tag = c("o ",
 "{D So, }", "[ [ I guess, +"), speaker_id = c("1632", "1632", 
 "1519")), .Names = c("doc_id", "damsl_tag", "speaker", "turn_num", 
 "utterance_num", "utterance_text", "speaker_id"), row.names = c(NA, 
-3L), class = "data.frame") %>% 
+3L), class = "data.frame") |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -741,8 +741,8 @@ The next step is to extract the three digit sequences that correspond to the `do
 ```{r}
 #| label: cd-semi-sdac-doc-info-2
 
-doc[str_detect(doc, "\\d+_\\d+_\\d+")] %>% # isolate pattern
-  str_extract(pattern = "\\d+_\\d+_\\d+") %>% # extract the pattern
+doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
+  str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
   str_split(pattern = "_") # split the character vector
 ```
 
@@ -751,9 +751,9 @@ A **list** is a special object type in R. It is an unordered collection of objec
 ```{r}
 #| label: cd-semi-sdac-doc-info-3
 
-doc[str_detect(doc, "\\d+_\\d+_\\d+")] %>% # isolate pattern
-  str_extract(pattern = "\\d+_\\d+_\\d+") %>% # extract the pattern
-  str_split(pattern = "_") %>% # split the character vector
+doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
+  str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
+  str_split(pattern = "_") |> # split the character vector
   unlist() # flatten the list to a character vector
 ```
 
@@ -763,9 +763,9 @@ Let's flatten the list in this case, as we have a single character vector, and a
 #| label: cd-semi-sdac-doc-info-4
 
 doc_speaker_info <- 
-  doc[str_detect(doc, "\\d+_\\d+_\\d+")] %>% # isolate pattern
-  str_extract(pattern = "\\d+_\\d+_\\d+") %>% # extract the pattern
-  str_split(pattern = "_") %>%  # split the character vector
+  doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
+  str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
+  str_split(pattern = "_") |>  # split the character vector
   unlist() # flatten the list to a character vector
 ```
 
@@ -784,8 +784,8 @@ The next step is to isolate the text section extracting it from rest of the docu
 ```{r}
 #| label: cd-semi-sdac-text
 
-doc %>% 
-  str_detect(pattern = "=+") %>% # match 1 or more `=`
+doc |> 
+  str_detect(pattern = "=+") |> # match 1 or more `=`
   which() # find vector index
 ```
 
@@ -794,8 +794,8 @@ So for this file `31` is the index in `doc` where the `=` sequence occurs. Now i
 ```{r}
 #| label: cd-semi-sdac-text-2
 
-doc %>% 
-  str_detect(pattern = "={3,}") %>% # match 3 or more `=`
+doc |> 
+  str_detect(pattern = "={3,}") |> # match 3 or more `=`
   which() # find vector index
 ```
 
@@ -807,8 +807,8 @@ We will get the same result for this file, but will safeguard ourselves a bit as
 #| label: cd-semi-sdac-text-3
 
 text_start_index <- 
-  doc %>% 
-  str_detect(pattern = "={3,}") %>% # match 3 or more `=` 
+  doc |> 
+  str_detect(pattern = "={3,}") |> # match 3 or more `=` 
   which() # find vector index
 text_start_index <- text_start_index + 1 # increment index by 1
 ```
@@ -855,7 +855,7 @@ Our first step towards a tidy dataset is to now combine the `doc_id` and each el
 #| tbl-cap: "First 5 observations of prelim data curation of the SDAC data."
 
 data <- data.frame(doc_id, text) # tidy format `doc_id` and `text`
-slice_head(data, n = 5) %>% # preview first lines of `text`
+slice_head(data, n = 5) |> # preview first lines of `text`
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -904,11 +904,11 @@ I've chained each of these steps in the code below, dropping the original `text`
 
 # Extract column information from `text`
 data <- 
-  data %>% # current dataset
-  mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) %>%  # extract damsl tags
-  mutate(speaker_turn = str_extract(string = text, pattern = "[AB]\\.\\d+")) %>% # extract speaker_turn pairs
-  mutate(utterance_num = str_extract(string = text, pattern = "utt\\d+")) %>% # extract utterance number
-  mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) %>%  # extract utterance text
+  data |> # current dataset
+  mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) |>  # extract damsl tags
+  mutate(speaker_turn = str_extract(string = text, pattern = "[AB]\\.\\d+")) |> # extract speaker_turn pairs
+  mutate(utterance_num = str_extract(string = text, pattern = "utt\\d+")) |> # extract utterance number
+  mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) |>  # extract utterance text
   select(-text) # drop the `text` column
 
 glimpse(data) # preview the data set
@@ -927,7 +927,7 @@ To separate the values of a column into two columns we use the `separate()` func
 #| label: cd-semi-sdac-text-organize
 
 data <-
-  data %>% # current dataset
+  data |> # current dataset
   separate(col = speaker_turn, # source column
            into = c("speaker", "turn_num")) # separate speaker_turn into distinct columns: speaker and turn_num
 
@@ -941,10 +941,10 @@ To remove unwanted leading or trailing whitespace we apply the `str_trim()` func
 
 # Clean up column information
 data <- 
-  data %>% # current dataset
-  mutate(damsl_tag = str_trim(damsl_tag)) %>% # remove leading/ trailing whitespace
-  mutate(utterance_num = str_replace(string = utterance_num, pattern = "utt", replacement = "")) %>% # remove 'utt'
-  mutate(utterance_text = str_replace(string = utterance_text, pattern = ":\\s", replacement = "")) %>% # remove ': '
+  data |> # current dataset
+  mutate(damsl_tag = str_trim(damsl_tag)) |> # remove leading/ trailing whitespace
+  mutate(utterance_num = str_replace(string = utterance_num, pattern = "utt", replacement = "")) |> # remove 'utt'
+  mutate(utterance_text = str_replace(string = utterance_text, pattern = ":\\s", replacement = "")) |> # remove ': '
   mutate(utterance_text = str_trim(utterance_text)) # trim leading/ trailing whitespace
 
 glimpse(data) # preview the data set
@@ -957,7 +957,7 @@ To round out our tidy dataset for this single conversation file we will connect 
 
 # Link speaker with speaker_id
 data <- 
-  data %>% # current dataset
+  data |> # current dataset
   mutate(speaker_id = case_when( # create speaker_id
     speaker == "A" ~ speaker_a_id, # speaker_a_id value when A
     speaker == "B" ~ speaker_b_id # speaker_b_id value when B
@@ -982,9 +982,9 @@ extract_sdac_metadata <- function(file) {
   
   # Extract `doc_id`, `speaker_a_id`, and `speaker_b_id`
   doc_speaker_info <- 
-    doc[str_detect(doc, "\\d+_\\d+_\\d+")] %>% # isolate pattern
-    str_extract("\\d+_\\d+_\\d+") %>% # extract the pattern
-    str_split(pattern = "_") %>% # split the character vector
+    doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
+    str_extract("\\d+_\\d+_\\d+") |> # extract the pattern
+    str_split(pattern = "_") |> # split the character vector
     unlist() # flatten the list to a character vector
   doc_id <- doc_speaker_info[1] # extract `doc_id`
   speaker_a_id <- doc_speaker_info[2] # extract `speaker_a_id`
@@ -992,8 +992,8 @@ extract_sdac_metadata <- function(file) {
   
   # Extract `text`
   text_start_index <- # find where header info stops
-    doc %>% 
-    str_detect(pattern = "={3,}") %>% # match 3 or more `=`
+    doc |> 
+    str_detect(pattern = "={3,}") |> # match 3 or more `=`
     which() # find vector index
   
   text_start_index <- text_start_index + 1 # increment index by 1
@@ -1007,30 +1007,30 @@ extract_sdac_metadata <- function(file) {
   
   # Extract column information from `text`
   data <- 
-    data %>% 
-    mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) %>%  # extract damsl tags
-    mutate(speaker_turn = str_extract(string = text, pattern = "[AB]\\.\\d+")) %>% # extract speaker_turn pairs
-    mutate(utterance_num = str_extract(string = text, pattern = "utt\\d+")) %>% # extract utterance number
-    mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) %>%  # extract utterance text
+    data |> 
+    mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) |>  # extract damsl tags
+    mutate(speaker_turn = str_extract(string = text, pattern = "[AB]\\.\\d+")) |> # extract speaker_turn pairs
+    mutate(utterance_num = str_extract(string = text, pattern = "utt\\d+")) |> # extract utterance number
+    mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) |>  # extract utterance text
     select(-text)
   
   # Separate speaker_turn into distinct columns
   data <-
-    data %>% # current dataset
+    data |> # current dataset
     separate(col = speaker_turn, # source column
              into = c("speaker", "turn_num")) # separate speaker_turn into distinct columns: speaker and turn_num
   
   # Clean up column information
   data <- 
-    data %>% 
-    mutate(damsl_tag = str_trim(damsl_tag)) %>% # remove leading/ trailing whitespace
-    mutate(utterance_num = str_replace(string = utterance_num, pattern = "utt", replacement = "")) %>% # remove 'utt'
-    mutate(utterance_text = str_replace(string = utterance_text, pattern = ":\\s", replacement = "")) %>% # remove ': '
+    data |> 
+    mutate(damsl_tag = str_trim(damsl_tag)) |> # remove leading/ trailing whitespace
+    mutate(utterance_num = str_replace(string = utterance_num, pattern = "utt", replacement = "")) |> # remove 'utt'
+    mutate(utterance_text = str_replace(string = utterance_text, pattern = ":\\s", replacement = "")) |> # remove ': '
     mutate(utterance_text = str_trim(utterance_text)) # trim leading/ trailing whitespace
   
   # Link speaker with speaker_id
   data <- 
-    data %>% # current dataset
+    data |> # current dataset
     mutate(speaker_id = case_when( # create speaker_id
       speaker == "A" ~ speaker_a_id, # speaker_a_id value when A
       speaker == "B" ~ speaker_b_id # speaker_b_id value when B
@@ -1046,7 +1046,7 @@ As a sanity check we will run the `extract_sdac_metadata()` function on a the co
 #| label: cd-extract-sdac-metadata-test-show
 #| eval: false
 
-extract_sdac_metadata(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") %>% 
+extract_sdac_metadata(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") |> 
   glimpse()
 ```
 
@@ -1054,7 +1054,7 @@ extract_sdac_metadata(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") %
 #| label: cd-extract-sdac-metadata-test-run
 #| echo: false
 
-extract_sdac_metadata(file = "data/curate-datasets/sdac/sw00utt/sw_0001_4325.utt") %>% 
+extract_sdac_metadata(file = "data/curate-datasets/sdac/sw00utt/sw_0001_4325.utt") |> 
   glimpse()
 ```
 
@@ -1104,8 +1104,8 @@ o pass each conversation file in the vector of paths to our conversation files i
 
 # Read files and return a tidy dataset
 sdac <- 
-  sdac_files %>% # pass file names
-  map(extract_sdac_metadata) %>% # read and tidy iteratively 
+  sdac_files |> # pass file names
+  map(extract_sdac_metadata) |> # read and tidy iteratively 
   bind_rows() # bind the results into a single data frame
 ```
 
@@ -1179,8 +1179,8 @@ sdac_files <-
 
 # Read files and return a tidy dataset
 sdac <- 
-  sdac_files %>% # pass file names
-  map(extract_sdac_metadata) %>% # read and tidy iteratively 
+  sdac_files |> # pass file names
+  map(extract_sdac_metadata) |> # read and tidy iteratively 
   bind_rows() # bind the results into a single data frame
   
 # Write curated dataset to disk
@@ -1210,7 +1210,7 @@ data_dic_starter <- function(data, file_path) {
   
   tibble(variable_name = names(data), # column with existing variable names 
        name = "", # column for human-readable names
-       description = "") %>% # column for prose description
+       description = "") |> # column for prose description
   write_csv(file = file_path) # write to disk
 }
 ```
@@ -1222,7 +1222,7 @@ Running this function in the R Console on the curated dataset (in this case the 
 #| tbl-cap: "Data dictionary starter structure for the SDAC curated dataset."
 #| echo: false
 
-tibble(variable_name = names(sdac), name = "", description = "") %>% 
+tibble(variable_name = names(sdac), name = "", description = "") |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -1273,6 +1273,17 @@ implement organizational strategies for organizing and documenting a dataset in 
 :::
 
 ## Questions {.unnumbered}
+
+::: callout-note
+## Conceptual questions
+
+1. ...
+2. ...
+
+:::
+
+::: callout-note
+## Technical exercises
 
 1. ...
 2. ...

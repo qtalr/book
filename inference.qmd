@@ -53,6 +53,80 @@ The process for each inferential data analysis in this section will include thre
 :::
 
 
+- Overview:
+    - Research goals (predict, prescribe, verify)
+    - Use of data
+        - Partitioned: training (reusable) and test (reserved) sets
+        - Outcome variable and predictor/ covariate variables
+        - Fixed outcome and mutable predictor variables/ features
+    - Methods
+        - Supervised machine learning methods
+            - Regression
+            - Classification
+    - Data types/ structures
+        - Matrices
+    - Interpreting results (quantitative)
+        - Summary statistics: 
+            - Accuracy
+            - Precision
+            - Recall
+            - F1
+            - Confusion matrix
+- Supervised machine learning analysis
+    - Methods: 
+        - Regression (continuous outcome variable)
+            - Linear regression
+            - Decision trees
+            - Neural networks
+        - Classification (categorical outcome variable)
+            - Logistic regression
+            - Decision trees
+            - Neural networks
+- IDA (Inferential Data Analysis)
+- Overview:
+    - Research goals (detect, explain, generalize)
+    - Use of data
+        - Conservative: no reuse of data (outside bootstrapping)
+        - Outcome variable and predictor/ covariate variables 
+        - Fixed outcome and fixed predictor variables/ features (tied to hypothesis)
+    - Methods
+        - Inferential statistics
+            - Descriptive statistics
+            - Inferential statistics
+    - Data types/ structures
+        - Data frames
+    - Interpreting results (quantitative)
+        - Visualizations
+        - Summary statistics
+- Inferential analysis
+    - Methods: 
+        - Continuous outcome variable
+            - Descriptive statistics
+                - Mean
+                - Standard deviation
+                - Confidence intervals
+            - Inferential statistics
+                - Correlation
+                - Linear egression
+        - Categorical outcome variable
+            - Descriptive statistics
+                - Frequency
+                - Proportion
+                - Confidence intervals
+            - Inferential statistics
+                - Chi-square
+                - Logistic regression
+
+<!--
+Note:
+
+IDA: Questions to consider:
+
+- Continuous outcome variable:
+    - The relationship between lexical retrieval (decisions, naming) and measures of frequency (observed frequency, adjusted frequency) and/ or Age of acquisition or Concreteness. (see @Gries2009a, p. 1-2)
+- Categorical outcome variable:
+    - ...
+-->
 
 ## Preparation
 
@@ -61,7 +135,7 @@ At this point let's now get familiar with the datasets and prepare them for anal
 ```{r}
 #| label: i-dative-load
 dative <- 
-  languageR::dative %>% # load the `dative` dataset  
+  languageR::dative |> # load the `dative` dataset  
   as_tibble() # convert the data frame to a tibble object
   
 glimpse(dative) # preview structure 
@@ -87,16 +161,16 @@ The observational unit for this dataset is `RealizationOfRecipient` variable whi
 #| tbl-cap: "First 10 observations of simplified `dative` dataset."
 
 dative <- 
-  dative %>% # dataset
-  select(RealizationOfRecipient, Modality, LengthOfRecipient, LengthOfTheme) %>% # select key variables
+  dative |> # dataset
+  select(RealizationOfRecipient, Modality, LengthOfRecipient, LengthOfTheme) |> # select key variables
   janitor::clean_names() # normalize variable names
 ```
 
 ```{r}
 #| label: i-dative-preview
 #| echo: false
-dative %>% 
-  slice_head(n = 10) %>% 
+dative |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -113,7 +187,7 @@ tribble(
   "modality", "Language Modality", "A factor with levels *spoken*, *written*.",
   "length_of_recipient", "Length of Recipient", "A numeric vector coding the number of words comprising the recipient.",
   "length_of_theme", "Length of Theme", "A numeric vector coding the number of words comprising the theme."
-) %>% 
+) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -157,7 +231,7 @@ sdac_disfluencies_dictionary <- read_csv(file = "data/inference/data/derived/sda
 #| label: tbl-i-sdac-disfluencies-dictionary
 #| tbl-cap: "Data dictionary for the `sdac_disfluencies` dataset."
 #| echo: false
-sdac_disfluencies_dictionary %>% 
+sdac_disfluencies_dictionary |> 
   kable(booktabs = TRUE)
 ```
 
@@ -167,7 +241,7 @@ For our analysis purposes we will reduce this dataset, as we did for the `dative
 ```{r}
 #| label: i-sdac-disfluencies-simplify
 sdac_disfluencies <- 
-  sdac_disfluencies %>% # dataset
+  sdac_disfluencies |> # dataset
   select(speaker_id, filler, count, sex, birth_year, education) # select key variables
 ```
 
@@ -178,8 +252,8 @@ Let's preview this simplified `sdac_disfluencies` dataset.
 #| tbl-cap: "First 10 observations of simplified `sdac_disfluencies` dataset."
 #| echo: false
 
-sdac_disfluencies %>% 
-  slice_head(n = 10) %>% 
+sdac_disfluencies |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -194,8 +268,8 @@ Consulting the [online manual for this corpus](https://catalog.ldc.upenn.edu/doc
 ```{r}
 #| label: i-sdac-disfluencies-age-transform
 sdac_disfluencies <- 
-  sdac_disfluencies %>% # dataset
-  mutate(age = (1992 - birth_year)) %>% # calculate age
+  sdac_disfluencies |> # dataset
+  mutate(age = (1992 - birth_year)) |> # calculate age
   select(-birth_year) # drop `birth_year` column
 ```
 
@@ -204,8 +278,8 @@ Now let's convert all the variables which are character vectors. We can do this 
 ```{r}
 #| label: i-sdac-disfluencies-to-factors
 sdac_disfluencies <- 
-  sdac_disfluencies %>% # dataset
-  mutate(speaker_id = factor(speaker_id)) %>% # convert numeric to factor
+  sdac_disfluencies |> # dataset
+  mutate(speaker_id = factor(speaker_id)) |> # convert numeric to factor
   mutate_if(is.character, factor) # convert all character to factor
 ```
 
@@ -227,7 +301,7 @@ So let's convert `education` to a factor adding these descriptions as factor lev
 ```{r}
 #| label: i-sdac-disfluencies-education-transform
 sdac_disfluencies <- 
-  sdac_disfluencies %>% # dataset
+  sdac_disfluencies |> # dataset
   mutate(education = factor(education, 
                             labels = c("less than high school", # value 0
                                        "less than college", # value 1
@@ -259,9 +333,9 @@ The `realization_of_recipient` variable contains the relevant information. Let's
 
 ```{r}
 #| label: i-uni-cat-description-dative
-dative %>% # dataset
-  select(realization_of_recipient) %>% # select the variable
-  skim() %>% # get data summary
+dative |> # dataset
+  select(realization_of_recipient) |> # select the variable
+  skim() |> # get data summary
   yank("factor") # only show factor-oriented information
 ```
 
@@ -273,7 +347,7 @@ Looking at the `top_counts` we can see that of the 3,263 observations, in 2,414 
 #| label: figi-uni-cat-visual-dative
 #| fig-cap: "Barplot visualizing the realization of recipient"
 
-dative %>% # dataset
+dative |> # dataset
   ggplot(aes(x = realization_of_recipient)) + # mapping
   geom_bar() + # geometry
   labs(x = "Realization of recipient", y = "Count") # labels
@@ -328,7 +402,7 @@ Other information can be organized in a more readable format using the broom pac
 
 ```{r}
 #| label: i-uni-cat-tidy-results
-c1 %>% # statistical result
+c1 |> # statistical result
   augment() # view detailed statistical test information
 ```
 
@@ -371,9 +445,9 @@ Since the dataset is currently organized around fillers as the observational uni
 ```{r}
 #| label: i-uni-cont-sdac-transform
 sdac_speaker_fillers <- 
-  sdac_disfluencies %>% # dataset
-  group_by(speaker_id) %>% # group by each speaker
-  summarise(sum = sum(count)) %>% # add up all fillers used
+  sdac_disfluencies |> # dataset
+  group_by(speaker_id) |> # group by each speaker
+  summarise(sum = sum(count)) |> # add up all fillers used
   ungroup() # remove grouping parameter
 ```
 
@@ -383,8 +457,8 @@ sdac_speaker_fillers <-
 #| tbl-cap: "First 10 observations of `sdac_speaker_fillers` dataset."
 #| echo: false
 
-sdac_speaker_fillers %>% 
-  slice_head(n = 10) %>% 
+sdac_speaker_fillers |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -398,9 +472,9 @@ num_skim <-
   skim_with(numeric = sfl(hist = NULL, # remove hist skim
                                    iqr = IQR)) # add IQR to skim
 
-sdac_speaker_fillers %>% # dataset
-  select(sum) %>% # variable of interest
-  num_skim() %>% # get custom data summary
+sdac_speaker_fillers |> # dataset
+  select(sum) |> # variable of interest
+  num_skim() |> # get custom data summary
   yank("numeric") # only show numeric-oriented information
 ```
 
@@ -418,13 +492,13 @@ https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/histdens.html
 ```{r}
 #| label: fig-i-uni-cont-sdac-visual
 p1 <- 
-  sdac_speaker_fillers %>% # dataset
+  sdac_speaker_fillers |> # dataset
   ggplot(aes(sum)) + # mapping
   geom_histogram() +  # geometry
   labs(x = "Fillers", y = "Count")
 
 p2 <- 
-  sdac_speaker_fillers %>% # dataset
+  sdac_speaker_fillers |> # dataset
   ggplot(aes(sum)) + # mapping
   geom_density() + # geometry
   geom_rug() +  # visualize individual observations
@@ -445,7 +519,7 @@ Since our aim is to test for normality, we can generate a Quantile-Quantile plot
 
 ```{r}
 #| label: i-uni-cont-sdac-qq-plot
-sdac_speaker_fillers %>% # dataset
+sdac_speaker_fillers |> # dataset
   ggplot(aes(sample = sum)) + # mapping
   stat_qq() + # calculate expected quantile-quantile distribution
   stat_qq_line() # plot the qq-line
@@ -491,9 +565,9 @@ Both the `realization_of_recipient` and `modality` variables are categorical, sp
 
 ```{r}
 #| label: i-bi-cat-description
-dative %>% 
-  select(realization_of_recipient, modality) %>% # select key variables
-  skim() %>% # get custom data summary
+dative |> 
+  select(realization_of_recipient, modality) |> # select key variables
+  skim() |> # get custom data summary
   yank("factor") # only show factor-oriented information
 ```
 
@@ -502,13 +576,13 @@ For this reason measures of central tendency are not applicable and we will turn
 ```{r}
 #| label: tbl-i-bi-cat-contingency-table
 #| tbl-cap: "Contingency table for `realization_of_recipient` and `modality`."
-dative %>% 
-  tabyl(realization_of_recipient, modality) %>% # cross-tabulate
-  adorn_totals(c("row", "col")) %>% # provide row and column totals
-  adorn_percentages("col") %>% # add percentages to the columns
-  adorn_pct_formatting(rounding = "half up", digits = 0) %>% # round the digits
-  adorn_ns() %>% # add observation number
-  adorn_title("combined") %>% # add a header title
+dative |> 
+  tabyl(realization_of_recipient, modality) |> # cross-tabulate
+  adorn_totals(c("row", "col")) |> # provide row and column totals
+  adorn_percentages("col") |> # add percentages to the columns
+  adorn_pct_formatting(rounding = "half up", digits = 0) |> # round the digits
+  adorn_ns() |> # add observation number
+  adorn_title("combined") |> # add a header title
   kable(booktabs = TRUE) # pretty table)
 ```
 
@@ -517,13 +591,13 @@ To gain a better appreciation for this relationship let's generate a couple plot
 ```{r}
 #| label: i-bi-cat-visual
 p1 <- 
-  dative %>% # dataset
+  dative |> # dataset
   ggplot(aes(x = realization_of_recipient, fill = modality)) + # mappings
   geom_bar() + # geometry
   labs(y = "Count", x = "Realization of recipient") # labels
 
 p2 <- 
-  dative %>% # dataset
+  dative |> # dataset
   ggplot(aes(x = realization_of_recipient, fill = modality)) + # mappings
   geom_bar(position = "fill") + # geometry, with fill for proportion plot
   labs(y = "Proportion", x = "Realization of recipient", fill = "Modality") # labels
@@ -558,7 +632,7 @@ We can also see more details about the test.
 
 ```{r}
 #| label: i-bi-cat-test-information
-c2 %>% # statistical result
+c2 |> # statistical result
   augment() # view detailed statistical test information
 ```
 
@@ -589,9 +663,9 @@ The key variables to assess in this case are the variables `count` and `filler`.
 ```{r}
 #| label: i-bi-cont-sdac-fillers
 sdac_fillers <- 
-  sdac_disfluencies %>% # dataset
-  group_by(speaker_id, filler) %>% # grouping parameters
-  summarize(sum = sum(count)) %>% # summed counts for each speaker-filler combination
+  sdac_disfluencies |> # dataset
+  group_by(speaker_id, filler) |> # grouping parameters
+  summarize(sum = sum(count)) |> # summed counts for each speaker-filler combination
   ungroup() # remove the grouping parameters
 ```
 
@@ -602,8 +676,8 @@ Let's preview this transformation.
 #| tbl-cap:  "First 10 observations from `sdac_fillers` dataset."
 #| echo: false
 
-sdac_fillers %>% 
-  slice_head(n = 10) %>% 
+sdac_fillers |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -611,9 +685,9 @@ Let's take a look at them together by grouping the dataset by `filler` and then 
 
 ```{r}
 #| label: i-bi-cont-description
-sdac_fillers %>% # dataset
-  group_by(filler) %>% # grouping parameter
-  num_skim() %>% # get custom data summary
+sdac_fillers |> # dataset
+  group_by(filler) |> # grouping parameter
+  num_skim() |> # get custom data summary
   yank("numeric") # only show numeric-oriented information
 ```
 
@@ -623,13 +697,13 @@ We see here that the standard deviation and IQR for both 'uh' and 'um' are relat
 ```{r}
 #| label: i-bi-cont-visual
 p1 <- 
-  sdac_fillers %>% # dataset
+  sdac_fillers |> # dataset
   ggplot(aes(x = filler, y = sum)) + # mappings
   geom_boxplot(notch = TRUE) + # geometry
   labs(x = "Filler", y = "Counts") # labels
 
 p2 <- 
-  sdac_fillers %>% # dataset
+  sdac_fillers |> # dataset
   ggplot(aes(x = filler, y = sum)) + # mappings
   geom_boxplot(notch = TRUE) + # geometry
   ylim(0, 100) + # scale the y axis to trim outliers
@@ -696,10 +770,10 @@ Now that we have three variables, there is more to summarize to get our descript
 
 ```{r}
 #| label: i-multi-cat-description
-dative %>% # dataset
-  select(realization_of_recipient, modality, length_of_recipient) %>% # select key variables
-  group_by(realization_of_recipient, modality) %>% # grouping parameters
-  num_skim() %>% # get custom data summary
+dative |> # dataset
+  select(realization_of_recipient, modality, length_of_recipient) |> # select key variables
+  group_by(realization_of_recipient, modality) |> # grouping parameters
+  num_skim() |> # get custom data summary
   yank("numeric") # only show numeric-oriented information
 ```
 
@@ -711,13 +785,13 @@ Let's take a look at a visualization of this information. Since we are working w
 ```{r}
 #| label: i-multi-cat-visual
 p1 <- 
-  dative %>% # dataset
+  dative |> # dataset
   ggplot(aes(x = realization_of_recipient, y = length_of_recipient, color = modality)) + # mappings
   geom_boxplot(notch = TRUE) + # geometry
   labs(x = "Realization of recipient", y = "Length of recipient (in words)", color = "Modality") # labels
 
 p2 <- 
-  dative %>% # dataset
+  dative |> # dataset
   ggplot(aes(x = realization_of_recipient, y = length_of_recipient, color = modality)) + # mappings
   geom_boxplot(notch = TRUE) + # geometry
   ylim(0, 15) + # scale the y axis to trim outliers
@@ -773,7 +847,7 @@ We will need to prepare the data before we get started as our current data frame
 ```{r}
 #| label: i-multi-cont-transform-sdac
 sdac_speakers_sex <- 
-  sdac_disfluencies %>% # dataset
+  sdac_disfluencies |> # dataset
   distinct(speaker_id, sex) # summarize for distinct `speaker_id` and `sex` values
 ```
 
@@ -784,9 +858,9 @@ Let's preview the first 10 observations form this transformation.
 #| tbl-cap: "First 10 observations of the `sdac_speakers_sex` data frame."
 #| echo: false
 
-sdac_speakers_sex %>% 
-  arrange(speaker_id) %>% 
-  slice_head(n = 10) %>% 
+sdac_speakers_sex |> 
+  arrange(speaker_id) |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -807,9 +881,9 @@ Now let's preview the first observations in this new `sdac_fillers_sex` data fra
 #| tbl-cap: "First 10 observations of the `sdac_fillers_sex` data frame."
 #| echo: false
 
-sdac_fillers_sex %>% 
-  arrange(speaker_id) %>% 
-  slice_head(n = 10) %>% 
+sdac_fillers_sex |> 
+  arrange(speaker_id) |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -818,7 +892,7 @@ At this point let's drop this speaker from the `sdac_speakers_sex` data frame.
 ```{r}
 #| label: i-multi-cont-drop-speaker
 sdac_fillers_sex <- 
-  sdac_fillers_sex %>% # dataset
+  sdac_fillers_sex |> # dataset
   filter(speaker_id != "155") # drop speaker_id 155
 ```
 
@@ -830,10 +904,10 @@ The process by now should be quite routine for getting our descriptive statistic
 
 ```{r}
 #| label: i-multi-cont-description
-sdac_fillers_sex %>% # dataset
-  select(sum, filler, sex) %>% # select key variables
-  group_by(filler, sex) %>% # grouping parameters
-  num_skim() %>% # get custom data summary
+sdac_fillers_sex |> # dataset
+  select(sum, filler, sex) |> # select key variables
+  group_by(filler, sex) |> # grouping parameters
+  num_skim() |> # get custom data summary
   yank("numeric") # only show numeric-oriented information
 ```
 
@@ -843,13 +917,13 @@ Looking at these descriptives, it seems like there is quite a bit of variability
 ```{r}
 #| label: i-mulit-cont-visual
 p1 <- 
-  sdac_fillers_sex %>% # dataset
+  sdac_fillers_sex |> # dataset
   ggplot(aes(x = filler, y = sum, color = sex)) + # mappings
   geom_boxplot(notch = TRUE) + # geometry
   labs(x = "Filler", y = "Counts", color = "Sex") # labels
 
 p2 <- 
-  sdac_fillers_sex %>% # dataset
+  sdac_fillers_sex |> # dataset
   ggplot(aes(x = filler, y = sum, color = sex)) + # mappings
   geom_boxplot(notch = TRUE) + # geometry
   ylim(0, 200) + # scale the y axis to trim outliers
@@ -952,9 +1026,37 @@ RESOURCES:
 
 ## Questions {.unnumbered}
 
-1. ...
-2. ...
+::: callout-note
+## Conceptual questions
 
+1. What is the difference between a descriptive and inferential analysis?
+2. What are the steps involved in conducting a descriptive analysis?
+3. What are the steps involved in conducting an inferential analysis?
+4. What are the steps involved in preparing data for inferential analysis?
+5. What are the steps involved in conducting a statistical interrogation?
+6. What are the steps involved in evaluating the results of an inferential analysis?
+7. What are the steps involved in reporting the results of an inferential analysis?
+8. Would word freqency differences between two groups of words be better assessed using a t-test or a chi-squared distribution?
+9. Would word lengths between two groups of words be better assessed using a t-test or a chi-squared distribution?
+10. What type of visualization would be best for exploring the relationship between two categorical variables?
+11. What type of visualization would be best for exploring the relationship between two non-categorical variables?
+12. What type of visualization would be best for exploring the relationship between a categorical and a non-categorical variable?
+13. What is the role of confidence intervals in inferential data analysis? How is this similar or differnt to the role of p-values?
+14. What is the role of effect size in inferential data analysis? How is this similar or differnt to the role of p-values?
+:::
+
+::: callout-note
+## Technical exercises
+
+1. Use the lm() function to create a linear model, assess the summary statistics, and evaluate the results.
+2. Use the glm() function to assess the relationship between two categorical variables and evaluate the results.
+3. Apply a chi-squared distribution to explore categorical dependent variables and evaluate the results.
+4. Calculate correlation coefficients between two non-categorical variables and evaluate the results.
+5. Read in a dataset and transform it to prepare it for inferential analysis.
+6. Decide which type of visualization is most appropriate for the dataset and then implement it using ggplot2.
+7. Use the effectsize() function to calculate effect size and confidence intervals.
+
+:::
 
 <!-- 
 The chapter begins by defining statistical inference and discussing its importance for linguistics, and then covers different types of statistical inference and the steps involved in preparing data for statistical inference. The chapter also covers statistical tests for hypothesis testing and the interpretation of statistical results, and discusses various applications of statistical inference in the field of linguistics. Finally, the chapter concludes with a recap of the key points covered and a discussion of future directions for statistical inference in linguistics.

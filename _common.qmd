@@ -10,19 +10,31 @@ filter <- dplyr::filter # avoid conflict with `stats` package
 
 options(digits = 3) # default to 3 decimal places
 
-options(knitr.table.format = function() {
-  if (knitr::is_latex_output())
+options(knitr.table.format = function() { # default to pipe table format
+  if (knitr::is_latex_output()) # if output is latex, use latex table format
     "latex" else "pipe"
 })
 
 # Adjust linewidth
-hook_output = knit_hooks$get('output')
+hook_output = knit_hooks$get('output') # get the default output hook
+
+# knit_hooks$set(output = function(x, options) {
+#   # this hook is used only when the linewidth option is not NULL
+#   if (!is.null(n <- options$linewidth)) { # if linewidth is not NULL
+#     x = knitr:::split_lines(x) # split the output into lines
+#     # any lines wider than n should be wrapped
+#     x = strwrap(x, width = n)
+#     x = paste(x, collapse = '\n')
+#   }
+#   hook_output(x, options)
+# })
+
 knit_hooks$set(output = function(x, options) {
   # this hook is used only when the linewidth option is not NULL
-  if (!is.null(n <- options$linewidth)) {
-    x = knitr:::split_lines(x)
+  if (!is.null(n <- options$linewidth)) { # if linewidth is not NULL
+    x = knitr:::split_lines(x) # split the output into lines
     # any lines wider than n should be wrapped
-    x = strwrap(x, width = n)
+    x = strwrap(x, width = n * getOption("width"))
     x = paste(x, collapse = '\n')
   }
   hook_output(x, options)

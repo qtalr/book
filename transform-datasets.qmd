@@ -15,7 +15,7 @@ execute:
 >
 > --- Michael Ende, The Neverending Story
 
-::: callout-note
+::: {.callout-note}
 ## Keys
 - What is the role of data transformation in a text analysis project?
 - What are the general processes for preparing datasets for analysis?
@@ -27,8 +27,7 @@ execute:
 #| echo: false
 #| message: false
 
-# Packages
-pacman::p_load(tidyverse, knitr, tidytext, cleanNLP)
+pacman::p_load(tidyverse, knitr, tidytext, cleanNLP) # load packages
 ```
 
 In this chapter we turn out attention to the process of moving a curated dataset one step closer to analysis. Where in the process of curating data into a dataset the goal was to derived a tidy dataset that contained the main relational characteristics of the data for our text analysis project, the transformation step refines and potential expands these characteristics such that they are more in line with our analysis aims. In this chapter I have grouped various transformation steps into four categories: normalization, recoding, generation, and merging. It is of note that the these categories have been ordered and are covered separately for descriptive reasons. In practice the ordering of which transformation to apply before another is highly idiosyncratic and requires that the researcher evaluate the characteristics of the dataset and the desired results.  
@@ -37,7 +36,7 @@ Furthermore, since in any given project there may be more than one analysis that
 
 Let's now turn to demonstrations of some common transformational steps using datasets with which we are now familiar. 
 
-::: callout-tip
+::: {.callout-tip}
 ## Swirl
 
 **What**: [Data manipulation](https://github.com/lin380/swirl)\
@@ -56,8 +55,7 @@ Consider the curated Europarle Corpus dataset. I will read in the dataset. Since
 ```{r}
 #| label: td-europarle-normalize-read-subset-show
 #| eval: false
-
-europarle <- read_csv(file = "../data/derived/europarle/europarle_curated.csv") %>%  # read curated dataset
+europarle <- read_csv(file = "../data/derived/europarle/europarle_curated.csv") |>  # read curated dataset
   filter(sentence_id < 1001) # keep first 1000 observations for each type
 
 glimpse(europarle)
@@ -67,7 +65,7 @@ glimpse(europarle)
 #| label: td-europarle-normalize-read-subset-run
 #| echo: false
 
-europarle <- read_csv(file = "data/transform-datasets/data/derived/europarle/europarle_curated.csv") %>%  # read curated dataset
+europarle <- read_csv(file = "data/transform-datasets/data/derived/europarle/europarle_curated.csv") |>  # read curated dataset
   filter(sentence_id < 1001) # keep first 1000 observations for each type
 
 glimpse(europarle)
@@ -80,8 +78,8 @@ Simply looking at the first 14 lines of this dataset, we can see that if our goa
 #| tbl-cap: "Europarle Corpus curated dataset preview."
 #| echo: false
 
-europarle %>% 
-  slice_head(n = 14) %>% 
+europarle |> 
+  slice_head(n = 14) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -96,9 +94,9 @@ Before we remove any lines, let's try craft a search pattern to identify these l
 #| tbl-cap: "Non-speech lines in the Europarle dataset."
 
 # Identify non-speech lines
-europarle %>% 
-  filter(str_detect(sentence, "^\\(") | str_detect(sentence, "[^.!?]$")) %>% # filter lines that detect a match for either condition 1 or 2
-  slice_sample(n = 10) %>% # random sample of 10 observations
+europarle |> 
+  filter(str_detect(sentence, "^\\(") | str_detect(sentence, "[^.!?]$")) |> # filter lines that detect a match for either condition 1 or 2
+  slice_sample(n = 10) |> # random sample of 10 observations
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -108,8 +106,8 @@ Since this search appears to match lines that we do not want to preserve, let's 
 #| label: td-europarle-filter-non-speech
 
 europarle <- 
-  europarle %>% # dataset
-  filter(!str_detect(sentence, pattern = "^\\(")) %>% # remove lines starting with (
+  europarle |> # dataset
+  filter(!str_detect(sentence, pattern = "^\\(")) |> # remove lines starting with (
   filter(!str_detect(sentence, pattern = "[^.!?]$")) # remove lines not ending in ., !, or ?
 ```
 
@@ -120,8 +118,8 @@ Let's look at the first 14 lines again, now that we have eliminated these artifa
 #| tbl-cap: "Europarle Corpus non-speech lines removed."
 #| echo: false
 
-europarle %>% 
-  slice_head(n = 14) %>% 
+europarle |> 
+  slice_head(n = 14) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -131,7 +129,7 @@ One further issue that we may want to resolve concerns the fact that there are w
 #| label: td-europarle-remove-whitespace
 
 europarle <- 
-  europarle %>% # dataset
+  europarle |> # dataset
   mutate(sentence = str_replace_all(string = sentence, 
                                     pattern = "'\\ss", 
                                     replacement = "'s")) # replace ' s with `s
@@ -163,10 +161,10 @@ lastfm <- read_csv(file = "data/transform-datasets/data/derived/lastfm/lastfm_cu
 #| tbl-cap: "Last fm lyrics dataset preview with one artist/ song per genre and the `lyrics` text truncated  at 200 characters for display purposes."
 #| echo: false
 
-lastfm %>% 
-  group_by(genre) %>% 
-  slice_head(n = 1) %>% 
-  mutate(lyrics = str_trunc(lyrics, 200)) %>% 
+lastfm |> 
+  group_by(genre) |> 
+  slice_head(n = 1) |> 
+  mutate(lyrics = str_trunc(lyrics, 200)) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -186,11 +184,11 @@ Putting this to work let's clean the `lyrics` column.
 #| label: td-lastfm-clean-end-lines
 
 lastfm <- 
-  lastfm %>% # dataset
+  lastfm |> # dataset
   mutate(lyrics = 
            str_replace_all(string = lyrics, 
                            pattern = "([a-z'!,.)?I])([A-Z])", # find contiguous end/ new line segments
-                           replacement = "\\1 \\2")) %>%  # replace with whitespace between
+                           replacement = "\\1 \\2")) |>  # replace with whitespace between
   mutate(lyrics = str_remove_all(lyrics, "\\(.+?\\)")) # remove backing vocals (Take On Me)
 ```
 
@@ -199,16 +197,16 @@ lastfm <-
 #| tbl-cap: "Last fm lyrics with cleaned lyrics..."
 #| echo: false
 
-lastfm %>% 
-  group_by(genre) %>% 
-  slice_head(n = 1) %>% 
-  mutate(lyrics = str_trunc(lyrics, 200)) %>% 
+lastfm |> 
+  group_by(genre) |> 
+  slice_head(n = 1) |> 
+  mutate(lyrics = str_trunc(lyrics, 200)) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
 Now given the fact that songs are poems, there are many lines that are not complete sentences so there is no practical way to try to segment these into grammatical sentence units. So in this case, this seems like a good stopping point for normalizing the lastfm dataset.
 
-## Recode
+## Recode {#td-recode}
 
 <!-- Consider:
 
@@ -244,8 +242,8 @@ Among a number of metadata variables, curated dataset includes the `utterance_te
 #| tbl-cap: "20 randomly sampled lines of the SDAC curated dataset."
 #| echo: false
 
-sdac %>% 
-  slice_sample(n = 20) %>% 
+sdac |> 
+  slice_sample(n = 20) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -255,7 +253,7 @@ Let's drop a few variables from our dataset to rein in our focus. I will keep th
 #| label: td-sdac-simplified
 
 sdac_simplified <- 
-  sdac %>% # dataset
+  sdac |> # dataset
   select(doc_id, speaker_id, utterance_text) # columns to retain
 ```
 
@@ -264,8 +262,8 @@ sdac_simplified <-
 #| tbl-cap: "First 10 lines of the simplified SDAC curated dataset."
 #| echo: false
 
-sdac_simplified %>% 
-  slice_head(n = 10) %>% 
+sdac_simplified |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -277,8 +275,8 @@ To do this we turn to the `str_count()` function. This function will count the n
 #| label: td-sdac-count-disfluencies
 
 sdac_disfluencies <- 
-  sdac_simplified %>% # dataset
-  mutate(uh = str_count(utterance_text, "\\{F [Uu]h")) %>% # match {F Uh or {F uh}
+  sdac_simplified |> # dataset
+  mutate(uh = str_count(utterance_text, "\\{F [Uu]h")) |> # match {F Uh or {F uh}
   mutate(um = str_count(utterance_text, "\\{F [Uu]m")) # match {F Um or {F um}
 ```
 
@@ -287,8 +285,8 @@ sdac_disfluencies <-
 #| tbl-cap: "First 20 lines of SDAC dataset with counts for the disfluencies 'uh' and 'um'."
 #| echo: false
 
-sdac_disfluencies %>% # dataset
-  slice_head(n = 20) %>% 
+sdac_disfluencies |> # dataset
+  slice_head(n = 20) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -300,7 +298,7 @@ To convert our current (wide) dataset to one where each filler type is listed an
 #| label: td-sdac-disfluencies-longer
 
 sdac_disfluencies <- 
-  sdac_disfluencies %>% # dataset
+  sdac_disfluencies |> # dataset
   pivot_longer(cols = c("uh", "um"), # columns to convert
                names_to = "filler", # column for the column names (i.e. filler types)
                values_to = "count") # column for the column values (i.e. counts)
@@ -311,8 +309,8 @@ sdac_disfluencies <-
 #| tbl-cap: "First 20 lines of SDAC dataset with tidy format for `fillers` as the unit of observation."
 #| echo: false
 
-sdac_disfluencies %>% # dataset
-  slice_head(n = 20) %>% 
+sdac_disfluencies |> # dataset
+  slice_head(n = 20) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -331,10 +329,10 @@ Let's return to the `lastfm` object we normalized earlier in the chapter to see 
 #| tbl-cap: "Last fm dataset with normalized lyrics."
 #| echo: false
 
-lastfm %>% 
-  group_by(genre) %>% 
-  slice_head(n = 1) %>% 
-  mutate(lyrics = str_trunc(lyrics, 200)) %>% 
+lastfm |> 
+  group_by(genre) |> 
+  slice_head(n = 1) |> 
+  mutate(lyrics = str_trunc(lyrics, 200)) |> 
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -346,11 +344,11 @@ The tidytext package includes a very useful function `unnest_tokens()` which all
 #| label: tbl-td-lastfm-tokenize-words
 #| tbl-cap: "First 10 observations for lastfm dataset tokenized by words."
 
-lastfm %>% # dataset
+lastfm |> # dataset
   unnest_tokens(output = word, # column for tokenized output
                 input = lyrics, # input column
-                token = "words") %>% # tokenize unit type
-  slice_head(n = 10) %>%  # preview first 10 lines
+                token = "words") |> # tokenize unit type
+  slice_head(n = 10) |>  # preview first 10 lines
   kable(booktabs = TRUE)
 ```
 
@@ -362,11 +360,11 @@ In addition to 'words', the `unnest_tokens()` function provides easy access to a
 #| label: tbl-td-lastfm-tokenize-characters
 #| tbl-cap: "First 10 observations for lastfm dataset tokenized by characters."
 
-lastfm %>% # dataset
+lastfm |> # dataset
   unnest_tokens(output = character, # column for tokenized output
                 input = lyrics, # input column
-                token = "characters") %>% # tokenize unit type
-  slice_head(n = 10) %>%  # preview first 10 lines
+                token = "characters") |> # tokenize unit type
+  slice_head(n = 10) |>  # preview first 10 lines
   kable(booktabs = TRUE)
 ```
 
@@ -378,12 +376,12 @@ There are even other options which allow for the creation of sequences of lingui
 #| label: tbl-td-lastfm-tokenize-bigrams
 #| tbl-cap: "First 10 observations for lastfm dataset tokenized by bigrams"
 
-lastfm %>% 
+lastfm |> 
   unnest_tokens(output = bigram, # column for tokenized output
                 input = lyrics, # input column
                 token = "ngrams", # tokenize unit type
-                n = 2) %>%  # size of word sequences 
-  slice_head(n = 10) %>%  # preview first 10 lines
+                n = 2) |>  # size of word sequences 
+  slice_head(n = 10) |>  # preview first 10 lines
   kable(booktabs = TRUE)
 ```
 
@@ -401,9 +399,9 @@ Let's take a look at annotation some of the language from the Europarle dataset 
 #| label: tbl-td-europarle-en-preview
 #| tbl-cap: "First 10 lines in English from the normalized SDAC dataset."
 
-europarle %>% 
-  filter(type == "Target") %>% 
-  slice_head(n = 10) %>% 
+europarle |> 
+  filter(type == "Target") |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -419,12 +417,12 @@ load_model_udpipe <- function(model_lang) {
   cnlp_init_udpipe(model_lang) # to download the model, if not downloaded
 base_path <- system.file("extdata", package = "cleanNLP") # get the base path
   model_name <- # extract the model_name
-    base_path %>% # extract the base path
-    dir() %>% # get the directory
+    base_path |> # extract the base path
+    dir() |> # get the directory
     stringr::str_subset(pattern = paste0("^", model_lang)) # extract the name of the model
   
-  udpipe::udpipe_load_model(file = file.path(base_path, model_name, fsep = "/")) %>% # create the path to the downloaded model stored on disk
-    return()
+  model_path <- udpipe::udpipe_load_model(file = file.path(base_path, model_name, fsep = "/")) # create the path to the downloaded model stored on disk
+    return(model_path)
 }
 ```
 
@@ -437,8 +435,8 @@ In a test case, let's load the 'english' model to annotate a sentence line from 
 eng_model <- load_model_udpipe("english") # load and initialize the language model, 'english' in this case.
 
 eng_annotation <- 
-  europarle %>% # dataset 
-  filter(type == "Target" & sentence_id == 6) %>% # select English and sentence_id 6
+  europarle |> # dataset 
+  filter(type == "Target" & sentence_id == 6) |> # select English and sentence_id 6
   cnlp_annotate(text_name = "sentence", # input text (sentence)
                 doc_name = "sentence_id") # specify the grouping column (sentence_id)
 
@@ -452,7 +450,7 @@ We see that the structure returned by the `cnlp_annotate()` function is a list. 
 #| tbl-cap: "Annotation information for a single English sentence from the Europarle dataset."
 #| echo: false
 
-eng_annotation$token %>% 
+eng_annotation$token |> 
   kable(booktabs = TRUE)
 ```
 
@@ -466,8 +464,8 @@ Let's now annotate the same sentence from the Europarle corpus for the Source ('
 spa_model <- load_model_udpipe("spanish") # load and initialize the language model, 'spanish' in this case.
 
 spa_annotation <- 
-  europarle %>% # dataset 
-  filter(type == "Source" & sentence_id == 6) %>% # select Spanish and sentence_id 6
+  europarle |> # dataset 
+  filter(type == "Source" & sentence_id == 6) |> # select Spanish and sentence_id 6
   cnlp_annotate(text_name = "sentence", # input text (sentence)
                 doc_name = "sentence_id") # specify the grouping column (sentence_id)
 ```
@@ -477,7 +475,7 @@ spa_annotation <-
 #| tbl-cap: "Annotation information for a single Spanish sentence from the Europarle dataset."
 #| echo: false
 
-spa_annotation$token %>% 
+spa_annotation$token |> 
   kable(booktabs = TRUE)
 ```
 
@@ -525,13 +523,13 @@ Let's see this in practice. Take the `lastfm` dataset. Let's tokenize the datase
 #| tbl-cap: "First 10 observations for `lastfm_words` dataset."
 
 lastfm_words <- 
-  lastfm %>% # dataset
+  lastfm |> # dataset
   unnest_tokens(output = "word", # output column
                 input = "lyrics", # input column
                 token = "words") # tokenized unit (words)
 
-lastfm_words %>% # dataset
-  slice_head(n = 10) %>% # first 10 observations
+lastfm_words |> # dataset
+  slice_head(n = 10) |> # first 10 observations
   kable(booktabs = TRUE)
 ```
 
@@ -543,7 +541,7 @@ Consider the `get_sentiments()` function which returns words which have been cla
 sentiments_bing <- 
   tidytext::get_sentiments(lexicon = "bing") # get 'bing' lexicon from get_sentiments
 
-sentiments_bing %>% 
+sentiments_bing |> 
   slice_head(n = 10) # preview first 10 observations
 ```
 
@@ -552,8 +550,8 @@ Since the `sentiments_bing` dataset and the `lastfm_words` dataset both share a 
 ```{r}
 #| label: td-view-distinct-words
 
-lastfm_words %>% # dataset
-  distinct(word) %>% # find unique words
+lastfm_words |> # dataset
+  distinct(word) |> # find unique words
   nrow() # count distinct rows/ words
 ```
 
@@ -565,8 +563,8 @@ If we want to keep all the words in the `lastfm_words` and add the sentiment inf
 #| label: tbl-td-lastfm-words-bing-left-joing
 #| tbl-cap: "First 10 observations for the `lastfm_words` sentiments_bing` left join."
 
-left_join(lastfm_words, sentiments_bing) %>% 
-  slice_head(n = 10) %>% # first 10 observations
+left_join(lastfm_words, sentiments_bing) |> 
+  slice_head(n = 10) |> # first 10 observations
   kable(booktabs = TRUE)
 ```
 
@@ -576,9 +574,9 @@ So we see that quite a few of the words from `lastfm_words` are not matched. To 
 #| label: tbltd-lastfm-words-bing-left-joing-filter
 #| tbl-cap: "First 10 observations for the `lastfm_words` sentiments_bing` left join."
 
-left_join(lastfm_words, sentiments_bing) %>%
-  filter(sentiment != "") %>% # return matched sentiments
-  slice_head(n = 10) %>% # first 10 observations
+left_join(lastfm_words, sentiments_bing) |>
+  filter(sentiment != "") |> # return matched sentiments
+  slice_head(n = 10) |> # first 10 observations
   kable(booktabs = TRUE)
 ```
 
@@ -590,7 +588,7 @@ Let's turn to another type of join: an anti-join. The purpose of an anti-join is
 english_stopwords <- 
   get_stopwords(language = "en") # get English stopwords from the Snowball lexicon
 
-english_stopwords %>% 
+english_stopwords |> 
   slice_head(n = 10) # preview first 10 observations
 ```
 
@@ -600,8 +598,8 @@ Now if we want to eliminate stopwords from our `lastfm_words` dataset we use `an
 #| label: tbl-td-lastfm-words-stopwords-anti-join
 #| tbl-cap: "First 10 observations in `lastfm_words` after filtering for English stopwords."
 
-anti_join(lastfm_words, english_stopwords) %>% 
-  slice_head(n = 10) %>% 
+anti_join(lastfm_words, english_stopwords) |> 
+  slice_head(n = 10) |> 
   kable(booktabs = TRUE)
 ```
 
@@ -612,7 +610,7 @@ Our existing, disfluency recoded, version includes the following variables.
 ```{r}
 #| label: td-sdac-disfluencies
 
-sdac_disfluencies %>% # dataset
+sdac_disfluencies |> # dataset
   slice_head(n = 10) # preview first 10 observations
 ```
 
@@ -658,7 +656,7 @@ Now there are some metadata columns we may want to keep and others we may want t
 #| label: td-sdac-disfluencies-subset-cols
 
 sdac_disfluencies <- 
-  sdac_disfluencies %>% # dataset
+  sdac_disfluencies |> # dataset
   select(doc_id:count, sex:education) # subset key columns
 ```
 
@@ -667,8 +665,8 @@ sdac_disfluencies <-
 #| tbl-cap: "First 10 observations for the `sdac_disfluencies` dataset with speaker metadata."
 #| echo: false
 
-sdac_disfluencies %>% # dataset
-  slice_head(n = 10) %>% # first 10 observations
+sdac_disfluencies |> # dataset
+  slice_head(n = 10) |> # first 10 observations
   kable(booktabs = TRUE)
 ```
 
@@ -694,7 +692,7 @@ data_dic_starter <- function(data, file_path) {
   
   tibble(variable_name = names(data), # column with existing variable names 
        name = "", # column for human-readable names
-       description = "") %>% # column for prose description
+       description = "") |> # column for prose description
   write_csv(file = file_path) # write to disk
 }
 ```
@@ -744,6 +742,17 @@ This chapter concludes the section on data/ dataset preparation. The next sectio
 :::
 
 ## Questions {.unnumbered}
+
+::: callout-note
+## Conceptual questions
+
+1. ...
+2. ...
+
+:::
+
+::: callout-note
+## Technical exercises
 
 1. ...
 2. ...

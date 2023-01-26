@@ -579,7 +579,7 @@ To write our data frame to disk we will export it into a standard plain-text for
 ```{r}
 #| label: ad-csv-snippet
 
-works_pr %>% head() %>% format_csv() %>% cat()
+works_pr |> head() |> format_csv() |> cat()
 ```
 
 The first line contains the names of the columns and subsequent lines the observations. Data points that contain commas themselves (e.g. "Shaw, Bernard") are quoted to avoid misinterpreting these commas a deliminators in our data. To write this dataset to disk we will use the `reader::write_csv()` function.
@@ -616,7 +616,7 @@ get_gutenberg_subject <- function(subject, target_file, sample_size = 10) {
     ids_sample <- 
       filter(gutenberg_metadata, 
              gutenberg_id %in% ids$gutenberg_id, # select ids in both data frames 
-             has_text == TRUE) %>% # select those ids that have text
+             has_text == TRUE) |> # select those ids that have text
       slice_sample(n = sample_size) # sample N works 
     # Download sample with associated `author` and `title` metadata
     works_sample <- 
@@ -651,7 +651,7 @@ set.seed(123) # make the sampling reproducible
 ids_sample <- 
   filter(gutenberg_metadata, 
          gutenberg_id %in% ids$gutenberg_id, # select ids in both data frames 
-         has_text == TRUE) %>% # select those ids that have text
+         has_text == TRUE) |> # select those ids that have text
   slice_sample(n = sample_size) # sample N works 
 # Download sample with associated `author` and `title` metadata
 works_pq <- 
@@ -769,10 +769,10 @@ Now, once the `search_tweets` query has been run, there a a large number of vari
 #| include: false
 
 rt_variables <- 
-  rt_latinx %>% 
-  map_df(typeof) %>% 
-  glimpse %>% 
-  as.data.frame() %>% 
+  rt_latinx |> 
+  map_df(typeof) |> 
+  glimpse() |> 
+  as.data.frame() |> 
   t()
 ```
 
@@ -781,7 +781,7 @@ rt_variables <-
 #| tbl-cap: "Variables and variable types returned from Twitter API via rtweet's `search_tweets()` function."
 #| echo: false
 
-rt_variables %>% 
+rt_variables |> 
     knitr::kable(booktabs = TRUE)
 ```
 
@@ -793,10 +793,10 @@ Let's assume that we want to keep all the variables that are not of type `list`.
 #| label: ad-rtweet-select-not-list
 
 rt_latinx_subset <- 
-  rt_latinx %>% # dataset
+  rt_latinx |> # dataset
   select(!where(is_list))  # select all variables that are NOT lists
 
-rt_latinx_subset %>% # subsetted dataset
+rt_latinx_subset |> # subsetted dataset
   glimpse() # overview
 ```
 
@@ -823,7 +823,7 @@ write_search_tweets <-
         search_tweets(q = query, # query term
                       n = n, # number of tweets desired (default 100)
                       type = type, # type of query
-                      include_rts = include_rts) %>%  # to include RTs
+                      include_rts = include_rts) |>  # to include RTs
         select(!where(is_list))  # remove list variables
       
       if(!dir.exists(dirname(path))) { # isolate directory and check if exists
@@ -908,7 +908,7 @@ web_file <- '
   </body>
 </html>
 '
-paste(web_file) %>% cat()
+paste(web_file) |> cat()
 ```
 
 Each element in this file is delineated by an opening and closing tag, `<head></head>`. Tags are nested within other tags to create the structural hierarchy. Tags can take class and id labels to distinguish them from other tags and often contain other attributes that dictate how the tag is to behave when rendered visually by a browser. For example, there are two `<div>` tags in our toy example: one has the label `class = "intro"` and the other `class = "conc"`. `<div>` tags are often used to separate sections of a webpage that may require special visual formatting. The `<a>` tag, on the other hand, creates a web link. As part of this tag's function, it requires the attribute `href=` and a web protocol --in this case it is a link to an email address `mailto:francojc@wfu.edu`. More often than not, however, the `href=` contains a URL (Uniform Resource Locator). A working example might look like this: `<a href="https://francojc.github.io/">My homepage</a>`.
@@ -932,14 +932,14 @@ html
 #| label: ad-parse-html-toy-1
 #| cache: false
 
-html %>% 
+html |> 
   html_elements("div")
 ```
 
 Notice that `html_elements("div")` has returned both `div` tags. To isolate one of tags by its class, we add the class name to the tag separating it with a `.`.
 
 ```{r ad-parse-html-toy-2, eval=TRUE, echo=TRUE}
-html %>% 
+html |> 
   html_elements("div.intro")
 ```
 
@@ -948,7 +948,7 @@ Great. Now say we want to drill down and isolate the subordinate `<p>` nodes. We
 ```{r}
 #| label: ad-parse-html-toy-3
 
-html %>% 
+html |> 
   html_elements("div.intro p")
 ```
 
@@ -957,8 +957,8 @@ To extract the text contained within a node we use the `html_text()` function.
 ```{r}
 #| label: ad-parse-html-toy-4
 
-html %>% 
-  html_elements("div.intro p") %>% 
+html |> 
+  html_elements("div.intro p") |> 
   html_text()
 ```
 
@@ -967,8 +967,8 @@ The result is a character vector with two elements corresponding to the text con
 ```{r , eval=TRUE, echo=TRUE}
 #| label: ad-parse-html-toy-5
 
-html %>% 
-  html_elements("div.intro p") %>% 
+html |> 
+  html_elements("div.intro p") |> 
   html_text(trim = TRUE)
 ```
 
@@ -1061,7 +1061,7 @@ From @fig-ad-inspect-element-artist-lastfm we see that the element we want to ta
 ```{r}
 #| label: ad-extract-artist-lastfm-1
 
-html %>% 
+html |> 
   html_element("a.header-new-crumb")
 ```
 
@@ -1071,8 +1071,8 @@ We can then extract the text with `html_text()`.
 #| label: ad-extract-artist-lastfm-2
 
 artist <- 
-  html %>% 
-  html_element("a.header-new-crumb") %>% 
+  html |> 
+  html_element("a.header-new-crumb") |> 
   html_text()
 artist
 ```
@@ -1085,8 +1085,8 @@ Let's extract the song title in the same way.
 #| label: ad-extract-song-title
 
 song <- 
-  html %>% 
-  html_element("h1.header-new-title") %>% 
+  html |> 
+  html_element("h1.header-new-title") |> 
   html_text()
 song
 ```
@@ -1107,8 +1107,8 @@ Since there are multiple elements that we want to extract, we will need to use t
 #| label: ad-extract-lyrics
 
 lyrics <- 
-  html %>% 
-  html_elements("p.lyrics-paragraph") %>% 
+  html |> 
+  html_elements("p.lyrics-paragraph") |> 
   html_text()
 lyrics
 ```
@@ -1118,7 +1118,7 @@ At this point, we have isolated and extracted the artist, song, and lyrics from 
 ```{r}
 #| label: ad-create-tibble-lastfm-1
 
-tibble(artist, song, lyrics) %>% 
+tibble(artist, song, lyrics) |> 
   glimpse()
 ```
 
@@ -1168,18 +1168,18 @@ get_lyrics <- function(lyrics_url) {
   close(url) # close url connection
   
   artist <- 
-    html %>% 
-    html_element("a.header-new-crumb") %>% 
+    html |> 
+    html_element("a.header-new-crumb") |> 
     html_text()
   
   song <- 
-    html %>% 
-    html_element("h1.header-new-title") %>% 
+    html |> 
+    html_element("h1.header-new-title") |> 
     html_text()
   
   lyrics <- 
-    html %>% 
-    html_elements("p.lyrics-paragraph") %>% 
+    html |> 
+    html_elements("p.lyrics-paragraph") |> 
     html_text()
   
   cat("...one moment ")
@@ -1228,8 +1228,8 @@ With just these two functions, we can take a lyrics URL from last.fm and scrape 
 
 lyrics_url <- "https://www.last.fm/music/Pixies/_/Where+Is+My+Mind%3F/+lyrics"
 
-lyrics_url %>% 
-  get_lyrics() %>% 
+lyrics_url |> 
+  get_lyrics() |> 
   write_content(target_file = "../data/original/lastfm/lyrics.csv")
 ```
 
@@ -1280,9 +1280,9 @@ get_genre_lyrics_urls <- function(last_fm_genre) {
     paste0("https://www.last.fm/tag/", last_fm_genre, "/tracks") 
   
   genre_lyrics_urls <- 
-    read_html(genre_listing_url) %>% # read raw html and parse to xml
-    html_elements("td.chartlist-name a") %>% # isolate the track elements
-    html_attr("href") %>% # extract the href attribute
+    read_html(genre_listing_url) |> # read raw html and parse to xml
+    html_elements("td.chartlist-name a") |> # isolate the track elements
+    html_attr("href") |> # extract the href attribute
     paste0("https://www.last.fm", ., "/+lyrics") # join the domain, relative artist path, and the post-pended /+lyrics to create an absolute URL
   
   return(genre_lyrics_urls)
@@ -1304,7 +1304,7 @@ saveRDS(hip_hop_lyrics, file = "data/acquire-data/hip_hop_lyrics.rds")
 #| label: ad-demo-get-genre-lyrics-urls-lastfm
 #| eval: false
 
-get_genre_lyrics_urls("hip+hop") %>%  # get urls for top hip hop tracks
+get_genre_lyrics_urls("hip+hop") |>  # get urls for top hip hop tracks
   head(n = 10) # only display 10 tracks
 ```
 
@@ -1314,7 +1314,7 @@ get_genre_lyrics_urls("hip+hop") %>%  # get urls for top hip hop tracks
 
 hip_hop_lyrics <- read_rds(file = "data/acquire-data/hip_hop_lyrics.rds")
 cat("Scraping top songs from: hip+hop genre:\n")
-hip_hop_lyrics %>% 
+hip_hop_lyrics |> 
   head(n = 10)
 ```
 
@@ -1325,8 +1325,8 @@ So now we have a method to scrape URLs by genre and list them in a vector. Our a
 #| eval: false
 
 # Note: will not run
-get_genre_lyrics_urls("hip+hop") %>% # get lyrics urls for specific genre
-  get_lyrics() %>% # scrape lyrics url
+get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
+  get_lyrics() |> # scrape lyrics url
   write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
 ```
 
@@ -1337,9 +1337,9 @@ This approach, however, has a couple of problems. (1) our `get_lyrics()` functio
 #| eval: false
 
 # Note: will run, but with occasional errors
-get_genre_lyrics_urls("hip+hop") %>% # get lyrics urls for specific genre
-  map(get_lyrics) %>%  # scrape lyrics url
-  bind_rows() %>% # combine tibbles into one
+get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
+  map(get_lyrics) |>  # scrape lyrics url
+  bind_rows() |> # combine tibbles into one
   write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
 ```
 
@@ -1364,9 +1364,9 @@ Updating the pipeline with the `get_lyrics_catch()` function would look like thi
 #| eval: false
 
 # Note: will run, but we can do better
-get_genre_lyrics_urls("hip+hop") %>% # get lyrics urls for specific genre
-  map(get_lyrics_catch) %>%  # scrape lyrics url
-  bind_rows() %>% # combine tibbles into one
+get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
+  map(get_lyrics_catch) |>  # scrape lyrics url
+  bind_rows() |> # combine tibbles into one
   write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
 ```
 
@@ -1382,10 +1382,10 @@ download_lastfm_lyrics <- function(last_fm_genre, target_file) {
     
     cat("Downloading data.\n")
     
-    get_genre_lyrics_urls(last_fm_genre) %>% 
-      map(get_lyrics_catch) %>% 
-      bind_rows() %>% 
-      mutate(genre = last_fm_genre) %>% 
+    get_genre_lyrics_urls(last_fm_genre) |> 
+      map(get_lyrics_catch) |> 
+      bind_rows() |> 
+      mutate(genre = last_fm_genre) |> 
       write_content(target_file)
     
   } else {
@@ -1525,6 +1525,17 @@ At this point you have both a bird’s eye view of the data available on the web
 :::
 
 ## Questions {.unnumbered}
+
+::: callout-note
+## Conceptual questions
+
+1. ...
+2. ...
+
+:::
+
+::: callout-note
+## Technical exercises
 
 1. ...
 2. ...

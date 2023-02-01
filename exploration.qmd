@@ -23,29 +23,28 @@ execute:
 #| label: exploration-data-packages
 #| echo: false
 #| message: false
-# Packages
 
+# Packages for data analysis
 pacman::p_load(tidyverse, patchwork, knitr, broom, effectsize, report, janitor, skimr, languageR)
 ```
 
-In this chapter we examine a wide range of strategies for deriving insight from data in cases where the researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. The chapter outlines two main branches of exploratory analysis: 1) descriptive analysis which statistically and/or visually summarizes a dataset and 2) unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either through unsupervised learning or descriptive methods, exploratory data analysis employs quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset in order to provide the researcher novel perspective to be qualitatively assessed.
+In this chapter we examine a wide range of strategies for deriving insight from data in cases where the researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. The chapter outlines two main branches of exploratory data analysis: 1) descriptive analysis which statistically and/ or visually summarizes a dataset and 2) unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either through unsupervised learning or descriptive methods, exploratory data analysis employs quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset in order to provide the researcher novel perspective to be qualitatively assessed.
 
-
-This chapter provides an introduction to exploratory data analysis (EDA) for linguists, with a focus on descriptive methods such as frequency analysis and co-occurence analysis, as well as unsupervised learning approaches such as clustering, topic modelling, and word embedding. It will also discuss the use cases of these methods in linguistics. 
+<!-- This chapter provides an introduction to exploratory data analysis (EDA) for linguists, with a focus on descriptive methods such as frequency analysis and co-occurence analysis, as well as unsupervised learning approaches such as clustering, topic modelling, and word embedding. It will also discuss the use cases of these methods in linguistics. 
 
 The chapter is organized as follows: ...
 
-We wil work with the State of the Union (SOTU) corpus, which contains the full text of all State of the Union addresses from 1790 to 2019. The corpus is available in the `quanteda.corpora` package, and can be loaded as follows:
+We wil work with the State of the Union (SOTU) corpus, which contains the full text of all State of the Union addresses from 1790 to 2019. The corpus is available in the `quanteda.corpora` package, and can be loaded as follows: -->
 
 ```{r}
 #| label: load-sotu 
+#| echo: false
+#| eval: false
  
 sotu_corpus <- 
   quanteda.corpora::data_corpus_sotu # load corpus
 ``` 
 
-
-(to be continued/ edited)
 
 ::: callout-tip
 ## Swirl
@@ -55,99 +54,132 @@ sotu_corpus <-
 **Why**: To ...
 :::
 
+## Orientation {#eda-orientation}
 
+The aim of this section is to provide an overview of exploratory data analysis (EDA) for linguists, with a focus on descriptive methods such as frequency analysis and co-occurence analysis, as well as unsupervised learning approaches such as clustering, topic modelling, and word embedding. It will also include use cases of these methods.
 
-- Overview
-  - Research goals (discover, describe, posit)
-  - Use of data
-      - Reusable
-      - No outcome variable (only predictors/ covariates)
-      - Mutable variables/ features
-  - Methods
-      - Descriptive methods
-      - Unsupervised machine learning methods
-  - Data types/ structures
-      - Vectors
-      - Data frames
-      - Matrices
-  - Interpreting results (qualitative
-      - Summary statistics 
-      - Visualizations
-- Descriptive analysis
-  - Methods: 
-      - Frequency analysis: (L2 acquisition, Language and culture studies)
-          - Word/ term frequency (counting)
-              - Raw frequency (SOTU)
-                  - Zipf's law
-              - Relative frequency (normalization)
-                  - Compare sub-corpora (by 'party')
-          - Adjusted frequency (relevance)
-              - TF-IDF (term frequency-inverse document frequency)
-                  - Distinctive words (remove 'stopwords')
-                  - Compare sub-corpora (by 'party')
-              - Dispersion measures
-                  - ...
-      - Co-occurrence analysis: (grammaticalization, syntactic alternations, discourse analysis, etc.)
-          - Concordance (contextualization)
-              - KWIC (keyword in context)
-          - Collocation (co-occurrence)
-              - Pointwise mutual information
-              - Log-likelihood
-              - Chi-square
-- Unsupervised machine learning analysis
-  - Methods: 
-      - Clustering (grouping)
-          - K-means (pre-defined number of clusters)
-          - Hierarchical clustering (dendrogram)
-      - Dimensionality reduction (feature selection)
-          - Principal component analysis (PCA)
-      - Topic modeling (latent semantic analysis)
-          - Latent Dirichlet allocation (LDA)
-      - Vector space modeling (word embeddings, semantic relatedness)
-          - Word2vec (skip-gram)
-          - GloVe (global vectors)
+### Research goals {#eda-research-goals}
 
+The goal of exploratory data analysis is to discover, describe, and posit new hypotheses. The researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. This analysis approach is best-suited for research where the literature on a research question is limited, or where the researcher is interested in exploring a new research question. Since the researcher does not start with a preconceived hypothesis, the researcher is not able to test a hypothesis and generalize to a population, but rather the researcher is able to describe the data and provide a new perspective to be qualitatively assessed. This is achieved through an iterative and inductive process of data exploration, where the researcher uses quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset letting the data guide the analysis. 
 
+### Approaches {#eda-approaches}
 
-<!--
+- There is no fixed outcome variable rather there is only a set of predictors or covariates. 
+- The data is mutable, meaning that the data can be changed or modified as needed to address the research question.
 
-Introduction to Exploratory Data Analysis for Linguists
+#### Analysis types {#eda-analysis-types}
 
-This chapter provides an introduction to exploratory data analysis for linguists, with a focus on descriptive methods such as frequency analyses, keyword in context and keyword analyses, as well as unsupervised learning approaches such as clustering, topic modelling, word embedding, and sentiment analyses. It will also discuss the use cases of these methods in linguistics.
+There are two main types of exploratory analysis: 1) descriptive analysis which statistically and/ or visually summarizes a dataset and 2) unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either or both of these approaches can be used to explore a dataset.
 
-Overview
+### Workflow {#eda-workflow}
 
-Descriptive Methods
+Prerequisites: 
+- A working research question
+- A dataset which aligns with the research question or hypothesis in terms of its sampling frame and the variables it contains or can be derived from the text
+- A set of preliminary interests and/ or linguistic variables to explore in the dataset
 
-Frequency analyses
-This section will provide an overview of frequency analyses and discuss the various ways to measure frequency, including absolute and relative frequency, as well as n-grams. It will also discuss the implications of these measures and their use cases in linguistics.
+#### Identify {#eda-identify}
 
-Keyword in context
-This section will discuss keyword in context (KWIC) analyses, which is used to identify meaningful keywords in a given text. It will discuss various ways to analyse a text and extract keywords, as well as discuss various practical applications of KWIC in linguistics.
+- With the research question in mind, identify the variables of interest in the dataset
+- Identify the linguistic variables that can be derived from the text (i.e. liguistic units: words, n-grams, sentences, etc.)
+- Consider the operational measures of the variables derived from the text (i.e. frequency, dispersion, co-occurrence, etc.)
+- Consider the other variables in the dataset that may be target for grouping or filtering the dataset (i.e. speaker information, document information, linguistic unit information, etc.)
 
-Keyword analyses
-This section will discuss keyword analyses, which are used to identify the most relevant keywords in a given text. It will discuss various methods of keyword analysis, such as frequency-based and semantic-based approaches, and discuss their applications in linguistics.
+#### Interrogate {#eda-interrogate}
 
-Unsupervised Learning Approaches
+Descriptive analysis:
 
-Clustering
+- Frequency analysis
+- Co-occurrence analysis
+
+Unsupervised learning:
+
+- Clustering
+- Topic modeling
+- Word embedding
+
+#### Interpret {#eda-interpret}
+
+Exploratory methods will produce a set of statistical and/ or visual results. The researcher must interpret these results to determine if they are meaningful and if they provide a new perspective on the research question. Many times the results from one method will lead to new questions which can be explored with other methods. In some cases, the results may not be meaningful and the researcher may need to return to the data preparation stage to modify the dataset or the variables of interest. As the aim  of exploratory analysis is jus that, to explore, the researcher can pivot the approach to explore new questions and new variables. Ultimately, what is meaningful is determined by the researcher in the light of the research question and the potential insight obtained from the results.
+
+## Analysis {#eda-analysis}
+
+### Descriptive analysis {#eda-descriptive} 
+
+#### Frequency analysis {#eda-frequency}
+
+<!-- (L2 acquisition, Language and culture studies) -->
+
+Frequency analysis is a descriptive method that counts the number of times a linguistic unit (i.e. word, n-gram, sentence, etc.) occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify linguistic units that are distinctive to a particular group or sub-group in the dataset.
+
+- Raw frequency (counting)
+    - Linguistic units (characters, words, n-grams, sentences, etc.)
+    - Raw frequency (absolute frequency)
+    - Zipf's law (rank-frequency)
+    - Issues with raw frequency ($f$): 
+        - Incomparable across sub-corpora, corpora, and time
+- Term frequency (normalization)
+    - Relative frequency (proportional frequency)
+    - Makes samples (more) comparable (divergence of corpus sizes can influences validity of comparison)
+    - Issues with term frequency ($tf$): 
+        - Does not reveal the distribution of terms across a text or set of texts
+        - Does not highlight distinctive words
+            - One way to address this is to filter out 'stop words' (i.e. the, a, an, etc.)
+- Adjusted frequency (relevance)
+    - Dispersion (distribution)
+        - $idf$ (inverse document frequency)
+        - ... Juilland's $D$ (equal/ non-equal parts)
+        - Gries' $DP$ Deviation of Proportions (DP)
+    - Weights
+        - $tf-idf$ (term frequency-inverse document frequency)
+            - Distinctive words (Used to identify the most relevant keywords in a given text.)
+            - Issues with $tf-idf$: 
+                - Does not reveal the context of terms
+                - Does not reveal the relationship between terms
+
+#### Co-occurrence analysis {#eda-co-occurrence}
+
+<!-- (grammaticalization, syntactic alternations, discourse analysis, etc.) -->
+
+- Concordance
+    - KWIC (keyword in context)
+    This section will discuss keyword in context (KWIC) analyses, which is used to identify meaningful keywords in a given text. It will discuss various ways to analyse a text and extract keywords, as well as discuss various practical applications of KWIC in linguistics.
+- Collocation
+    - PMI (pointwise mutual information)
+    - Dice's coefficient
+    - ...
+
+### Unsupervised learning {#eda-unsupervised}
+
+#### Clustering {#eda-clustering}
+
 This section will discuss clustering techniques, which are used to partition data into clusters based on similarity. It will discuss various approaches to clustering, such as k-means and hierarchical clustering, as well as discuss their use cases in linguistics.
 
-Topic modelling
-This section will discuss topic modelling techniques, which are used to identify and group semantically similar topics in unstructured data. It will discuss various approaches to topic modelling, such as Latent Dirichlet Allocation (LDA), and discuss their applications in linguistics.
+- K-means (pre-defined number of clusters)
+- Hierarchical clustering (dendrogram)
 
-Word embedding
+#### Dimensionality reduction {#eda-dimensionality-reduction}
+
+- PCA (principal component analysis)
+- MDS (multidimensional scaling)
+
+#### Topic modeling {#eda-topic-modeling}
+
+This section will discuss topic modeling techniques, which are used to identify and group semantically similar topics in unstructured data. It will discuss various approaches to topic modelling, such as Latent Dirichlet Allocation (LDA), and discuss their applications in linguistics.
+
+- LDA (latent Dirichlet allocation)
+- LSA (latent semantic analysis)
+
+#### Word embedding {#eda-word-embedding}
+
 This section will discuss word embedding techniques, which are used to represent words in a vector space. It will discuss various approaches to word embedding, such as Word2Vec and GloVe, and discuss their applications in linguistics.
 
-Sentiment analyses
-This section will discuss sentiment analysis techniques, which are used to identify the polarity (positive or negative) of a given text. It will discuss various approaches to sentiment analysis, such as Naive Bayes and Support Vector Machines (SVM), and discuss their applications in linguistics.
+- Word2vec (skip-gram)
+- GloVe (global vectors for word representation)
 
-Conclusion
+## Summary 
 
-Use Cases for Exploratory Data Analysis in Linguistics
-
-
--->
+Exploratory data analysis is a set of methods that can be used to explore a dataset and to identify new questions and new variables of interest. The methods can be used to describe a dataset and to identify linguistic units that are distinctive to a particular group or sub-group in the dataset. The methods can also be used to identify semantically similar topics in unstructured data. The results of exploratory analysis can be used to inform the development of a hypothesis or to inform the design of a machine learning model. 
 
 
 ## Activities {.unnumbered}

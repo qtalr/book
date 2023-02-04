@@ -1,7 +1,6 @@
 ---
 execute: 
   echo: true
-  cache: true
 ---
 
 # Inference {#sec-inference}
@@ -9,7 +8,14 @@ execute:
 ```{r}
 #| label: setup-options
 #| child: "_common.qmd"
+#| cache: false
 ```
+
+<!-- TODO:
+
+- [ ] ...
+
+-->
 
 > People generally see what they look for, and hear what they listen for.
 >
@@ -55,29 +61,189 @@ The process for each inferential data analysis in this section will include thre
 
 ## Orientation {#ida-orientation}
 
-The aim of this section is to ...
+The aim of this section is to provide an overview of inferential data analysis (IDA) and to introduce the three main types of inferential analysis approaches that are most common in text analysis research. 
 
 ### Research goals {#ida-research-goals}
 
+The goal of IDA is to detect, explain, and generalize. The relationship to detect is predtermined by the hypothesis. In this situation the researcher will have identified an outcome variable (often known as a dependent variable) and often a predictor or set of predictor variables (independent variables) that are directly linked to the hypothesis in a way that the results of the statistical analysis allows to either confirm that null hypothesis or reject it. Explaining the results of the statistical analysis is key to summarizing the findings and how they relate to the hypothesis. To the extent that the text sample used is representative of the population from which the data is sampled, the results can be generalized to the population. IDA is not an exploratory endeavor and as such that anlysis is performed on the data in a much more conservative manner than is the case in exploratory data analysis (EDA) or predictive data analysis (PDA).
+
 ### Approaches {#ida-approaches}
+
+- The dependent variable and predictor variables are fixed (tied to hypothesis)
+- Descriptive statistics and visualizations (plots or tables) are used to summarize the data and provide a preliminary assessment of the data
+- Inferential statistics are used to test the hypothesis
 
 #### Analysis types {#ida-analysis-types}
 
+The type of analysis that is performed depends most heavily on the informational value of the dependent variable. The informational value of the dependent variable is determined by the type of data that is collected. Secondly, the number and informational types of the independent variables (predictor variables) also play a role in determining the type of analysis that is performed. 
+
+- Categorical dependent variable
+    - Descriptive statistics
+        - Frequency
+        - Proportion
+        - Confidence intervals
+    - Inferential statistics
+        - Chi-square
+        - Logistic regression
+- Continuous dependent variable
+    - Descriptive statistics
+        - Mean
+        - Standard deviation
+        - Confidence intervals
+    - Inferential statistics
+        - Correlation
+        - Linear regression
+
 ### Workflow {#ida-workflow}
+
+Prerequisites:
+- A testable hypothesis (covering the outcome space, i.e. null and alternative hypotheses).
+- A data set that aligns with the population targeted to generalize to. 
+- A operationalized dependent and independent variable(s) that are tied to the hypothesis. 
 
 #### Identify {#ida-identify}
 
+- Identify the informational value of the dependent and independent variable(s).
+- Assess the distribution of the independent and dependent variables with the appropriate descriptive statistics and visualizations.
+- Choose an appropriate statistical test based on the informational value and distribution of the dependent and independent variables.
+- Apply transformations to the data as needed to meet the assumptions of the statistical tests.
+
 #### Interrogate {#ida-interrogate}
+
+- Apply the appropriate statistical test to the data:
+  - Categorical dependent variable
+    - Chi-square (dependent and one independent variable)
+    - Logistic regression (dependent and one or more independent variables)
+  - Continuous dependent variable
+    - Correlation (dependent and one independent variable)
+    - Linear regression (dependent and one or more independent variables)
+- Assess the results of the statistical test (p-value, confidence intervals, effect size)
 
 #### Interpret {#ida-interpret}
 
+Review the results of the statistical test and interpret the results in the context of the hypothesis.
+
 ## Analysis {#ida-analysis}
 
-### Types 
+Recap and introduction to the structure of the analysis subsection. 
 
-#### Methods/ algorithms
+- Categorical dependent variable
+  - Categorical/ continuous independent variable(s)
+    - Descriptive assessment
+      - 0-1 categorical independent variable: Tables summary statistics (contingency table)
+      - Continuous independent variable(s): Plots and summary statistics (boxplots, histograms, etc.)
+    - Statistical interrogation
+      - Chi-square (dependent and one independent variable)
+      - Logistic regression (dependent and one or more independent variables)
+    - Evaluation of results
+      - p-value
+      - Confidence intervals
+      - Effect size
+- Continuous dependent variable
+  - Continuous/ categorical independent variable(s)
+    - Descriptive assessment
+      - Tables, plots, and summary statistics
+    - Statistical interrogation
+      - Correlation
+      - Linear regression
+    - Evaluation of results
+      - p-value
+      - Confidence intervals
+      - Effect size
+
+### Categorical dependent variable {#ida-categorical-dependent-variable}
+
+#### Chi-square {#ida-chi-square}
+
+Chi-square tests can be used for frequencies of categorical variables. The chi-square goodness of fit test is used to test whether the observed frequencies of a categorical variable match the expected frequencies of a single variable. The chi-square test of independence is used to test whether the observed frequencies of two categorical variables are independent of each other. For hypothesis tests that include more than two variables, the chi-square test is not appropriate. Instead, logistic regression is used.
+
+#### Logistic regression {#ida-logistic-regression}
+
+Logistic regression can handle more than one independent variable, and these variables need not be categorical. The dependent variable is a binary variable, and the independent variables can be continuous or categorical. The logistic regression model is used to predict the probability of the dependent variable being 1. The logistic regression model is used to test whether the independent variables are associated with the dependent variable. 
+
+Using the `infer` package, a logistic regression can be performed using the `specify()` and `generate()` functions. The `specify()` function is used to specify the dependent and independent variables. The `generate()` function is used to generate the model. The `calculate()` function is used to calculate the p-value and confidence intervals. 
+
+```{r}
+#| label: ida-logistic-regression
+#| message: false
+#| eval: false
+
+library(infer) # for inferential statistics
+
+# load the `dative` data from the `languageR` package
+data(package = "languageR", data = "dative")
+
+# specify the dependent `RealizationOfRecipient` and independent variables `LengthOfTheme` and `AnimacyOfTheme` for a logistic regression model
+log_reg <- 
+  dative %>%
+  specify(RealizationOfRecipient ~ LengthOfTheme + AnimacyOfTheme) %>%
+  generate(response = "logistic", type = "response") %>%
+  calculate(stat = "p.value", order = "descending")
+```
+
+### Continuous dependent variable {#ida-continuous-dependent-variable}
+
+#### Correlation {#ida-correlation}
+
+#### Linear regression {#ida-linear-regression}
+
+## Reporting {#ida-reporting}
 
 ## Summary 
+
+## Activities {.unnumbered}
+
+::: callout-tip
+## Recipe
+
+**What**: [Statistical inference: prep, assess, interrogate, evaluate, and report](https://lin380.github.io/tadr/articles/recipe_9.html)\
+**How**: Read Recipe 9 and participate in the Hypothes.is online social annotation.\
+**Why**: To illustrate some common coding strategies for preparing datasets for inferential data analysis, as well as the steps conduct descriptive assessment, statistical interrogation, and evaluation and reporting of results.
+:::
+
+::: callout-tip
+## Lab
+
+**What**: [Statistical inference: prep, assess, interrogate, evaluate, and report](https://github.com/lin380/lab_9)\
+**How**: Clone, fork, and complete the steps in Lab 9.\
+**Why**: To gain experience working with coding strategies to prepare, assess, interrogate, evaluate, and report results from an inferential data analysis, practice transforming datasets and visualizing relationships, and implement organizational strategies for organizing and reporting results in a reproducible fashion.
+:::
+
+## Questions {.unnumbered}
+
+::: callout-note
+## Conceptual questions
+
+1. What is the difference between a descriptive and inferential analysis?
+2. What are the steps involved in conducting a descriptive analysis?
+3. What are the steps involved in conducting an inferential analysis?
+4. What are the steps involved in preparing data for inferential analysis?
+5. What are the steps involved in conducting a statistical interrogation?
+6. What are the steps involved in evaluating the results of an inferential analysis?
+7. What are the steps involved in reporting the results of an inferential analysis?
+8. Would word freqency differences between two groups of words be better assessed using a t-test or a chi-squared distribution?
+9. Would word lengths between two groups of words be better assessed using a t-test or a chi-squared distribution?
+10. What type of visualization would be best for exploring the relationship between two categorical variables?
+11. What type of visualization would be best for exploring the relationship between two non-categorical variables?
+12. What type of visualization would be best for exploring the relationship between a categorical and a non-categorical variable?
+13. What is the role of confidence intervals in inferential data analysis? How is this similar or differnt to the role of p-values?
+14. What is the role of effect size in inferential data analysis? How is this similar or differnt to the role of p-values?
+:::
+
+::: callout-note
+## Technical exercises
+
+1. Use the lm() function to create a linear model, assess the summary statistics, and evaluate the results.
+2. Use the glm() function to assess the relationship between two categorical variables and evaluate the results.
+3. Apply a chi-squared distribution to explore categorical dependent variables and evaluate the results.
+4. Calculate correlation coefficients between two non-categorical variables and evaluate the results.
+5. Read in a dataset and transform it to prepare it for inferential analysis.
+6. Decide which type of visualization is most appropriate for the dataset and then implement it using ggplot2.
+7. Use the effectsize() function to calculate effect size and confidence intervals.
+
+:::
+
+<!--
 
 - IDA (Inferential Data Analysis)
 - Overview:
@@ -114,7 +280,7 @@ The aim of this section is to ...
                 - Chi-square
                 - Logistic regression
 
-<!-- Note:
+Note:
 
 IDA: Questions to consider:
 
@@ -970,6 +1136,8 @@ We can conclude, then, that there is a strong interaction effect for `filler` an
 
 In this chapter we have discussed various approaches to conducting inferential data analysis. Each configuration, however, always includes a descriptive assessment, statistical interrogation, and an evaluation of the results. We considered univariate, bivariate, and multivariate analyses using both categorical and non-categorical dependent variables to explore the similarities and differences between these approaches. 
 
+
+
 <!-- IDEAS:
 
 - Use Switchboard Dialogue Act Corpus
@@ -998,61 +1166,6 @@ RESOURCES:
 - 
 
 
--->
-
-## Activities {.unnumbered}
-
-::: callout-tip
-## Recipe
-
-**What**: [Statistical inference: prep, assess, interrogate, evaluate, and report](https://lin380.github.io/tadr/articles/recipe_9.html)\
-**How**: Read Recipe 9 and participate in the Hypothes.is online social annotation.\
-**Why**: To illustrate some common coding strategies for preparing datasets for inferential data analysis, as well as the steps conduct descriptive assessment, statistical interrogation, and evaluation and reporting of results.
-:::
-
-::: callout-tip
-## Lab
-
-**What**: [Statistical inference: prep, assess, interrogate, evaluate, and report](https://github.com/lin380/lab_9)\
-**How**: Clone, fork, and complete the steps in Lab 9.\
-**Why**: To gain experience working with coding strategies to prepare, assess, interrogate, evaluate, and report results from an inferential data analysis, practice transforming datasets and visualizing relationships, and implement organizational strategies for organizing and reporting results in a reproducible fashion.
-:::
-
-## Questions {.unnumbered}
-
-::: callout-note
-## Conceptual questions
-
-1. What is the difference between a descriptive and inferential analysis?
-2. What are the steps involved in conducting a descriptive analysis?
-3. What are the steps involved in conducting an inferential analysis?
-4. What are the steps involved in preparing data for inferential analysis?
-5. What are the steps involved in conducting a statistical interrogation?
-6. What are the steps involved in evaluating the results of an inferential analysis?
-7. What are the steps involved in reporting the results of an inferential analysis?
-8. Would word freqency differences between two groups of words be better assessed using a t-test or a chi-squared distribution?
-9. Would word lengths between two groups of words be better assessed using a t-test or a chi-squared distribution?
-10. What type of visualization would be best for exploring the relationship between two categorical variables?
-11. What type of visualization would be best for exploring the relationship between two non-categorical variables?
-12. What type of visualization would be best for exploring the relationship between a categorical and a non-categorical variable?
-13. What is the role of confidence intervals in inferential data analysis? How is this similar or differnt to the role of p-values?
-14. What is the role of effect size in inferential data analysis? How is this similar or differnt to the role of p-values?
-:::
-
-::: callout-note
-## Technical exercises
-
-1. Use the lm() function to create a linear model, assess the summary statistics, and evaluate the results.
-2. Use the glm() function to assess the relationship between two categorical variables and evaluate the results.
-3. Apply a chi-squared distribution to explore categorical dependent variables and evaluate the results.
-4. Calculate correlation coefficients between two non-categorical variables and evaluate the results.
-5. Read in a dataset and transform it to prepare it for inferential analysis.
-6. Decide which type of visualization is most appropriate for the dataset and then implement it using ggplot2.
-7. Use the effectsize() function to calculate effect size and confidence intervals.
-
-:::
-
-<!-- 
 The chapter begins by defining statistical inference and discussing its importance for linguistics, and then covers different types of statistical inference and the steps involved in preparing data for statistical inference. The chapter also covers statistical tests for hypothesis testing and the interpretation of statistical results, and discusses various applications of statistical inference in the field of linguistics. Finally, the chapter concludes with a recap of the key points covered and a discussion of future directions for statistical inference in linguistics.
 
 I. Introduction to statistical inference

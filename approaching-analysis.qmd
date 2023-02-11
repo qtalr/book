@@ -14,12 +14,15 @@ execute:
 
 <!--TODO:
 
-- [ ] change from gridExtra to patchwork for graphics
-
-Consider: 
-- [ ] Summarizing this chapter. On first draft it is over 11k words.
-  - [ ] Moving (parts of) the analysis sections to the individual chapters on inference, prediction, and exploration?
-- [ ] ...
+- [ ] Change from gridExtra to patchwork for graphics
+- [ ] Consider summarizing this chapter. On first draft it is over 11k words.
+  - [ ] Moving (parts of) the 'Analysis' section to the individual chapters on inference, prediction, and exploration?
+- [ ] Add 'Consider' callouts where appropriate
+- [ ] Add conceptual questions
+- [ ] Add R coding exercises
+- [ ] Fix `skimr` table output, removing the `skim_type` attribute see @tbl-summaries-continuous-measures-belc for my first attempt
+- [ ] Connect the unit of analysis and unit of observation concepts to the discussion of descriptive statistics
+- [ ] Consider whether the `belc` dataset is the most adequate for this chapter. This issue is that word frequencies are not the most appropriate for the discussion continuous variables of descriptive statistics. Perhaps a dataset with more continuous measures would be better. That way we can contrast the descriptive statistics of continuous and categorical variables.
 
 -->
 
@@ -32,7 +35,7 @@ Consider:
 
 - What is the role of statistics in data analysis?
 - What is the importance of descriptive assessment in data analysis?
-- In what ways are main approaches to data analysis similar and different?
+- In what ways are the main approaches to data analysis similar and different?
 ::: 
 
 ```{r}
@@ -41,7 +44,7 @@ options(kableExtra.auto_format = FALSE) # avoid kableextra from outputting HTML 
 pacman::p_load(TBDBr, skimr, janitor, kableExtra, effectsize, patchwork)
 ```
 
-In this chapter I will build on the notions of data and information from the previous chapter. The aim of statistics in quantitative analysis is to uncover patterns in datasets. Thus statistics is aimed at deriving knowledge from information, the next step in the DIKI Hierarchy @fig-diki-hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves even more conscious subjective decisions on what information to assess, and what method to select to interrogate the information, and ultimately how to interpret the findings. The first step is to conduct a descriptive assessment of the information, both at the individual variable level and also between variables, the second is to interrogate the dataset either through inferential, predictive, or exploratory analysis methods, and the third is to interpret and report the findings.
+In this chapter I will build on the notions of data and information from the previous chapter. The aim of statistics in quantitative analysis is to uncover patterns in datasets. Thus statistics is aimed at deriving knowledge from information, the next step in the DIKI Hierarchy @fig-diki-hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves even more conscious subjective decisions on what information to assess, and what method to select to interrogate the information, and ultimately how to interpret the findings. The first step is to conduct a descriptive assessment of the information, both at the individual variable level and also between variables, the second is to interrogate the dataset either through exploratory, predictive, or inferential analysis methods, and the third is to interpret and report the findings.
 
 ::: {#swirl .callout-tip}
 ## Interactive programming
@@ -133,7 +136,7 @@ The BELC dataset contains three categorical variables (`participant_id`, `age_gr
 
 The distinction between categorical an continuous levels of measurement, as mentioned above, are the main two and for some statistical approaches the only distinction that needs to be made to conduct an analysis. However, categorical and continuous can each be broken down into subcategories and for some descriptive and analytic purposes these distinctions are important. For categorical variables a distinction can be made between variables in which there is a structured relationship between the values and those in which there is not. _Nominal variables_ contain values which are labels denoting the membership in a class in which there is no relationship between the labels. _Ordinal variables_ also contain labels of classes, but in contrast to nominal variables, there is a relationship between the classes, namely one in which there is a precedence relationship or order. With this in mind, our categorical variables be sub-classified. There is no order between the values of `participant_id` and `sex` and they are therefore nominal whereas the values of `age_group` are ordered, each value refers to a sequential age group, and therefore it is ordinal.
 
-Turning to continuous variables, another subdivision can be made which hinges on the existence of a non-arbitrary zero or not. _Interval variables_ contain values in which the difference between the values is regular and defined, but the measure has an arbitrary zero value. A typically cited example of an interval variable is temperature measurements on the Fahrenheit scale. A value of 0 on this scale does not mean there is 0 temperature. _Ratio variables_ have all the properties of interval variables but also include a non-arbitrary definition of zero. All of the continuous variables in the BELC dataset (`num_tokens`, `num_types`, and `ttr`) are ratio variables as a value of 0 would indicate the lack of this attribute.
+Turning to continuous variables, another subdivision can be made which hinges on the existence of a non-arbitrary zero or not. _Interval variables_ contain values in which the difference between the values is regular and defined, but the measure has an arbitrary zero value. A typical example of an interval variable is temperature measurements on the Fahrenheit scale. A value of 0 on this scale does not mean there is 0 temperature. _Ratio variables_ have all the properties of interval variables but also include a non-arbitrary definition of zero. All of the continuous variables in the BELC dataset (`num_tokens`, `num_types`, and `ttr`) are ratio variables as a value of 0 would indicate the lack of this attribute.
 
 An hierarchical overview of the relationship between the two main and four sub-types of levels of measurement appear in @fig-info-values-paper.
 
@@ -173,18 +176,21 @@ It is always key to gain insight into shape of the information through numeric, 
 
 The way to statistically summarize a variable into a single measure is to derive a __measure of central tendency__. For a continuous variable the most common measure is the (arithmetic) _mean_, or average, which is simply the sum of all the values divided by the number of values. As a measure of central tendency, however, the mean can be less-than-reliable as it is sensitive to outliers which is to say that data points in the variable that are extreme relative to the overall distribution of the other values in the variable affect the value of the mean depending on how extreme the deviate. One way to assess the effects of outliers is to calculate a __measure of dispersion__. The most common of these is the _standard deviation_ which estimates the average amount of variability between the values in a continuous variable. Another way to assess, or rather side-step, outliers is to calculate another measure of central tendency, the _median_. A median is calculated by sorting all the values in the variable and then selecting the value which falls in the middle of all the other values. A median is less sensitive to outliers as extreme values (if there are few) only indirectly affect the selection of the middle value. Another measure of dispersion is to calculate quantiles. A _quantile_ slices the data in four percentile ranges providing a five value numeric summary of the spread of the values in a continuous variable. The spread between the first and third quantile is known as the Interquartile Range (IQR) and is also used as a single statistic to summarize variability between values in a continuous variable.
 
-Below is a list of central tendency and dispersion scores for the continuous variables in the BELC dataset.
+Below is a list of central tendency and dispersion scores for the continuous variables in the BELC dataset @tbl-summaries-continuous-measures-belc.
 
 ```{r}
-#| label: summaries-continuous-measures-belc
+#| label: tbl-summaries-continuous-measures-belc
+#| tbl-cap: "Central tendency and dispersion measures for the continuous variables in the BELC dataset."
 
 my_skim <- skim_with(numeric = sfl(hist = NULL, # remove hist from my_skim
                                    iqr = IQR)) # add IQR to my_skim
-
 belc |> 
-  select(num_tokens:ttr) |> 
-  my_skim() |> 
-  yank("numeric")
+  select(num_tokens:ttr) |> # select only the continuous variables
+  my_skim() |> # apply my_skim to the BELC dataset
+  yank("numeric") |>  # select the "numeric" columns 
+  select(-n_missing, -complete_rate) |> # remove n_missing and complete_rate columns
+  data.frame() |> # remove the skimr object class
+  kable(booktabs = TRUE) # convert to a kable table
 ```
 
 ::: callout-warning
@@ -202,29 +208,29 @@ These are important measures for assessing the central tendency and dispersion a
 
 p1 <- 
   belc |> 
-  ggplot(aes(y = num_tokens)) + 
-  geom_boxplot(outlier.colour = "red") + 
-  theme(axis.title.x=element_blank(), axis.text.x = element_blank()) +
-  labs(y = "Number of tokens")
+  ggplot(aes(y = num_tokens)) + # select the num_tokens variable
+  geom_boxplot() + # create a boxplot
+  theme(axis.title.x=element_blank(), axis.text.x = element_blank()) + # remove x-axis labels
+  labs(y = "Number of tokens") # add y-axis label
 
 p2 <- 
   belc |> 
-  ggplot(aes(y = num_types)) + 
-  geom_boxplot(outlier.colour = "red") + 
-  theme(axis.title.x=element_blank(), axis.text.x = element_blank()) +
-  labs(y = "Number of types")
+  ggplot(aes(y = num_types)) + # select the num_types variable
+  geom_boxplot() + # create a boxplot
+  theme(axis.title.x=element_blank(), axis.text.x = element_blank()) + # remove x-axis labels
+  labs(y = "Number of types") # add y-axis label
 
 p3 <- 
   belc |> 
-  ggplot(aes(y = ttr)) + 
-  geom_boxplot(outlier.colour = "red") + 
-  theme(axis.title.x=element_blank(), axis.text.x = element_blank()) +
+  ggplot(aes(y = ttr)) + # select the ttr variable
+  geom_boxplot() + # create a boxplot
+  theme(axis.title.x=element_blank(), axis.text.x = element_blank()) + # remove x-axis labels
   labs(y = "Type-Token Ratio")
 
 p1 + p2 + p3 # combine plots
 ```
 
-In a boxplot, the bold line is the median. The surrounding box around the median is the interquantile range. The extending lines above and below the IQR mark the largest and lowest value that is within 1.5 times either the 3rd (top of the box) or 1st (bottom of the box). Any values that fall outside, above or below, the extending lines are considered statistical outliers and are marked as dots (in this case red dots). ^[Note that each of these three variables are to be considered separately here (vertically). Later we will see the use of boxplots to compare a continuous variable across levels of a categorical variable (horizontally).]
+In a boxplot, the bold line is the median. The surrounding box around the median is the interquantile range. The extending lines above and below the IQR mark the largest and lowest value that is within 1.5 times either the 3rd (top of the box) or 1st (bottom of the box). Any values that fall outside, above or below, the extending lines are considered statistical outliers and are marked as dots. ^[Note that each of these three variables are to be considered separately here (vertically). Later we will see the use of boxplots to compare a continuous variable across levels of a categorical variable (horizontally).]
 
 Boxplots provide a robust and visually intuitive way of assessing central tendency and variability in a continuous variable but this type of plot can be complemented by looking at the overall distribution of the values in terms of their frequencies. A histogram provides a visualization of the frequency (and density in this case with the blue overlay) of the values across a continuous variable binned at regular intervals. 
 
@@ -282,7 +288,63 @@ Histograms provide insight into the distribution of the data. For our three cont
 knitr::include_graphics("figures/approaching-analysis/skew-types-paper.png")
 ```
 
-In histograms/ density plots in which the distribution is either left or right, the median and the mean are not aligned. The _mode_, which indicates the most frequent value in the variable is also not aligned with the other two measures. In a left-skewed distribution the mean will be to the left of the median which is left of the mode whereas in a right-skewed distribution the opposite occurs. In a distribution with absolutely no skew these three measures are the same. In practice these measures rarely align perfectly but it is very typical for these three measures to approximate alignment. It is common enough that this distribution is called the Normal Distribution ^[formally known as a Gaussian Distribution] as it is very common in real-world data. 
+```{r}
+#| label: fig-summaries-skew-graphic-2
+#| fig-cap: 'Examples of skew types in density plots.' 
+
+# Generate 1 million samples of three types of data
+# left_values: left skewed data
+# normal_values: data following normal distribution
+# right_values: right skewed data
+
+set.seed(1234) # set seed for reproducibility
+
+# Create tibble with three columns of skew data
+skew_examples <- 
+  tibble(left_values = rbeta(10000000, 5, 2), 
+         normal_values = rbeta(10000000, 5, 5),
+         right_values = rbeta(10000000, 2, 5))
+
+# Function to calculate the mode
+get_mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Plot left skew in a density plot with lines for mean, median, and mode
+p1 <- 
+  skew_examples |> 
+  ggplot(aes(x = left_values)) + 
+  geom_density(alpha=.2, fill="#7dced8", color = "#7dced8") + 
+  labs(x = "Value", y = "Density") + 
+  geom_vline(aes(xintercept = mean(left_values)), color = "red", linetype = "dashed") + 
+  geom_vline(aes(xintercept = median(left_values)), color = "blue", linetype = "dashed") + 
+  geom_vline(aes(xintercept = get_mode(left_values)), color = "green", linetype = "dashed")
+
+# Plot normal distribution in a density plot with lines for mean, median, and mode
+p2 <- 
+  skew_examples |> 
+  ggplot(aes(x = normal_values)) + 
+  geom_density(alpha=.2, fill="#7dced8", color = "#7dced8") + 
+  labs(x = "Value", y = "Density") + 
+  geom_vline(aes(xintercept = mean(normal_values)), color = "red", linetype = "dashed") + 
+  geom_vline(aes(xintercept = median(normal_values)), color = "blue", linetype = "dashed") + 
+  geom_vline(aes(xintercept = get_mode(normal_values)), color = "green", linetype = "dashed")
+
+# Plot right skew in a density plot with lines for mean, median, and mode
+p3 <- 
+  skew_examples |> 
+  ggplot(aes(x = right_values)) + 
+  geom_density(alpha=.2, fill="#7dced8", color = "#7dced8") + 
+  labs(x = "Value", y = "Density") + 
+  geom_vline(aes(xintercept = mean(right_values)), color = "red", linetype = "dashed") + 
+  geom_vline(aes(xintercept = median(right_values)), color = "blue", linetype = "dashed") + 
+  geom_vline(aes(xintercept = get_mode(right_values)), color = "green", linetype = "dashed")
+
+p1 + p2 + p3 # arrange plots in a row
+```
+
+In histograms/ density plots in which the distribution is either left or right, the median and the mean are not aligned. The _mode_, which indicates the most frequent value in the variable is also not aligned with the other two measures. In a left-skewed distribution the mean will be to the left of the median which is left of the mode whereas in a right-skewed distribution the opposite occurs. In a distribution with absolutely no skew these three measures are the same. In practice these measures rarely align perfectly but it is very typical for these three measures to approximate alignment. It is common enough that this distribution is called the Normal Distribution ^[formally known as a Gaussian Distribution] as it is very common in real-world data.
 
 Another and potentially more informative way to inspect the normality of a distribution is to create Quantile-Quantile plots (QQ Plot). In @fig-summaries-qqnorm-plot-belc I've created QQ plots for our three continuous variables. The line in each plot is the normal distribution and the more points that fall off of this line, the less likely that the distribution is normal.
 
@@ -756,7 +818,6 @@ monofactorial |>
 #| label: tbl-ida-statistical-multifactorial-listing
 #| tbl-cap: 'Common multifactorial tests.'
 
-
 multifactorial <- 
   tribble(
   ~"Dependent", ~"Independent", ~"Control", ~"Test",
@@ -1137,16 +1198,30 @@ I rounded out this chapter with a short description of the importance of reporti
 ::: callout-note
 ## Conceptual questions
 
-1. ...
-2. ...
+- What are the key differences between descriptive and analytic statistics?
+- What informational values can a variable take?
+- What are the potential measures of central tendency and dispersion for a variable? Does it depend on the informational value of the variable?
+- Consider the following variables: $X$ = number of children, $Y$ = number of siblings, $Z$ = number of siblings who are older than the participant. Which of these variables are categorical and which are continuous? What are the informational values of each variable? What are the measures of central tendency and dispersion for each variable?
+- What type(s) of tables or plots are appropriate for summarizing a variable? What type(s) of tables or plots are appropriate for summarizing the relationship between two variables?
+- In the following variables and information values, identify if the plots are appropriate for summarizing the relationship. 
+- What are the key differences between inferential, predictive, and exploratory analysis?
+- How do the goals of the research influence the choice of analysis type?
+- Given the following research questions, identify which type of analysis is most appropriate and why:
+- Given the following research questions, identify which type of analysis is most appropriate and why:
+- Given the following research questions, identify which type of analysis is most appropriate and why:
+- How are the results of inferential, predictive, and exploratory analysis evaluated?
+- Research compendia are an important part of reproducible research. What are the key components of a research compendium? What are the benefits of sharing a research compendium?
+- 
 
 :::
 
 ::: callout-note
 ## Technical exercises
 
-1. ...
-2. ...
+- Create a contingency table for the following variables: 
+- Create a plot for the following variables:
+- Report these tables and plots with a short interpretation of what they show.
+- ...  
 
 :::
 

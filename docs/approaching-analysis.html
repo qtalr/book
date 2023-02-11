@@ -76,6 +76,7 @@ div.csl-indent {
     "search-submit-button-title": "Submit"
   }
 }</script><script src="site_libs/quarto-diagram/mermaid.min.js"></script><script src="site_libs/quarto-diagram/mermaid-init.js"></script><link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script><link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><link rel="stylesheet" href="assets/style.css">
 </head>
 <body class="nav-sidebar docked">
@@ -289,12 +290,15 @@ div.csl-indent {
 
 </header><!--TODO:
 
-- [ ] change from gridExtra to patchwork for graphics
-
-Consider: 
-- [ ] Summarizing this chapter. On first draft it is over 11k words.
-  - [ ] Moving (parts of) the analysis sections to the individual chapters on inference, prediction, and exploration?
-- [ ] ...
+- [ ] Change from gridExtra to patchwork for graphics
+- [ ] Consider summarizing this chapter. On first draft it is over 11k words.
+  - [ ] Moving (parts of) the 'Analysis' section to the individual chapters on inference, prediction, and exploration?
+- [ ] Add 'Consider' callouts where appropriate
+- [ ] Add conceptual questions
+- [ ] Add R coding exercises
+- [ ] Fix `skimr` table output, removing the `skim_type` attribute see @tbl-summaries-continuous-measures-belc for my first attempt
+- [ ] Connect the unit of analysis and unit of observation concepts to the discussion of descriptive statistics
+- [ ] Consider whether the `belc` dataset is the most adequate for this chapter. This issue is that word frequencies are not the most appropriate for the discussion continuous variables of descriptive statistics. Perhaps a dataset with more continuous measures would be better. That way we can contrast the descriptive statistics of continuous and categorical variables.
 
 --><blockquote class="blockquote">
 <p>Statistical thinking will one day be as necessary for efficient citizenship as the ability to read and write.</p>
@@ -313,14 +317,14 @@ Keys
 <ul>
 <li>What is the role of statistics in data analysis?</li>
 <li>What is the importance of descriptive assessment in data analysis?</li>
-<li>In what ways are main approaches to data analysis similar and different?</li>
+<li>In what ways are the main approaches to data analysis similar and different?</li>
 </ul>
 </div>
 </div>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/approaching-analysis-packages_dbd16830a69a1da3ec77c3a7ec5ec373">
 
 </div>
-<p>In this chapter I will build on the notions of data and information from the previous chapter. The aim of statistics in quantitative analysis is to uncover patterns in datasets. Thus statistics is aimed at deriving knowledge from information, the next step in the DIKI Hierarchy <a href="text-analysis.html#fig-diki-hierarchy">Figure&nbsp;<span>1.3</span></a>. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves even more conscious subjective decisions on what information to assess, and what method to select to interrogate the information, and ultimately how to interpret the findings. The first step is to conduct a descriptive assessment of the information, both at the individual variable level and also between variables, the second is to interrogate the dataset either through inferential, predictive, or exploratory analysis methods, and the third is to interpret and report the findings.</p>
+<p>In this chapter I will build on the notions of data and information from the previous chapter. The aim of statistics in quantitative analysis is to uncover patterns in datasets. Thus statistics is aimed at deriving knowledge from information, the next step in the DIKI Hierarchy <a href="text-analysis.html#fig-diki-hierarchy">Figure&nbsp;<span>1.5</span></a>. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves even more conscious subjective decisions on what information to assess, and what method to select to interrogate the information, and ultimately how to interpret the findings. The first step is to conduct a descriptive assessment of the information, both at the individual variable level and also between variables, the second is to interrogate the dataset either through exploratory, predictive, or inferential analysis methods, and the third is to interpret and report the findings.</p>
 <div id="swirl" class="callout-tip callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -449,7 +453,7 @@ Interactive programming
 <p>Understanding the informational value, or <strong>level of measurement</strong>, of a variable or set of variables in key to preparing for analysis as it has implications for what visualization techniques and statistical measures we can use to interrogate the dataset. There are two main levels of measurement a variable can take: categorical and continuous. <strong>Categorical variables</strong> reflect class or group values. <strong>Continuous variables</strong> reflect values that are measured along a continuum.</p>
 <p>The BELC dataset contains three categorical variables (<code>participant_id</code>, <code>age_group</code>, and <code>sex</code>) and three continuous variables (<code>num_tokens</code>, <code>num_types</code>, and <code>ttr</code>). The categorical variables identify class or group membership; which participant wrote the composition, what age group they were in, and their biological sex. The continuous variables measure attributes that can take a range of values without a fixed limit and the differences between each value are regular. The number of words and number of unique words for each composition can range from 1 to <span class="math inline">\(n\)</span> and the Type-Token Ratio being derived from these two variables is also continuous for the same reason. Furthermore, the differences between the each of values of these measures is on a defined interval, so for example a composition which has a word count (<code>num_tokens</code>) of 40 is exactly two times as large as a composition with a word count of 20.</p>
 <p>The distinction between categorical an continuous levels of measurement, as mentioned above, are the main two and for some statistical approaches the only distinction that needs to be made to conduct an analysis. However, categorical and continuous can each be broken down into subcategories and for some descriptive and analytic purposes these distinctions are important. For categorical variables a distinction can be made between variables in which there is a structured relationship between the values and those in which there is not. <em>Nominal variables</em> contain values which are labels denoting the membership in a class in which there is no relationship between the labels. <em>Ordinal variables</em> also contain labels of classes, but in contrast to nominal variables, there is a relationship between the classes, namely one in which there is a precedence relationship or order. With this in mind, our categorical variables be sub-classified. There is no order between the values of <code>participant_id</code> and <code>sex</code> and they are therefore nominal whereas the values of <code>age_group</code> are ordered, each value refers to a sequential age group, and therefore it is ordinal.</p>
-<p>Turning to continuous variables, another subdivision can be made which hinges on the existence of a non-arbitrary zero or not. <em>Interval variables</em> contain values in which the difference between the values is regular and defined, but the measure has an arbitrary zero value. A typically cited example of an interval variable is temperature measurements on the Fahrenheit scale. A value of 0 on this scale does not mean there is 0 temperature. <em>Ratio variables</em> have all the properties of interval variables but also include a non-arbitrary definition of zero. All of the continuous variables in the BELC dataset (<code>num_tokens</code>, <code>num_types</code>, and <code>ttr</code>) are ratio variables as a value of 0 would indicate the lack of this attribute.</p>
+<p>Turning to continuous variables, another subdivision can be made which hinges on the existence of a non-arbitrary zero or not. <em>Interval variables</em> contain values in which the difference between the values is regular and defined, but the measure has an arbitrary zero value. A typical example of an interval variable is temperature measurements on the Fahrenheit scale. A value of 0 on this scale does not mean there is 0 temperature. <em>Ratio variables</em> have all the properties of interval variables but also include a non-arbitrary definition of zero. All of the continuous variables in the BELC dataset (<code>num_tokens</code>, <code>num_types</code>, and <code>ttr</code>) are ratio variables as a value of 0 would indicate the lack of this attribute.</p>
 <p>An hierarchical overview of the relationship between the two main and four sub-types of levels of measurement appear in <a href="#fig-info-values-paper">Figure&nbsp;<span>3.1</span></a>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-info-values-paper_5e23af2c433aeb1616e32d49b17063db">
 <div class="cell-output-display">
@@ -492,79 +496,61 @@ C-- Zero --&gt;G[Ratio]:::tier3
 <section id="single-variables" class="level4"><h4 class="anchored" data-anchor-id="single-variables">Single variables</h4>
 <!-- Exploring: single variables (univariate) -->
 <p>The way to statistically summarize a variable into a single measure is to derive a <strong>measure of central tendency</strong>. For a continuous variable the most common measure is the (arithmetic) <em>mean</em>, or average, which is simply the sum of all the values divided by the number of values. As a measure of central tendency, however, the mean can be less-than-reliable as it is sensitive to outliers which is to say that data points in the variable that are extreme relative to the overall distribution of the other values in the variable affect the value of the mean depending on how extreme the deviate. One way to assess the effects of outliers is to calculate a <strong>measure of dispersion</strong>. The most common of these is the <em>standard deviation</em> which estimates the average amount of variability between the values in a continuous variable. Another way to assess, or rather side-step, outliers is to calculate another measure of central tendency, the <em>median</em>. A median is calculated by sorting all the values in the variable and then selecting the value which falls in the middle of all the other values. A median is less sensitive to outliers as extreme values (if there are few) only indirectly affect the selection of the middle value. Another measure of dispersion is to calculate quantiles. A <em>quantile</em> slices the data in four percentile ranges providing a five value numeric summary of the spread of the values in a continuous variable. The spread between the first and third quantile is known as the Interquartile Range (IQR) and is also used as a single statistic to summarize variability between values in a continuous variable.</p>
-<p>Below is a list of central tendency and dispersion scores for the continuous variables in the BELC dataset.</p>
-<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/summaries-continuous-measures-belc_eb0e6a6ba51707167b7244b2d0df15b3">
+<p>Below is a list of central tendency and dispersion scores for the continuous variables in the BELC dataset <a href="#tbl-summaries-continuous-measures-belc">Table&nbsp;<span>3.2</span></a>.</p>
+<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-summaries-continuous-measures-belc_e7720c4c94da0760056e873f16cf7403">
 <div class="cell-output-display">
-<p><strong>Variable type: numeric</strong></p>
-<table class="table table-sm table-striped">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 10%">
-<col style="width: 15%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 4%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 7%">
-</colgroup>
-<thead><tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: right;">mean</th>
-<th style="text-align: right;">sd</th>
-<th style="text-align: right;">p0</th>
-<th style="text-align: right;">p25</th>
-<th style="text-align: right;">p50</th>
-<th style="text-align: right;">p75</th>
-<th style="text-align: right;">p100</th>
-<th style="text-align: right;">iqr</th>
-</tr></thead>
+<div id="tbl-summaries-continuous-measures-belc" class="anchored">
+
+<table>
+<caption>Table&nbsp;3.2:  Central tendency and dispersion measures for the continuous variables in the BELC dataset. </caption>
+ <thead><tr>
+<th style="text-align:left;"> skim_variable </th>
+   <th style="text-align:right;"> mean </th>
+   <th style="text-align:right;"> sd </th>
+   <th style="text-align:right;"> p0 </th>
+   <th style="text-align:right;"> p25 </th>
+   <th style="text-align:right;"> p50 </th>
+   <th style="text-align:right;"> p75 </th>
+   <th style="text-align:right;"> p100 </th>
+   <th style="text-align:right;"> iqr </th>
+  </tr></thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">num_tokens</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">264.91</td>
-<td style="text-align: right;">175.61</td>
-<td style="text-align: right;">4.0</td>
-<td style="text-align: right;">116.00</td>
-<td style="text-align: right;">220.00</td>
-<td style="text-align: right;">360.00</td>
-<td style="text-align: right;">740.00</td>
-<td style="text-align: right;">244.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">num_types</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">40.25</td>
-<td style="text-align: right;">22.80</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">22.00</td>
-<td style="text-align: right;">38.00</td>
-<td style="text-align: right;">54.00</td>
-<td style="text-align: right;">97.00</td>
-<td style="text-align: right;">32.00</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">ttr</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.17</td>
-<td style="text-align: right;">0.03</td>
-<td style="text-align: right;">0.1</td>
-<td style="text-align: right;">0.14</td>
-<td style="text-align: right;">0.16</td>
-<td style="text-align: right;">0.18</td>
-<td style="text-align: right;">0.25</td>
-<td style="text-align: right;">0.04</td>
-</tr>
+<tr>
+<td style="text-align:left;"> num_tokens </td>
+   <td style="text-align:right;"> 264.911 </td>
+   <td style="text-align:right;"> 175.611 </td>
+   <td style="text-align:right;"> 4.000 </td>
+   <td style="text-align:right;"> 116.000 </td>
+   <td style="text-align:right;"> 220.00 </td>
+   <td style="text-align:right;"> 360.000 </td>
+   <td style="text-align:right;"> 740.00 </td>
+   <td style="text-align:right;"> 244.000 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> num_types </td>
+   <td style="text-align:right;"> 40.253 </td>
+   <td style="text-align:right;"> 22.801 </td>
+   <td style="text-align:right;"> 1.000 </td>
+   <td style="text-align:right;"> 22.000 </td>
+   <td style="text-align:right;"> 38.00 </td>
+   <td style="text-align:right;"> 54.000 </td>
+   <td style="text-align:right;"> 97.00 </td>
+   <td style="text-align:right;"> 32.000 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> ttr </td>
+   <td style="text-align:right;"> 0.167 </td>
+   <td style="text-align:right;"> 0.032 </td>
+   <td style="text-align:right;"> 0.101 </td>
+   <td style="text-align:right;"> 0.144 </td>
+   <td style="text-align:right;"> 0.16 </td>
+   <td style="text-align:right;"> 0.182 </td>
+   <td style="text-align:right;"> 0.25 </td>
+   <td style="text-align:right;"> 0.039 </td>
+  </tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 <div class="callout-warning callout callout-style-default callout-captioned">
@@ -582,7 +568,7 @@ Tip
 </div>
 <p>In the above summary, we see the mean, standard deviation (sd), and the quantiles (the five-number summary, p0, p25, p50, p75, and p100). The middle quantile (p50) is the median and the IQR is listed last.</p>
 <p>These are important measures for assessing the central tendency and dispersion and will be useful for reporting purposes, but to get a better feel of how a variable is distributed, nothing beats a visual summary. A boxplot graphically summarizes many of these metrics. In <a href="#fig-summaries-boxplots-belc">Figure&nbsp;<span>3.3</span></a> we see the same three continuous variables, but now in graphical form.</p>
-<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-boxplots-belc_7df6384422a4535f16e6b4ea56944c0f">
+<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-boxplots-belc_91c1c137d3d64d38a1cad2ab3b546a5d">
 <div class="cell-output-display">
 <div id="fig-summaries-boxplots-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-boxplots-belc-1.png" class="img-fluid figure-img" width="480"></p>
@@ -591,7 +577,7 @@ Tip
 </div>
 </div>
 </div>
-<p>In a boxplot, the bold line is the median. The surrounding box around the median is the interquantile range. The extending lines above and below the IQR mark the largest and lowest value that is within 1.5 times either the 3rd (top of the box) or 1st (bottom of the box). Any values that fall outside, above or below, the extending lines are considered statistical outliers and are marked as dots (in this case red dots). <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>In a boxplot, the bold line is the median. The surrounding box around the median is the interquantile range. The extending lines above and below the IQR mark the largest and lowest value that is within 1.5 times either the 3rd (top of the box) or 1st (bottom of the box). Any values that fall outside, above or below, the extending lines are considered statistical outliers and are marked as dots. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>Boxplots provide a robust and visually intuitive way of assessing central tendency and variability in a continuous variable but this type of plot can be complemented by looking at the overall distribution of the values in terms of their frequencies. A histogram provides a visualization of the frequency (and density in this case with the blue overlay) of the values across a continuous variable binned at regular intervals.</p>
 <p>In <a href="#fig-summaries-histograms-belc">Figure&nbsp;<span>3.4</span></a> I’ve plotted histograms in the top row and density plots in the bottom row for the same three continuous variables from the BELC dataset.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-histograms-belc_fd9fbb2e1e2cd699c83746c3fc196b51">
@@ -613,23 +599,32 @@ Tip
 </div>
 </div>
 </div>
-<p>In histograms/ density plots in which the distribution is either left or right, the median and the mean are not aligned. The <em>mode</em>, which indicates the most frequent value in the variable is also not aligned with the other two measures. In a left-skewed distribution the mean will be to the left of the median which is left of the mode whereas in a right-skewed distribution the opposite occurs. In a distribution with absolutely no skew these three measures are the same. In practice these measures rarely align perfectly but it is very typical for these three measures to approximate alignment. It is common enough that this distribution is called the Normal Distribution <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> as it is very common in real-world data.</p>
-<p>Another and potentially more informative way to inspect the normality of a distribution is to create Quantile-Quantile plots (QQ Plot). In <a href="#fig-summaries-qqnorm-plot-belc">Figure&nbsp;<span>3.6</span></a> I’ve created QQ plots for our three continuous variables. The line in each plot is the normal distribution and the more points that fall off of this line, the less likely that the distribution is normal.</p>
-<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-qqnorm-plot-belc_6dc542a0df4e109a3e50811b0ba7a372">
+<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-skew-graphic-2_b7d7007354747facbb3380380cec9afb">
 <div class="cell-output-display">
-<div id="fig-summaries-qqnorm-plot-belc" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-qqnorm-plot-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.6: QQ Plots for the continuous variables in the BELC dataset.</figcaption><p></p>
+<div id="fig-summaries-skew-graphic-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-skew-graphic-2-1.png" class="img-fluid figure-img" width="480"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.6: Examples of skew types in density plots.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>A visual inspection can often be enough to detect non-normality, but in cases which visually approximate the normal distribution (such as these) we can perform the Shapiro-Wilk test of normality. This is an inferential test that compares a variable’s distribution to the normal distribution. The likelihood that the distribution differs from the normal distribution is reflected in a <span class="math inline">\(p\)</span>-value. A <span class="math inline">\(p\)</span>-value below the .05 threshold suggests the distribution is non-normal. In <a href="#tbl-summaries-normality-test-belc">Table&nbsp;<span>3.2</span></a> we see that given this criterion only the distribution of <code>num_types</code> is normally distributed.</p>
+<p>In histograms/ density plots in which the distribution is either left or right, the median and the mean are not aligned. The <em>mode</em>, which indicates the most frequent value in the variable is also not aligned with the other two measures. In a left-skewed distribution the mean will be to the left of the median which is left of the mode whereas in a right-skewed distribution the opposite occurs. In a distribution with absolutely no skew these three measures are the same. In practice these measures rarely align perfectly but it is very typical for these three measures to approximate alignment. It is common enough that this distribution is called the Normal Distribution <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> as it is very common in real-world data.</p>
+<p>Another and potentially more informative way to inspect the normality of a distribution is to create Quantile-Quantile plots (QQ Plot). In <a href="#fig-summaries-qqnorm-plot-belc">Figure&nbsp;<span>3.7</span></a> I’ve created QQ plots for our three continuous variables. The line in each plot is the normal distribution and the more points that fall off of this line, the less likely that the distribution is normal.</p>
+<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-qqnorm-plot-belc_6dc542a0df4e109a3e50811b0ba7a372">
+<div class="cell-output-display">
+<div id="fig-summaries-qqnorm-plot-belc" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-qqnorm-plot-belc-1.png" class="img-fluid figure-img" width="480"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.7: QQ Plots for the continuous variables in the BELC dataset.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A visual inspection can often be enough to detect non-normality, but in cases which visually approximate the normal distribution (such as these) we can perform the Shapiro-Wilk test of normality. This is an inferential test that compares a variable’s distribution to the normal distribution. The likelihood that the distribution differs from the normal distribution is reflected in a <span class="math inline">\(p\)</span>-value. A <span class="math inline">\(p\)</span>-value below the .05 threshold suggests the distribution is non-normal. In <a href="#tbl-summaries-normality-test-belc">Table&nbsp;<span>3.3</span></a> we see that given this criterion only the distribution of <code>num_types</code> is normally distributed.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-summaries-normality-test-belc_44430cb482b59a19c46e1bfb7f26a753">
 <div class="cell-output-display">
 <div id="tbl-summaries-normality-test-belc" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.2: Results from Shapiro-Wilk test of normality for continuous variables in the BELC dataset.</caption>
+<caption>Table&nbsp;3.3: Results from Shapiro-Wilk test of normality for continuous variables in the BELC dataset.</caption>
 <thead><tr class="header">
 <th style="text-align: left;">variable</th>
 <th style="text-align: right;">statistic</th>
@@ -658,12 +653,12 @@ Tip
 </div>
 <p>Downstream in the analytic analysis, the distribution of continuous variables will need to be taken into account for certain statistical tests. Tests that assume ‘normality’ are parametric tests, those that do not are non-parametric. Distributions which approximate the normal distribution can sometimes be transformed to conform to the normal distribution either by outlier trimming or through statistical procedures (e.g.&nbsp;square root, log, or inverse transformation), if necessary. At this stage, however, the most important thing is to recognize whether the distributions approximate or wildly diverge from the normal distribution.</p>
 <p>Before we leave continuous variables, let’s consider another approach for visually summarizing a single continuous variable. The Empirical Cumulative Distribution Function, or <em>ECDF</em>, is a summary of the cumulative proportion of each of the values of a continuous variable over the domain of possible values. An ECDF plot can be useful in determining what proportion of the values fall above or below a certain percentage of the data.</p>
-<p>In <a href="#fig-summarize-ecdf-belc">Figure&nbsp;<span>3.7</span></a> we see ECDF plots for our three continuous variables.</p>
+<p>In <a href="#fig-summarize-ecdf-belc">Figure&nbsp;<span>3.8</span></a> we see ECDF plots for our three continuous variables.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summarize-ecdf-belc_18823985fd567c32f7a7b853c353bf1c">
 <div class="cell-output-display">
 <div id="fig-summarize-ecdf-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summarize-ecdf-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.7: ECDF plots for the continuous variables in the BELC dataset.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.8: ECDF plots for the continuous variables in the BELC dataset.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -737,12 +732,12 @@ Tip
 </section><section id="multiple-variables" class="level4"><h4 class="anchored" data-anchor-id="multiple-variables">Multiple variables</h4>
 <p>In addition to the single variable summaries (univariate), it is very useful to understand how two (bivariate) or more variables (multivariate) are related to add to our understanding of the shape of the relationships in the dataset. Just as with univariate summaries, the informational values of the variables frame our approach.</p>
 <p>To explore the relationship between two continuous variables we can statistically summarize a relationship with a <strong>coefficient of correlation</strong> which is a measure of <strong>effect size</strong> between continuous variables. If the continuous variables approximate the normal distribution <em>Pearson’s r</em> is used, if not <em>Kendall’s tau</em> is the appropriate measure. A correlation coefficient ranges from -1 to 1 where 0 is no correlation and -1 or 1 is perfect correlation (either negative or positive). Let’s assess the correlation coefficient for the variables <code>num_tokens</code> and <code>ttr</code>. Since these variables are not normally distributed, we use Kendall’s tau. Using this measure the correlation coefficient is <span class="math inline">\(-0.565\)</span> suggesting there is a correlation, but not a particularly strong one.</p>
-<p>Correlation measures are important for reporting but to really appreciate a relationship it is best to graphically represent the variables in a <em>scatterplot</em>. In <a href="#fig-summaries-bivariate-scatterplot-belc">Figure&nbsp;<span>3.8</span></a> we see the relationship between <code>num_tokens</code> and <code>ttr</code>.</p>
+<p>Correlation measures are important for reporting but to really appreciate a relationship it is best to graphically represent the variables in a <em>scatterplot</em>. In <a href="#fig-summaries-bivariate-scatterplot-belc">Figure&nbsp;<span>3.9</span></a> we see the relationship between <code>num_tokens</code> and <code>ttr</code>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-bivariate-scatterplot-belc_f97f7495a69712414018682aff3aa634">
 <div class="cell-output-display">
 <div id="fig-summaries-bivariate-scatterplot-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-bivariate-scatterplot-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.8: Scatterplot…</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.9: Scatterplot…</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -766,7 +761,7 @@ Tip
 <div class="cell-output-display">
 <div id="fig-summaries-multivariate-scatterplot-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-multivariate-scatterplot-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.9: Scatterplot visualizing the relationship between <code>num_tokens</code> and <code>ttr</code>.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.10: Scatterplot visualizing the relationship between <code>num_tokens</code> and <code>ttr</code>.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -777,7 +772,7 @@ Tip
 <div class="cell-output-display">
 <div id="tbl-summarize-bivariate-cont-cat-belc" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.3: Summary table for <code>tokens</code> by <code>age_group</code>.</caption>
+<caption>Table&nbsp;3.4: Summary table for <code>tokens</code> by <code>age_group</code>.</caption>
 <thead><tr class="header">
 <th style="text-align: left;">age_group</th>
 <th style="text-align: right;">mean_num_tokens</th>
@@ -815,12 +810,12 @@ Tip
 </div>
 </div>
 <p>The SEM is a metric which summarizes variation based on the number of values and the CI, as we have seen, summarizes the potential range of in which the mean may fall given a likelihood criterion (usually the same as the <span class="math inline">\(p\)</span>-value, .05).</p>
-<p>Because we are assessing a categorical variable in combination with a continuous variable a table is an available visual summary. But as I have said before, a graphic summary is hard to beat. In the following figure (<a href="#fig-summaries-bivariate-barplot-belc">Figure&nbsp;<span>3.10</span></a>) a barplot is provided which includes the means of <code>num_tokens</code> for each level of <code>age_group</code>. The overlaid bars represent the confidence interval for each mean score.</p>
+<p>Because we are assessing a categorical variable in combination with a continuous variable a table is an available visual summary. But as I have said before, a graphic summary is hard to beat. In the following figure (<a href="#fig-summaries-bivariate-barplot-belc">Figure&nbsp;<span>3.11</span></a>) a barplot is provided which includes the means of <code>num_tokens</code> for each level of <code>age_group</code>. The overlaid bars represent the confidence interval for each mean score.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-bivariate-barplot-belc_3fdff6ad0471679a438859047424d4a1">
 <div class="cell-output-display">
 <div id="fig-summaries-bivariate-barplot-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-bivariate-barplot-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.10: Barplot comparing the mean <code>num_tokens</code> by <code>age_group</code> from the BELC dataset.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.11: Barplot comparing the mean <code>num_tokens</code> by <code>age_group</code> from the BELC dataset.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -832,40 +827,40 @@ Tip
 <div class="cell-output-display">
 <div id="fig-summaries-multivariate-barplot-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-multivariate-barplot-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.11: Barplot comparing the mean <code>num_tokens</code> by <code>age_group</code> and <code>sex</code> from the BELC dataset.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.12: Barplot comparing the mean <code>num_tokens</code> by <code>age_group</code> and <code>sex</code> from the BELC dataset.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>We see in <a href="#fig-summaries-multivariate-barplot-belc">Figure&nbsp;<span>3.11</span></a> that on the whole, the appears to be general trend towards more tokens in a composition for more advanced learner levels. However, the non-overlap in CI bars for the ‘12-year-olds’ for the levels of <code>sex</code> (‘male’ and ‘female’) suggest that 12-year-old females may produce more tokens per composition than males –a potential divergence from the overall trend.</p>
+<p>We see in <a href="#fig-summaries-multivariate-barplot-belc">Figure&nbsp;<span>3.12</span></a> that on the whole, the appears to be general trend towards more tokens in a composition for more advanced learner levels. However, the non-overlap in CI bars for the ‘12-year-olds’ for the levels of <code>sex</code> (‘male’ and ‘female’) suggest that 12-year-old females may produce more tokens per composition than males –a potential divergence from the overall trend.</p>
 <p>Barplots are a familiar and common visualization for summaries of continuous variables across levels of categorical variables, but a boxplot is another useful visualization of this type of relationship.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-bivariate-boxplots-belc_e78dc6ae89b49a0468e655d6999b4c24">
 <div class="cell-output-display">
 <div id="fig-summaries-bivariate-boxplots-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-bivariate-boxplots-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.12: Boxplot of the relationship between <code>age_group</code> and <code>num_tokens</code> from the BELC dataset.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.13: Boxplot of the relationship between <code>age_group</code> and <code>num_tokens</code> from the BELC dataset.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
 <p>As seen when summarizing single continuous variables, boxplots provide a rich set of information concerning the distribution of a continuous variable. In this case we can visually compare the continuous variable <code>num_tokens</code> with the categorical variable <code>age_group</code>. The plot in the right pane includes ‘notches’. Notches represent the confidence interval, in boxplots this interval surrounds the median. When compared horizontally across levels of a categorical variable the overlap of notched spaces suggest that the true median may be within the same range. Additionally, when the confidence interval goes outside the interquantile range (the box) the notches hinge back to the either the 1st (lower) or the 3rd (higher) IQR range and suggests that the variability is high.</p>
-<p>We can also add a third variable to our exploration. As in the barplot in <a href="#fig-summaries-multivariate-barplot-belc">Figure&nbsp;<span>3.11</span></a>, the boxplot in <a href="#fig-summaries-multivariate-boxplots-belc">Figure&nbsp;<span>3.13</span></a> suggests that there is an overall trend towards more tokens per composition as a learner advances in experience, except at the ‘12-year-old’ level where there appears to be a difference between ‘males’ and ‘females’.</p>
+<p>We can also add a third variable to our exploration. As in the barplot in <a href="#fig-summaries-multivariate-barplot-belc">Figure&nbsp;<span>3.12</span></a>, the boxplot in <a href="#fig-summaries-multivariate-boxplots-belc">Figure&nbsp;<span>3.14</span></a> suggests that there is an overall trend towards more tokens per composition as a learner advances in experience, except at the ‘12-year-old’ level where there appears to be a difference between ‘males’ and ‘females’.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-multivariate-boxplots-belc_567093820961352d0fbdd6ac09f57700">
 <div class="cell-output-display">
 <div id="fig-summaries-multivariate-boxplots-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-multivariate-boxplots-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.13: Boxplot of the relationship between <code>age_group</code>, <code>num_tokens</code> and <code>sex</code> from the BELC dataset.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.14: Boxplot of the relationship between <code>age_group</code>, <code>num_tokens</code> and <code>sex</code> from the BELC dataset.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Up to this point in our exploration of multiple variables we have always included at least one continuous variable. The central tendency for continuous variables can be summarized in multiple ways (mean, median, and mode) and when calculating means and medians, measures of dispersion are also provide helpful information summarize variability. When working with categorical variables, however, measures of central tendency and dispersion are more limited. For ordinal variables central tendency can be summarized by the median or mode and dispersion can be assessed with an interquantile range. For nominal variables the mode is the only measure of central tendency and dispersion is not applicable. For this reason relationships between categorical variables are typically summarized using <strong>contingency tables</strong> which provide cross-variable counts for each level of the target categorical variables.</p>
-<p>Let’s explore the relationship between the categorical variables <code>sex</code> and <code>age_group</code>. In <a href="#tbl-summaries-bivariate-categorical-table-belc">Table&nbsp;<span>3.4</span></a> we see the contingency table with summary counts and percentages.</p>
+<p>Let’s explore the relationship between the categorical variables <code>sex</code> and <code>age_group</code>. In <a href="#tbl-summaries-bivariate-categorical-table-belc">Table&nbsp;<span>3.5</span></a> we see the contingency table with summary counts and percentages.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-summaries-bivariate-categorical-table-belc_70e743d0ceff9c983f1594b498d5d2a3">
 <div class="cell-output-display">
 <div id="tbl-summaries-bivariate-categorical-table-belc" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.4: Contingency table for <code>age_group</code> and <code>sex</code>.</caption>
+<caption>Table&nbsp;3.5: Contingency table for <code>age_group</code> and <code>sex</code>.</caption>
 <colgroup>
 <col style="width: 18%">
 <col style="width: 17%">
@@ -917,19 +912,19 @@ Tip
 <div class="cell-output-display">
 <div id="fig-summaries-bivariate-categorical-barplot-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-bivariate-categorical-barplot-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.14: Barplot…</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.15: Barplot…</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>In <a href="#fig-summaries-bivariate-categorical-barplot-belc">Figure&nbsp;<span>3.14</span></a> the left pane shows the counts. Counts alone can be tricky to evaluate and adjusting the barplot to account for the proportions of males to females in each group, as shown in the right pane, provides a clearer picture of the relationship. From these barplots we can see there were more females in the study overall and particularly in the 12-year-olds and 17-year-olds groups. To gauge the association strength between <code>sex</code> and <code>age_group</code> we can calculate <em>Cramer’s V</em> which, in spirit, is like our correlation coefficients for the relationship between continuous variables. The Cramer’s V score for this relationship is 0 which is low, suggesting that there is not a strong association between <code>sex</code> and <code>age_group</code> –in other words, the relationship is stable.</p>
+<p>In <a href="#fig-summaries-bivariate-categorical-barplot-belc">Figure&nbsp;<span>3.15</span></a> the left pane shows the counts. Counts alone can be tricky to evaluate and adjusting the barplot to account for the proportions of males to females in each group, as shown in the right pane, provides a clearer picture of the relationship. From these barplots we can see there were more females in the study overall and particularly in the 12-year-olds and 17-year-olds groups. To gauge the association strength between <code>sex</code> and <code>age_group</code> we can calculate <em>Cramer’s V</em> which, in spirit, is like our correlation coefficients for the relationship between continuous variables. The Cramer’s V score for this relationship is 0 which is low, suggesting that there is not a strong association between <code>sex</code> and <code>age_group</code> –in other words, the relationship is stable.</p>
 <p>Let’s look at a more complex case in which we have three categorical variables. Now the dataset, as is, does not have a third categorical variable for us to explore but we can recast the continuous <code>num_tokens</code> variable as a categorical variable if we bin the scores into groups. I’ve binned tokens into three score groups with equal ranges in a new variable called <code>rank_tokens</code>.</p>
 <p>Adding a second categorical independent variable ups the complexity of our analysis and as a result our visualization strategy will change. Our numerical summary will include individual two-way cross-tabulations for each of the levels for the third variable. In this case it is often best to use the variable with the fewest levels as the third variable, in this case <code>sex</code>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-summaries-multivariate-categorical-table-belc-female_0f307bc2ddcd87b60a6684763661f71a">
 <div class="cell-output-display">
 <div id="tbl-summaries-multivariate-categorical-table-belc-female" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.5: Contingency table for <code>age_group</code>, <code>rank_tokens</code>, and <code>sex</code> (female).</caption>
+<caption>Table&nbsp;3.6: Contingency table for <code>age_group</code>, <code>rank_tokens</code>, and <code>sex</code> (female).</caption>
 <colgroup>
 <col style="width: 26%">
 <col style="width: 15%">
@@ -988,7 +983,7 @@ Tip
 <div class="cell-output-display">
 <div id="tbl-summaries-multivariate-categorical-table-belc-male" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.6: Contingency table for <code>age_group</code>, <code>rank_tokens</code>, and <code>sex</code> (male).</caption>
+<caption>Table&nbsp;3.7: Contingency table for <code>age_group</code>, <code>rank_tokens</code>, and <code>sex</code> (male).</caption>
 <colgroup>
 <col style="width: 26%">
 <col style="width: 15%">
@@ -1043,12 +1038,12 @@ Tip
 </div>
 </div>
 </div>
-<p>Contingency tables with this many levels are notoriously difficult to interpret. A plot that is often used for three-way contingency table summaries is a mosaic plot. In <a href="#fig-summaries-multivariate-mosaic-belc">Figure&nbsp;<span>3.15</span></a> I have created a mosaic plot for the three categorical variables in the previous contingency tables.</p>
+<p>Contingency tables with this many levels are notoriously difficult to interpret. A plot that is often used for three-way contingency table summaries is a mosaic plot. In <a href="#fig-summaries-multivariate-mosaic-belc">Figure&nbsp;<span>3.16</span></a> I have created a mosaic plot for the three categorical variables in the previous contingency tables.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-summaries-multivariate-mosaic-belc_e821d2cd9b0fc36b1fd0fea176fbcd6c">
 <div class="cell-output-display">
 <div id="fig-summaries-multivariate-mosaic-belc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-summaries-multivariate-mosaic-belc-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.15: Mosaic plot for three categorical variables <code>age_group</code>, <code>rank_tokens</code>, and <code>sex</code> in the BELC dataset.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.16: Mosaic plot for three categorical variables <code>age_group</code>, <code>rank_tokens</code>, and <code>sex</code> in the BELC dataset.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1100,19 +1095,19 @@ Tip
 <div class="cell-output-display">
 <div id="fig-aa-inferential-variables" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="figures/approaching-analysis/inferential-variables.png" class="img-fluid figure-img" width="631"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.16: Variable roles in inferential analysis.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.17: Variable roles in inferential analysis.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
 <p>At this point let’s look at the main characteristics that need to be taken into account to statistically interrogate the variables we have chosen to test our hypothesis. The type of statistical test that one chooses is based on (1) the informational value of the dependent variable and (2) the number of independent variables included in the analysis. Together these two characteristics go a long way in determining the appropriate class of statistical test, but other considerations about the distribution of particular variables (i.e.&nbsp;normality), relationships between variables (i.e.&nbsp;independence), and expected directionality of the predicted effect may condition the appropriate method to be applied.</p>
 <p>As you can imagine, there are a host of combinations and statistical tests that apply in particular scenarios, too many to consider in given the scope of this coursebook (see <span class="citation" data-cites="Gries2013a">Gries (<a href="references.html#ref-Gries2013a" role="doc-biblioref">2013</a>)</span> and <span class="citation" data-cites="Paquot2020a">Paquot and Gries (<a href="references.html#ref-Paquot2020a" role="doc-biblioref">2020</a>)</span> for a more exhaustive description). Below I’ve summarized some common statistical scenarios and their associated tests which focus on the juxtaposition of informational values and the number of variables, leaving aside alternative tests which deal with non-normal distributions, ordinal variables, non-independent variables, etc.</p>
-<p>In <a href="#tbl-ida-statistical-monofactorial-listing">Table&nbsp;<span>3.7</span></a> we see <strong>monofactorial tests</strong>, tests with only one independent variable.</p>
+<p>In <a href="#tbl-ida-statistical-monofactorial-listing">Table&nbsp;<span>3.8</span></a> we see <strong>monofactorial tests</strong>, tests with only one independent variable.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-ida-statistical-monofactorial-listing_6167bc2f5d28b980e615e08c168e0380">
 <div class="cell-output-display">
 <div id="tbl-ida-statistical-monofactorial-listing" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.7: Common monofactorial tests.</caption>
+<caption>Table&nbsp;3.8: Common monofactorial tests.</caption>
 <thead><tr class="header">
 <th style="text-align: left;">Dependent</th>
 <th style="text-align: left;">Independent</th>
@@ -1139,31 +1134,38 @@ Tip
 </div>
 </div>
 </div>
-<p><a href="#tbl-ida-statistical-multifactorial-listing">Table&nbsp;<span>3.8</span></a> includes a listing of <strong>multifactorial tests</strong>, tests with more than one independent and/ or control variables.</p>
-<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-ida-statistical-multifactorial-listing_525cb6345dc5cd18e0d94b2e071fa12c">
+<p><a href="#tbl-ida-statistical-multifactorial-listing">Table&nbsp;<span>3.9</span></a> includes a listing of <strong>multifactorial tests</strong>, tests with more than one independent and/ or control variables.</p>
+<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-ida-statistical-multifactorial-listing_7419ae7302fcf372dd1b74e9f9a6553c">
 <div class="cell-output-display">
 <div id="tbl-ida-statistical-multifactorial-listing" class="anchored">
-<table class="table table-sm table-striped">
-<caption>Table&nbsp;3.8: Common multifactorial tests.</caption>
-<thead><tr class="header">
-<th style="text-align: left;">Dependent</th>
-<th style="text-align: left;">Independent</th>
-<th style="text-align: left;">Control</th>
-<th style="text-align: left;">Test</th>
-</tr></thead>
+
+<table>
+<caption>Table&nbsp;3.9:  Common multifactorial tests. </caption>
+ <thead>
+<tr>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Variable roles</div></th>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1"></th>
+</tr>
+<tr>
+<th style="text-align:left;"> Dependent </th>
+   <th style="text-align:left;"> Independent </th>
+   <th style="text-align:left;"> Control </th>
+   <th style="text-align:left;"> Test </th>
+  </tr>
+</thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">Categorical</td>
-<td style="text-align: left;">varied</td>
-<td style="text-align: left;">varied</td>
-<td style="text-align: left;">Logistic regression</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Continuous</td>
-<td style="text-align: left;">varied</td>
-<td style="text-align: left;">varied</td>
-<td style="text-align: left;">Linear regression</td>
-</tr>
+<tr>
+<td style="text-align:left;"> Categorical </td>
+   <td style="text-align:left;font-style: italic;"> varied </td>
+   <td style="text-align:left;font-style: italic;"> varied </td>
+   <td style="text-align:left;"> Logistic regression </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Continuous </td>
+   <td style="text-align:left;font-style: italic;"> varied </td>
+   <td style="text-align:left;font-style: italic;"> varied </td>
+   <td style="text-align:left;"> Linear regression </td>
+  </tr>
 </tbody>
 </table>
 </div>
@@ -1186,12 +1188,12 @@ research question, data usage, and  variable and statistical approach selection
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/pda-sms-data_3f739fac488fdf0c349ce7f09a31e2f6">
 
 </div>
-<p>To give an example, let’s consider a language task in which the goal is to take text messages (SMS) and develop a language model that predict if a message is spam or not. Minimally we would need data which includes individual text messages and each of these text message will need to be labeled as being either spam or legitimate messages (‘ham’ in this case). In <a href="#tbl-pda-sma-preview">Table&nbsp;<span>3.9</span></a> we see the first ten of 5574 observations from the SMS Spam Collection (v.1) dataset collected by <span class="citation" data-cites="Almeida2011a">Almeida, Gómez Hildago, and Yamakami (<a href="references.html#ref-Almeida2011a" role="doc-biblioref">2011</a>)</span>.</p>
+<p>To give an example, let’s consider a language task in which the goal is to take text messages (SMS) and develop a language model that predict if a message is spam or not. Minimally we would need data which includes individual text messages and each of these text message will need to be labeled as being either spam or legitimate messages (‘ham’ in this case). In <a href="#tbl-pda-sma-preview">Table&nbsp;<span>3.10</span></a> we see the first ten of 5574 observations from the SMS Spam Collection (v.1) dataset collected by <span class="citation" data-cites="Almeida2011a">Almeida, Gómez Hildago, and Yamakami (<a href="references.html#ref-Almeida2011a" role="doc-biblioref">2011</a>)</span>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-pda-sma-preview_ad5c70291874c890128d4b83a3f3a2e6">
 <div class="cell-output-display">
 <div id="tbl-pda-sma-preview" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.9: First ten observations from the SMS Spam Collection (v.1)</caption>
+<caption>Table&nbsp;3.10: First ten observations from the SMS Spam Collection (v.1)</caption>
 <colgroup>
 <col style="width: 5%">
 <col style="width: 94%">
@@ -1252,18 +1254,18 @@ research question, data usage, and  variable and statistical approach selection
 <div class="cell-output-display">
 <div id="fig-aa-predictive-variables" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="figures/approaching-analysis/predictive-variables.png" class="img-fluid figure-img" width="582"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.17: Variable roles in predictive analysis.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.18: Variable roles in predictive analysis.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
 <!-- Informational value of the target variable -->
-<p>Let’s now turn to some considerations to take into account when selecting a statistical algorithm. First, just as in IDA, variable informational value plays a role in algorithm selection, specifically the informational value of the target variable. If the target variable is categorical, then we are looking for a <strong>classification</strong> algorithm. If the target variable is continuous, we will employ a <strong>regression</strong> algorithm. <a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> Some common classification algorithms are listed in <a href="#tbl-pda-algorithms">Table&nbsp;<span>3.10</span></a>.</p>
+<p>Let’s now turn to some considerations to take into account when selecting a statistical algorithm. First, just as in IDA, variable informational value plays a role in algorithm selection, specifically the informational value of the target variable. If the target variable is categorical, then we are looking for a <strong>classification</strong> algorithm. If the target variable is continuous, we will employ a <strong>regression</strong> algorithm. <a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> Some common classification algorithms are listed in <a href="#tbl-pda-algorithms">Table&nbsp;<span>3.11</span></a>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-pda-algorithms_c554dcb7d70a86d8c632997a5d23a5e6">
 <div class="cell-output-display">
 <div id="tbl-pda-algorithms" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.10: Some common supervised learning algorithms.</caption>
+<caption>Table&nbsp;3.11: Some common supervised learning algorithms.</caption>
 <thead><tr class="header">
 <th style="text-align: left;">Classification</th>
 <th style="text-align: left;">Regression</th>
@@ -1309,7 +1311,7 @@ research question, data usage, and  variable and statistical approach selection
 <div class="cell-output-display">
 <div id="fig-aa-predictive-phases" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="figures/approaching-analysis/predictive-phases.png" class="img-fluid figure-img" width="720"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.18: Phases in predictive analysis.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.19: Phases in predictive analysis.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1338,17 +1340,17 @@ MuPDAR approach (Multifactorial Prediction and Deviation Analysis with Regressio
 <div class="cell-output-display">
 <div id="fig-aa-exploratory-variables" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="figures/approaching-analysis/exploratory-variables.png" class="img-fluid figure-img" width="542"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.19: Variable roles in exploratory analysis.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.20: Variable roles in exploratory analysis.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>For illustrative purposes let’s consider the State of the Union Corpus (SOTU) <span class="citation" data-cites="R-quanteda.corpora">(<a href="references.html#ref-R-quanteda.corpora" role="doc-biblioref">Benoit 2020</a>)</span>. The presidential addresses and a set of meta-data variables are included in the corpus. I’ve subsetted this corpus to only include U.S. presidents since 1946. A tabular preview of the first 10 addresses (truncated for display) can be found in <a href="#tbl-eda-sotu-corpus">Table&nbsp;<span>3.11</span></a>.</p>
+<p>For illustrative purposes let’s consider the State of the Union Corpus (SOTU) <span class="citation" data-cites="R-quanteda.corpora">(<a href="references.html#ref-R-quanteda.corpora" role="doc-biblioref">Benoit 2020</a>)</span>. The presidential addresses and a set of meta-data variables are included in the corpus. I’ve subsetted this corpus to only include U.S. presidents since 1946. A tabular preview of the first 10 addresses (truncated for display) can be found in <a href="#tbl-eda-sotu-corpus">Table&nbsp;<span>3.12</span></a>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/tbl-eda-sotu-corpus_1878b0a97cd863ca5e79ee4262df61b6">
 <div class="cell-output-display">
 <div id="tbl-eda-sotu-corpus" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.11: First ten addresses from the SOTU Corpus.</caption>
+<caption>Table&nbsp;3.12: First ten addresses from the SOTU Corpus.</caption>
 <colgroup>
 <col style="width: 11%">
 <col style="width: 11%">
@@ -1445,7 +1447,7 @@ MuPDAR approach (Multifactorial Prediction and Deviation Analysis with Regressio
 <div class="cell-output-display">
 <div id="tbl-eda-approaches-table" class="anchored">
 <table class="table table-sm table-striped">
-<caption>Table&nbsp;3.12: Some common EDA analysis methods</caption>
+<caption>Table&nbsp;3.13: Some common EDA analysis methods</caption>
 <thead><tr class="header">
 <th style="text-align: left;">Descriptive</th>
 <th style="text-align: left;">Unsupervised learning</th>
@@ -1468,7 +1470,7 @@ MuPDAR approach (Multifactorial Prediction and Deviation Analysis with Regressio
 </div>
 </div>
 </div>
-<p>EDA leans heavily on visual representations of both descriptive and unsupervised learning methods. Visualizations enable humans to identify and extrapolate associative patterns. Visualizations range from standard barplots and scatterplots to network graphs and dendrograms and more. Some sample visualizations based on the SOTU Corpus are found in <a href="#fig-eda-visualizations-grid">Figure&nbsp;<span>3.20</span></a>.</p>
+<p>EDA leans heavily on visual representations of both descriptive and unsupervised learning methods. Visualizations enable humans to identify and extrapolate associative patterns. Visualizations range from standard barplots and scatterplots to network graphs and dendrograms and more. Some sample visualizations based on the SOTU Corpus are found in <a href="#fig-eda-visualizations-grid">Figure&nbsp;<span>3.21</span></a>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-eda-sotu-freq_b64372e6f1011c829b9116fc8bc4438f">
 
 </div>
@@ -1485,7 +1487,7 @@ MuPDAR approach (Multifactorial Prediction and Deviation Analysis with Regressio
 <div class="cell-output-display">
 <div id="fig-eda-visualizations-grid" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="approaching-analysis_files/figure-html/fig-eda-visualizations-grid-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.20: Sample visualizations from the SOTU Corpus (1946-2020).</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.21: Sample visualizations from the SOTU Corpus (1946-2020).</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1496,12 +1498,12 @@ MuPDAR approach (Multifactorial Prediction and Deviation Analysis with Regressio
 <p>Much of the necessary reporting for an analysis features in prose as part of the write-up of a report or article. This will include descriptive summaries, a blueprint of the method(s) used, and the results. Descriptive summaries will often include assessments of individual variables and/ or relationships between variables (central tendency, dispersion, association strength, etc.). Any procedures applied to diagnose or to correct the data should also be included in the final report. This information is key to helping readers assess the results from the analysis. A blueprint of the methods used will describe the variable selection process, how the variables were used in the statistical analysis, and any other information that is relevant for a reader to understand what was done and why it was done. Reporting results from an analysis will depend on the type of analysis and the particular method(s) employed. For inferential analyses this will include the test statistic(s) (<span class="math inline">\(X^2\)</span>, <span class="math inline">\(R^2\)</span>, etc.) and some measure of confidence (<span class="math inline">\(p\)</span>-value, confidence interval, effect size). In predictive analyses accuracy results and related information will need to be reported. For exploratory analyses, the reporting of results will vary and often include visualizations and metrics that require more human interpretation than the other analysis types.</p>
 <p>While a good article write-up will include the most vital information to understand the procedures taken in an analysis, there are many more details which do not traditionally appear in prose. If a research project was conducted programmatically, however, the programming files (scripts) used to generate the analysis can (and should) be shared. While the scripts themselves are highly useful for other researchers to consult and understand in fine-grained detail the steps that were taken, it is important to also recognize that the research project should be well documented –through organized project directory and file structure as well as through code commenting. This description and instructions on how to run the analysis form a <strong>research compendium</strong> which ensure that the research conducted is easily understood and able to be reproduced and/ or enhanced by other researchers.</p>
 </section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
-<p>In this chapter we have focused on description and analysis –the third component of DIKI Hierarchy. This process is visually summarized in <a href="#fig-approaching-analysis-visual-summary-graphic">Figure&nbsp;<span>3.21</span></a>.</p>
+<p>In this chapter we have focused on description and analysis –the third component of DIKI Hierarchy. This process is visually summarized in <a href="#fig-approaching-analysis-visual-summary-graphic">Figure&nbsp;<span>3.22</span></a>.</p>
 <div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/fig-approaching-analysis-visual-summary-graphic_b4f4e607fc3f9ccb7224dc3f4443046d">
 <div class="cell-output-display">
 <div id="fig-approaching-analysis-visual-summary-graphic" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="figures/approaching-analysis/approaching-analysis-visual-summary-paper.png" class="img-fluid figure-img" width="1075"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3.21: Approaching analysis: visual summary</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.22: Approaching analysis: visual summary</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1547,10 +1549,22 @@ Conceptual questions
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li>…</li>
-<li>…</li>
-</ol>
+<ul>
+<li>What are the key differences between descriptive and analytic statistics?</li>
+<li>What informational values can a variable take?</li>
+<li>What are the potential measures of central tendency and dispersion for a variable? Does it depend on the informational value of the variable?</li>
+<li>Consider the following variables: <span class="math inline">\(X\)</span> = number of children, <span class="math inline">\(Y\)</span> = number of siblings, <span class="math inline">\(Z\)</span> = number of siblings who are older than the participant. Which of these variables are categorical and which are continuous? What are the informational values of each variable? What are the measures of central tendency and dispersion for each variable?</li>
+<li>What type(s) of tables or plots are appropriate for summarizing a variable? What type(s) of tables or plots are appropriate for summarizing the relationship between two variables?</li>
+<li>In the following variables and information values, identify if the plots are appropriate for summarizing the relationship.</li>
+<li>What are the key differences between inferential, predictive, and exploratory analysis?</li>
+<li>How do the goals of the research influence the choice of analysis type?</li>
+<li>Given the following research questions, identify which type of analysis is most appropriate and why:</li>
+<li>Given the following research questions, identify which type of analysis is most appropriate and why:</li>
+<li>Given the following research questions, identify which type of analysis is most appropriate and why:</li>
+<li>How are the results of inferential, predictive, and exploratory analysis evaluated?</li>
+<li>Research compendia are an important part of reproducible research. What are the key components of a research compendium? What are the benefits of sharing a research compendium?</li>
+<li>
+</li></ul>
 </div>
 </div>
 <div class="callout-note callout callout-style-default callout-captioned">
@@ -1563,10 +1577,12 @@ Technical exercises
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<ol type="1">
+<ul>
+<li>Create a contingency table for the following variables:</li>
+<li>Create a plot for the following variables:</li>
+<li>Report these tables and plots with a short interpretation of what they show.</li>
 <li>…</li>
-<li>…</li>
-</ol>
+</ul>
 </div>
 </div>
 <!-- Additional references:

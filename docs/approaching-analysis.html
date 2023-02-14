@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.313">
+<meta name="generator" content="quarto-1.2.335">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Quantitative Text Analysis for Linguistics - 3&nbsp; Approaching analysis</title>
 <style>
@@ -295,6 +295,10 @@ Content:
   - [ ] Moving (parts of) the 'Analysis' section to the individual chapters on inference, prediction, and exploration?
 - [ ] Connect the unit of analysis and unit of observation concepts to the discussion of descriptive statistics
 - [ ] Consider whether the `belc` dataset is the most adequate for this chapter. This issue is that word frequencies are not the most appropriate for the discussion continuous variables of descriptive statistics. Perhaps a dataset with more continuous measures would be better. That way we can contrast the descriptive statistics of continuous and categorical variables.
+- [ ] Reorganize discussion of single variables: start with categorical variables and then move to continuous variables. Categorical variable summaries include frequency tables, bar charts, and summary statistics (mode, median, IQR). Continuous variable summaries include histograms, boxplots, and summary statistics (mean, median, standard deviation, IQR). --Note to tie histograms to the discussion of the (normal) distribution and skew and connect with the view of boxplots as a visual summary of the distribution.
+- [ ] Reorganize discussion of multiple variables: start with categorical, mixed, and then continuous. 
+- [ ] Consider adding standarization (normalization and scaling) of variables. This is a common practice in data analysis and is often required for certain statistical methods. Furthermore, it is a common practice in machine learning and useful for comparing variables on a common scale.
+- [ ] What is the difference between descriptive and analytic statistics?
 
 Exercises:
 - [ ] Add 'Consider' callouts where appropriate
@@ -306,7 +310,7 @@ Formatting:
 - [ ] Change from gridExtra to patchwork for graphics
 - [ ] Fix `skimr` table output, removing the `skim_type` attribute see @tbl-summaries-continuous-measures-belc for my first attempt
 - [ ] Change hand-drawn figures to `ggplot2` figures or `mermaid` diagrams.
-- [ ] ...
+- [ ] Explore mosaic plots in `ggplot2`. Do they exist?
 
 --><blockquote class="blockquote">
 <p>Statistical thinking will one day be as necessary for efficient citizenship as the ability to read and write.</p>
@@ -497,7 +501,7 @@ C-- Zero --&gt;G[Ratio]:::tier3
 </div>
 </div>
 </div>
-<p>A few notes of practical importance; First, the distinction between interval and ratio variables is often not applicable in text analysis and therefore often treated together as continuous variables. Second, the distinction between ordinal and interval/continuous variables is not as clear cut as it may seem. Both variables contain values which have an ordered relationship. By definition the values of an ordinal variable do not reflect regular intervals between the units of measurement. But in practice interval/continuous variables with a defined number of values (say from a Likert scale used on a survey) may be treated as an ordinal variable as they may be better understood as reflecting class membership. Third, all continuous variables can be converted to categorical variables, but the reverse is not true. We could, for example, define a criterion for binning the word counts in <code>num_tokens</code> for each composition into ordered classes such as “low”, “mid”, “high”. On the other hand, <code>sex</code> (as it has been measured here) cannot take intermediate values on a unfixed range. The upshot is that variables can be down-typed but not up-typed. In most cases it is preferred to treat continuous variables as such, if the nature of the variable permits it, as the down-typing of continuous data to categorical data results in a loss of information –which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data <span class="citation" data-cites="Baayen2004">(<a href="references.html#ref-Baayen2004" role="doc-biblioref">Baayen 2004</a>)</span>.</p>
+<p>A few notes of practical importance; First, the distinction between interval and ratio variables is often not applicable in text analysis and therefore often treated together as continuous variables. Second, the distinction between ordinal and interval/continuous variables is not as clear cut as it may seem. Both variables contain values which have an ordered relationship. By definition the values of an ordinal variable do not reflect regular intervals between the units of measurement. But in practice interval/ continuous variables with a defined number of values (say from a Likert scale used on a survey) may be treated as an ordinal variable as they may be better understood as reflecting class membership. Third, all continuous variables can be converted to categorical variables, but the reverse is not true. We could, for example, define a criterion for binning the word counts in <code>num_tokens</code> for each composition into ordered classes such as “low”, “mid”, “high”. On the other hand, <code>sex</code> (as it has been measured here) cannot take intermediate values on a unfixed range. The upshot is that variables can be down-typed but not up-typed. In most cases it is preferred to treat continuous variables as such, if the nature of the variable permits it, as the down-typing of continuous data to categorical data results in a loss of information –which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data <span class="citation" data-cites="Baayen2004">(<a href="references.html#ref-Baayen2004" role="doc-biblioref">Baayen 2004</a>)</span>.</p>
 </section><section id="summaries" class="level3" data-number="3.1.2"><h3 data-number="3.1.2" class="anchored" data-anchor-id="summaries">
 <span class="header-section-number">3.1.2</span> Summaries</h3>
 <p>It is always key to gain insight into shape of the information through numeric, tabular and/ or visual summaries before jumping in to analytic statistical approaches. The most appropriate form of summarizing information will depend on the number and informational value(s) of our target variables. To get a sense of how this looks, let’s continue to work with the BELC dataset and pose different questions to the data with an eye towards seeing how various combinations of variables are descriptively explored.</p>
@@ -687,50 +691,67 @@ Tip
 </div>
 </div>
 <p>Below is a list of the central tendency metrics for the categorical variables in the BELC dataset.</p>
-<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/summaries-categorical-measures-belc_b00991777ce18a9d372e2b31704f1b41">
+<div class="cell" data-layout-align="center" data-hash="approaching-analysis_cache/html/summaries-categorical-measures-belc_5ee6f261cf8f5542f561ac26ea5ab38f">
 <div class="cell-output-display">
 <p><strong>Variable type: factor</strong></p>
-<table class="table table-sm table-striped">
-<colgroup>
-<col style="width: 16%">
-<col style="width: 10%">
-<col style="width: 15%">
-<col style="width: 8%">
-<col style="width: 9%">
-<col style="width: 38%">
-</colgroup>
-<thead><tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: left;">ordered</th>
-<th style="text-align: right;">n_unique</th>
-<th style="text-align: left;">top_counts</th>
+
+<table>
+<thead><tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:left;">
+ordered
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+<th style="text-align:left;">
+top_counts
+</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">participant_id</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">36</td>
-<td style="text-align: left;">L05: 3, L10: 3, L11: 3, L12: 3</td>
+<tr>
+<td style="text-align:left;">
+participant_id
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:left;">
+L05: 3, L10: 3, L11: 3, L12: 3
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">age_group</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">TRUE</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: left;">10-: 24, 16-: 24, 12-: 16, 17-: 15</td>
+<tr>
+<td style="text-align:left;">
+age_group
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+10-: 24, 16-: 24, 12-: 16, 17-: 15
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">sex</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: left;">fem: 48, mal: 31</td>
+<tr>
+<td style="text-align:left;">
+sex
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+fem: 48, mal: 31
+</td>
 </tr>
 </tbody>
 </table>

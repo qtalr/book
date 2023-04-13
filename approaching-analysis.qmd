@@ -301,6 +301,57 @@ p6 <-
 gridExtra::grid.arrange(p1, p2, p3, p4, p5, p6, ncol = 3, nrow = 2)
 ```
 
+
+```{r}
+#| label: fig-histogram-boxplot-sim
+#| fig-cap: 'Histogram and boxplot for a simulated normal distribution.'
+#| fig-alt: 'A histogram and boxplot for a simulated normal distribution.'
+#| fig-pos: 'h'
+#| echo: false
+data <- data.frame(values = rnorm(1000, mean = 0, sd = 1))
+
+# Calculate the Q1, Q2, and Q3 quantiles
+quantiles <- quantile(data$values, probs = c(0.25, 0.5, 0.75))
+
+# Create the histogram with lines at Q1, Q2, and Q3
+histogram <- ggplot(data, aes(x = values)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightblue", color = "black", alpha = 0.7) +
+  geom_vline(aes(xintercept = quantiles[[2]]), color = "red", linetype = "dashed") +
+  geom_vline(aes(xintercept = quantiles[[1]]), color = "blue", linetype = "dashed") +
+  geom_vline(aes(xintercept = quantiles[[3]]), color = "blue", linetype = "dashed") +
+  labs(title = "Histogram with Quantile Lines")
+
+# Create the boxplot
+boxplot <- ggplot(data, aes(x = 0, y = values)) +
+  geom_boxplot(fill = "lightblue", color = "black", alpha = 0.7) +
+  labs(title = "Boxplot") + 
+  geom_rug() +
+  coord_flip()
+
+# Combine the plots using patchwork
+combined_plot <- histogram / boxplot + plot_layout(guides = "collect")
+print(combined_plot)
+```
+
+
+::: {.callout}
+Histograms and Boxplots
+
+A histogram is a graphical representation of the frequency distribution of a dataset. It is created by dividing the data into intervals or "bins" and counting the number of data points that fall into each bin. The height of the bars in a histogram represents the frequency or count of data points in each bin. The shape of the histogram can give us insights into the distribution's central tendency, spread, and skewness.
+
+A boxplot, on the other hand, is a graphical representation of the five-number summary of a dataset: the minimum, first quartile (Q1), median (Q2), third quartile (Q3), and maximum. It provides a visual summary of the dataset's central tendency, dispersion, and potential outliers. The box in a boxplot represents the interquartile range (IQR), which contains the middle 50% of the data. The whiskers extend from the box to the minimum and maximum values within 1.5 * IQR, and any data points beyond the whiskers are considered potential outliers.
+
+Relating histograms and boxplots:
+
+* Both histograms and boxplots provide information about the central tendency and spread of the data. The peak(s) in a histogram can give us a sense of where the data is centered, similar to the median in a boxplot. The width of the histogram can indicate the spread of the data, akin to the IQR in a boxplot.
+* The shape of a histogram can provide insights into the skewness of a dataset. A histogram that is symmetric with a single peak can correspond to a roughly symmetric boxplot. A positively skewed histogram (with a long tail to the right) can correspond to a boxplot where Q3 - Q2 > Q2 - Q1, and a negatively skewed histogram (with a long tail to the left) can correspond to a boxplot where Q2 - Q1 > Q3 - Q2.
+* While histograms focus on the frequency distribution of data points, boxplots focus on the data's quartiles and potential outliers. Both types of plots can be used in tandem to get a more comprehensive understanding of a dataset's distribution.
+
+In summary, histograms and boxplots are related in that they both offer graphical representations of data distributions. They provide different perspectives on the data's central tendency, spread, and skewness, and when used together, they can offer a more complete understanding of a dataset.
+:::
+
+
+
 Histograms provide insight into the distribution of the data. For our three continuous variables, the distributions happen not to be too strikingly distinct. They are, however, not the same either. When we explore continuous variables with histograms we are often trying to assess whether there is skew or not. There are three general types of skew, visualized in @fig-summaries-skew-graphic.
 
 ```{r}

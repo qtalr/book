@@ -1,0 +1,36 @@
+<script>
+  // JavaScript code for indexing and generating clickable list of indices
+  $(document).ready(function () {
+    var index = {}; // Object to store the index
+
+    // Iterate over each indexed term
+    $('.index').each(function () {
+      var term = $(this).text(); // Get the term
+      var sectionId = $(this).closest('section').attr('id'); // Get the section ID or any other identifier
+      var sectionPage = $(this).closest('.page').attr('id'); // Get the page ID or any other identifier for the section's page
+
+      // Check if the term already exists in the index
+      if (term in index) {
+        // Append the section and page IDs to the existing term entry
+        index[term].push({ sectionId: sectionId, pageId: sectionPage });
+      } else {
+        // Create a new entry for the term in the index
+        index[term] = [{ sectionId: sectionId, pageId: sectionPage }];
+      }
+    });
+
+    // Generate clickable list of indices
+    var indexHtml = '<ul>';
+    for (var term in index) {
+      var sections = index[term];
+      for (var i = 0; i < sections.length; i++) {
+        var listItem = '<li><a href="' + sections[i].pageId + '.html#' + sections[i].sectionId + '">' + term + '</a></li>';
+        indexHtml += listItem;
+      }
+    }
+    indexHtml += '</ul>';
+
+    // Append the index to the index.html file
+    $('#index-container').html(indexHtml);
+  });
+</script>

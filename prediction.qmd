@@ -112,6 +112,8 @@ Some applications of supervised machine learning in linguistics include text cla
 
 To either evaluate the training or testing set, the model is used to make predictions on the data in the set. The predictions are then compared to the actual values of the target variable in the set to evaluate the model's performance. So how is the model's performance evaluated? 
 
+##### Classification {#pda-classification}
+
 For classification, there are a number of metrics that can be used to evaluate the performance of a model, including accuracy, precision, recall, and F1 score. To understand these measures it is helpful to consider a confusion matrix, which is a table that describes the performance of a classification model on data for which the true values are known. The confusion matrix is a two-by-two matrix that shows the number of true positives (TP), false positives (FP), true negatives (TN), and false negatives (FN), as seen in @tbl-pda-confusion-matrix.
 
 ```{r}
@@ -171,6 +173,57 @@ $${#eq-pda-f1}
 
 Area under the curve (AUC) is the area under the ROC (Receiver Operating Characteristic) curve, which is a graph of true positives (TPR) and false positives (FPR). The AUC is a measure of the model's performance across all possible classification thresholds. The AUC is a number between 0 and 1, where 0.5 represents a model that is no better than random guessing, and 1 represents a perfect model.
 
+**Feature importance**
+
+- parallel coordinate visualization
+
+In a supervised text classification task, you can use parallel coordinate plots to visualize the distribution of class labels across different feature dimensions. This can help identify which features are most informative for distinguishing between classes and inform feature selection or dimensionality reduction techniques.
+
+ ```{r}
+#| label: fig-pda-parallel-coordinate-example
+#| fig-cap: "A parallel coordinate plot showing the distribution of class labels across different feature dimensions"
+
+# Libraries
+library(tidyverse)
+library(tidytext)
+
+# Faux data
+data <- data.frame(
+  text = c("I love cats", "Cats are amazing", "I hate dogs", "Dogs are annoying"),
+  class = c("positive", "positive", "negative", "negative")
+)
+
+# Tokenize data
+tokenized_data <- data %>%
+  unnest_tokens(word, text) %>%
+  count(class, word) %>%
+  ungroup() %>%
+  spread(class, n, fill = 0)
+
+# Normalize the term frequencies
+normalized_data <-
+  tokenized_data %>%
+  mutate(
+    positive = positive / sum(positive),
+    negative = negative / sum(negative)
+  ) %>%
+  gather(class, frequency, -word)
+
+# Generate the parallel coordinate plot
+ggplot(normalized_data, aes(x = class, y = frequency, group = word, color = word)) +
+  geom_line() +
+  theme_minimal() +
+  labs(
+    title = "Parallel Coordinate Visualization",
+    subtitle = "Text Classification Model Using Words as Features",
+    x = "Class",
+    y = "Normalized Term Frequency"
+  )
+ ```
+
+We can look at the parallel coordinate plot in @fig-pda-parallel-coordinate-example to see that the words "cats" and "love" are more common in the positive class, while the words "dogs" and "hate" are more common in the negative class. This suggests that these words are good features for distinguishing between the two classes.
+
+##### Regression {#pda-regression}
 
 For regression, the most common metric is the root mean squared error (RMSE). The RMSE is the square root of the mean of the squared differences between the predicted values and the actual values. The lower the RMSE, the better the model fits the data. 
 

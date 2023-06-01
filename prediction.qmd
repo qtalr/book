@@ -112,7 +112,7 @@ Some applications of supervised machine learning in linguistics include text cla
 
 To either evaluate the training or testing set, the model is used to make predictions on the data in the set. The predictions are then compared to the actual values of the target variable in the set to evaluate the model's performance. So how is the model's performance evaluated? 
 
-##### Classification {#pda-classification}
+##### Classification {#pda-workflow-classification}
 
 For classification, there are a number of metrics that can be used to evaluate the performance of a model, including accuracy, precision, recall, and F1 score. To understand these measures it is helpful to consider a confusion matrix, which is a table that describes the performance of a classification model on data for which the true values are known. The confusion matrix is a two-by-two matrix that shows the number of true positives (TP), false positives (FP), true negatives (TN), and false negatives (FN), as seen in @tbl-pda-confusion-matrix.
 
@@ -124,8 +124,8 @@ For classification, there are a number of metrics that can be used to evaluate t
 confusion_matrix <- matrix(c("TP", "FP", "FN", "TN"), nrow = 2, ncol = 2, byrow = TRUE)
 colnames(confusion_matrix) <- c("Predicted positive", "Predicted negative")
 rownames(confusion_matrix) <- c("Actual positive", "Actual negative")
-confusion_matrix |> 
-    knitr::kable()
+confusion_matrix |>
+  knitr::kable()
 ```
 
 Now let's fill this confusion matrix with hypothetical values, as seen in @tbl-pda-confusion-matrix-example to see how the metrics are calculated.
@@ -134,13 +134,13 @@ Now let's fill this confusion matrix with hypothetical values, as seen in @tbl-p
 #| label: tbl-pda-confusion-matrix-example
 #| tbl-cap: "Confusion matrix for a hypothetical model's performance on a test set"
 #| echo: false
- 
+
 # Generate a hypothetical confusion matrix
 confusion_matrix <- matrix(c(100, 10, 20, 50), nrow = 2, ncol = 2, byrow = TRUE)
 colnames(confusion_matrix) <- c("Predicted positive", "Predicted negative")
 rownames(confusion_matrix) <- c("Actual positive", "Actual negative")
-confusion_matrix |> 
-    knitr::kable()
+confusion_matrix |>
+  knitr::kable()
 ```
 
 - Accuracy is defined as the proportion of correct predictions made by the model. 
@@ -180,7 +180,7 @@ Area under the curve (AUC) is the area under the ROC (Receiver Operating Charact
 In a supervised text classification task, you can use parallel coordinate plots to visualize the distribution of class labels across different feature dimensions. This can help identify which features are most informative for distinguishing between classes and inform feature selection or dimensionality reduction techniques.
 
  ```{r}
-#| label: fig-pda-parallel-coordinate-example
+#| label: fig-pda-parallel-coordinates
 #| fig-cap: "A parallel coordinate plot showing the distribution of class labels across different feature dimensions"
 
 # Libraries
@@ -221,9 +221,9 @@ ggplot(normalized_data, aes(x = class, y = frequency, group = word, color = word
   )
  ```
 
-We can look at the parallel coordinate plot in @fig-pda-parallel-coordinate-example to see that the words "cats" and "love" are more common in the positive class, while the words "dogs" and "hate" are more common in the negative class. This suggests that these words are good features for distinguishing between the two classes.
+We can look at the parallel coordinate plot in @fig-pda-parallel-coordinates to see that the words "cats" and "love" are more common in the positive class, while the words "dogs" and "hate" are more common in the negative class. This suggests that these words are good features for distinguishing between the two classes.
 
-##### Regression {#pda-regression}
+##### Regression {#pda-workflow-regression}
 
 For regression, the most common metric is the root mean squared error (RMSE). The RMSE is the square root of the mean of the squared differences between the predicted values and the actual values. The lower the RMSE, the better the model fits the data. 
 
@@ -236,12 +236,12 @@ Supervised machine learning algorithms for regression are typically evaluated us
 
 # Generate a table showing the differences between mean squared error, root mean squared error, and mean absolute error
 error_metrics <- tibble(
-    error = c("MSE", "RMSE", "MAE"),
-    formula = c("$$\\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2$$", "$$\\sqrt{\\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2}$$", "$$\\frac{1}{n} \\sum_{i=1}^{n} \\vert y_i - \\hat{y}_i \\vert$$"),
-    description = c("The average of the squared differences between the prediction and the actual data", "The square root of the mean squared error", "The average of the absolute differences between the prediction and the actual data")
+  error = c("MSE", "RMSE", "MAE"),
+  formula = c("$$\\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2$$", "$$\\sqrt{\\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2}$$", "$$\\frac{1}{n} \\sum_{i=1}^{n} \\vert y_i - \\hat{y}_i \\vert$$"),
+  description = c("The average of the squared differences between the prediction and the actual data", "The square root of the mean squared error", "The average of the absolute differences between the prediction and the actual data")
 )
-error_metrics |> 
-    knitr::kable()
+error_metrics |>
+  knitr::kable()
 ```
 
 The main advantages of using MSE, RMSE, and MAE are that they are all on the same scale as the dependent variable, and they are all differentiable, which makes them useful for optimization algorithms. MSE is the most commonly used metric for regression, but RMSE and MAE are also used. MSE is more sensitive to outliers than RMSE and MAE, so it is more useful when the data has outliers. RMSE and MAE are more useful when the data does not have outliers.
@@ -251,12 +251,12 @@ The main advantages of using MSE, RMSE, and MAE are that they are all on the sam
 ```{r}
 #| label: pda-regression
 #| echo: false
-#| 
+#|
 # Generate a hypothetical results with a MSE of .75 for a supevised learning regression model with 50 observations
 set.seed(123) # Set the seed for reproducibility
 results <- tibble(
-    actual = rnorm(100, mean = 10, sd = 1), # Generate 100 random numbers from a normal distribution
-    predicted = actual + rnorm(100, mean = 1, sd = .5) # Add random noise to the actual values
+  actual = rnorm(100, mean = 10, sd = 1), # Generate 100 random numbers from a normal distribution
+  predicted = actual + rnorm(100, mean = 1, sd = .5) # Add random noise to the actual values
 )
 ```
 
@@ -271,29 +271,33 @@ Plot the actual and predicted values to see how well the model fits the data.
 m1 <- lm(actual ~ predicted, data = results)
 
 # Plot the actual and predicted values with the model error
-results |> 
-    ggplot(aes(x = predicted, y = actual)) +
-    geom_point() +
-    geom_smooth(method = "lm", se = FALSE, color = "black") +
-    geom_segment(aes(x=predicted, xend=predicted, y=fitted(m1), yend=fitted(m1)+residuals(m1)), color = "black", linetype = 2) + # 
-    labs(x = "Predicted", y = "Actual")
+results |>
+  ggplot(aes(x = predicted, y = actual)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  geom_segment(aes(x = predicted, xend = predicted, y = fitted(m1), yend = fitted(m1) + residuals(m1)), color = "black", linetype = 2) + #
+  labs(x = "Predicted", y = "Actual")
 ```
 
 We can now apply our error metrics to the `results` data to see how well the model fits the data.
 
 ```{r}
 #| label: pda-regression-error
-#| 
+#|
 # Calculate the error metrics for the `results` data
-results |> 
-    mutate(error = actual - predicted) |> # calculate the error
-    summarise(mse = mean(error^2),  # calculate the MSE
-              rmse = sqrt(mse),  # calculate the RMSE
-              mae = mean(abs(error)),  # calculate the MAE
-              n = n()) |>  # calculate the number of observations
-    mutate(mse = mse * 1/n,  # multiply by 1/n to get the MSE for n observations
-           rmse = rmse * 1/n,  # multiply by 1/n to get the RMSE for n observations
-           mae = mae * 1/n)  # multiply by 1/n to get the MAE for n observations
+results |>
+  mutate(error = actual - predicted) |> # calculate the error
+  summarise(
+    mse = mean(error^2), # calculate the MSE
+    rmse = sqrt(mse), # calculate the RMSE
+    mae = mean(abs(error)), # calculate the MAE
+    n = n()
+  ) |> # calculate the number of observations
+  mutate(
+    mse = mse * 1 / n, # multiply by 1/n to get the MSE for n observations
+    rmse = rmse * 1 / n, # multiply by 1/n to get the RMSE for n observations
+    mae = mae * 1 / n
+  ) # multiply by 1/n to get the MAE for n observations
 ```
 
 
@@ -310,11 +314,13 @@ So we can implement this in R subtracting the actual values from the predicted v
 #| label: pda-regression-mse
 
 results |> # use the `results` data
-    mutate(error = actual - predicted) |> # calculate the error
-    summarise(mse = mean(error^2),  # calculate the MSE
-              n = n()) |>  # calculate the number of observations
-    mutate(mse = mse * 1/n) |>  # multiply by 1/n to get the MSE for n observations
-    pull(mse) # pull the MSE value out of the tibble
+  mutate(error = actual - predicted) |> # calculate the error
+  summarise(
+    mse = mean(error^2), # calculate the MSE
+    n = n()
+  ) |> # calculate the number of observations
+  mutate(mse = mse * 1 / n) |> # multiply by 1/n to get the MSE for n observations
+  pull(mse) # pull the MSE value out of the tibble
 ```
 
 Formula for calculating the RMSE:

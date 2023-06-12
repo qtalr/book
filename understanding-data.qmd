@@ -14,13 +14,8 @@ execute:
 <!--
 
 Content:
-- [ ] Incorporate the role of unit of analysis and unit of observation into the discussion of dataset organization (under Information section).
-  - [ ] What role does the unit of analysis and the unit of observation play in structuring the dataset?
-      - Define unit of analysis: the levels of observation that are the focus of the analysis (e.x. speaker, language, text genre, etc.)
-      - Define unit of observation: the types of data that is collected for each unit of analysis (e.x. text, utterances, n-grams, words, lemmas, morphemes, etc.)
-  - [ ] The unit of analysis and the unit of observation are derived from the research question or hypothesis.
-    - [ ] Add examples of research questions and hypotheses that would lead to different units of analysis and units of observation. Such as "A what rate does lexical diversity increase for second language learners of Spanish whose first language is English?" Unit of analysis: learners. Unit of observation: words at distinct levels. 
-- [ ] Move the data sources section to the online companion website (qtalr.com) and link to it from here. Note: I will want to specify here and for all links that the LaTeX version should add links as footnotes and the HTML version should add links as hyperlinks.
+
+- [x] Move the data sources section to the online companion website (qtalr.com) and link to it from here. Note: I will want to specify here and for all links that the LaTeX version should add links as footnotes and the HTML version should add links as hyperlinks.
 
 Exercises:
 
@@ -28,40 +23,30 @@ Formatting:
 
 -->
 
-> The plural of anecdote is not data.
->
-> --- Marc Bekoff
-
 > The goal is to turn data into information, and information into insight.
 >
 > --- Carly Fiorina
 
-> Without data, you're just another person with an opinion.
-> 
-> --- W. Edwards Deming
+::: {.callout}
+**{{< fa regular list-alt >}} Outcomes**
 
-::: callout-note
-## Keys
-
--   What are the distinct types of data and how do they differ?
--   What is information and what form does it take?
--   What is the importance of documentation in reproducible research?
+- Analyze the distinct types of data and compare their differences.
+- Define information and describe format it takes.
+- Evaluate the importance of documentation in promoting reproducible research.
 :::
 
 ```{r}
 #| label: understanding-data-packages
 
-pacman::p_load(tidyverse, knitr, jsonlite, tadr, tidytext, readtext)
+pacman::p_load(tidyverse, knitr, jsonlite, tadr, qtalrkit, tidytext, readtext)
 ```
 
-In this chapter I cover the starting concepts in our journey to understand how to derive insight from data, illustrated in the DIKI Hierarchy (@fig-diki-hierarchy), focusing specifically on the first two levels: Data and Information. We will see that what is commonly referred to as 'data' everyday uses is broken into three distinct categories, two of which are referred to as data and the third is known as information. We will introduce the key concepts and structural characteristics which define information. We will also cover the importance of documentation of data and datasets in quantitative research.
+In this chapter, the groundwork is laid for deriving insights from data by focusing on Data and Information. The concepts of populations and samples are introduced, highlighting their similarities and key differences. Connecting these topics to text analysis, language samples or corpora are explored, discussing their types, sources, formats, and ethical considerations. Subsequently, key concepts in information, such as organization and transformation, are examined. The 'tidy' approach to organizing data is discussed, including structural characteristics and semantic attributes. Moreover, data transformation techniques are introduced, which can enhance the quality and usability of data in subsequent analysis steps. The importance of documentation in quantitative research is emphasized through addressing data origin and data dictionaries. Methods for documenting sources and processes are provided to ensure a comprehensive understanding of extracting valuable insights from data.
 
-<!-- term but in the context of data analysis it  First I will address the umbrella term ‘data’ and distinguish between three types: objective data (population), subjective data (sample), and relational data (dataset). This will provide the scaffolding to discuss corpus representativeness, the ‘tidy’ data format, and informational values of data. -->
+::: {.callout}
+**{{< fa terminal >}} Swirl lesson**
 
-::: {.callout-tip}
-## Swirl
-
-**What**: [Objects, Packages and functions](https://github.com/lin380/swirl)\
+**What**: [Objects, Packages and functions](https://github.com/qtalr/swirl)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To introduce you to the main types of objects in R and to understand the role and use of functions and packages in R programming.
 :::
@@ -72,69 +57,105 @@ Data is data, right? The term 'data' is so common in popular vernacular it is ea
 
 <!-- When we talk about data, we often assume that it is objective and unbiased. However, this is not always the case. In fact, there are many important details about data that require more careful consideration. Let's explore one of these details: the difference between populations and samples -->
 
-### Population sampling
+### Populations
 
-The first thing that comes to many people's mind when the term population is used is human populations (derived from Latin 'populus'). Say for example we pose the question --What's the population of Milwuakee? When we speak of a population in these terms we are talking about the total sum of individuals living within the geographical boundaries of Milwaukee. In concrete terms, a \index{population}**population** is the objective make up of an idealized set of objects and events in reality. Key terms here are objective and idealized. Although we can look up the US Census report for Milwaukee and retrieve a figure for the population, this cannot truly be the population. Why is that? Well, whatever method that was used to derive this numerical figure was surely incomplete. If not incomplete, by the time someone recorded the figure some number of residents of Milwaukee moved out, moved in, were born, or passed away --the figure is no longer the true population.
+<!--  
+- Definition and examples
+- Relation to research question
+-->
 
-<!-- A population is a group of people, objects, or events that share a common characteristic or belong to a specific category. For example, the population of a city includes all the people who live within its geographical boundaries. It's important to note that populations are not fixed or objective entities, but rather idealized sets of objects and events that are subject to change over time. -->
+The first thing that comes to many people's mind when the term population is used is human populations (derived from Latin 'populus'). Say for example we pose the question --What's the population of Milwuakee? When we speak of a population in these terms we are talking about the total sum of individuals living within the geographical boundaries of Milwaukee. In concrete terms, a \index{population}**population** an idealized set of objects or events in reality which share a common characteristic or belong to a specific category. The term to highlight here is idealized. Although we can look up the US Census report for Milwaukee and retrieve a figure for the population, this cannot truly be the population. Why is that? Well, whatever method that was used to derive this numerical figure was surely incomplete. If not incomplete, by the time someone recorded the figure some number of residents of Milwaukee moved out, moved in, were born, or passed away. In either case, this example serves to point out that populations are not fixed and are subject to change over time.
 
-Likewise when we talk about populations in terms of language we dealing with an objective and idealized aspect of reality. Let's take the words of the English language as an analog to our previous example population. In this case the words are the people and English is the bounding characteristic. Just as people, words move out, move in, are born, and pass away. Any compendium of the words of English at any moment is almost instananeously incomplete. This is true for all populations, save those relatively rare cases in which the bounding characteristics select a narrow slice of reality which is objectively measurable and whose membership is fixed (the complete works of Shakespeare, for example).
+Likewise when we talk about populations in terms of language we dealing with an idealized aspect of reality. Let's take the words of the English language as an analog to our previous example population. In this case the words are the people and English is the grouping characteristic. Just as people, words move out, move in, are born, and pass away. Any compendium of the words of English at any moment is almost instananeously incomplete. This is true for all populations, save those relatively rare cases in which the grouping characteristics select a narrow slice of reality which is objectively measurable and whose membership is fixed (the complete works of Shakespeare, for example).
 
-In sum, (most) populations are amorphous moving targets. We objectively hold them to exist, but in practical terms we often cannot nail down the specifics of populations. So how do researchers go about studying populations if they are theoretically impossible to access directly? The strategy employed is called sampling.
+In sum, (most) populations are amorphous moving targets. We subjectively hold them to exist, but in practical terms we often cannot nail down the specifics of populations. So how do researchers go about studying populations if they are theoretically impossible to access directly? The strategy employed is called sampling.
 
-A \index{sample}**sample** is the product of a subjective process of selecting a finite set of observations from an objective population with the goal of capturing the relevant characteristics of the target population. Although there are strategies to minimize the mismatch between the characteristics of the subjective sample and objective population, it is important to note that it is almost certainly true that any given sample diverges from the population it aims to represent to some degree. The aim, however, is to employ a series of sampling decisions, which are collectively known as a sampling frame, that maximize the chance of representing the population.
+### Samples
 
-What are the most common sampling strategies? First \index{sample size}**sample size**. A larger sample will always be more representative than a smaller sample. Sample size, however, is not enough. It is not hard to imagine a large sample which by chance captures only a subset of the features of the population. A next step to enhance sample representativeness is apply **random sampling**. Together a large random sample has an even better chance of reflecting the main characteristics of the population better than a large or random sample. But, random as random is, we still run the risk of acquiring a skewed sample (i.e a sample which does not mirror the target population).
+<!--  
+- Definition and examples
+- Sampling techniques (e.g., size, random, stratified)
+-->
 
-To help mitigate these issues, there are two more strategies that can be applied to improve sample representativeness. Note, however, that while size and random samples can be applied to any sample with little information about internal characteristics of the population, these next two strategies require decisions depend on the presumed internal characteristics of the population. The first of these more informed sampling strategies is called **stratified sampling**. Stratified samples make (educated) assumptions about sub-components within the population of interest. With these sub-populations in mind, large random samples are acquired for each sub-population, or strata. At a minimum, stratified samples can be no less representative than random sampling alone, but the chances that the sample is better increases. Can there be problems in the approach? Yes, and on two fronts. First knowledge of the internal components of a population are often based on a limited or incomplete knowledge of the population. In other words, strata are selected subjectively by researchers using various heuristics some of which are based on some sense of 'common knowledge'. The second front on which stratified sampling can err concerns the relative sizes of the sub-components relative to the whole population. Even if the relevant sub-components are identified, their relative size adds another challenge which researchers must address in order to maximize the representativeness of a sample. To attempt to align, or **balance**, the relative sizes of the samples for the strata is the second population-informed sampling strategy.
+A \index{sample}**sample** is the product of a subjective process of selecting a finite set of observations from an idealized population with the goal of capturing the relevant characteristics of the target population. The **degree of representativeness** of a sample is the extent to which the sample reflects the characteristics of the population. The degree of representativeness is crucial form research as it directly impacts of any findings based on the sample. 
 
-<!--- Both stratified and balanced sampling techniques are often strategies associated with sampling projects which attempt to model macro-level language samples, say American English. But for more specialized samples where the objective is to capture more localized language use, these strategies are not ... -->
+<!-- Although there are strategies to minimize the mismatch between the characteristics of the sample and population, it is important to note that it is almost certainly true that any given sample diverges from the population it aims to represent to some degree. The aim, however, is to employ a series of sampling decisions, which are collectively known as a sampling frame, that maximize the chance of representing the population. -->
 
+To maximize the representativeness of a sample, researchers employ a variety of strategies. One of the first and sometimes the easiest strategy is to increase the \index{sample size}**sample size**. A larger sample will always be more representative than a smaller sample. Sample size, however, is often not enough. It is not hard to imagine a large sample which by chance captures only a subset of the features of the population. Another step to enhance sample representativeness is to apply **random sampling**. Together a large random sample has an even better chance of reflecting the main characteristics of the population better than a large or random sample. But, random as random is, we still run the risk of acquiring a skewed sample (*i.e.* a sample with low representativeness).
+
+To help mitigate these issues, there are two more strategies that can be applied to improve sample representativeness. Note, however, that while size and random samples can be applied to any sample with little information about internal characteristics of the population, these next two strategies require decisions depend on the presumed internal characteristics of the population. The first of these more informed sampling strategies is called **stratified sampling**. Stratified samples make (educated) assumptions about sub-components within the population of interest. With these sub-populations in mind, large random samples are acquired for each sub-population, or strata. At a minimum, stratified samples can be no less representative than random sampling alone, but the chances that the sample is better increases. Can there be problems in the approach? Yes, and on two fronts. First knowledge of the internal components of a population are often based on a limited or incomplete knowledge of the population (remember populations are idealized). In other words, strata are selected subjectively by researchers using various heuristics some of which are based on some sense of 'common knowledge'. 
+
+The second front on which stratified sampling can err concerns the relative sizes of the sub-components relative to the whole population. Even if the relevant sub-components are identified, their relative size adds another challenge which researchers must address in order to maximize the representativeness of a sample. To attempt to align, or **balance**, the relative sizes of the samples for the strata is the second population-informed sampling strategy.
 
 ### Corpora
 
-A key feature of a sample is that it is purposely selected. Samples are not simply a collection or set of data from the population. Samples are rigorously selected with an explicit target population in mind. In text analysis a purposely sampled collection of texts, of the type defined here, is known as a **corpus.** For this same reason a set of texts or documents which have not been selected along a purposely selected sampling frame is not a corpus. The sampling frame, and therefore the populations modeled, in any given corpus most likely will vary and for this reason it is not a safe assumption that any given corpus is equally applicable for any and every research question. Corpus development (*i.e.* language sampling) is purposeful, and the characteristics of the corpus development process should be made explicit through documentation. Therefore vetting a corpus sample for its applicability to a research goal is a key step in that a research must take to ensure the integrity of the research findings.
+A key feature of a sample is that it is purposely selected. Samples are not simply a collection or set of data from the population. Samples are rigorously selected with an explicit target population in mind. In text analysis, a purposely sampled collection of texts, of the type defined here, is known as a **corpus** (pl. corpora). For this same reason a set of texts or documents which have not been selected along a purposely selected sampling frame is not a corpus rather a collection of documents. The sampling frame, and therefore the populations modeled, in any given corpus most likely will vary and for this reason it is not a safe assumption that any given corpus is equally applicable for any and every research question. Corpus development (*i.e.* language sampling) is purposeful, and the characteristics of the corpus development process should be made explicit through documentation. Therefore vetting a corpus sample for its applicability to a research goal is a key step in that a research must take to ensure the integrity of the research findings.
 
-::: callout-important
-## Consider
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
-The Brown Corpus is widely recognized as one of the first large, machine-readable corpora. It was compiled by @Kucera1967. Consult the [documentation for this corpus](http://korpus.uib.no/icame/brown/bcm.html). Can you determine what language population this corpus aims to represent? Given the sampling frame for this corpus (in the documentation and summarized in @fig-brown-distribution), what types of research might this corpus support or not support?
-:::
+The 'Standard Sample of Present-Day American English' (known commonly as the Brown Corpus) is widely recognized as one of the first large, machine-readable corpora. Compiled by @Kucera1967, the corpus is comprised of 1,014,312 words from edited English prose published in the United States in 1961. 
+
+Given the sampling frame for this corpus visualized in @fig-brown-distribution:
 
 ```{r}
 #| label: fig-brown-distribution
-#| fig-cap: 'Brown Corpus of Written American English'
+#| fig-cap: "Overview of the sampling frame of the Brown Corpus."
+#| fig-alt: "The Brown Corpus sampling frame is shown as a bar plot comprised of 15 main categories (strata) of text on the y-axis. The relative size of each category is shown as a percentage of the total number of words in the corpus on the x-axis. The largest categories are 'Fiction' (23%) and 'Press' (18%) and the smallest categories are 'Religion' (0.3%) and 'Learned' (0.2%)."
+#| fig-pos: H
 
-brown <- tadr::brown
+brown <- readr::read_csv("data/understanding-data/brown.csv")
 
-brown_categorys_docs <-
+brown_categories_docs <-
   brown |>
   distinct(category, category_description, document_id) |>
-  separate(category_description, into = c("main_category", "sub_category"), sep = ": ", fill = "right")
+  separate(category_description,
+    into = c("main_category", "sub_category"),
+    sep = ": ",
+    fill = "right"
+  )
 
-brown_categorys_docs |>
+brown_categories_docs |>
   count(main_category) |>
   ggplot(aes(y = reorder(main_category, n), x = n / sum(n))) +
   geom_col() +
   scale_x_continuous(labels = scales::percent) +
   labs(
-    x = "Percentage of the corpus",
-    y = "Main category",
-    title = "Brown Corpus: Sampling Frame",
-    subtitle = "Strata and Balance"
+    x = "Percentage of the corpus (balance)",
+    y = "Main category (strata)",
+    title = "Brown Corpus Sampling Frame"
   )
 ```
-  
+
+Can you determine what language population this corpus aims to represent?
+What types of research might this corpus support or not support?
+:::
+
 #### Types
+
+##### Reference
 
 With the notion of sampling frames in mind, some corpora are compiled with the aim to be of general purpose (general or **reference corpora**), and some with much more specialized sampling frames (**specialized corpora**). For example, the [American National Corpus (ANC)](https://www.anc.org/) or the [British National Corpus (BNC)](http://www.natcorp.ox.ac.uk/) are corpora which aim to model (represent/ reflect) the general characteristics of a variety of the English language, the former of American English and the later British English. These are ambitious projects, and require significant investments of time in corpus design and then in implementation (and continued development) that are usually undertaken by research teams [@Adel2020].
 
+##### Specialized
+
+<!-- 
+- Modality (e.g., written, spoken, signed)
+- Genre (e.g., news, fiction, academic, social media)
+- Population (age, region, language background, etc.)
+- Comparision (e.g., parallel, comparable)
+-->
+
 Specialized corpora aim to represent more specific populations. The [Santa Barbara Corpus of Spoken American English (SBCSAE)](https://www.linguistics.ucsb.edu/research/santa-barbara-corpus), as you can imagine from the name of the resource, aims to model spoken American English. No claim to written English is included. There are even more specific types of corpora which attempt to model other types of sub-populations such as [academic writing](https://www.coventry.ac.uk/research/research-directories/current-projects/2015/british-academic-written-english-corpus-bawe/), [computer-mediated communication (CMC)](https://www.clarin.eu/resource-families/cmc-corpora), language use in specific [regions of the world](http://ice-corpora.net/ice/index.html), a [country](https://www.wgtn.ac.nz/lals/resources/corpora-default/corpora-wsc), a [region of a country](https://cesa.arizona.edu), *etc*.
 
-::: callout-important
-## Consider
+<!-- <img src="figures/understanding-data/word-mapper.png" width="200" align="right"/>  -->
 
-<img src="figures/understanding-data/word-mapper.png" width="200" align="right"/> @Grieve2018 compiled a 8.9 billion-word corpus of geotagged posts from Twitter between 2013-2014 in the United States. The authors provide a [search interface](https://isogloss.shinyapps.io/isogloss/) to explore relationship between lexical usage and geographic location. Explore this corpus searching for terms related to slang ("hella", "wicked"), geographical ("mountain", "river"), meteorological ("snow", "rain"), and/ or any other term types. What types of patterns do you find? What are the benefits and/ or limitations of this type of data and/ or interface?
+
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+@Grieve2018 compiled a 8.9 billion-word corpus of geotagged posts from Twitter between 2013-2014 in the United States. The authors provide a [search interface](https://isogloss.shinyapps.io/isogloss/) to explore relationship between lexical usage and geographic location. Explore this corpus searching for terms related to slang ("hella", "wicked"), geographical ("mountain", "river"), meteorological ("snow", "rain"), and/ or any other term types. What types of patterns do you find? What are the benefits and/ or limitations of this type of data and/ or interface?
 :::
 
 Another set of specialized corpora are resources which aim to compile texts from different languages or different language varieties for direct or indirect comparison. Corpora that are directly comparable, that is they include source and translated texts, are called **parallel corpora**. Parallel corpora include different languages or language varieties that are indexed and aligned at some linguistic level (*i.e.* word, phrase, sentence, paragraph, or document), see [OPUS](https://opus.nlpl.eu/). Corpora that are compiled with different languages or language varieties but are not directly aligned are called **comparable corpora**. The comparable language or language varieties are sampled with the same or similar sampling frame, for example [Brown](https://ota.bodleian.ox.ac.uk/repository/xmlui/handle/20.500.12024/0402) and [LOB](https://ota.bodleian.ox.ac.uk/repository/xmlui/handle/20.500.12024/0167) corpora.
@@ -143,76 +164,55 @@ The aim of the quantitative text researcher is to select the corpus or corpora (
 
 #### Sources
 
+<!--  
+- Publicly available datasets and repositories
+- Custom-built corpora (web scraping, APIs, OCR, etc.)
+- Ethical considerations for data collection
+-->
+
+##### Published {.unnumbered}
+
 The most common source of data used in contemporary quantitative research is the internet. On the web an investigator can access corpora published for research purposes and language used in natural settings that can be compiled by investigators into a corpus. Many organizations exist around the globe that provide access to corpora in browsable catalogs, or **repositories**. There are repositories dedicated to language research, in general, such as the [Language Data Consortium](https://www.ldc.upenn.edu/) or for specific language domains, such as the language acquisition repository [TalkBank](http://talkbank.org/). It is always advisable to start looking for the available language data in a repository. The advantage of beginning your data search in repositories is that a repository, especially those geared towards the linguistic community, will make identifying language corpora faster than through a general web search. Furthermore, repositories often require certain standards for corpus format and documentation for publication. A standardized resource many times will be easier to interpret and evaluate for its appropriateness for a particular research project.
 
-<!-- [ ]  Companion website link, instead of a list here -->
+Repositories are by no means the only source of corpora on the web. Researchers from around the world provide access to corpora and datasets on their own sites or through data sharing platforms. Corpora of various sizes and scopes will often be accessible on a dedicated homepage or appear on the homepage of a sponsoring institution. These resources may be available for download (*e.g.* LDC) or via search inferaces (*e.g.* COCA). Finding these resources is often a matter of doing a web search with the word 'corpus' and a list of desired attributes, including language, modality, register, *etc*. 
 
-In the table below I've compiled a list of some corpus repositories to help you get started.
+As part of a general movement towards reproducibility, more corpora are available on **data sharing platforms** such as [GitHub](https://github.com/), [Zenodo](https://zenodo.org/), [Re3data](http://www.re3data.org/), [OSF](https://osf.io/), *etc*. These platforms enable researchers to securely store, manage, and share data with others. Support is provided for various types of data, including documents and code, and as such they are a good place to look as they often include reproducible research projects as well.
 
-```{r}
-#| label: pinboard-repositories
+##### Custom-built {.unnumbered}
 
-readRDS("assets/listings/data_repositories.rds") |>
-  kable(caption = "A list of some corpus repositories")
-```
-  
-Repositories are by no means the only source of corpora on the web. Researchers from around the world provide access to corpora and other data sources on their own sites or through data sharing platforms. Corpora of various sizes and scopes will often be accessible on a dedicated homepage or appear on the homepage of a sponsoring institution. Finding these resources is a matter of doing a web search with the word 'corpus' and a list of desired attributes, including language, modality, register, *etc*. As part of a general movement towards reproducibility more corpora are available on the web than ever before. Therefore data sharing platforms supporting reproducible research, such as [GitHub](https://github.com/), [Zenodo](https://zenodo.org/), [Re3data](http://www.re3data.org/), [OSF](https://osf.io/), *etc*., are a good place to look as well, if searching repositories and targeted web searches do not yield results.
+Language corpora prepared by researchers and research groups listed on repositories or hosted by the researchers themselves is often the first place to look for data. The web, however, contains a wealth of language and language-related data that can be accessed by researcher to compile their own corpus. There are two primary ways to attain language data from the web. The first is through the process of web scraping. **Web scraping** is the process of harvesting data from the public-facing web. Language texts may be found on sites as uploaded files, such as pdf or doc (Word) documents, or found displayed as the primary text of a site. Given the wide variety of documents uploaded and language behavior recorded daily on news sites, blogs and the like, compiling a corpus has never been easier. Having said that, how the data is structured and how much data needs to be retrieved can pose practical obstacles to collecting data from the web, particularly if the approach is to acquire the data by manually instead of automating the task.
 
-In the table below you will find a list of corpus resources and datasets.
+The second way to acquire data from the web is through an **Application Programming Interface** (API). APIs are, as the title suggests, programming interfaces which allow access, under certain conditions, to information that a website or database accessible via the web contains.
 
-<!-- [ ]  Companion website link, instead of a list here -->
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
 
-```{r}
-#| label: pinboard-corpora
-
-readRDS("assets/listings/data_corpora.rds") |>
-  kable(caption = "Corpora and language datasets.")
-```
-  
-Language corpora prepared by researchers and research groups listed on repositories or hosted by the researchers themselves is often the first place to look for data. The web, however, contains a wealth of language and language-related data that can be accessed by researcher to compile their own corpus. There are two primary ways to attain language data from the web. The first is through the process of web scraping. **Web scraping** is the process of harvesting data from the web either manually or (semi-)automatically from the actual public-facing web. The second way to acquire data from the web is through an **Application Programming Interface** (API). APIs are, as the title suggests, programming interfaces which allow access, under certain conditions, to information that a website or database accessible via the web contains.
-
-<!-- If your corpus search ends in a dead-end, either because a suitable resource does not appear to exist or an existing resource is unattainable given licensing restrictions or fees, it may be time to compile your own corpus. Turning to machine readable texts on the internet is usually the logical first step to access language for a new corpus. Language texts may be found on sites as uploaded files, such as pdf or doc (Word) documents, or found displayed as the primary text of a site. Given the wide variety of documents uploaded and language behavior recorded daily on social media, news sites, blogs and the like, compiling a corpus has never been easier. Having said that, how the data is structured and how much data needs to be retrieved can pose practical obstacles to collecting data from the web, particularly if the approach is to acquire the data by hand instead of automating the task. Our approach here, however, will be to automate the process as much as possible whether that means leveraging R package interfaces to language data, converting hundreds of pdf documents to plain text, or scraping content from web documents.  -->
-
-<!-- [ ]  Companion website link, instead of a list here -->
-
-The table below lists some R packages that serve to interface language data directly through R.
-
-```{r}
-#| label: pinboard-apis
-
-readRDS("assets/listings/data_apis.rds") |>
-  kable(caption = "R Package interfaces to language corpora and datasets.")
-```
-  
-Data for language research is not limited to (primary) text sources. Other sources may include processed data from previous research; word lists, linguistic features, *etc*.. Alone or in combination with text sources this data can be a rich and viable source of data for a research project.
-
-<!-- Companion website link -->
-
-Below I've included some processed language resources.
-
-```{r}
-#| label: pinboard-experimental
-
-readRDS("assets/listings/data_experimental.rds") |>
-  kable(caption = "Language data from previous research and meta-studies.")
-```
-  
-<!-- Companion website link -->
-
-The list of data available for language research is constantly growing. I've document very few of the wide variety of resources. Below I've included attempts by others to provide a summary of the corpus data and language resources available.
-
-```{r}
-#| label: pinboard-listings
-
-readRDS("assets/listings/data_listings.rds") |>
-  kable(caption = "Lists of corpus resources.")
-```
-  
-::: callout-important
-## Consider
-
-Explore some of the resources listed above and consider their sampling frames. Can you think of a research question or questions that this resource may be well-suited to support research into? What types of questions would be less-than-adequate for a given resource?
+The process of corpus development is a topic in and of itself. For a more in-depth discussion of the process, see @Adel2020 and ...
 :::
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+<!--  
+- [x] Add link to Guide 5 on companion website
+-->
+Explore some of the resources listed on the [qtalrkit compansion site](https://qtalr.github.io/qtalrkit/articles/guide-5.html) and consider their sampling frames. Can you think of a research question or questions that this resource may be well-suited to support research into? What types of questions would be less-than-adequate for a given resource?
+:::
+
+##### Ethical considerations
+
+<!--  
+- [ ] Revise this section
+  - [ ] adding web scraping, APIs.
+  - [ ] adding examples of licenses, permissions, and citation/ attribution
+-->
+
+Ethical practices in corpus data collection involve adhering to principles and guidelines that ensure researchers' work is used fairly, respectfully, and with integrity. A corpus represents a form of Intellectual Property (IP) and must be treated accordingly. Individual data resources often have their own licensing agreements and terms of use, ranging from public domain to proprietary licenses. Public domain licenses, such as those found in Project Gutenberg, allow anyone to use the data for any purpose. Creative Commons licenses, like those used by the American National Corpus, Wikipedia, and TalkBank, span from open to more restrictive uses, including requirements for attribution or prohibiting commercial use. More restrictive licenses, such as those for the Corpus of Contemporary American English and the British National Corpus, may require a fee to access and use the data.
+
+Respecting intellectual property rights is crucial when working with corpus data. Violating these rights can lead to legal and ethical issues, including lawsuits, fines, and damage to one's professional reputation. To avoid these problems, researchers must ensure they have the necessary permissions to use copyrighted works in their corpora. Obtaining permissions involves contacting the author or publisher and requesting consent to use their work for research purposes. Documenting all obtained permissions is essential to demonstrate compliance with IP laws and ethical guidelines.
+
+Attribution and citation are critical aspects of respecting intellectual property rights in corpus data collection. Researchers should follow established citation guidelines, such as APA, MLA, or Chicago, to accurately credit original authors. Providing clear and consistent citations helps maintain transparency and ensures that authors receive appropriate recognition for their work. By prioritizing ethical practices, researchers can protect intellectual property rights and uphold the integrity of their research, fostering trust and credibility in their findings.
+
 
 #### Formats
 
@@ -272,8 +272,8 @@ Data alone is not informative. Only through explicit organization of the data in
 
 For the running text in the Europarle Corpus, we know that there are files which are the source text (original) and files that correspond to the target text (translation). In @tbl-structure-europarle we see that this text has been organized so that there are columns corresponding to the `type` and `sentence` with an additional `sentence_id` column to keep an index of how the sentences are aligned.
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
 
 It is conventional to work with column names for datasets in R using the same conventions that are used for naming objects. It is a matter of taste which convention is used, but I have adopted [snake case](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html#snake_case) as my personal preference. There are also [alternatives](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html). Regardless of the convention you choose, it is good practice to be consistent.
 
@@ -369,11 +369,11 @@ knitr::include_graphics("figures/understanding-data/tidy-format-paper.png")
 
 #### Informational values {#ud-informational-values}
 
-Each column in a tidy dataset is a **variable** which reflects measures for a particular attribute that can take on different values. These values are grouped into two main categories: **categorical** and **numeric**. 
+In a tidy dataset, each column represents a **variable** that measures a specific attribute with varying values. These values can be classified into two primary types: **categorical** and **numeric**. To further refine this classification, we can identify four distinct types of values: nominal, ordinal, interval, and ratio. Collectively, these four types are referred to as **levels of measurement**. By categorizing values into either categorical or numeric groups, we can better understand how to apprroach and analyze the data within each column.
 
 <!-- Provide a brief description of the two types of variables and their sub-types. -->
 
-Qualitative variables are **categorical** and can be further broken down into **nominal** and **ordinal**. Quantitative variables are **Numeric** and can be further broken down into **interval** and **ratio** as seen in @fig-ud-informational-values.
+Categorical variables are qualitative measures and can be further broken down into **nominal** and **ordinal**. Numeric variables are quantitative measures and can be further broken down into **interval** and **ratio**. The informational values of these variables are summarized in @fig-ud-informational-values.
 
 ```{mermaid}
 %%| label: fig-ud-informational-values
@@ -398,8 +398,10 @@ C --> |Ordinal + equal intervals| F[Interval]:::tier3
 C --> |Interval + non-arbitrary zero| G[Ratio]:::tier3
 ```
 
+- [ ] Create a drawio diagram for this figure.
 
-<!-- Provide examples of each of these types of levels of measurement. -->
+
+- [ ] Provide examples of each of these types of levels of measurement.
 
 .... examples of levels of measurement ....
 
@@ -510,7 +512,7 @@ Examples using measures relevant to linguistic studies could be:
 * Number of syllables per word
 * Word frequency per sentence
 * Number of errors made in a writing sample
-# Number of words in a text
+* Number of words in a text
 * Response time (in milliseconds)
 
 I hope this helps you better understand the different levels of measurement in statistical analysis, as well as providing some examples specific to linguistic studies at each level!
@@ -519,17 +521,27 @@ I hope this helps you better understand the different levels of measurement in s
 
 #### Semantic value {#ud-semantic-value}
 
-Semantic value in a tidy dataset is derived from the association of this physical structure along the two dimensions of this rectangular format. First, each column is a **variable** which reflects measures for a particular attribute that can take on different values. In this way it 'varies'. 
+Semantic value in a tidy dataset is derived from the association of this physical structure along the two dimensions of this rectangular format. First, each column is a variable which reflects measures for a particular attribute that can take on different values. In this way it 'varies'. 
 
 In the Europarle Corpus dataset, in Table @tbl-structure-europarle, for example, the `type` column measures the type of text, either `Source` or `Target`. Futhermore variables can contain measures which are either qualitative or quantitative, that is category- or scale-based. 
 
-Second, each row is an **observation** that contains all of the variables associated with the primary **unit of observation**. The primary unit of observation the variable that is the essential focus of the informational structure. In this same dataset the first observation contains the `type`, `sentence_id`, and the `sentence`. As this dataset is currently structured the primary unit of investigation is the `sentence` as each of the other variables have measures that characterize each value of `sentence`.
+Second, each row is an **observation** that contains all of the variables associated with the primary **unit of observation**. The primary unit of observation the variable that is the essential focus of the informational structure. In this same dataset the first observation contains the `type`, `sentence_id`, and the `sentence`. As this dataset is currently structured, the primary unit of investigation is the `sentence` as each of the other variables have measures that characterize each value of `sentence`.
 
-The decision as to what the primary unit of observation is is fundamentally guided by the research question, and therefore highly specific to the particular research project. Say instead we wanted to focus on words instead of sentences. The dataset would need to be transformed such that a new variable (`words`) would be created to contain each word in the corpus.
+The decision as to what the primary unit of observation is is fundamentally guided by the research question, and therefore highly specific to the particular research project. Say instead we wanted to focus on words instead of sentences. The dataset would need to be transformed such that a new variable (`words`) would be created and each row would index a word in the corpus.
 
-<!-- 
-- [ ] This is a good moment to introduce the concept of the primary unit of analysis and the primary unit of observation.
+<!--
 
+- [ ] Incorporate the role of unit of analysis and unit of observation into the discussion of dataset organization (under Information section).
+  - [ ] What role does the unit of analysis and the unit of observation play in structuring the dataset?
+      - Define unit of analysis: the levels of observation that are the focus of the analysis (e.x. speaker, language, text genre, etc.)
+      - Define unit of observation: the types of data that is collected for each unit of analysis (e.x. text, utterances, n-grams, words, lemmas, morphemes, etc.)
+  - [ ] The unit of analysis and the unit of observation are derived from the research question or hypothesis.
+    - [ ] Add examples of research questions and hypotheses that would lead to different units of analysis and units of observation. Such as "A what rate does lexical diversity increase for second language learners of Spanish whose first language is English?" Unit of analysis: learners. Unit of observation: words at distinct levels. 
+
+
+---- 
+
+NOTES:
 
 The *unit of analysis refers to the entity that is studied and analyzed* in a research study or corpus linguistics, while the *unit of observation refers to the specific item or element that is actually observed or measured* within the selected unit of analysis. In simpler terms, the unit of analysis is the larger context while the unit of observation is the subset within that context.
 
@@ -581,7 +593,7 @@ europarle_example_words |>
   slice_head(n = 9) |>
   kable(booktabs = TRUE)
 ```
-  
+
 The values for the variables `type` and `sentence_id` maintain the necessary description for each `word` to ensure the required semantic relationships to identify the particular attributes for each word observation. This dataset may seem redundant in that the values for `type` and `sentence_id` are repeated numerous times but this 'redundancy' makes the relationship between each variable associated with the primary unit of investigation explicit. This format makes a tidy dataset a versatile format for researchers to conduct analyses in a powerful and flexible way, as we will see throughout this textbook.
 
 ```{r}
@@ -595,18 +607,19 @@ europarle_example_words |>
   geom_col(position = "dodge")
 ```
   
+
 It is important to make clear that data in tabular format in itself does not constitute a dataset, in the tidy sense we will be using. Data can be organized in many ways which do not make relationships between variables and observations explicit.
 
 <!-- *Consider adding some 'messy' data and/ or summary tables which do not reflect the relational structure we are aiming to create to base our research on.* -->
 
-::: callout-important
-## Consider
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
-All tabular data does not have the 'tidy' format that I have described here. Can you think of examples of tabular information that would not be in a tidy format?
+All tabular data does not have the 'tidy' format that I have described here. Can you think of examples of tabular information that would not be in a tidy format? What would be the implications of this for data analysis?
 :::
 
-::: callout-important
-## Consider
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
 Consider the following dataset: 
 
@@ -966,6 +979,19 @@ Note in some cases we may convert our tidy tabular dataset to other data formats
 
 ## Documentation
 
+### Data origin information
+
+<!--  
+- [ ] Include data origin information: source, date, version, license, permissions, attribution, etc.
+- [ ] Emphasize 'read-only' nature of acquired corpus data/ datasets
+-->
+
+### Data dictionaries
+
+<!--  
+- [ ] Point out curation and transformation steps are documented in code and in prose (README.md, or other?)
+-->
+
 As we have seen in this chapter that acquiring data and converting that data into information involves a number of conscious decisions and implementation steps. As a favor to ourselves as researchers and to the research community, it is crucial to document these decisions and steps. This makes it both possible to retrace our own steps and also provides a guide for future researchers that want to reproduce and/ or build on your research. A programmatic approach to quantitative research helps ensure that the implementation steps are documented and reproducible but it is also vital that the decisions that are made are documented as well. This includes the creation/ selection of the corpus data, the description of the variables chosen from the corpus for the derived dataset, and the description of the variables created from the derived dataset for the analysis dataset.
 
 For an existing corpus sample acquired from a repository (*e.g.* [Switchboard Dialog Act Corpus](https://catalog.ldc.upenn.edu/LDC97S62), Language Data Consortium), a research group (*e.g.* [CEDEL2](http://cedel2.learnercorpora.com/)), or an individual researcher (*e.g.* [SMS Spam Collection](https://www.dt.fee.unicamp.br/~tiago/smsspamcollection/)), there is often documentation provided describing key attributes of the resource. This documentation should be included with the acquisition of the corpus and added to the research project. For a corpus that a researcher compiles themselves, they will need to generate this documentation.
@@ -1002,7 +1028,7 @@ In this chapter we have focused on data and information --the first two componen
 #| fig-cap: 'Understanding data: visual summary'
 #| echo: false
 
-knitr::include_graphics("figures/understanding-data/understanding-data_visual-summary-paper.png")
+knitr::include_graphics("figures/understanding-data/ud-diki.drawio.png")
 ```
 
 First a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.
@@ -1015,26 +1041,29 @@ Finally, documentation should be implemented at each stage of the analysis proje
 
 ## Activities {.unnumbered}
 
-::: callout-tip
-## Recipe
+- [ ] Add summary of the purpose, goals, outcomes of these activities
 
-**What**: [Reading, inspecting, and writing data](https://lin380.github.io/tadr/articles/recipe_3.html)\
-**How**: Read Recipe 3 and participate in the Hypothes.is online social annotation.\
-**Why**: To use literate programming in R markdown to work with R coding strategies for reading, inspecting, and writing datasets.
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
+
+**What**: [Reading, inspecting, and writing data](https://qtalr.github.io/qtalrkit/articles/recipe-2.html)\
+**How**: Read Recipe 2 and participate in the Hypothes.is online social annotation.\
+**Why**: To use literate programming in Quarto to work with R coding strategies for reading, inspecting, and writing datasets.
 :::
 
-::: callout-tip
-## Lab
+::: {.callout}
+**{{< fa flask >}} Lab**
 
-**What**: [Reading, inspecting, and writing data](https://github.com/lin380/lab_3)\
-**How**: Clone, fork, and complete the steps in Lab 3.\
+**What**: [Reading, inspecting, and writing data](https://github.com/qtalr/lab-2)\
+**How**: Clone, fork, and complete the steps in Lab 2.\
 **Why**: To read datasets from packages and from plain-text files, inspect and report characteristics of datasets, and write datasets to plain-text files.
 :::
 
 ## Questions {.unnumbered}
 
-::: callout-note
-## Conceptual questions
+::: {.callout}
+**Conceptual questions**
+
 
 1. What is the difference between a population and a sample in linguistic research?
 2. Why is it important to vet a corpus before using it in a research project?
@@ -1059,12 +1088,11 @@ To add:
 - How does the unit of analysis and the unit of observation relate to the levels of measurement of variables in a dataset?
 - In what ways can a dataset be considered a model of the world?
 - To what extent does the sample represent the population? What implications does this have for the generalizability of the results of a research project?
-
-
 :::
 
-::: callout-note
-## Technical exercises
+
+::: {.callout}
+**Technical questions**
 
 <!-- Compare with the swirl, recipe, and lab exercises. -->
 
@@ -1075,54 +1103,6 @@ To add:
 5. Transforming a Derived Dataset:
 6. Merging Datasets:
 7. Writing a dataset to disk
-- Consider (an example dataset) and its data dictionary, write a script to read the dataset, inspect it, and write it to disk.
-- Consider a dataset and its data dictionary what appears to be the unit of analysis and the unit of observation?
-
+8. Consider (an example dataset) and its data dictionary, write a script to read the dataset, inspect it, and write it to disk.
+9.  Consider a dataset and its data dictionary what appears to be the unit of analysis and the unit of observation?
 :::
-
-<!-- 
-
-## Annotated readings
-
-### Data
-
-**Egbert, J., Larsson, T., & Biber, D. (2020). Doing Linguistics with a Corpus: Methodological Considerations for the Everyday User. Cambridge University Press.** [@Egbert2020] 
-
-Chapter 2 "Getting to know your corpus" (2.1 and 2.3)
-
-Section 2.1 considers the importance of representativeness for corpus-based research and the idea of generalization. It explores how "similar" data can vary in important ways and that the research question and data/ corpus selection are intertwined. In short the results are only as good as the data in. All samples are skewed (to some degree) and it is important to acknowledge and document the potential limitations. 
-
-(Note: the concepts of sampling procedures are not covered.)
-
-
-**Biber, D. (1993). Representativeness in corpus design. Literary and Linguistic Computing, 8(4), 243–257.** [@Biber:1993]
-
-Discusses representativeness in more detail. Includes target population, stratified and proportional sampling, sampling within texts, and issues regarding sample size.
-
-(Note: this article gets quite dense starting in section 4. Sections 1-3 might be good for this course.)
-
-
-**Atkins, S., Clear, J., & Ostler, N. (1992). Corpus Design Criteria. Literary and Linguistic Computing, 7(1), 1–16.**
-[@atkins1992cdc]
-
-There are some very good points made in this article. However, those points will need to be fished out of a very detailed write-up on corpus design. Key points: (1) problems and practical solutions for defining populations with language phenomena, (2) text/ corpus typologies, and (3) defining text collection types. 
-
-**Ädel, A. (2020). Corpus Compilation. In M. Paquot & S. Th. Gries (Eds.), A Practical Handbook of Corpus Linguistics (pp. 3–24). Springer.** [@Adel2020]
-
-Provides a good summary of issues related to representativeness, balance, size in corpus sampling. It also highlights the fact that generalized corpora are most often left to groups of researchers and most researchers that compile a corpus will work with more specialized and opportunistic samples. Yet, considerations for research are fundamental to document and report to provide context for the research. It also discusses the important role of annotation --linguistic and non-linguistic (metadata) and the formats that these often take.
-
-### Information
-
-**Levshina, N. (2015). How to do linguistics with R: Data exploration and statistical analysis. John Benjamins Publishing Company.** [@Levshina2015]
-
-Chapter 1.4 "Types of variables" 
-
-- Deals with nominal, ordinal, interval, and ratio information levels of variables
-- ...
-
-
-### Documentation
-
-...
-
--->

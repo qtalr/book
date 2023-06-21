@@ -51,33 +51,46 @@ Formatting:
 >
 > --- H.G. Wells
 
-::: callout-note
-## Keys
+::: {.callout}
+**{{< fa regular list-alt >}} Outcomes**
 
--   What is the role of statistics in data analysis?
--   What is the importance of descriptive assessment in data analysis?
--   In what ways are the main approaches to data analysis similar and different?
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+<!-- [ ] update verbs -->
+
+- What is the role of statistics in data analysis?
+- What is the importance of descriptive assessment in data analysis?
+- In what ways are the main approaches to data analysis similar and different?
 :::
 
 ```{r}
 #| label: approaching-analysis-packages
-options(kableExtra.auto_format = FALSE) # avoid kableextra from outputting HTML on kable tables
+
+# avoid kableextra from outputting HTML on kable tables
+options(kableExtra.auto_format = FALSE) 
 pacman::p_load(TBDBr, skimr, janitor, kableExtra, effectsize, patchwork)
 ```
 
-In this chapter I will build on the notions of data and information from the previous chapter. The aim of statistics in quantitative analysis is to uncover patterns in datasets. Thus statistics is aimed at deriving knowledge from information, the next step in the DIKI Hierarchy @fig-diki-hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves even more conscious subjective decisions on what information to assess, and what method to select to interrogate the information, and ultimately how to interpret the findings. The first step is to conduct a descriptive assessment of the information, both at the individual variable level and also between variables, the second is to interrogate the dataset either through exploratory, predictive, or inferential analysis methods, and the third is to interpret and report the findings.
+In this chapter I will build on the notions of data and information from the previous chapter. The aim of statistics in quantitative analysis is to uncover patterns in datasets. Thus statistics is aimed at deriving knowledge from information, the next step in the DIKI Hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves even more conscious subjective decisions on what information to assess, and what method to select to interrogate the information, and ultimately how to interpret the findings. The first step is to conduct a descriptive assessment of the information, both at the individual variable level and also between variables, the second is to interrogate the dataset either through exploratory, predictive, or inferential analysis methods, and the third is to interpret and report the findings.
 
-::: {#swirl .callout-tip}
-## Interactive programming
+::: {.callout}
+**{{< fa terminal >}} Swirl lesson**
+
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 **What**: [Data visualization](https://github.com/lin380/swirl)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To explore data visually in text and in graphics.
 :::
 
-## Descriptive assessment {#aa-descriptive-assessment}
+## Descriptive assessment {#sec-aa-descriptive}
 
-A descriptive assessment of the dataset includes a set of diagnostic measures and tabular and visual summaries which provide researchers a better understanding of the structure of a dataset, prepare the researcher to make decisions about which statistical methods and/ or tests are most appropriate, and to safeguard against false assumptions (missing data, data distributions, etc.). In this section we will *EDIT: first cover the importance of understanding the informational value that variables can represent and then move to use this understanding to approach summarizing individual variables and relationships between variables.*
+<!-- 
+- [ ] Complete revision?  
+  - [ ] Consider using BELC after all, just changing the focus.
+    - [ ] Add a data dictionary, example of using documentation to understand the dataset.
+-->
+
+A descriptive assessment of the dataset includes a set of diagnostic measures and tabular and visual summaries which provide researchers a better understanding of the structure of a dataset, prepare the researcher to make decisions about which statistical methods and/ or tests are most appropriate, and to safeguard against false assumptions (missing data, data distributions, etc.).
 
 <!-- Comes down to informational types and number of variables -->
 
@@ -149,41 +162,11 @@ belc |> # dataset
 
 The entire dataset includes 79 observations from 36 participants. Each observation in the BELC dataset corresponds to an individual learner's composition. It includes which participant wrote the composition (`participant_id`), the age group they were part of at the time (`age_group`), their sex (`sex`), and the number of English words they produced (`num_tokens`), the number of unique English words they produced (`num_types`). The final variable (`ttr`) is the calculated ratio of number of unique words (`num_types`) to total words (`num_tokens`) for each composition. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity.
 
-### Information values
+----
 
-Understanding the informational value, or **level of measurement**, of a variable or set of variables in key to preparing for analysis as it has implications for what visualization techniques and statistical measures we can use to interrogate the dataset. There are two main levels of measurement a variable can take: categorical and continuous. **Categorical variables** reflect class or group values. **Continuous variables** reflect values that are measured along a continuum.
+In most cases it is preferred to use the highest informational of a variable. Simplifying data results in a loss of information --which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data [@Baayen2004].
 
-The BELC dataset contains three categorical variables (`participant_id`, `age_group`, and `sex`) and three continuous variables (`num_tokens`, `num_types`, and `ttr`). The categorical variables identify class or group membership; which participant wrote the composition, what age group they were in, and their biological sex. The continuous variables measure attributes that can take a range of values without a fixed limit and the differences between each value are regular. The number of words and number of unique words for each composition can range from 1 to $n$ and the Type-Token Ratio being derived from these two variables is also continuous for the same reason. Furthermore, the differences between the each of values of these measures is on a defined interval, so for example a composition which has a word count (`num_tokens`) of 40 is exactly two times as large as a composition with a word count of 20.
-
-The distinction between categorical an continuous levels of measurement, as mentioned above, are the main two and for some statistical approaches the only distinction that needs to be made to conduct an analysis. However, categorical and continuous can each be broken down into subcategories and for some descriptive and analytic purposes these distinctions are important. For categorical variables a distinction can be made between variables in which there is a structured relationship between the values and those in which there is not. *Nominal variables* contain values which are labels denoting the membership in a class in which there is no relationship between the labels. *Ordinal variables* also contain labels of classes, but in contrast to nominal variables, there is a relationship between the classes, namely one in which there is a precedence relationship or order. With this in mind, our categorical variables be sub-classified. There is no order between the values of `participant_id` and `sex` and they are therefore nominal whereas the values of `age_group` are ordered, each value refers to a sequential age group, and therefore it is ordinal.
-
-Turning to continuous variables, another subdivision can be made which hinges on the existence of a non-arbitrary zero or not. *Interval variables* contain values in which the difference between the values is regular and defined, but the measure has an arbitrary zero value. A typical example of an interval variable is temperature measurements on the Fahrenheit scale. A value of 0 on this scale does not mean there is 0 temperature. *Ratio variables* have all the properties of interval variables but also include a non-arbitrary definition of zero. All of the continuous variables in the BELC dataset (`num_tokens`, `num_types`, and `ttr`) are ratio variables as a value of 0 would indicate the lack of this attribute.
-
-An hierarchical overview of the relationship between the two main and four sub-types of levels of measurement appear in @fig-info-values-paper.
-
-```{r}
-#| label: fig-info-values-paper
-#| fig-cap: 'Levels of measurement graphic representation.'
-
-include_graphics("figures/approaching-analysis/Informational-values-paper.png")
-```
-
-```{mermaid}
-%%| label: fig-intro-values
-%%| fig-cap: "Levels of measurement graphic representation."
-graph TD
-style A fill:#aaa,stroke:#333,stroke-width:1px
-classDef tier2 fill:#ccc,stroke:#333,stroke-width:1px;
-classDef tier3 fill:#eee,stroke:#333,stroke-width:1px;
-A[All variables] -- "Classes" --> B[Categorical]
-A -- "Degrees" --> C[Continuous]
-B:::tier2 -- No order -->D[Nominal]:::tier3
-B -- Order -->E[Ordinal]:::tier3
-C:::tier2 -- No zero -->F[Interval]:::tier3
-C -- Zero -->G[Ratio]:::tier3
-```
-
-A few notes of practical importance; First, the distinction between interval and ratio variables is often not applicable in text analysis and therefore often treated together as continuous variables. Second, the distinction between ordinal and interval/continuous variables is not as clear cut as it may seem. Both variables contain values which have an ordered relationship. By definition the values of an ordinal variable do not reflect regular intervals between the units of measurement. But in practice interval/ continuous variables with a defined number of values (say from a Likert scale used on a survey) may be treated as an ordinal variable as they may be better understood as reflecting class membership. Third, all continuous variables can be converted to categorical variables, but the reverse is not true. We could, for example, define a criterion for binning the word counts in `num_tokens` for each composition into ordered classes such as "low", "mid", "high". On the other hand, `sex` (as it has been measured here) cannot take intermediate values on a unfixed range. The upshot is that variables can be down-typed but not up-typed. In most cases it is preferred to treat continuous variables as such, if the nature of the variable permits it, as the down-typing of continuous data to categorical data results in a loss of information --which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data [@Baayen2004].
+----
 
 ### Summaries
 
@@ -211,12 +194,6 @@ belc |>
   data.frame() |> # remove the skimr object class
   kable(booktabs = TRUE) # convert to a kable table
 ```
-
-::: callout-warning
-## Tip
-
-The descriptive statistics returned above were generated by the `skimr` package.
-:::
 
 In the above summary, we see the mean, standard deviation (sd), and the quantiles (the five-number summary, p0, p25, p50, p75, and p100). The middle quantile (p50) is the median and the IQR is listed last.
 
@@ -504,12 +481,6 @@ Take, for example, the number of tokens (`num_tokens`) per composition. The ECDF
 
 Now let's turn to the descriptive assessment of categorical variables. For categorical variables, central tendency can be calculated as well but only a subset of measures given the reduced informational value of categorical variables. For nominal variables where there is no relationship between the levels the central tendency is simply the mode. The levels of ordinal variables, however, are relational and therefore the median, in addition to the mode, can also be used as a measure of central tendency. Note that a variable with one mode is unimodal, two modes, bimmodal, and in variables that have two or more modes multimodal.
 
-::: callout-warning
-## Tip
-
-To get numeric value of the median for an ordinal variable the levels of the variable will need to be numeric as well. Non-numeric levels can be recoded to numeric for this purpose if necessary.
-:::
-
 Below is a list of the central tendency metrics for the categorical variables in the BELC dataset.
 
 ```{r}
@@ -549,8 +520,8 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 
 In both plots `ttr` is on the y-axis and `num_tokens` on the x-axis. The points correspond to the intersection between these variables for each single observation. In the left pane only the points are represented. Visually (and given the correlation coefficient) we can see that there is a negative relationship between the number of tokens and the Type-Token ratio: in other words, the more tokens a composition has the lower the Type-Token Ratio. In this case this trend is quite apparent, but in other cases is may not be. To provide an additional visual cue a trend line is often added to a scatterplot. In the right pane I've added a linear trend line. This line demarcates the optimal central tendency across the relationship, assuming a linear relationship. The steeper the line, or slope, the more likely the correlation is strong. The band, or ribbon, around this trend line indicates the **confidence interval** which means that real central tendency could fall anywhere within this space. The wider the ribbon, the larger the variation between the observations. In this case we see that the ribbon widens when the number of tokens is either low or high. This means that the trend line could be potentially be drawn either steeper (more strongly correlated) or flatter (less strongly correlated).
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
 
 In plots comparing two or more variables, the choice of which variable to plot on the x- and y-axis is contingent on the research question and/ or the statistical approach. The language varies between statistical approaches: in inferential methods the x-axis is used to plot what is known as the dependent variable and the y-axis an independent variable. In predictive methods the dependent variable is known as the outcome and the independent variable a predictor. Exploratory methods do not draw distinctions between variables along these lines so the choice between which variable to plot along the x- and y-axis is often arbitrary.
 :::
@@ -1300,16 +1271,22 @@ I rounded out this chapter with a short description of the importance of reporti
 
 ## Activities {.unnumbered}
 
-::: callout-tip
-## Recipe
+<!-- [ ] Add description of outcomes -->
+
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
+
+<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 **What**: [Descriptive assessment of datasets](https://lin380.github.io/tadr/articles/recipe_4.html)\
 **How**: Read Recipe 4 and participate in the Hypothes.is online social annotation.\
 **Why**: To explore appropriate methods for summarizing variables in datasets given the number and informational values of the variable(s).
 :::
 
-::: callout-tip
-## Lab
+::: {.callout}
+**{{< fa flask >}} Lab**
+
+<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 **What**: [Descriptive assessment of datasets](https://github.com/lin380/lab_4)\
 **How**: Clone, fork, and complete the steps in Lab 4.\
@@ -1318,33 +1295,35 @@ I rounded out this chapter with a short description of the importance of reporti
 
 ## Questions {.unnumbered}
 
-::: callout-note
-## Conceptual questions
+<!-- Digital literacy, Research, Programming -->
 
--   What are the key differences between descriptive and analytic statistics?
--   What informational values can a variable take?
--   What are the potential measures of central tendency and dispersion for a variable? Does it depend on the informational value of the variable?
--   Consider the following variables: $X$ = number of children, $Y$ = number of siblings, $Z$ = number of siblings who are older than the participant. Which of these variables are categorical and which are continuous? What are the informational values of each variable? What are the measures of central tendency and dispersion for each variable?
--   What type(s) of tables or plots are appropriate for summarizing a variable? What type(s) of tables or plots are appropriate for summarizing the relationship between two variables?
--   In the following variables and information values, identify if the plots are appropriate for summarizing the relationship.
--   What are the key differences between inferential, predictive, and exploratory analysis?
--   How do the goals of the research influence the choice of analysis type?
--   Given the following research questions, identify which type of analysis is most appropriate and why:
--   Given the following research questions, identify which type of analysis is most appropriate and why:
--   Given the following research questions, identify which type of analysis is most appropriate and why:
--   How are the results of inferential, predictive, and exploratory analysis evaluated?
--   Research compendia are an important part of reproducible research. What are the key components of a research compendium? What are the benefits of sharing a research compendium?
--   
+::: {.callout}
+**Conceptual questions**
+
+- What are the key differences between assessment and analysis?
+- What are the potential measures of central tendency and dispersion for a variable? Does it depend on the informational value of the variable?
+- Consider the following variables: $X$ = number of children, $Y$ = number of siblings, $Z$ = number of siblings who are older than the participant. Which of these variables are categorical, ordinal, numeric? What are the measures of central tendency and dispersion for each variable?
+- What type(s) of tables or plots are appropriate for summarizing a variable? What type(s) of tables or plots are appropriate for summarizing the relationship between two variables?
+- In the following variables and informational values, identify if the plots are appropriate for summarizing the relationship.
+- What are the key differences between exploratory, predictive, and inferential analysis?
+- How do the goals of the research influence the choice of analysis type?
+- Given the following research questions, identify which type of analysis is most appropriate and why:
+- Given the following research questions, identify which type of analysis is most appropriate and why:
+- Given the following research questions, identify which type of analysis is most appropriate and why:
+- How are the results of inferential, predictive, and exploratory analysis evaluated?
+- Research compendia are an important part of reproducible research. What are the key components of a research compendium? What are the benefits of sharing a research compendium?
+- 
 :::
 
-::: callout-note
-## Technical exercises
+::: {.callout}
+**Technical exercises**
 
--   Create a contingency table for the following variables:
--   Create a plot for the following variables:
--   Report these tables and plots with a short interpretation of what they show.
--   ...
+- Create a contingency table for the following variables:
+- Create a plot for the following variables:
+- Report these tables and plots with a short interpretation of what they show.
+- ...
 :::
+
 
 <!-- Additional references:
 

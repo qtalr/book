@@ -16,9 +16,10 @@ execute:
 Content:
 - [ ] Reorganize and summarize this chapter. 
   - [ ] On first draft it is over 11k words.
-  - [ ] Consider whether the `belc` dataset is the most adequate for this chapter. This issue is that word frequencies are not the most appropriate for the discussion continuous variables of descriptive statistics. Perhaps a dataset with more continuous measures (word length or syntactic complexity) would be better. That way we can contrast the descriptive statistics of continuous and categorical variables.
 
-- [ ] What is the difference between descriptive and analytic statistics?
+- [x] What is the difference between descriptive and analytic statistics?
+  - Summarizing and organizing data 
+  - Collection of methods leveraged to generate insight, make predictions, and test hypotheses
 - [ ] Connect the unit of analysis and unit of observation concepts to the discussion of descriptive statistics
 
 - [ ] Focus on descriptive assessment (importance): To understand the data, to identify patterns, to spot anomalies, to test assumptions, to check the integrity of the data, and to determine how the data should be analyzed.
@@ -55,32 +56,1242 @@ Formatting:
 **{{< fa regular list-alt >}} Outcomes**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<!-- [ ] update verbs -->
+<!-- [x] update verbs/ change to outcomes -->
 
-- What is the role of statistics in data analysis?
-- What is the importance of descriptive assessment in data analysis?
-- In what ways are the main approaches to data analysis similar and different?
+- Recall the fundamental concepts and principles of statistics in data analysis.
+- Articulate the roles of diagnostic, analytic, and interpretive statistics in quantitative analysis.
+- Compare the similarities and differences between analytic approaches to data analysis.
 :::
 
 ```{r}
-#| label: approaching-analysis-packages
+#| label: aa-packages
 
-# avoid kableextra from outputting HTML on kable tables
+# Avoid kableextra from outputting HTML on kable tables
 options(kableExtra.auto_format = FALSE) 
+
 pacman::p_load(TBDBr, skimr, janitor, kableExtra, effectsize, patchwork)
 ```
 
-In this chapter I will build on the notions of data and information from the previous chapter. The aim of statistics in quantitative analysis is to uncover patterns in datasets. Thus statistics is aimed at deriving knowledge from information, the next step in the DIKI Hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves even more conscious subjective decisions on what information to assess, and what method to select to interrogate the information, and ultimately how to interpret the findings. The first step is to conduct a descriptive assessment of the information, both at the individual variable level and also between variables, the second is to interrogate the dataset either through exploratory, predictive, or inferential analysis methods, and the third is to interpret and report the findings.
+<!-- [ ] Revise introduction to fit new outline/ content -->
+
+In this chapter I will build on the notions of data and information from the previous chapter. The aim of analysis is to derive knowledge from information, the next step in the DIKI Hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves another level of intervention. The goal is to break down complex information into simpler components which are more readily interpretable. In what follows, we will cover the main steps in the process of analysis. The first is to inspect the data to ensure its quality and understand its characteristics. The second is to interrogate the data to uncover patterns and relationships. The third is to interpret the findings. To conclude this chapter I will outline methods to and the importance of communicating the results in a transparent and reproducible manner.
 
 ::: {.callout}
 **{{< fa terminal >}} Swirl lesson**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Data visualization](https://github.com/lin380/swirl)\
+**What**: [Data visualization](https://github.com/qtalr/swirl)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To explore data visually in text and in graphics.
 :::
+
+## Diagnostic measures {#sec-diagnostic-measures}
+
+<!-- Purpose: Organize and summarize data -->
+
+The purpose of diagnostic measures is to inspect your data to ensure its quality and understand its characteristics. There are two primary types of diagnostic measures: verfication and description. Verification methods are applied to catch missing or erroneous data while descriptive methods are used to gain a better understanding of the data. Although treated in two separate sections, in practice these methods are complementary and are often addressed in tandem.
+
+```{r}
+#| label: aa-belc
+#| eval: false
+
+# Talkbank: BELC
+corpus_name <- "slabank"
+corpora <- c("slabank", "English", "BELC", "compositions")
+
+# Get tokens ---- 
+belc_tokens_tbl <-
+  getTokens(
+    corpusName = corpus_name, # corpus name
+    corpora = corpora
+  ) |> # corpus path
+  unnest(everything()) # unnest variables
+
+# Get participants ---- 
+belc_participants_tbl <-
+  getParticipants(
+    corpusName = corpus_name, # corpus name
+    corpora = corpora
+  ) |> # corpus path
+  unnest(everything()) # unnest variables
+
+# Join tokens and participants ----
+belc_parts_tokens_tbl <- 
+  left_join(belc_participants_tbl, belc_tokens_tbl)
+
+# Wrangling steps ----
+belc_tbl <- 
+  belc_parts_tokens_tbl |> 
+  # remove compositions-2014/ data
+  filter(str_detect(path, "/compositions/")) |> 
+  # separate time_group and part_id
+  separate(filename, c("time_group", "part_id"), sep = "c") |> 
+  # remove 2B time group
+  filter(time_group != "2B") |> 
+  # replace "A" with "T" in time_group labels
+  mutate(time_group = str_remove(time_group, "A")) |> 
+  mutate(time_group = str_c("T", time_group, sep = "")) |>
+  # remove redundant variables
+  select(-path, -who, -name, -role, -language, -age) |> 
+  # select names and order
+  select(part_id, sex, group = time_group,
+    month_age = monthage,  num_words = numwords,
+    num_utts = numutts, avg_utt = avgutt, median_utt = medianutt, 
+    utt_id = uid, word_id = wordnum, word, lemma = stem, pos
+  ) |> 
+  # subset columns
+  select(part_id:month_age, utt_id:pos) |> 
+  # arrange observations
+  arrange(part_id, utt_id, word_id)
+
+# Save data ----
+write_rds(belc_tbl, "data/approaching-analysis/belc_tbl.rds")
+
+# Create data dictionary ----
+create_data_dictionary(data = belc_tbl, file_path = "data/approaching-analysis/belc_tbl_dd.csv", model = "gpt-3.5-turbo")
+```
+
+```{r}
+#| label: aa-belc-dataset-data-dictionary
+
+# Dataset
+belc_tbl <- read_rds("data/approaching-analysis/belc_tbl.rds")
+# Data dictionary
+belc_dd <- read_csv("data/approaching-analysis/belc_tbl_dd.csv")
+```
+
+To ground this discussion I will introduce a new dataset. This dataset is drawn from the Barcelona English Language Corpus (BELC) [@Munoz2006], which is found in the TalkBank repository. I've selected the "Written composition" task from this corpus which contains 80 writing samples from 36 second language learners of English at different ages. Participants were given the task of writing for 15 minutes on the topic of "Me: my past, present and future". Data was collected for participants from one to three times over the course of seven years (at 10, 12, 16, and 17 years of age).
+
+In @tbl-aa-belc-dd we see the data dictionary for the BELC dataset which reflects structural and transformational steps I've done so we start with a tidy dataset with `word` as the unit of observation. 
+
+```{r}
+#| label: tbl-aa-belc-dd
+#| tbl-cap: "Data dictionary for the BELC dataset."
+
+# Data dictionary ----
+belc_dd |> 
+  # reorder to match understanding data chapter
+  select(everything(), description) |> 
+  kable() |> 
+  kable_styling()
+```
+
+The data dictionary provides a easily accessible overview of the dataset. This includes a human-readable mapping from variable names to variable descriptions. Further, it provides information about the type of variable (e.g., categorical, ordinal, numeric). As we will see the informational type of variables is key to diagnostic measures, as well as all other components of analysis.
+
+### Verification process {#aa-verification}
+
+<!-- Purpose: Organize and verify -->
+
+Although a dataset has undergone curation and transformation, it is still important to verify the data. This is a process of checking the data to ensure that it is accurate and complete. In the case that it is not, consideration should be given to how to address the issues.
+
+<!-- - Missing data (imputation, deletion) -->
+
+The most basic and usually the first step is to check for **missing data**. In @tbl-aa-belc-skim-missing, there are missing values for the `lemma` and `pos` variables in the BELC dataset.
+
+```{r}
+#| label: tbl-aa-belc-skim-missing
+#| tbl-cap: "Summary output for missing values in the BELC dataset."
+
+# Skim missing data ----
+belc_tbl |> 
+  # skim data
+  skim() |> 
+  # create tibble
+  tibble() |> 
+  # select variables
+  select(
+    variable = skim_variable,
+    type = skim_type,
+    n_missing, complete_rate
+) |> 
+  # print table
+  kable() |> 
+  kable_styling()
+```
+
+There are two primary approaches to dealing with missing data: deletion and recoding. Since these missing values account for only 1.5% and 0.4% of the data respectively, we might be safe to remove these observations. Another approach is to recode the missing values by either applying a unique value for missing values (e.g., `NULL`) or by imputing values. Imputing values is usually done by replacing missing values with some middle-of-the-road value (e.g., mean, median, mode), but other, more nuanced approaches are possible.
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+For more information on missing data, see the [missing data chapter](https://bookdown.org/ajkurz/Approaching-Analysis/missing-data.html) in this book.
+:::
+
+In either case, it is important to consider the implications of missing data for the analysis. For example, if the missing data is not at random or include a sizeable portion of the values of interest, then the analysis may be biased.
+
+```{r}
+#| label: aa-belc-missing-data-impute
+
+# Impute missing values
+belc_tbl <- 
+  belc_tbl |> 
+  # pos == n and lemma == <NA>
+  mutate(lemma = case_when(
+    pos == "n" & is.na(lemma) ~ word,
+    TRUE ~ lemma
+  )) |> 
+  # lemma not: I, football, basketball, english
+  mutate(pos = case_when(
+    is.na(pos) & !(word %in% c("I", "football", "basketball", "english")) ~ "L2",
+    is.na(pos) ~ "n",
+    TRUE ~ pos
+  )) |>
+  # remaining empty lemmas from word
+  mutate(lemma = case_when(
+    is.na(lemma) ~ word,
+    TRUE ~ lemma
+  ))
+```
+
+<!-- Identifying anomalies -->
+
+Value coding schemes, annotation errors, or other issues may result in **anomalies** in the data. These are values that are unexpected or inconsistent with the rest of the data or effect the treatment of the data for the particular analysis to be performed. 
+
+For categorical variables, this may include values that are not expected or are not in the set of values that are expected. A summary of the values for a given variable can be used as a first step to identify anomalies. In @tbl-aa-belc-skim-categorical, we see the minimum and maximum number of characters and the number of unique values for each categorical variable in the BELC dataset.
+
+```{r}
+#| label: tbl-aa-belc-skim-categorical
+#| tbl-cap: "Summary output for categorical variables in the BELC dataset."
+
+# Skim categorical data ----
+belc_tbl |> 
+  # skim data
+  skimr::skim() |> 
+  # filter to categorical variables
+  yank("character") |> 
+  # create tibble
+  tibble() |> 
+  # select variables
+  select(
+    variable = skim_variable,
+    min_chars = min,
+    max_chars = max,
+    num_unique = n_unique
+) |> 
+  # print table
+  kable() |> 
+  kable_styling()
+```
+
+From our knowledge of the data, we can gauge whether these values are expected. For example, `sex` has two values; likely corresponding to some coding of 'male' and 'female'. The variable `part_id` has 36 distinct values, which is expected since there are 36 participants and `group` has four, corresponding to the longitudinal time groups. It is also possible to gauge the expected values for `lemma` as we know that these are the base words and should be less than the number of words in the dataset. 
+
+Further verfication of the categorical variables is need, of course. This may include aggregating the data to see the distribution of values and/ or checking the values against the documentation.
+
+Let's now consider numeric variables. Numeric variables, by their very nature, do not lend themselves to the same type of summary used for categorical variables (*i.e.* character lengths, number of unique values, or aggregation) to detect anomalies. For numeric variables there are two types of anomalies that we will consider: outliers and errors in coding. **Outliers** are anomalies that are extreme values that are not representative of the rest of the data. To determine what is extreme, we need to consider the distribution of the data, that is, the range of values and the frequency of values. It is rarely the case that we can eyeball the distribution of the data based on raw values. Instead, a combination of summary statistics and visualizations are used to determine the distribution of the data. For this reason, the detection of outliers is often carried out as part of the descriptive assessment of the data, as we will see in @sec-aa-description. 
+
+On the other hand, coding anomalies are values that are not expected or are not in the set of values that are expected. These can sometimes be detected by visual inspection of the data. For example, in @tbl-aa-belc-numeric, we see the first 10 observations for each variable in the BELC dataset.
+
+```{r}
+#| label: tbl-aa-belc-numeric
+#| tbl-cap: "First 10 observations for variables in the BELC dataset."
+
+# Variables ----
+belc_tbl |> 
+  slice_head(n = 10) |>
+  kable() |>
+  kable_styling()
+```
+
+Leaving `month_age` aside, we see that the other two numeric variables `utt_id` and `word_id` index utterances and words respectively. However, in contrast to `part_id` which is a categorical variable as it serves as a unique identifier for each participant, these variables are numeric as they serve to not only index utterances and words but also to provide a measure of how many utterances or words have been produced. Seen in this light, `0` for the first value of `utt_id` and `word_id` is unexpected. To adjust for this, we can add `1` to each value of these variables. 
+
+```{r}
+#| label: aa-belc-numeric-adjust
+
+# Adjust numeric variables ----
+belc_tbl <- 
+  belc_tbl |> 
+  # adjust utt_id and word_id
+  mutate(
+    utt_id = utt_id + 1,
+    word_id = word_id + 1
+  )
+```
+
+### Descriptive statistics {#sec-aa-description}
+
+<!-- Purpose: Summarizing data -->
+
+The goal of descriptive statistics is to summarize the data in order to understand and prepare the data for the analysis approach to be performed. This is accomplished through a combination of statistic measures and/ or tabular or graphic summaries. The choice of descriptive statistics is guided by the type of data, as well as the question(s) being asked of the data.
+
+To that end, let's consider a reconfiguration of the BELC dataset, in @tbl-aa-belc-reconfig, which will provide a more illustrative dataset. 
+
+```{r}
+#| label: aa-belc-reconfig
+#| eval: false
+
+# Reconfigure BELC dataset ----
+# Unit of observation: essay
+
+belc_essay_tbl <- 
+  belc_tbl |> 
+  # group by essay
+  group_by(part_id, sex, group) |> 
+  # summarize data
+  summarize(
+    # number of words
+    tokens = n(),
+    # number of unique words
+    types = n_distinct(word),
+    # number l1 tokens
+    l1_tokens = sum(str_count(pos, "L2"))) |> 
+  # ungroup by essay
+  ungroup() |> 
+  mutate(
+    # proportion of L2 to L1 words
+    prop_l2 = 1 - round((l1_tokens/ tokens), 3), 
+    # type/ token ratio
+    ttr = round((types/ tokens), 3), 
+    # assign number to essays
+    essay_id = str_c("E", row_number(), sep = "")
+  ) |> 
+  # select variables
+  select(essay_id, part_id:types, ttr, prop_l2)
+
+belc_essay_tbl <- 
+  belc_essay_tbl |> 
+  mutate(
+    across(
+      where(is.character), 
+      factor
+    )
+  ) |> 
+  mutate(group = fct_inorder(group, ordered = TRUE)) |> 
+  mutate(group = fct_relevel(group, "T1", "T2", "T3", "T4"))
+
+# Write data ----
+write_rds(belc_essay_tbl, "data/approaching-analysis/belc_essay_tbl.rds")
+
+# Create data dictionary ----
+create_data_dictionary(belc_essay_tbl, "data/approaching-analysis/belc_essay_tbl_dd.csv", model = "gpt-3.5-turbo")
+```
+
+```{r}
+#| label: tbl-aa-belc-reconfig
+#| tbl-cap: "First 10 observations of the reconfigured BELC dataset."
+
+# Read data ----
+belc_essay_tbl <- read_rds("data/approaching-analysis/belc_essay_tbl.rds")
+
+# View data ----
+belc_essay_tbl |> 
+  # select first 10 observations
+  slice_head(n = 10) |> 
+  # print table
+  kable() |> 
+  kable_styling()
+```
+
+In this new configuration, the unit of observation is now `essay_id`. Each of the following variable are attributes or measures of this variable. The new variables in this dataset are aggregates of the previous BELC dataset: `tokens` is the number of total words, `types` is the number of unique words, `ttr` is the ratio of unique words to total words. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity. Finally, the proportion of L2 words (English) to the total words (tokens) is provided in `prop_l2`. 
+
+In descriptive statistics, there are four basic questions that are asked of each of the variables in the dataset. Each correspond to a different type of descriptive statistic.
+
+1. Central Tendency: Where do the data points tend to be located? 
+2. Dispersion: How spread out are the data points?
+3. Distribution: What is the shape of the distribution of the data points?
+4. Interdependence: How are these data points related to other data?
+
+#### Central tendency {#sec-aa-central-tendency}
+
+<!-- Location -->
+<!-- - Central tendency (mean, median, mode) -->
+
+```{r}
+#| label: aa-belc-descriptive-functions
+
+# Function: calculate the mode ----
+calculate_mode <- function(x) {
+  x |>  
+  # convert to tibble
+  as_tibble() |>  
+  # count values
+  count(value) |>
+  # select most frequent value  
+  filter(n == max(n)) |> 
+  # pull value
+  pull(value)
+}
+
+# Function: calculate the normalized entropy ----
+calculate_norm_entropy <- function(x) {
+  # add NA to x
+  x <- addNA(x, ifany = TRUE)
+  # get value proportions
+  prop <- prop.table(table(x))
+  # calculate entropy
+  entropy <- -sum(prop * log2(prop))
+  # calculate max entropy
+  max_entropy <- log2(length(prop))
+  # calculate normalized entropy
+  normalized_entropy <- entropy/max_entropy
+  return(normalized_entropy)
+}
+
+# Skim function ----
+aa_skim <- skim_with(
+  factor = sfl(top_counts = top_counts, norm_entropy = calculate_norm_entropy),
+  character = sfl(top_counts = top_counts, norm_entropy = calculate_norm_entropy),
+  numeric = sfl(mean = mean, median = median, sd = sd, iqr = IQR),
+  append = FALSE)
+```
+
+The central tendency is measure which aims to summarize the data points in a variable as the most representative, middle or most typical value. There are three common measures of central tendency: the mode, mean and median. Each differ in how they summarize the data points.
+
+The **mode** is the value, or values, that appears most frequently in a set of values. If there are multiple values with the highest frequency, then the variable is said to be multimodal. The most versatile of the central tendency measures as it can be applied to all levels of measurement, the mode is not often used for numeric variables as it is not as informative as other measures.
+
+The more common measures for numeric variables are the mean and the median. The **mean** is a summary statistic calculated by summing all the values and dividing by the number of values. The **median** is calculated by sorting all the values in the variable and then selecting the middle value. Given that the mean and median are calculated differently, they will not always yield the same result. Differences that appear between the mean and median will be of interest to us later in this chapter.
+
+#### Dispersion
+
+<!-- - Variability/ Dispersion (range, IQR, variance, standard deviation) -->
+
+The mean, median, and mode provide summary information where data points tend to be located. However, they do not provide us with any understanding as to how representative this value is. To provide this context, the spread of the values around the central tendency, or **dispersion**, is calculated. 
+
+For categorical variables, the spread is framed in terms of how balanced the values are across the levels. One way to do this is to calculate the (normalized) entropy. **Entropy** is a measure of uncertainty. The more balanced the values are across the levels, the higher the entropy. The less balanced the values are across the levels, the lower the entropy. Normalized entropy scores range from 0 to 1, with 0 indicating that all the values are the same and 1 indicating that all the values are different.
+
+The most common measure of dispersion for numeric variables is the **standard deviation**. The standard deviation is calculated by taking the square root of the variance. The **variance** is the average of the squared differences from the mean. So, more succinctly, the standard deviation is a measure of the spread of the values around the mean. Where the standard deviation is anchored to the mean, the **interquartile range** (IQR) is tied to the median. The median represents the sorted middle of the values, in other words the 50th percentile. The IQR is the difference between the 75th percentile and the 25th percentile. Again, just as the mean and the median, the standard deviation and the IQR are calculated in different ways, they are not always the same.
+
+Let's now consider the relevant central tendency and dispersion of the variables in the BELC dataset in @tbl-aa-belc-descriptive-stats. 
+
+:::{#tbl-aa-belc-descriptive-stats layout-ncol=2}
+
+```{r}
+#| label: tbl-aa-belc-descriptive-stats-1
+#| tbl-cap: "Categorical variables"
+
+belc_essay_tbl |> 
+  # custom skim function
+  aa_skim() |> 
+  yank("factor") |> 
+  select(-n_missing, -complete_rate) |>
+  select(variable = skim_variable, everything()) |> 
+  tibble() |> 
+  kable()
+```
+
+```{r}
+#| label: tbl-aa-belc-descriptive-stats-2
+#| tbl-cap: "Numeric variables"
+
+belc_essay_tbl |> 
+  aa_skim() |> 
+  yank("numeric") |> 
+  select(-n_missing, -complete_rate) |>
+  select(variable = skim_variable, everything()) |> 
+  tibble() |> 
+  # round to 2 digits
+  kable(digits = 2)
+```
+
+Central tendency and dispersion of the variables in the BELC dataset
+:::
+
+In @tbl-aa-belc-descriptive-stats-1 we see the measures for categorical variables. The `top_counts` variable gives us a short list of the most frequent levels of the variable. From `top_count` we can gather whether the variable has one mode or is multimodel. Both `essay_id` and `part_id` have the same most frequent value for the levels listed. On the other hand, `sex` and `group` have a single mode. We can also appreciate the dispersion of these variables based on the `norm_entropy` of each variable. `essay_id` is completely balanced across the levels, so it has a normalized entropy of 1. the other variables are not as balanced, but still quite balanced as the normalized entropy is close to 1.
+
+In @tbl-aa-belc-descriptive-stats-2 the numeric variables have a column for the mean, median, standard deviation, and IQR for each. The variable `tokens` has a larger difference between the mean and median than the other variables and the standard deviation is relatively large suggesting that the values are more spread out around the mean. In the case of `ttr` the mean and median are quite close and the standard deviation is relatively small suggesting that the values are more tightly clustered around the mean.
+
+When interpreting these summary values, it is important to only directly compare column-wise. That is, focusing only on a single variable, not across variables. Each variable, as is, is measured on a different scale and only relative to itself can we make sense of the values. 
+
+However, we can transform the central tendency and dispersion scores for numeric variables to make them more comparable by standardizing the scale of the values. **Standardization** is a scale-based transformation that changes the scale of the values to a common scale, or *z-scores*. It involves two separate transformations: centering and scaling. **Centering** is a transformation that subtracts the mean or median from each value. The result is a mean and median of zero. **Scaling** is a transformation that divides each value by the standard deviation or IQR. 
+
+In @tbl-aa-belc-descriptive-stats-standardized we see the same summary statistics as in @tbl-aa-belc-descriptive-stats-2, but the values have been standardized for the mean and standard deviation. The mean is now zero and the standard deviation is one. This allows us to compare the median and IQR of the variables more directly. 
+
+```{r}
+#| label: tbl-aa-belc-descriptive-stats-standardized
+#| tbl-cap: "Standardized central tendency and dispersion of numeric variables"
+
+belc_essay_tbl |> 
+  mutate(tokens = scale(tokens) |> as.numeric(), 
+        types = scale(types) |> as.numeric(),
+        ttr = scale(ttr) |> as.numeric(),
+        prop_l2 = scale(prop_l2) |> as.numeric()
+        ) |>
+  aa_skim() |>
+  yank("numeric") |> 
+  select(-n_missing, -complete_rate) |>
+  select(variable = skim_variable, everything()) |> 
+  tibble() |> 
+  # round to 2 digits
+  kable(digits = 2)
+```
+
+One more caveat to keep in mind is that we need to be mindful of the nature of the data being standardized and what the standardized values mean. For example, the variables `tokens` and `types` were originally counts. But the standardized values are not interpretable as counts, they are now on a different scale --specifically a z-score scale. In the same way since the `ttr` and `prop_l2` variables were originally proportions, the standardized values are also not interpretable as proportions. One additional twist, however, is that the original scales for these pairs of variables were not the same: `tokens` and `types` were counts, but `ttr` and `prop_l2` were proportions. So, even though the standardized values are on the same scale, they are not directly comparable.
+
+Beyond comparing central tendency and dispersion across variables, standarization is useful for analytic statistics to mitigate the influence of variables with large values. In some cases, the statistical method will require standardization of variables before analysis.
+
+#### Distributions
+
+<!-- - Distributions  -->
+
+Summary statistics of the central tendency and dispersion of a variable provide a sense of the most representative value and how spread out the data is around this value. However, to gain a more comprehensive understanding of the variable, it is key to consider the frequencies of all the data points. The **distribution** of a variable is the pattern or shape of the data that emerges when the frequencies of all data points are considered. This can reveal patterns that might not be immediately apparent from summary statistics alone. Understanding the frequency and distribution of data points is vital as it informs subsequent choices of statistical analysis and evaluative methods, ensuring they are appropriate for the specific characteristics of the data.
+
+When assessing the distribution of categorical variables, we can use a frequency table or bar plot. A **frequency table** is a useful method to display the frequency and proportion of each level in a categorical variable in a clear and concise manner. In @tbl-aa-belc-frequency-table we see the frequency table for the variable `sex`.
+
+<!-- sex frequency table -->
+
+```{r}
+#| label: tbl-aa-belc-frequency-table
+#| tbl-cap: "Frequency table for the variable `sex`."
+
+belc_essay_tbl |> 
+  tabyl(sex) |> 
+  tibble() |> 
+  select(sex, frequency = n, proportion = percent) |>
+  kable() |> 
+  kable_styling()
+```
+
+A **bar plot** is a type of plot where the x-axis is a categorical variable and the y-axis is the frequency of the values. The frequency is represented by the height of the bar. The variables can be ordered by frequency, alphabetically, or some other order. @fig-aa-belc-barplots is a bar chart for the variables `sex`, `group`, and `part_id`, ordered alphabetically.
+
+<!-- sex, group, and part_id barplots -->
+
+```{r}
+#| label: fig-aa-belc-barplots
+#| fig-cap: "Bar plots for categorical variables in the BELC dataset."
+#| fig-subcap: 
+#|   - "Sex"
+#|   - "Time group"
+#|   - "Participant ID"
+#| layout-ncol: 3
+
+# Function to create bar plots ----
+create_barplot <- function(data, variable, x_lab = NULL, y_lab = NULL) {
+  # Create a frequency table for the variable
+  freq_table <- data |> count({{ variable }})
+  
+  # Set the y-limits to 0 to the sum of the variable frequencies
+  ylim <- c(0, sum(freq_table$n))
+  
+  # Create the bar plot
+  ggplot(freq_table, aes(x = {{ variable }}, y = n)) +
+    geom_bar(stat = "identity") +
+    ylim(ylim) +
+    labs(x = x_lab, y = y_lab)
+}
+
+# Bar plots for categorical variables ----
+
+# Bar plot `sex` ----
+belc_essay_tbl |> 
+  create_barplot(sex, "Sex", "Frequency")
+
+# Bar plot `group` ----
+belc_essay_tbl |> 
+  create_barplot(group, "Time group", "Frequency")
+
+# [ ] consider how to set y-limits, as part_id frequencies are numerous and small
+# Bar plot `part_id` ----
+belc_essay_tbl |> 
+  create_barplot(part_id, "Participant ID", "Frequency") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+So for a frequency table or barplot, we can see the frequency of each level of a categorical variable. This gives us some knowledge about the BELC dataset: there are more girls in the dataset, more essays appear in first and third time groups, and the number of essays written by each participant is scattered from one to three. If we were to see any clearly loopsided categories, this would be a sign of imbalance in the data and we would need to consider how this might impact our analysis.
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+The goal of descriptive statistics is to summarize the data in a way that is meaningful and interpretable. With this in mind, compare the frequency table in [-@tbl-aa-belc-frequency-table] and bar plot in [-@fig-aa-belc-barplots-1]. Does one provide a more interpretable summary of the data? Why or why not? Are there any other ways you might communicate this distribution more effectively?
+:::
+
+For numeric variables, understanding the distribution is more complex, and also more important. In essence, however, we are assessing two things: the appearance of outliers in relation to and the overall shape of the distribution.
+
+<!-- - Outliers  -->
+
+Now, a frequency table, as in @tbl-aa-belc-frequency-table, does not summarize the distribution of a numeric variable in a concise, readily human-consumable format. Instead, the distribution of a numeric variable is best understood visually.
+
+The most common visualizations of the distribution of a numeric variable are histograms and density plots. **Histograms** are a type of bar plot where the x-axis is a numeric variable and the y-axis is the frequency of the values falling within a determined range of values, or bins. The frequency of values within each bin is represented by the height of the bars. **Density plots** are a smoothed version of histograms. The y-axis of a density plot is the probability of the values. When frequent values appear closely together, the plot line is higher. When the frequency of values is lower or more spread out, the plot line is lower. An example of these plots is show in @fig-aa-belc-histogram-density-tokens for the variable `tokens`.
+
+```{r}
+#| label: fig-aa-belc-histogram-density-tokens
+#| fig-cap: "Distribution plots for the variable `tokens`."
+#| fig-subcap: 
+#|  - "Histogram"
+#|  - "Density plot"
+#| fig-height: 2
+#| layout-ncol: 2
+
+# Define range for x-axis
+x_range <- belc_essay_tbl |> 
+  pull(tokens) |> 
+  range()
+
+# Histogram ---- 
+belc_essay_tbl |> 
+  ggplot(aes(x = tokens)) +
+  geom_histogram(bins = 30, color = "black", fill = "white") +
+  labs(x = "Number of tokens", y = "Frequency") +
+  scale_x_continuous(limits = x_range)
+
+# Density plot ----
+belc_essay_tbl |>
+  ggplot(aes(x = tokens)) +
+  geom_density() +
+  labs(x = "Number of tokens", y = "Probability") +
+  scale_x_continuous(limits = x_range)
+```
+
+Both the histogram in @fig-aa-belc-histogram-density-tokens-1 and the density plot in @fig-aa-belc-histogram-density-tokens-2 show the distribution of the variable `tokens` in slightly different ways which translate into trade-offs in terms of interpretability.  
+
+The histogram shows the frequency of the values in bins. The number of bins and/ or binwidth can be changed for more or less granularity. A rough grain histogram shows the general shape of the distribution, but it is difficult to see the details of the distribution. A fine grain histogram shows the details of the distribution, but it is difficult to see the general shape of the distribution. The density plot shows the general shape of the distribution, but it hides the details of the distribution. Given this trade-off, it is often useful explore outliers with histograms and the overall shape of the distribution with density plots.
+
+In @fig-aa-belc-histograms we see histograms for the variables `tokens`, `types`, and `ttr`.
+
+```{r}
+#| label: fig-aa-belc-histograms
+#| fig-cap: "Histograms for numeric variables `tokens`, `types`, and `ttr`."
+#| fig-subcap:
+#|  - "Number of tokens"
+#|  - "Number of types"
+#|  - "Type-token ratio score"
+#| layout-ncol: 3
+
+# Histograms ----
+hist_tokens_p <- 
+  belc_essay_tbl |> 
+  ggplot(aes(x = tokens)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
+  # geom_density() +
+  labs(x = "Number of tokens", y = "") +
+  theme(axis.text.y = element_blank())
+
+hist_types_p <- 
+  belc_essay_tbl |>
+  ggplot(aes(x = types)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
+  # geom_density() +
+  labs(x = "Number of types", y = "") +
+  theme(axis.text.y = element_blank())
+
+hist_ttr_p <- 
+  belc_essay_tbl |>
+  ggplot(aes(x = ttr)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
+  # geom_density() +
+  labs(x = "Type-token ratio", y = "") +
+  theme(axis.text.y = element_blank())
+
+hist_tokens_p
+hist_types_p
+hist_ttr_p
+```
+
+Focusing on the details captured in the histogram we are better able to detect potential outliers. Outliers can reflect valid values that are simply extreme or they can reflect something erroneous in the data. To distinguish between these two possibilities, it is important to know the context of the data. Take, for example, @fig-aa-belc-histograms-3. We see that there is a bin near the value 1.0. Given that the type-token ratio is a ratio of the number of types to the number of tokens, it is unlikely that the type-token ratio would be exactly 1.0 as this would mean that every word in an essay is unique. Another, less dramatic, example is the bin to the far right of @fig-aa-belc-histograms-1. In this case, the bin represents the number of tokens in an essay. An uptick in the number of essays with a large number of tokens is not surprising and would not typically be considered an outlier. On the other hand, consider the bin near the value 0 in the same plot. It is unlikely that a true essay would have 0, or near 0, words and therefore a closer look at the data is warranted. 
+
+It is important to recognize that outliers contribute undue influence
+to overall measures of central tendency and dispersion. To appreciate this, let's consider another helpful visualization called a **boxplot**. A boxplot is a visual representation which aims to represent the central tendency, dispersion, and distribution of a numeric variable in one plot. In @fig-aa-belc-boxplot we see a boxplot for `ttr` variable. The box in the middle of the plot represents the interquartile range (IQR) which is the range of values between the first quartile and the third quartile. The solid line in the middle of the box represents the median. The lines extending from the box are called 'whiskers' and provide the range of values which are within 1.5 times the IQR. Values outside of this range are plotted as individual points.
+
+<!-- boxplot | histogram/ boxplot side -->
+
+:::{#fig-aa-belc-boxplot-hist-ttr layout-ncol=2}
+
+```{r}
+#| label: fig-aa-belc-boxplot
+#| fig-cap: "Boxplot"
+#| fig-height: 5
+#| layout-ncol: 1
+
+p1 <- 
+  belc_essay_tbl |> 
+  ggplot(aes(y = ttr)) +
+  geom_boxplot() +
+  labs(y = "Type-Token Ratio Score", x = "") +
+  # remove x-axis labels
+  theme(axis.text.x = element_blank()) +
+  scale_y_continuous(limits = c(0.4, 1.02))
+
+p1
+```
+
+```{r}
+#| label: fig-aa-belc-hist-boxplot-comparison
+#| fig-subcap: 
+#| - "Histogram"
+#| - "Boxplot (horizontal)"
+#| fig-height: 2.1
+#| layout-nrow: 2
+
+# Calculate quantiles and mean
+quants <- 
+  belc_essay_tbl |> 
+  pull(ttr) |> 
+  quantile(probs = c(0.25, 0.5, 0.75))
+
+mean_val <- 
+  belc_essay_tbl |> 
+  pull(ttr) |> 
+  mean()
+
+# Histogram plot ----
+p2 <-
+  belc_essay_tbl |> 
+  ggplot(aes(x = ttr)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, color = "#BDBDBD", fill = "white") +
+  # geom_density() +
+  geom_vline(aes(xintercept = quants[[1]]), linetype = "solid") + # first quartile
+  geom_vline(aes(xintercept = quants[[2]]), linetype = "solid", linewidth = 1) + # median
+  geom_vline(aes(xintercept = mean_val), linetype = "dashed", linewidth = 1) + # mean
+  geom_vline(aes(xintercept = quants[[3]]), linetype = "solid") + # third quartile
+  labs(x = "", y = "") +
+  theme(axis.text.y = element_blank()) +
+  scale_x_continuous(limits = c(0.4, 1.02))
+
+p2
+
+# Boxplot ----
+p3 <- 
+  p1 + 
+  # add X annotation for mean
+  geom_segment(aes(x = -0.38, xend = 0.38, y = mean(ttr), yend = mean(ttr)), linetype = "dashed", linewidth = 1) +
+  # geom_rug() + 
+  coord_flip() +
+  labs(y = "", x = "") +
+  theme(axis.text.y = element_blank())
+
+p3
+```
+
+Boxplots and histogram for the variable `ttr`.
+:::
+
+Now let's consider boxplots from another angle. In @fig-aa-belc-hist-boxplot-comparison-2 I've plotted the boxplot horizontally, right below the histogram in @fig-aa-belc-hist-boxplot-comparison-1. In this view, we can see that a boxplot is a simplifed histogram augmented with central tendency and dispersion statistics. While histograms focus on the frequency distribution of data points, boxplots focus on the data's quartiles and potential outliers.
+
+I've added a dashed line in @fig-aa-belc-hist-boxplot-comparison-1 and @fig-aa-belc-hist-boxplot-comparison-2 to signal the mean in this set of plots, but it is not typically included. I include the dashed line to make a point: the mean is more sensitive to outliers than the median. As I pointed out in @sec-aa-central-tendency, the mean is the sum of all values divided by the number of values. If there are extreme values, the mean will be pulled in the direction of the extreme values. The median, however, is the middle value and a few extreme values have less effect. So, when central tendency is reported, if there is a sizeable difference between the mean and the median, the direction of the difference can be used to infer the presence of outliers.
+
+Returning to outliers, it is important to address them to safeguard the accuracy of the analysis. There are two main ways to address outliers: 1) transform the data and 2) eliminate observations with outliers (**trimming**). Trimming is more extreme as it removes data but can be the best approach for true outliers. Transforming the data is an approach to mitigating the influence of extreme but valid values. **Transformation** involves applying a mathematical function to the data which changes the scale and/ or shape of the distribution, but does not remove data nor does it change the relative order of the values. 
+
+In @fig-aa-belc-histogram-density-trimmed, we see two boxplots. @fig-aa-belc-boxplot-trimmed-1 is the original `ttr` data and @fig-aa-belc-boxplot-trimmed-2 reflects the data trimmed to remove outliers. In this case, we have removed essays with a type-token ratio of 1. 
+
+```{r}
+#| label: fig-aa-belc-boxplot-trimmed
+#| fig-cap: "Boxplots for `ttr` before and after trimming."
+#| fig-subcap:
+#|  - "Type-token ratio score"
+#|  - "Type-token ratio score (trimmed)"
+#| layout-ncol: 2
+
+# Boxplot (original) ----
+belc_essay_tbl |> 
+  ggplot(aes(y = ttr)) +
+  geom_boxplot() +
+  # add X annotation for mean
+  geom_segment(aes(x = -0.38, xend = 0.38, y = mean(ttr), yend = mean(ttr)), linetype = "dashed") +
+  labs(y = "Type-Token Ratio Score", x = "") +
+  # remove x-axis labels
+  theme(axis.text.x = element_blank())
+
+# Boxplot (trimmed) ----
+belc_essay_tbl <- 
+  belc_essay_tbl |> 
+  # Filter out essays with less than 10 tokens or a type-token ratio of 1
+  filter(ttr != 1) 
+
+belc_essay_tbl |> 
+  ggplot(aes(y = ttr)) +
+  geom_boxplot() +
+  # add X annotation for mean
+  geom_segment(aes(x = -0.38, xend = 0.38, y = mean(ttr), yend = mean(ttr)), linetype = "dashed") +
+  labs(y = "Type-Token Ratio Score", x = "") +
+  # remove x-axis labels
+  theme(axis.text.x = element_blank()) +
+  ylim(0.4, 1.0)
+```
+
+We can now appreciate the effect that the outliers had on the mean value of the `ttr` variable as the difference between the mean and median is now smaller. 
+
+<!-- Normal distribution/ skewed distributions -->
+
+The exploration the data points with histograms and boxplots has helped us to identify outliers. Now we turn to the question of the overall shape of the distribution. The key question is whether the observed distribution of each variable approximates the Normal Distribution, or not. 
+
+The **Normal Distribution** is a theoretical distribution where the values are symmetrically dispersed around the central tendency (mean/ median). In terms we can now understand, this means that the mean and median are the same. The Normal Distribution is important because many statistical tests assume that the data distribution is normal or near normal. 
+
+Stepping away from our BELC dataset, I've created simulated data that fit normal and non-normal, or skewed, distributions. I present each of these distributions as density plots with mean and median line overlays in @fig-aa-distributions. 
+
+```{r}
+#| label: fig-aa-distributions
+#| fig-cap: "Mean and median for normal and skewed distributions."
+#| fig-subcap:
+#|  - "Left skewed distribution"
+#|  - "Normal distribution"
+#|  - "Right skewed distribution"
+#| layout-ncol: 3
+
+shape1 = 6
+shape2 = 2
+
+# Left skewed distribution ----
+set.seed(123)
+left_skew_data <- tibble(value = rbeta(1000, shape1, shape2)) # left skewed
+
+ggplot(left_skew_data, aes(x = value)) +
+  geom_function(fun = dbeta, args = list(shape1 = shape1, shape2 = shape2), color = "black", size = 1) +
+  geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
+  geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
+  theme(axis.text = element_blank()) +
+  labs(x = "Values", y = "Density")
+
+# Normal distribution ----
+set.seed(123)
+norm_data <- tibble(value = rnorm(1000))
+
+ggplot(norm_data, aes(x = value)) +
+  geom_function(fun = dnorm, args = list(mean = 0, sd = 1), color = "black", size = 1) +
+  geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
+  geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
+  labs(x = "Values", y = "Density") +
+  theme(axis.text = element_blank())
+  
+
+# Right skewed distribution ----
+set.seed(123)
+right_skew_data <- tibble(value = rbeta(1000, shape2, shape1)) # right skewed
+
+ggplot(right_skew_data, aes(x = value)) +
+  geom_function(fun = dbeta, args = list(shape1 = shape2, shape2 = shape1), color = "black", size = 1) +
+  geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
+  geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
+  theme(axis.text = element_blank()) +
+  labs(x = "Values", y = "Density")
+
+```
+
+A **Normal Distribution**, illustrated in @fig-aa-distributions-2, is a distribution where the values are symmetrically dispersed around the central tendency (mean/ median). This means that in a theoretical distribution that the mean and median are the same. The Normal Distribution is also known as the **Gaussian Distribution** or the **Bell Curve**, for the hallmark bell shape of the distribution. In this distribution, extreme values are less likely than values near the center.
+
+A **skewed distribution** is not a specific type of distribution but rather a characteristic than many distributions can exhibit where the values are not symmetrically dispersed around the central tendency. A distribution in which values tend to disperse to the left of the central tendency is **left skewed** as in @fig-aa-distributions-1 and dispersion to the right is **right skewed** as in @fig-aa-distributions-3. 
+
+Data that are normally, or near-normally distributed are often analyzed using parametric tests while data that exhibit a skewed distributed are often analyzed using non-parametric tests. Divergence from normality is not a binary distinction. Rather, it is a matter of degree. A visual inspection is usually sufficient for experienced researchers to determine whether a distribution is normal or skewed. However, for those who are less experienced or if you want to be more precise, there are two primary measures which can help ascertain the degree to which a distribution is normal: skewness and kurtosis. **Skewness** is a measure of the degree to which a distribution is asymmetrical. **Kurtosis** is a measure of the degree to which a distribution is peaked.
+
+In @tbl-aa-skewness-kurtosis I provide the skewness and kurtosis scores for our simulated distributions along with central tendency measures for context.
+
+```{r}
+#| label: tbl-aa-skewness-kurtosis
+#| tbl-cap: "Skewness and kurtosis for normal and skewed distributions."
+
+library(moments)
+
+aa_dist_skim  <- 
+  skim_with(numeric = sfl(mean, median, skewness = skewness, kurtosis = kurtosis))
+
+# Combine the three distributions into one tibble before skimming
+tibble(
+  `Left skew` = left_skew_data$value,
+  `Normal` = norm_data$value,
+  `Right skew` = right_skew_data$value
+) |> 
+  aa_dist_skim() |> 
+  yank("numeric") |> 
+  select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |> 
+  tibble() |> 
+  kable()
+```
+
+All things distribution are matters of degree, so there are no hard and fast rules for determining whether a distribution is normal or skewed. However, there are some general guidelines that can be used to determine the degree to which a distribution is normal or skewed, as shown in @tbl-aa-skewness-kurtosis.
+
+::: {#tbl-aa-skewness-kurtosis layout-ncol=2}
+
+| Score Range | Evaluation |
+|-------------|------------|
+| -0.5 to 0.5 | Approximately symmetric |
+| -1 to -0.5 (or) 0.5 to 1 | Moderately skewed |
+| < -1 (or) > 1 | Highly skewed |
+
+: Skewness scores {#tbl-aa-skewness}
+
+| Score Range | Evaluation |
+|-------------|------------|
+| < 3 | Less peaked than normal |
+| Equal to 3 | Normal peak |
+| > 3 | More peaked than normal |
+
+: Kurtosis scores {#tbl-aa-kurtosis}
+
+Rules of thumb for skewness and kurtosis scores.
+:::
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+Another approach for visually summarizing a single numeric variable is the Empirical Cumulative Distribution Function, or *ECDF*. An ECDF plot is a summary of the cummulative proportion of each of the values of a numeric variable. In addition to providing insight into the distribution of a variable, ECDF plots can be useful in determing what proportion of the values fall above or below a certain percentage of the data. 
+:::
+
+The question is which type of distribution does each numeric variable in the BELC dataset fit? Comparing the variables `ttr`, `types` and `prop_l2` in @fig-aa-belc-histogram-density-trimmed to the three distributions in @fig-aa-distributions, we see that all three numeric variables in the BELC dataset are skewed to some degree.
+
+```{r}
+#| label: fig-aa-belc-histogram-density-trimmed
+#| fig-cap: "Histogram/ Density plots for numeric variables in the BELC dataset."
+#| fig-subcap:
+#| - "Type-token ratio score"
+#| - "Number of types"
+#| - "Proportion of L2 words"
+#| layout-ncol: 3
+
+belc_essay_tbl <- 
+  belc_essay_tbl |> 
+  # Filter out essays with less than 10 tokens
+  filter(tokens >= 10) |> 
+  anti_join(get_outliers(belc_essay_tbl, prop_l2), by = "essay_id")
+
+# Density plots ----
+
+# Type-token ratio score ----
+belc_essay_tbl |>
+  ggplot(aes(x = ttr)) +
+  geom_density() +
+  labs(x = "Type-token ratio", y = "Probability")
+
+# Number of types ----
+belc_essay_tbl |>
+  ggplot(aes(x = types)) +
+  geom_density() +
+  labs(x = "Number of types", y = "Probability")
+
+# Proportion of L2 words ----
+belc_essay_tbl |>
+  ggplot(aes(x = prop_l2)) +
+  geom_density() +
+  labs(x = "Proportion of L2 words", y = "Probability")
+```
+
+
+@fig-aa-belc-histogram-density-trimmed-1 for `ttr` has some right skewing but not as much as `types` in @fig-aa-belc-histogram-density-trimmed-2. `prop_l2` in @fig-aa-belc-histogram-density-trimmed-3 is the most skewed of the three variables. As mentioned earlier, skewed distributions can take many forms, some are more skewed than others. 
+
+To view statistics on our three variables in @fig-aa-belc-histogram-density-trimmed, we can calculate the skewness and kurtosis. 
+
+```{r}
+#| label: tbl-aa-belc-skewness-kurtosis
+#| tbl-cap: "Skewness and kurtosis for numeric variables in the BELC dataset."
+
+belc_essay_tbl |> 
+  aa_dist_skim() |>
+  yank("numeric") |> 
+  select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |>  
+  mutate(distribution = factor(distribution, levels = c("ttr", "types", "tokens", "prop_l2"))) |> 
+  arrange(distribution) |>
+  kable()
+```
+
+Given the characteristics of the numeric variables in the BELC dataset, although none of them are perfectly normal, but only `prop_l2` is highly skewed. Therefore, if we intend to use these variables 'as-is' in statistical measures or tests, we now know whether to choose parametric or non-parametric alternatives. 
+
+In the case that a variable is highly skewed, it is often useful to attempt transform the variable to reduce the skewness. In contrast to scale-based transformations (*e.g.* centering and scaling), shape-based transformations change the scale and the shape of the distribution. The most common shape-based transformation is the logarithmic transformation. The **logarithmic transformation** (log-transformation) takes the log (typically base 10) of each value in a variable. The log-transformation is useful for reducing the skewness of a variable as it compresses large values and expands small values. If the skewness is due to these factors, the log-transformation can help. 
+
+It is important to note, however, that if scale-based transformations are to be applied to a variable, they should be applied after the log-transformation as the log of negative values is undefined. 
+
+#### Interdependence
+
+<!-- Purpose: nature and strength -->
+
+We have covered the first three of the four questions we are interested in asking in a descriptive analysis. The fourth, and last, question is whether there is mutual dependence between variables. If so, what is the directionality and how strong is the dependence? Knowing the answers to these questions will help frame our approach to analysis.
+
+To assess interdependence, the number and information types of the variables under consideration are important. Let's start by considering two variables. If we are working with two variables, we are dealing with a **bivariate** relationship. Given there are three informational types (categorical, ordinal, and numeric), there are six logical bivariate combinations: categorical-categorical, categorical-ordinal, categorical-numeric, ordinal-ordinal, ordinal-numeric, and numeric-numeric.
+
+The directionality of a relationship will take the form of a tabular or graphic summary depending on the informational value of the variables involved. In @tbl-aa-summary-types, we see the appropriate summary types for each of the six bivariate combinations.
+
+|                 | Categorical       | Ordinal                     | Numeric              |
+|-----------------|-------------------|-----------------------------|----------------------|
+| **Categorical** | Contingency table | Contingency table/ Bar plot | Pivot table/ Boxplot |
+| **Ordinal**     | -                 | Contingency table/ Bar plot | Pivot table/ Boxplot |
+| **Numeric**     | -                 | -                           | Scatterplot          |
+
+: Appropriate summary types for different combinations of variable types. {#tbl-aa-summary-types}
+
+<!-- Nominal + ? -->
+
+Let's first start with the combinations that include a categorical or ordinal variable. Categorical and ordinal variables reflect measures of class-type information, with add meaningful ranks to ordinal variables. To assess a relationship with these variable types, a table is always a good place to start. When combined together, a contingency table is the appropriate table. A **contingency table** is a cross-tabulation of two class-type variables, basically a two-way frequency table. This means that three of the six bivariate combinations are assessed with a contingency table: categorical-categorical, categorical-ordinal, and ordinal-ordinal.
+
+In @tbl-aa-belc-contingency-tables we see contingency tables for the categorical variable `sex` and ordinal variable `group` in the BELC dataset.
+
+<!-- sex + group contingency table -->
+
+::: {#tbl-aa-belc-contingency-tables layout-ncol=2}
+
+```{r}
+#| label: tbl-aa-belc-contingency-tables-1
+#| tbl-cap: "Counts"
+
+belc_essay_tbl |> 
+  tabyl(group, sex) |> 
+  adorn_totals(c("row", "col")) |>
+  kable()
+```
+
+
+```{r}
+#| label: tbl-aa-belc-contingency-tables-2
+#| tbl-cap: "Percentages"
+
+belc_essay_tbl |> 
+  tabyl(group, sex) |> 
+  adorn_totals(c("row", "col")) |>
+  adorn_percentages("row") |>
+  adorn_pct_formatting(digits = 2) |>
+  # adorn_ns() |> 
+  kable()
+```
+
+Contingency tables for categorical variable `sex` and ordinal variable `group` in the BELC dataset.
+:::
+
+A contingency table may include only counts, as in @tbl-aa-belc-contingency-tables-1, or may include proportions or percentages in an effort to normalize the counts and make them more comparable, as in @tbl-aa-belc-contingency-tables-2.
+
+It is sometimes helpful to visualize a contingency table as a bar plot when there are a larger number of levels in either or both of the variables. Again, looking at the relationship between `sex` and `group`, we see that we can plot the counts or the proportions. In @fig-aa-belc-bar-plots, we see both.
+
+<!-- sex + group bar plots (counts/ proportions) -->
+
+```{r}
+#| label: fig-aa-belc-bar-plots
+#| fig-cap: "Bar plots for the relationship between `sex` and `group` in the BELC dataset."
+#| fig-subcap:
+#| - "Counts"
+#| - "Proportions"
+#| layout-ncol: 2
+
+belc_essay_tbl |> 
+  ggplot(aes(x = sex, y = after_stat(count), fill = group)) +
+  geom_bar(position = "stack", color = "black") +
+  scale_fill_brewer(palette = "Greys") +
+  labs(x = "Sex", y = "Frequency", fill = "Group") +
+  ylim(0, 80)
+
+belc_essay_tbl |>
+  ggplot(aes(x = sex, fill = group)) +
+  geom_bar(position = "fill", color = "black") +
+  scale_fill_brewer(palette = "Greys") +
+  labs(x = "Sex", y = "Proportion", fill = "Group")
+```
+
+To summarize and assess the relationship between a categorical or an ordinal variable and a numeric variable, we cannot use a contingency table. Instead, this type of relationship is best summarized in a table using a summary statistic in a **pivot table**. A pivot table is a table in which a class-type variable is used to group a numeric variable by some summary statistic appropriate for numeric variables, *e.g.* mean, median, standard deviation, *etc.*
+
+In @tbl-aa-belc-pivot-table, we see a pivot table for the relationship between `group` and `tokens` in the BELC dataset. Specifically, we see the mean number of tokens by group.
+
+<!-- group + tokens pivot table (mean) -->
+
+```{r}
+#| label: tbl-aa-belc-pivot-table
+#| tbl-cap: "Pivot table for the relationship between `group` and `tokens` in the BELC dataset."
+
+belc_essay_tbl |> 
+  group_by(group) |> 
+  summarise(mean_tokens = mean(tokens)) |> 
+  kable()
+```
+
+We see that the mean number of tokens increases from Group T1 to T4, which is consistent with the idea that the students in the higher groups are writing longer essays. 
+
+Although a pivot table may be appropriate for targeted numeric summaries, a visualization is often more informative for assessing the dispersion and distribution of a numeric variable by a categorical or ordinal variable. There are two main types of visualizations for this type of relationship: a boxplot and a **violin plot**. A violin plot is a visualization that summarizes the distribution of a numeric variable by a categorical or ordinal variable, adding the overall shape of the distribution, much as a density plot does for histograms. 
+
+In @fig-aa-belc-boxplot-violin-plot, we see both a boxplot and a violin plot for the relationship between `group` and `tokens` in the BELC dataset.
+
+<!-- group + tokens boxplot/ voilin plot -->
+
+```{r}
+#| label: fig-aa-belc-boxplot-violin-plot
+#| fig-cap: "Boxplot and violin plot for the relationship between `group` and `tokens` in the BELC dataset."
+#| fig-subcap:
+#| - "Boxplot"
+#| - "Violin plot"
+#| layout-ncol: 2
+
+belc_essay_tbl |> 
+  ggplot(aes(x = group, y = tokens)) +
+  geom_boxplot(color = "black") +
+  labs(x = "Group", y = "Tokens")
+
+belc_essay_tbl |>
+  ggplot(aes(x = group, y = tokens)) +
+  geom_violin(color = "black") +
+  labs(x = "Group", y = "Tokens")
+```
+
+From the boxplot in @fig-aa-belc-boxplot-violin-plot-1, we see that the general trend towards more tokens used by students in higher groups. But we can also appreciate the dispersion of the data within each group looking at the boxes and whiskers. On the surface it appears that the data for groups T1 and T3 are closer to each other than groups T2 and T4, in which there is more variability within these groups. Furthermore, we can see outliers in groups T1 and T3, but not in groups T2 and T4. From the violin plot in @fig-aa-belc-boxplot-violin-plot-2, we can see the same information, but we can also see the overall shape of the distribution of tokens within each group. In this plot, it is very clear that group T4 includes a wide range of token counts.
+
+<!-- Numeric + Numeric -->
+
+The last bivariate combination is numeric-numeric. To summarize this type of relationship a scatterplot is used. A **scatterplot** is a visualization that plots each data point as a point in a two-dimensional space, with one numeric variable on the x-axis and the other numeric variable on the y-axis. Depending on the type of relationship you are trying to assess, you may want to add a trend line to the scatterplot. A trend line is a line that summarizes the overall trend in the relationship between the two numeric variables. To assess the extent to which the relationship is linear, a straight line is drawn which minimizes the distance between the line and the points.
+
+In @fig-aa-belc-scatter-plot, we see a scatterplot and a scatterplot with a trend line for the relationship between `ttr` and `types` in the BELC dataset. 
+
+<!-- ttr + types scatter plot: points, points + trend line -->
+
+```{r}
+#| label: fig-aa-belc-scatter-plot
+#| fig-cap: "Scatter plot for the relationship between `ttr` and `types` in the BELC dataset."
+#| fig-subcap:
+#| - "Points"
+#| - "Points with a linear trend line"
+#| layout-ncol: 2
+
+belc_essay_tbl |> 
+  ggplot(aes(x = types, y = ttr)) +
+  geom_point(color = "black", alpha = 0.5) +
+  labs(x = "Number of types", y = "Type-Token Ratio score")
+
+belc_essay_tbl |>
+  ggplot(aes(x = types, y = ttr)) +
+  geom_point(color = "black", alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed", color = "black", size = 1) +
+  labs(x = "Number of types", y = "Type-Token Ratio score")
+```
+
+We see that there is an apparent positive relationship between these two variables, which is consistent with the idea that as the number of types increases, the type-token ratio increases. In other words, as the number of unique words increases, so does the lexical diversity of the text. Since we are evaluating a linear relationship, we are assessing the extent to which there is a **correlation** between `ttr` and `types`. A correlation simply means that as the values of one variable change, the values of the other variable change in a consistent manner.
+
+<!-- Assocation/ Correlation strength -->
+
+Once a sense of the directionality of a relationship can be established, the next step is to gauge the relative strength, or association. **Association** refers to any relationship in which there is a dependency between two variables. Quantitative measures of association, in combination with tabular and visual summaries, can provide a more complete picture of the relationship between two variables.
+
+There are a number of measures of assocation, depending on the types of variables being assessed and, for numeric variables, whether the distribution is normal (parametric) or non-normal (non-parametric), as seen in @tbl-aa-association-measures.
+
+
+|                                 | Categorical            | Ordinal                 | Numeric<br>*Non-parametric* | Numeric<br>*Parametric*   |
+|---------------------------------|------------------------|-------------------------|-----------------------------|---------------------------|
+| **Categorical**                 | Chi-square $\chi^2$, Cramér's $V$ | Goodman and Kruskal's $\gamma$ | Rank biserial Correlation   | Point-biseral Correlation |
+| **Ordinal**                     | -                      | Kendall's $\tau$             | Kendall's $\tau$                  | Pearson's $r$               |
+| **Numeric**<br>*Non-parametric* | -                      | -                       | Kendall's $\tau$                  | Pearson's $r$               |
+| **Numeric**<br>*Parametric*     | -                      | -                       | -                           | Pearson's $r$               |
+
+: Measures of association or correlation strength for different combinations of variable types. {#tbl-aa-association-measures tbl-colwidths="[20, 20, 20, 20, 20]"}
+
+Association measures often are expressed as a number between -1 and 1, where 0 indicates no association, -1 indicates a perfect negative association, and 1 indicates a perfect positive association. The closer the number is to 0, the weaker the association. The closer the number is to -1 or 1, the stronger the association. Association statistics are often accompanied by a **confidence interval** (CI), which is a range of values that is likely to contain the true value of the association in the population. The confidence interval is expressed as a percentage, such as 95%, which means that if we were to repeat the study 100 times, 95 of those studies would produce a confidence interval that contains the true value of the association in the population. If the range between the lower and higher bounds of the confidence interval contains 0, then the association is likely no different than chance.
+
+Given these measures and interpretations, let's consider the different types of bivariate relationships we have seen so far in the BELC dataset. The first interdependence we explored involved the categorical variable `sex` and the ordinal variable `group`. This relationship may not be of primary interest to a study on L2 writing, but it is a good example of how to assess the strength of an association between a categorical and ordinal variable. Furthermore, it could be the case that we want to assess whether we have widely unbalanced female/ male proportions in our time groups. 
+
+Using @tbl-aa-association-measures, we see that we can use Goodman and Kruskal's $\gamma$ (gamma) to assess the strength of the association between these two variables. The measures of association in @tbl-aa-gamma suggest that the proportion of male participants is higher in group T1 and lower in group T2. However, these associations are moderately strong, as the gamma value is near $\pm$ 0.4.
+
+<!-- Perform Gamma: sex + group -->
+
+```{r}
+#| label: tbl-aa-gamma
+#| tbl-cap: "Gamma for the relationship between `sex` and `group` in the BELC dataset."
+
+library(correlation)
+
+assoc_sex_group <- 
+  belc_essay_tbl |> 
+  select(sex, group) |> 
+  correlation(include_factors = TRUE, method = "gamma")
+
+assoc_sex_group |> 
+  filter(p < .05 & abs(r) < 1) |> 
+  select(1:6) |> 
+  kable()
+```
+
+When paired with @fig-aa-belc-bar-plots we can appreciate that groups T1 and T2 have contrasting proportions of females to males and that groups T3 and T4 are more closely proportioned. This observation should be considered when approaching statistical analyses in which categorical variables required (near) equal proportions of categories.
+
+<!-- Perform Pearson's Correlation: group + tokens -->
+
+Now let's take a look at a more interesting relationship, the one between the ordinal variable `group` and the numeric variable `tokens`. Since we determined that `tokens` was near normally distributed, we can choose the parametric version of our association measure, Pearson's $r$. The measures of association in @tbl-aa-pearson suggest that there is a negative association between group T1 and a positive one betwen group T4 and `tokens`, which is consistent with the idea that as the group number increases, the number of tokens increases. These associations are moderate to strong, as the Pearson's $r$ values are near $\pm$ 0.5. However, the other groups (T2 and T3) have very weak assocations with `tokens` and the CI includes 0, which means that the association is likely no different than chance.  
+
+```{r}
+#| label: tbl-aa-pearson
+#| tbl-cap: "Pearson's r for the relationship between `group` and `tokens` in the BELC dataset."
+
+assoc_group_tokens <- 
+  belc_essay_tbl |> 
+  select(group, tokens) |> 
+  correlation(include_factors = TRUE, method = "pearson")
+
+assoc_group_tokens |> 
+  filter(Parameter2 == "tokens") |> 
+  # filter(p < .05 & abs(r) < 1) |> 
+  select(1:6) |> 
+  kable()
+```
+
+These association measures suggest that there is a relationship between `group` and `tokens`, but that the relationship is not the same for all groups. This may due to a number of factors, such as the number of participants in each group, the effect of outliers within particular levels, etc. or may simply underscore that the relationship between `group` and `tokens` is not linear. What we do with this information will depend on our research aims. Whatever the case, we can use these measures to inform our next steps, as we will see in the next section.
+
+<!-- Perform Pearson's Correlation: ttr + types -->
+
+Finally, let's look at the relationship between the numeric variables `ttr` and `types`. Since we determined both `ttr` and `types` are normally distributed, we can choose the parametric version of our association measure, Pearson's $r$. The measures of association in @tbl-aa-pearson-2 suggest that there is a negative association between `ttr` and `types`, which is consistent with the idea that as the number of types increases, the type-token ratio decreases. This association is strong, as Pearson's $r$ value is near 0.6. 
+
+```{r}
+#| label: tbl-aa-pearson-2
+#| tbl-cap: "Pearson's r for the relationship between `ttr` and `types` in the BELC dataset."
+
+assoc_ttr_types <- 
+  belc_essay_tbl |> 
+  select(ttr, types) |> 
+  correlation(include_factors = TRUE, method = "pearson")
+
+assoc_ttr_types |>
+  filter(p < .05 & abs(r) < 1) |> 
+  select(1:6) |> 
+  kable()
+```
+
+Before moving on to the next section, it is important to remember than through the process of diagnostic measures, we gain a thorough understanding of our data's characteristics and quality, preparing us for the next step in our analysis. However, remember that these measures do not exist in isolation. The decisions we make at this stage, from handling missing data to understanding the distribution of our variables, can have significant implications on our subsequent analysis. So, this initial step of data analysis deserves our careful attention and scrutiny.
+
+## Analytic methods 
+
+Interrogate your data to analyze patterns and relationships. Aligning approach with the question you are asking of your data.
+
+### Exploratory data analysis (EDA)
+
+data-driven, hypothesis-generating
+
+  - Categorical: Distributions (frequency, co-occurrence) and groupings (clustering)
+  - Numeric: Dimensions (PCA, t-SNE, Topic modeling) and groupings (vector space models)
+
+### Predictive data analysis (PDA)
+
+data-driven/ theory-driven
+
+  - Categorical: Classification (logistic regression, decision trees, naive Bayes)
+  - Numeric: Regression (linear regression, SVM, neural networks)
+
+### Inferential data analysis (IDA)
+
+theory-driven, hypothesis-testing
+
+  - Categorical: Chi-square, ANOVA, Logistic regression
+  - Numeric: t-test, Correlation, Linear regression
+
+## Evaluation strategies
+
+Interpret your data to assess the quality, relevance, and usefulness of the results in relation to your objectives.
+
+### Qualitative leaning
+
+EDA (Exploratory Data Analysis) often involves a mix of qualitative and quantitative evaluation methods. While visualizations and manual inspection of the data can be considered qualitative, there are also quantitative measures like correlation coefficients, summary statistics, and distribution metrics that can be used in EDA.
+
+- summaries/ visualizations
+  - distributions
+- connections/ relationships
+  - similarity/ dissimilarity
+
+### Quantitative leaning
+
+PDA (Predictive Data Analysis) typically focuses on quantitative evaluation methods, such as accuracy, precision, recall, F1-score, and other performance metrics for predictive models. However, qualitative evaluation can also play a role in understanding the model's behavior, interpreting results, and identifying potential biases or limitations.
+
+IDA (Inferential Data Analysis) usually relies on quantitative evaluation methods, such as hypothesis testing, confidence intervals, and effect sizes, to draw conclusions about populations based on samples. Nonetheless, qualitative evaluation can be useful in interpreting the results and providing context for the findings.
+
+- model evaluation
+  - Bootstrapping, cross-validation
+  - Confidence intervals
+- model performance
+  - Accuracy, precision, recall, F1-score/ RMSE, MAE, MSE
+  - Effect sizes
+
+While EDA may lean more towards qualitative evaluation and PDA and IDA tend to focus on quantitative evaluation, all three types of analysis can benefit from a combination of both qualitative and quantitative evaluation methods.
+
+
+## Communicate results
+
+Communicate your data to share your findings with others. Whether part of a journal, blog, presentation, report, article, book, etc. it is important to document your analysis process and results in a way that is reproducible and transparent. 
+
+- Document your process
+  - Create a codebook. This documents the key decisions you made in your analysis, including the variables you used, how you transformed them, and any other important information about your data.
+  - Share your code. This allows others to reproduce your analysis and verify your results.
+  - Comment your code. This helps others understand your code and your thought process.
+- Document your results
+  - Create a report. This allows you to share your findings with others.
+    - A report will contain a narrative of your analysis, including the research question, the data you used, the methods you applied, and the results you obtained.
+
+
+
+
+----
+<!-- Previous content -->
+
 
 ## Descriptive assessment {#sec-aa-descriptive}
 
@@ -149,7 +1360,7 @@ write_rds(x = belc, file = "data/approaching-analysis/belc.rds")
 belc <- read_rds(file = "data/approaching-analysis/belc.rds") # read belc dataset from disk
 ```
 
-To ground this discussion I will introduce a new dataset. This dataset is drawn from the [Barcelona English Language Corpus (BELC)](https://slabank.talkbank.org/access/English/BELC.html), which is found in the [TalkBank repository](http://talkbank.org/). I've selected the "Written composition" task from this corpus which contains writing samples from second language learners of English at different ages. Participants were given the task of writing for 15 minutes on the topic of "Me: my past, present and future". Data was collected for many (but not all) participants up to four times over the course of seven years. In @tbl-belc-overview I've included the first 10 observations from the dataset which reflects structural and transformational steps I've done so we start with a tidy dataset.
+To ground this discussion I will introduce a new dataset. This dataset is drawn from the [Barcelona English Language Corpus (BELC)](https://slabank.talkbank.org/access/English/BELC.html), which is found in the [TalkBank repository](http://talkbank.org/). I've selected the "Written composition" task from this corpus which contains writing samples from second language learners of English at different ages. Participants were given the task of writing for 15 minutes on the topic of "Me: my past, present and future". Data was collected for many (but not all) participants up to four times over the course of seven years. In ... I've included the first 10 observations from the dataset which reflects structural and transformational steps I've done so we start with a tidy dataset.
 
 ```{r belc-overview, echo=FALSE}
 #| label: tbl-belc-overview
@@ -602,7 +1813,7 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 
 When CI ranges overlap, just as with ribbons in scatterplots, the likelihood that the differences between levels are 'real' is diminished.
 
-To gauge the effect size of this relationship we can use *Spearman's rho* for rank-based coefficients. The score is `r cor(as.numeric(belc$age_group), belc$num_tokens, method = "spearman")` indicating that the relationship between `age_group` and `num_tokens` is quite strong. [^3]
+To gauge the effect size of this relationship we can use *Kendall's τ* for rank-based coefficients. The score is `r cor(as.numeric(belc$age_group), belc$num_tokens, method = "spearman")` indicating that the relationship between `age_group` and `num_tokens` is quite strong. [^3]
 
 [^3]: To calculate effect sizes for the difference between two means, *Cohen's d* is used.
 
@@ -779,7 +1990,7 @@ In sum, a dataset is information but when the observations become numerous or co
 * Interpret the results in the context of the research question(s) using domain knowledge and qualitative methods (uncover).
 
 
-[Evaluate] Predictive Data Analysis (PDA): Supervised machine learning to predict some target outcome variable. Attempt examine strength of relationships between variables and variable types and the target variable of interest. (examine relationships --data-/ hypothesis-driven)
+[Examine] Predictive Data Analysis (PDA): Supervised machine learning to predict some target outcome variable. Attempt examine strength of relationships between variables and variable types and the target variable of interest. (examine relationships --data-/ hypothesis-driven)
 - Indicate research goal: to examine strength of relationships between variables and the target variable of interest.
 - Identify approach: Identify the target variable of interest and then identify the variables of interest. (feature engineering)
 * Interrogate the variables using statistical learning for prediction, comparison or the nature of the research goal (decision-driven, insight-driven)

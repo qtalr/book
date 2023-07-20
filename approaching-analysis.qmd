@@ -67,7 +67,7 @@ Formatting:
 #| label: aa-packages
 
 # Avoid kableextra from outputting HTML on kable tables
-options(kableExtra.auto_format = FALSE) 
+options(kableExtra.auto_format = FALSE)
 
 pacman::p_load(TBDBr, skimr, janitor, kableExtra, effectsize, patchwork)
 ```
@@ -105,7 +105,7 @@ A descriptive assessment of the dataset includes a set of diagnostic measures an
 corpus_name <- "slabank"
 corpora <- c("slabank", "English", "BELC", "compositions")
 
-# Get tokens ---- 
+# Get tokens ----
 belc_tokens_tbl <-
   getTokens(
     corpusName = corpus_name, # corpus name
@@ -113,7 +113,7 @@ belc_tokens_tbl <-
   ) |> # corpus path
   unnest(everything()) # unnest variables
 
-# Get participants ---- 
+# Get participants ----
 belc_participants_tbl <-
   getParticipants(
     corpusName = corpus_name, # corpus name
@@ -122,31 +122,32 @@ belc_participants_tbl <-
   unnest(everything()) # unnest variables
 
 # Join tokens and participants ----
-belc_parts_tokens_tbl <- 
+belc_parts_tokens_tbl <-
   left_join(belc_participants_tbl, belc_tokens_tbl)
 
 # Wrangling steps ----
-belc_tbl <- 
-  belc_parts_tokens_tbl |> 
+belc_tbl <-
+  belc_parts_tokens_tbl |>
   # remove compositions-2014/ data
-  filter(str_detect(path, "/compositions/")) |> 
+  filter(str_detect(path, "/compositions/")) |>
   # separate time_group and part_id
-  separate(filename, c("time_group", "part_id"), sep = "c") |> 
+  separate(filename, c("time_group", "part_id"), sep = "c") |>
   # remove 2B time group
-  filter(time_group != "2B") |> 
+  filter(time_group != "2B") |>
   # replace "A" with "T" in time_group labels
-  mutate(time_group = str_remove(time_group, "A")) |> 
+  mutate(time_group = str_remove(time_group, "A")) |>
   mutate(time_group = str_c("T", time_group, sep = "")) |>
   # remove redundant variables
-  select(-path, -who, -name, -role, -language, -age) |> 
+  select(-path, -who, -name, -role, -language, -age) |>
   # select names and order
-  select(part_id, sex, group = time_group,
-    month_age = monthage,  num_words = numwords,
-    num_utts = numutts, avg_utt = avgutt, median_utt = medianutt, 
+  select(part_id, sex,
+    group = time_group,
+    month_age = monthage, num_words = numwords,
+    num_utts = numutts, avg_utt = avgutt, median_utt = medianutt,
     utt_id = uid, word_id = wordnum, word, lemma = stem, pos
-  ) |> 
+  ) |>
   # subset columns
-  select(part_id:month_age, utt_id:pos) |> 
+  select(part_id:month_age, utt_id:pos) |>
   # arrange observations
   arrange(part_id, utt_id, word_id)
 
@@ -175,10 +176,10 @@ In @tbl-aa-belc-dd we see the data dictionary for the BELC dataset which reflect
 #| tbl-cap: "Data dictionary for the BELC dataset."
 
 # Data dictionary ----
-belc_dd |> 
+belc_dd |>
   # reorder to match understanding data chapter
-  select(everything(), description) |> 
-  kable() |> 
+  select(everything(), description) |>
+  kable() |>
   kable_styling()
 ```
 
@@ -199,19 +200,19 @@ The most basic and usually the first step is to check for **missing data** to en
 #| tbl-cap: "Summary output for missing values in the BELC dataset."
 
 # Skim missing data ----
-belc_tbl |> 
+belc_tbl |>
   # skim data
-  skim() |> 
+  skim() |>
   # create tibble
-  tibble() |> 
+  tibble() |>
   # select variables
   select(
     variable = skim_variable,
     type = skim_type,
     n_missing, complete_rate
-) |> 
+  ) |>
   # print table
-  kable() |> 
+  kable() |>
   kable_styling()
 ```
 
@@ -229,13 +230,13 @@ In either case, it is important to consider the implications of missing data for
 #| label: aa-belc-missing-data-impute
 
 # Impute missing values
-belc_tbl <- 
-  belc_tbl |> 
+belc_tbl <-
+  belc_tbl |>
   # pos == n and lemma == <NA>
   mutate(lemma = case_when(
     pos == "n" & is.na(lemma) ~ word,
     TRUE ~ lemma
-  )) |> 
+  )) |>
   # lemma not: I, football, basketball, english
   mutate(pos = case_when(
     is.na(pos) & !(word %in% c("I", "football", "basketball", "english")) ~ "L2",
@@ -260,22 +261,22 @@ For categorical variables, this may include values that are not expected or are 
 #| tbl-cap: "Summary output for categorical variables in the BELC dataset."
 
 # Skim categorical data ----
-belc_tbl |> 
+belc_tbl |>
   # skim data
-  skimr::skim() |> 
+  skimr::skim() |>
   # filter to categorical variables
-  yank("character") |> 
+  yank("character") |>
   # create tibble
-  tibble() |> 
+  tibble() |>
   # select variables
   select(
     variable = skim_variable,
     min_chars = min,
     max_chars = max,
     num_unique = n_unique
-) |> 
+  ) |>
   # print table
-  kable() |> 
+  kable() |>
   kable_styling()
 ```
 
@@ -292,7 +293,7 @@ On the other hand, coding anomalies are values that are not expected or are not 
 #| tbl-cap: "First 10 observations for variables in the BELC dataset."
 
 # Variables ----
-belc_tbl |> 
+belc_tbl |>
   slice_head(n = 10) |>
   kable() |>
   kable_styling()
@@ -304,8 +305,8 @@ Leaving `month_age` aside, we see that the other two numeric variables `utt_id` 
 #| label: aa-belc-numeric-adjust
 
 # Adjust numeric variables ----
-belc_tbl <- 
-  belc_tbl |> 
+belc_tbl <-
+  belc_tbl |>
   # adjust utt_id and word_id
   mutate(
     utt_id = utt_id + 1,
@@ -328,10 +329,10 @@ To that end, let's consider a reconfiguration of the BELC dataset, in @tbl-aa-be
 # Reconfigure BELC dataset ----
 # Unit of observation: essay
 
-belc_essay_tbl <- 
-  belc_tbl |> 
+belc_essay_tbl <-
+  belc_tbl |>
   # group by essay
-  group_by(part_id, sex, group) |> 
+  group_by(part_id, sex, group) |>
   # summarize data
   summarize(
     # number of words
@@ -339,29 +340,30 @@ belc_essay_tbl <-
     # number of unique words
     types = n_distinct(word),
     # number l1 tokens
-    l1_tokens = sum(str_count(pos, "L2"))) |> 
+    l1_tokens = sum(str_count(pos, "L2"))
+  ) |>
   # ungroup by essay
-  ungroup() |> 
+  ungroup() |>
   mutate(
     # proportion of L2 to L1 words
-    prop_l2 = 1 - round((l1_tokens/ tokens), 3), 
+    prop_l2 = 1 - round((l1_tokens / tokens), 3),
     # type/ token ratio
-    ttr = round((types/ tokens), 3), 
+    ttr = round((types / tokens), 3),
     # assign number to essays
     essay_id = str_c("E", row_number(), sep = "")
-  ) |> 
+  ) |>
   # select variables
   select(essay_id, part_id:types, ttr, prop_l2)
 
-belc_essay_tbl <- 
-  belc_essay_tbl |> 
+belc_essay_tbl <-
+  belc_essay_tbl |>
   mutate(
     across(
-      where(is.character), 
+      where(is.character),
       factor
     )
-  ) |> 
-  mutate(group = fct_inorder(group, ordered = TRUE)) |> 
+  ) |>
+  mutate(group = fct_inorder(group, ordered = TRUE)) |>
   mutate(group = fct_relevel(group, "T1", "T2", "T3", "T4"))
 
 # Write data ----
@@ -379,11 +381,11 @@ create_data_dictionary(belc_essay_tbl, "data/approaching-analysis/belc_essay_tbl
 belc_essay_tbl <- read_rds("data/approaching-analysis/belc_essay_tbl.rds")
 
 # View data ----
-belc_essay_tbl |> 
+belc_essay_tbl |>
   # select first 10 observations
-  slice_head(n = 10) |> 
+  slice_head(n = 10) |>
   # print table
-  kable() |> 
+  kable() |>
   kable_styling()
 ```
 
@@ -406,15 +408,15 @@ In descriptive statistics, there are four basic questions that are asked of each
 
 # Function: calculate the mode ----
 calculate_mode <- function(x) {
-  x |>  
-  # convert to tibble
-  as_tibble() |>  
-  # count values
-  count(value) |>
-  # select most frequent value  
-  filter(n == max(n)) |> 
-  # pull value
-  pull(value)
+  x |>
+    # convert to tibble
+    as_tibble() |>
+    # count values
+    count(value) |>
+    # select most frequent value
+    filter(n == max(n)) |>
+    # pull value
+    pull(value)
 }
 
 # Function: calculate the normalized entropy ----
@@ -428,7 +430,7 @@ calculate_norm_entropy <- function(x) {
   # calculate max entropy
   max_entropy <- log2(length(prop))
   # calculate normalized entropy
-  normalized_entropy <- entropy/max_entropy
+  normalized_entropy <- entropy / max_entropy
   return(normalized_entropy)
 }
 
@@ -437,7 +439,8 @@ aa_skim <- skim_with(
   factor = sfl(top_counts = top_counts, norm_entropy = calculate_norm_entropy),
   character = sfl(top_counts = top_counts, norm_entropy = calculate_norm_entropy),
   numeric = sfl(mean = mean, median = median, sd = sd, iqr = IQR),
-  append = FALSE)
+  append = FALSE
+)
 ```
 
 The central tendency is measure which aims to summarize the data points in a variable as the most representative, middle or most typical value. There are three common measures of central tendency: the mode, mean and median. Each differ in how they summarize the data points.
@@ -464,13 +467,13 @@ Let's now consider the relevant central tendency and dispersion of the variables
 #| label: tbl-aa-belc-descriptive-stats-1
 #| tbl-cap: "Categorical variables"
 
-belc_essay_tbl |> 
+belc_essay_tbl |>
   # custom skim function
-  aa_skim() |> 
-  yank("factor") |> 
+  aa_skim() |>
+  yank("factor") |>
   select(-n_missing, -complete_rate) |>
-  select(variable = skim_variable, everything()) |> 
-  tibble() |> 
+  select(variable = skim_variable, everything()) |>
+  tibble() |>
   kable()
 ```
 
@@ -478,12 +481,12 @@ belc_essay_tbl |>
 #| label: tbl-aa-belc-descriptive-stats-2
 #| tbl-cap: "Numeric variables"
 
-belc_essay_tbl |> 
-  aa_skim() |> 
-  yank("numeric") |> 
+belc_essay_tbl |>
+  aa_skim() |>
+  yank("numeric") |>
   select(-n_missing, -complete_rate) |>
-  select(variable = skim_variable, everything()) |> 
-  tibble() |> 
+  select(variable = skim_variable, everything()) |>
+  tibble() |>
   # round to 2 digits
   kable(digits = 2)
 ```
@@ -505,17 +508,18 @@ In @tbl-aa-belc-descriptive-stats-standardized we see the same summary statistic
 #| label: tbl-aa-belc-descriptive-stats-standardized
 #| tbl-cap: "Standardized central tendency and dispersion of numeric variables"
 
-belc_essay_tbl |> 
-  mutate(tokens = scale(tokens) |> as.numeric(), 
-        types = scale(types) |> as.numeric(),
-        ttr = scale(ttr) |> as.numeric(),
-        prop_l2 = scale(prop_l2) |> as.numeric()
-        ) |>
+belc_essay_tbl |>
+  mutate(
+    tokens = scale(tokens) |> as.numeric(),
+    types = scale(types) |> as.numeric(),
+    ttr = scale(ttr) |> as.numeric(),
+    prop_l2 = scale(prop_l2) |> as.numeric()
+  ) |>
   aa_skim() |>
-  yank("numeric") |> 
+  yank("numeric") |>
   select(-n_missing, -complete_rate) |>
-  select(variable = skim_variable, everything()) |> 
-  tibble() |> 
+  select(variable = skim_variable, everything()) |>
+  tibble() |>
   # round to 2 digits
   kable(digits = 2)
 ```
@@ -538,11 +542,11 @@ When assessing the distribution of categorical variables, we can use a frequency
 #| label: tbl-aa-belc-frequency-table
 #| tbl-cap: "Frequency table for the variable `sex`."
 
-belc_essay_tbl |> 
-  tabyl(sex) |> 
-  tibble() |> 
+belc_essay_tbl |>
+  tabyl(sex) |>
+  tibble() |>
   select(sex, frequency = n, proportion = percent) |>
-  kable() |> 
+  kable() |>
   kable_styling()
 ```
 
@@ -553,7 +557,7 @@ A **bar plot** is a type of plot where the x-axis is a categorical variable and 
 ```{r}
 #| label: fig-aa-belc-barplots
 #| fig-cap: "Bar plots for categorical variables `sex`, `group`, `part_id` in the BELC dataset."
-#| fig-subcap: 
+#| fig-subcap:
 #|   - "Sex"
 #|   - "Time group"
 #|   - "Participant ID"
@@ -563,10 +567,10 @@ A **bar plot** is a type of plot where the x-axis is a categorical variable and 
 create_barplot <- function(data, variable, x_lab = NULL, y_lab = NULL) {
   # Create a frequency table for the variable
   freq_table <- data |> count({{ variable }})
-  
+
   # Set the y-limits to 0 to the sum of the variable frequencies
   ylim <- c(0, sum(freq_table$n))
-  
+
   # Create the bar plot
   ggplot(freq_table, aes(x = {{ variable }}, y = n)) +
     geom_bar(stat = "identity") +
@@ -577,17 +581,17 @@ create_barplot <- function(data, variable, x_lab = NULL, y_lab = NULL) {
 # Bar plots for categorical variables ----
 
 # Bar plot `sex` ----
-belc_essay_tbl |> 
+belc_essay_tbl |>
   create_barplot(sex, "Sex", "Frequency")
 
 # Bar plot `group` ----
-belc_essay_tbl |> 
+belc_essay_tbl |>
   create_barplot(group, "Time group", "Frequency")
 
 # [x] consider how to set y-limits, as part_id frequencies are numerous and small
 # Bar plot `part_id` ----
-belc_essay_tbl |> 
-  create_barplot(part_id, "Participant ID", "Frequency") + 
+belc_essay_tbl |>
+  create_barplot(part_id, "Participant ID", "Frequency") +
   ylim(0, 4) + # add y-limits particular to part_id
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -611,19 +615,19 @@ The most common visualizations of the distribution of a numeric variable are his
 ```{r}
 #| label: fig-aa-belc-histogram-density-tokens
 #| fig-cap: "Distribution plots for the variable `tokens`."
-#| fig-subcap: 
+#| fig-subcap:
 #|  - "Histogram"
 #|  - "Density plot"
 #| fig-height: 2
 #| layout-ncol: 2
 
 # Define range for x-axis
-x_range <- belc_essay_tbl |> 
-  pull(tokens) |> 
+x_range <- belc_essay_tbl |>
+  pull(tokens) |>
   range()
 
-# Histogram ---- 
-belc_essay_tbl |> 
+# Histogram ----
+belc_essay_tbl |>
   ggplot(aes(x = tokens)) +
   geom_histogram(bins = 30, color = "black", fill = "white") +
   labs(x = "Number of tokens", y = "Frequency") +
@@ -653,15 +657,15 @@ In @fig-aa-belc-histograms we see histograms for the variables `tokens`, `types`
 #| layout-ncol: 3
 
 # Histograms ----
-hist_tokens_p <- 
-  belc_essay_tbl |> 
+hist_tokens_p <-
+  belc_essay_tbl |>
   ggplot(aes(x = tokens)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
   # geom_density() +
   labs(x = "Number of tokens", y = "") +
   theme(axis.text.y = element_blank())
 
-hist_types_p <- 
+hist_types_p <-
   belc_essay_tbl |>
   ggplot(aes(x = types)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
@@ -669,7 +673,7 @@ hist_types_p <-
   labs(x = "Number of types", y = "") +
   theme(axis.text.y = element_blank())
 
-hist_ttr_p <- 
+hist_ttr_p <-
   belc_essay_tbl |>
   ggplot(aes(x = ttr)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
@@ -694,8 +698,8 @@ It is important to recognize that outliers contribute undue influence to overall
 #| fig-width: 4
 #| fig-asp: .6
 
-p1 <- 
-  belc_essay_tbl |> 
+p1 <-
+  belc_essay_tbl |>
   ggplot(aes(y = ttr)) +
   geom_boxplot() +
   labs(y = "Type-Token Ratio Score", x = "") +
@@ -721,19 +725,19 @@ Now let's consider boxplots from another angle. In @fig-aa-belc-histogram-boxplo
 #| fig-asp: .6
 
 # Calculate quantiles and mean
-quants <- 
-  belc_essay_tbl |> 
-  pull(ttr) |> 
+quants <-
+  belc_essay_tbl |>
+  pull(ttr) |>
   quantile(probs = c(0.25, 0.5, 0.75))
 
-mean_val <- 
-  belc_essay_tbl |> 
-  pull(ttr) |> 
+mean_val <-
+  belc_essay_tbl |>
+  pull(ttr) |>
   mean()
 
 # Histogram plot ----
 p2 <-
-  belc_essay_tbl |> 
+  belc_essay_tbl |>
   ggplot(aes(x = ttr)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "#BDBDBD", fill = "white") +
   # geom_density() +
@@ -748,11 +752,11 @@ p2 <-
 p2
 
 # Boxplot ----
-p3 <- 
-  p1 + 
+p3 <-
+  p1 +
   # add X annotation for mean
   geom_segment(aes(x = -0.38, xend = 0.38, y = mean(ttr), yend = mean(ttr)), linetype = "dashed", linewidth = 1) +
-  # geom_rug() + 
+  # geom_rug() +
   coord_flip() +
   labs(y = "", x = "") +
   theme(axis.text.y = element_blank())
@@ -775,7 +779,7 @@ In @fig-aa-belc-histogram-density-trimmed, we see two boxplots. @fig-aa-belc-box
 #| layout-ncol: 2
 
 # Boxplot (original) ----
-belc_essay_tbl |> 
+belc_essay_tbl |>
   ggplot(aes(y = ttr)) +
   geom_boxplot() +
   # add X annotation for mean
@@ -785,12 +789,12 @@ belc_essay_tbl |>
   theme(axis.text.x = element_blank())
 
 # Boxplot (trimmed) ----
-belc_essay_tbl <- 
-  belc_essay_tbl |> 
+belc_essay_tbl <-
+  belc_essay_tbl |>
   # Filter out essays with less than 10 tokens or a type-token ratio of 1
-  filter(ttr != 1) 
+  filter(ttr != 1)
 
-belc_essay_tbl |> 
+belc_essay_tbl |>
   ggplot(aes(y = ttr)) +
   geom_boxplot() +
   # add X annotation for mean
@@ -820,8 +824,8 @@ Stepping away from our BELC dataset, I've created simulated data that fit normal
 #|  - "Right skewed distribution"
 #| layout-ncol: 3
 
-shape1 = 6
-shape2 = 2
+shape1 <- 6
+shape2 <- 2
 
 # Left skewed distribution ----
 set.seed(123)
@@ -844,7 +848,7 @@ ggplot(norm_data, aes(x = value)) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
   labs(x = "Values", y = "Density") +
   theme(axis.text = element_blank())
-  
+
 
 # Right skewed distribution ----
 set.seed(123)
@@ -873,7 +877,7 @@ In @tbl-aa-skewness-kurtosis I provide the skewness and kurtosis scores for our 
 
 library(moments)
 
-aa_dist_skim  <- 
+aa_dist_skim <-
   skim_with(numeric = sfl(mean, median, skewness = skewness, kurtosis = kurtosis))
 
 # Combine the three distributions into one tibble before skimming
@@ -881,11 +885,11 @@ tibble(
   `Left skew` = left_skew_data$value,
   `Normal` = norm_data$value,
   `Right skew` = right_skew_data$value
-) |> 
-  aa_dist_skim() |> 
-  yank("numeric") |> 
-  select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |> 
-  tibble() |> 
+) |>
+  aa_dist_skim() |>
+  yank("numeric") |>
+  select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |>
+  tibble() |>
   kable()
 ```
 
@@ -929,10 +933,10 @@ The question is which type of distribution does each numeric variable in the BEL
 #| - "Proportion of L2 words"
 #| layout-ncol: 3
 
-belc_essay_tbl <- 
-  belc_essay_tbl |> 
+belc_essay_tbl <-
+  belc_essay_tbl |>
   # Filter out essays with less than 10 tokens
-  filter(tokens >= 10) |> 
+  filter(tokens >= 10) |>
   anti_join(get_outliers(belc_essay_tbl, prop_l2), by = "essay_id")
 
 # Density plots ----
@@ -965,11 +969,11 @@ To view statistics on our three variables in @fig-aa-belc-histogram-density-trim
 #| label: tbl-aa-belc-skewness-kurtosis
 #| tbl-cap: "Skewness and kurtosis for numeric variables in the BELC dataset."
 
-belc_essay_tbl |> 
+belc_essay_tbl |>
   aa_dist_skim() |>
-  yank("numeric") |> 
-  select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |>  
-  mutate(distribution = factor(distribution, levels = c("ttr", "types", "tokens", "prop_l2"))) |> 
+  yank("numeric") |>
+  select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |>
+  mutate(distribution = factor(distribution, levels = c("ttr", "types", "tokens", "prop_l2"))) |>
   arrange(distribution) |>
   kable()
 ```
@@ -1012,8 +1016,8 @@ In @tbl-aa-belc-contingency-tables we see contingency tables for the categorical
 #| label: tbl-aa-belc-contingency-tables-1
 #| tbl-cap: "Counts"
 
-belc_essay_tbl |> 
-  tabyl(group, sex) |> 
+belc_essay_tbl |>
+  tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
   kable()
 ```
@@ -1023,12 +1027,12 @@ belc_essay_tbl |>
 #| label: tbl-aa-belc-contingency-tables-2
 #| tbl-cap: "Percentages"
 
-belc_essay_tbl |> 
-  tabyl(group, sex) |> 
+belc_essay_tbl |>
+  tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
   adorn_percentages("row") |>
   adorn_pct_formatting(digits = 2) |>
-  # adorn_ns() |> 
+  # adorn_ns() |>
   kable()
 ```
 
@@ -1049,7 +1053,7 @@ It is sometimes helpful to visualize a contingency table as a bar plot when ther
 #| - "Proportions"
 #| layout-ncol: 2
 
-belc_essay_tbl |> 
+belc_essay_tbl |>
   ggplot(aes(x = sex, y = after_stat(count), fill = group)) +
   geom_bar(position = "stack", color = "black") +
   scale_fill_brewer(palette = "Greys") +
@@ -1073,9 +1077,9 @@ In @tbl-aa-belc-pivot-table, we see a pivot table for the relationship between `
 #| label: tbl-aa-belc-pivot-table
 #| tbl-cap: "Pivot table for the relationship between `group` and `tokens` in the BELC dataset."
 
-belc_essay_tbl |> 
-  group_by(group) |> 
-  summarise(mean_tokens = mean(tokens)) |> 
+belc_essay_tbl |>
+  group_by(group) |>
+  summarise(mean_tokens = mean(tokens)) |>
   kable()
 ```
 
@@ -1095,7 +1099,7 @@ In @fig-aa-belc-boxplot-violin-plot, we see both a boxplot and a violin plot for
 #| - "Violin plot"
 #| layout-ncol: 2
 
-belc_essay_tbl |> 
+belc_essay_tbl |>
   ggplot(aes(x = group, y = tokens)) +
   geom_boxplot(color = "black") +
   labs(x = "Group", y = "Tokens")
@@ -1124,7 +1128,7 @@ In @fig-aa-belc-scatter-plot, we see a scatterplot and a scatterplot with a tren
 #| - "Points with a linear trend line"
 #| layout-ncol: 2
 
-belc_essay_tbl |> 
+belc_essay_tbl |>
   ggplot(aes(x = types, y = ttr)) +
   geom_point(color = "black", alpha = 0.5) +
   labs(x = "Number of types", y = "Type-Token Ratio score")
@@ -1168,14 +1172,14 @@ Using @tbl-aa-association-measures, we see that we can use Goodman and Kruskal's
 
 library(correlation)
 
-assoc_sex_group <- 
-  belc_essay_tbl |> 
-  select(sex, group) |> 
+assoc_sex_group <-
+  belc_essay_tbl |>
+  select(sex, group) |>
   correlation(include_factors = TRUE, method = "gamma")
 
-assoc_sex_group |> 
-  filter(p < .05 & abs(r) < 1) |> 
-  select(1:6) |> 
+assoc_sex_group |>
+  filter(p < .05 & abs(r) < 1) |>
+  select(1:6) |>
   kable()
 ```
 
@@ -1189,15 +1193,15 @@ Now let's take a look at a more interesting relationship, the one between the or
 #| label: tbl-aa-pearson
 #| tbl-cap: "Pearson's r for the relationship between `group` and `tokens` in the BELC dataset."
 
-assoc_group_tokens <- 
-  belc_essay_tbl |> 
-  select(group, tokens) |> 
+assoc_group_tokens <-
+  belc_essay_tbl |>
+  select(group, tokens) |>
   correlation(include_factors = TRUE, method = "pearson")
 
-assoc_group_tokens |> 
-  filter(Parameter2 == "tokens") |> 
-  # filter(p < .05 & abs(r) < 1) |> 
-  select(1:6) |> 
+assoc_group_tokens |>
+  filter(Parameter2 == "tokens") |>
+  # filter(p < .05 & abs(r) < 1) |>
+  select(1:6) |>
   kable()
 ```
 
@@ -1211,14 +1215,14 @@ Finally, let's look at the relationship between the numeric variables `ttr` and 
 #| label: tbl-aa-pearson-2
 #| tbl-cap: "Pearson's r for the relationship between `ttr` and `types` in the BELC dataset."
 
-assoc_ttr_types <- 
-  belc_essay_tbl |> 
-  select(ttr, types) |> 
+assoc_ttr_types <-
+  belc_essay_tbl |>
+  select(ttr, types) |>
   correlation(include_factors = TRUE, method = "pearson")
 
 assoc_ttr_types |>
-  filter(p < .05 & abs(r) < 1) |> 
-  select(1:6) |> 
+  filter(p < .05 & abs(r) < 1) |>
+  select(1:6) |>
   kable()
 ```
 
@@ -1272,13 +1276,13 @@ For illustrative purposes let's consider the State of the Union Corpus (SOTU) [@
 #| echo: false
 
 library(quanteda) # for corpus()
-sotu_corpus <- 
+sotu_corpus <-
   quanteda.corpora::data_corpus_sotu |> # load the corpus
   corpus_subset(Date > "1946-01-01") # subset to only include presidents since 1946
 
-sotu_tbl  <- 
+sotu_tbl <-
   sotu_corpus |> # select the corpus
-  tidy() |> # convert to tibble 
+  tidy() |> # convert to tibble
   select(president = President, date = Date, delivery, party, addresses = text) |> # select variables
   mutate(addresses = str_squish(addresses)) # remove line breaks
 
@@ -1304,14 +1308,14 @@ By the same token, approaches for interrogating the dataset can differ significa
 #| label: tbl-eda-methods
 #| tbl-cap: 'Some common EDA methods'
 
-eda_approaches <- 
+eda_approaches <-
   tribble(
     ~"Descriptive methods", ~"Unsupervised learning methods",
     "Frequency analysis", "Cluster analysis",
     "Keyness analysis", "Topic Modeling",
     "Co-occurence analysis", "Vector Space Models"
   )
-eda_approaches |> 
+eda_approaches |>
   kable()
 ```
 
@@ -1326,49 +1330,55 @@ library(quanteda.textstats) # for textstat_frequency()
 library(quanteda.textplots) # for plot_frequency()
 
 sotu_freq_p <- # Frequency plots
-  sotu_corpus |> 
+  sotu_corpus |>
   tokens(remove_punct = TRUE) |> # remove punctuation
   tokens_remove(pattern = stopwords("en")) |> # remove stopwords
   dfm() |> # convert to dfm
   textstat_frequency(n = 20, groups = party) |> # get top 20 terms for each party
   ggplot(aes(x = reorder(feature, frequency), y = frequency, color = group)) + # plot
   geom_point() + # point plot
-  labs(x = "Terms", y = "Term frequency", color = "Party", 
-       title = "20 Most Frequent Terms") +
+  labs(
+    x = "Terms", y = "Term frequency", color = "Party",
+    title = "20 Most Frequent Terms"
+  ) +
   scale_color_manual(values = c("blue", "red")) + # color by party
+  # place legend below plot
+  theme(legend.position = "bottom", legend.box = "horizontal") +
   coord_flip() # flip axes
 ```
 
 ```{r }
 #| label: aa-eda-sotu-cooccurence
- 
+
 # Co-occurence analysis
 # network graph
 
 library(igraph) # for graph_from_data_frame()
 library(ggraph) # for ggraph()
 
-bigrams <- 
-  sotu_tbl |> 
-  unnest_tokens(bigram, addresses, token = "ngrams", n = 2) |> 
+bigrams <-
+  sotu_tbl |>
+  unnest_tokens(bigram, addresses, token = "ngrams", n = 2) |>
   separate(bigram, c("word1", "word2"), sep = " ") |>
-  filter(!word1 %in% stopwords::stopwords('en'),
-           !word2 %in% stopwords::stopwords('en')) |>
-  count(word1, word2, sort = TRUE) |> 
+  filter(
+    !word1 %in% stopwords::stopwords("en"),
+    !word2 %in% stopwords::stopwords("en")
+  ) |>
+  count(word1, word2, sort = TRUE) |>
   filter(word1 == "free", n > 1)
-  
-  # set.seed(2016)
-  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
-  
-sotu_free_p <- 
-    bigrams |>
-    graph_from_data_frame() |>
-    ggraph(layout = "fr") +
-    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
-    geom_node_point(color = "lightblue") +
-    geom_node_text(aes(label = name), vjust = 1, hjust = 1, size = 3) +
-    theme_void() +
-    labs(title = "Bigrams with 'Free' as the first word")
+
+# set.seed(2016)
+a <- grid::arrow(type = "closed", length = unit(.05, "inches"))
+
+sotu_free_p <-
+  bigrams |>
+  graph_from_data_frame() |>
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = log(n), label_size = log(n)), show.legend = FALSE, arrow = a) +
+  # geom_node_point(color = "lightblue") +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1, size = 3) +
+  theme_void() +
+  labs(title = "Bigrams with 'Free' as the first word")
 ```
 
 ```{r}
@@ -1376,22 +1386,24 @@ sotu_free_p <-
 #| eval: false
 
 sotu_keyness_p <- # Barplot: keyness
-  sotu_corpus |> 
-  tokens(remove_punct = TRUE) |> 
-  tokens_remove(pattern = stopwords("en")) |> 
-  dfm() |> 
-  textstat_keyness(target = docvars(sotu_corpus, "Date") > "2001-09-10") |> 
+  sotu_corpus |>
+  tokens(remove_punct = TRUE) |>
+  tokens_remove(pattern = stopwords("en")) |>
+  dfm() |>
+  textstat_keyness(target = docvars(sotu_corpus, "Date") > "2001-09-10") |>
   mutate(period = case_when(
     n_reference > n_target ~ "Pre 9-11",
     n_target > n_reference ~ "Post 9-11"
-  )) |> 
-  filter(!is.na(period)) |> 
-  group_by(period) |> 
-  slice_head(n = 10) |> 
+  )) |>
+  filter(!is.na(period)) |>
+  group_by(period) |>
+  slice_head(n = 10) |>
   ggplot(aes(x = reorder(feature, chi2), y = chi2)) +
   geom_col(width = .5) +
-  labs(x = "Terms", y = "Keyness statistic (Chi-squared)",
-       title = "Term keyness") +
+  labs(
+    x = "Terms", y = "Keyness statistic (Chi-squared)",
+    title = "Term keyness"
+  ) +
   facet_wrap(~ reorder(period, desc(period)), scales = "free_y") +
   coord_flip()
 ```
@@ -1403,6 +1415,7 @@ sotu_keyness_p <- # Barplot: keyness
 #| - "Frequency analysis of the 20 most frequent terms by party."
 #| - "Co-occurence analysis of the terms that appear after the term 'free'."
 #| layout-ncol: 2
+#| fig-height: 4
 
 sotu_freq_p # Frequency plots 
 sotu_free_p # Co-occurence analysis
@@ -1415,54 +1428,55 @@ The second group, **unsupervised learning** is a subtype of machine learning in 
 ```{r}
 #| label: aa-eda-sotu-clustering
 #| warning: false
- 
+
 # Clustering (hierarchical) analysis
 # dendrogram
 
 library(factoextra) # for fviz_dend()
 
-sotu_hclust <- 
-  sotu_corpus |> 
-  tokens() |> 
-  dfm() |> 
-  dfm_remove(pattern = stopwords('en')) |> 
-  dfm_group(groups = President) |> 
-  textstat_dist() |> 
-  as.dist() |> 
+sotu_hclust <-
+  sotu_corpus |>
+  tokens() |>
+  dfm() |>
+  dfm_remove(pattern = stopwords("en")) |>
+  dfm_group(groups = President) |>
+  textstat_dist() |>
+  as.dist() |>
   hclust()
 
-sotu_pres_p <- 
-  fviz_dend(sotu_hclust, 
-            cex = .5, 
-            k = 2, 
-            k_colors = c("black", "darkgrey"))
+sotu_pres_p <-
+  fviz_dend(sotu_hclust,
+    cex = .5,
+    k = 2,
+    k_colors = c("black", "darkgrey")
+  )
 ```
 
 ```{r}
 #| label: aa-eda-sotu-word-embeddings
 
-# Word embeddings ---- 
+# Word embeddings ----
 
 library(word2vec) # for word2vec()
 library(Rtsne) # for Rtsne()
 library(ggrepel)
 
 # Extract texts from corpus
-sotu_texts <- 
-  sotu_corpus |> 
-  as.character() |> 
+sotu_texts <-
+  sotu_corpus |>
+  as.character() |>
   tolower()
 
 # Train word2vec model
-sotu_model <- 
+sotu_model <-
   word2vec(sotu_texts, stopwords = stopwords("en"))
 
 # Extract word vectors and vocabulary
-sotu_vectors <- 
-  sotu_model |> 
+sotu_vectors <-
+  sotu_model |>
   as.matrix()
 
-sotu_vocab <- 
+sotu_vocab <-
   sotu_model |>
   summary(type = "vocabulary")
 
@@ -1470,33 +1484,34 @@ sotu_vocab <-
 sotu_tsne <- Rtsne(sotu_vectors)
 
 # Create data frame of word vectors and vocabulary
-sotu_tsne_tbl <- 
-  sotu_tsne$Y |> 
-  as.data.frame() |> 
-  as_tibble() |> 
+sotu_tsne_tbl <-
+  sotu_tsne$Y |>
+  as.data.frame() |>
+  as_tibble() |>
   mutate(label = sotu_vocab)
 
 # Cluster word vectors
 set.seed(1234)
 
-sotu_tsne_clusters <- 
-  sotu_tsne_tbl |> 
-  mutate(cluster = kmeans(sotu_tsne_tbl[,1:2], centers = 5)$cluster) |> 
+sotu_tsne_clusters <-
+  sotu_tsne_tbl |>
+  mutate(cluster = kmeans(sotu_tsne_tbl[, 1:2], centers = 5)$cluster) |>
   mutate(cluster = as.factor(cluster))
 
 # Sample 20 words from each cluster
-sotu_tsne_sampled <- 
-  sotu_tsne_clusters |> 
+sotu_tsne_sampled <-
+  sotu_tsne_clusters |>
   group_by(cluster) |>
   sample_n(20)
 
 # Plot word vectors
-sotu_tsne_p <- 
-  sotu_tsne_clusters |> 
+sotu_tsne_p <-
+  sotu_tsne_clusters |>
   ggplot(aes(x = V1, y = V2, color = cluster)) +
   geom_point(alpha = 0.75) +
   geom_text_repel(data = sotu_tsne_sampled, aes(label = label), color = "black", min.segment.length = 0, size = 3) +
   theme_minimal() +
+  labs(x = "Component 1", y = "Component 2", color = "Cluster") +
   scale_color_brewer(palette = "Greys", direction = -1, type = "qual") +
   ggtitle("t-SNE visualization with K-means Clustering")
 ```
@@ -1509,8 +1524,9 @@ sotu_tsne_p <-
 #| - "Hierarchical clustering of the SOTU corpus."
 #| - "Word embedding space in the SOTU corpus."
 #| layout-ncol: 2
+#| fig-height: 4
 
-sotu_pres_p # clustering analysis
+sotu_pres_p # clustering analysis 
 sotu_tsne_p # word embeddings
 ```
 
@@ -1562,7 +1578,7 @@ Let's consider the Europarl corpus of native, non-native and translated texts (E
 #| label: tbl-enntt-dd
 #| tbl-cap: 'Data dictionary of the ENNTT corpus.'
 
-read_csv("data/approaching-analysis/enntt_curated_dd.csv") |> 
+read_csv("data/approaching-analysis/enntt_curated_dd.csv") |>
   knitr::kable()
 ```
 
@@ -1570,7 +1586,7 @@ Now depending on our research question, we will have a different outcome variabl
 
 The approach to interrogating the dataset includes three main steps: feature engineering, model selection, and model evaluation. We've discussed feature engineering, so what is model selection and model evaluation? And how do we go about performing these steps?  
 
-**Model selection** is the process of choosing a machine learning algorithm and set of features that produces the best prediction accuracy for the outcome variable. To refine our approach such that we arrive at the best combination of algorithm and features, we need to train our machine learner on a variety of combinations and evaluate the accuracy of each. We don't want to train and evaluate on the same data, as this would be cheating, and likely would not produce a model that generalizes well to new data. Instead, we split our data into two sets: a training set and a test set. The **training set** is used to train the machine learner, while the **test set** is used to evaluate the accuracy of the model[^dev-set].
+**Model selection** is the process of choosing a machine learning algorithm and set of features that produces the best prediction accuracy for the outcome variable. To refine our approach such that we arrive at the best combination of algorithm and features, we need to train our machine learner on a variety of combinations and evaluate the accuracy of each. We don't want to train and evaluate on the same data, as this would be cheating, and likely would not produce a model that generalizes well to new data. Instead, we split our data into two sets: a training set and a test set. The **training set** is used to train the machine learner, while the **test set** is used to evaluate the accuracy of the model[^dev-set]. The larger portion of the data, from 60% to 80%, is used for training, while the remaining portion is used for testing.
 
 [^dev-set]: Depending on the application and the amount of available data, a third *development set* is sometimes created as a pseudo test set to facilitate the testing of multiple approaches on data outside the training set before the final evaluation on the test set is performed. 
 
@@ -1662,7 +1678,7 @@ A dataset based on the Switchboard Dialog Act Corpus (SWDA) [@SWDA2008], seen in
 #| tbl-cap: 'Data dictionary of the SWDA dataset.'
 
 # SWDA data dictionary ----
-read_csv("data/approaching-analysis/swda_transformed_1_dd.csv") |> 
+read_csv("data/approaching-analysis/swda_transformed_1_dd.csv") |>
   kable()
 ```
 
@@ -1717,15 +1733,15 @@ In @tbl-ida-methods-monofactorial we see **monofactorial tests**, tests with onl
 #| label: tbl-ida-methods-monofactorial
 #| tbl-cap: 'Common monofactorial tests used in IDA.'
 
-monofactorial <- 
+monofactorial <-
   tribble(
-  ~"Dependent", ~"Predictor", ~"Test",
-  "Categorical", "Categorical", "Pearson's Chi-squared test",
-  "Numeric", "Categorical", "Student's t-Test",
-  "Numeric", "Numeric", "Pearson's correlation test"
-)
-monofactorial |> 
-  knitr::kable() |> 
+    ~"Dependent", ~"Predictor", ~"Test",
+    "Categorical", "Categorical", "Pearson's Chi-squared test",
+    "Numeric", "Categorical", "Student's t-Test",
+    "Numeric", "Numeric", "Pearson's correlation test"
+  )
+monofactorial |>
+  knitr::kable() |>
   add_header_above(c("Variable roles" = 2, " "))
 ```
 
@@ -1735,15 +1751,15 @@ monofactorial |>
 #| label: tbl-ida-methods-multifactorial
 #| tbl-cap: 'Common multifactorial tests used in IDA.'
 
-multifactorial <- 
+multifactorial <-
   tribble(
-  ~"Dependent", ~"Predictor", ~"Control", ~"Test",
-  "Categorical", "varied", "varied", "Logistic regression",
-  "Numeric", "varied", "varied", "Linear regression"
-)
-multifactorial |> 
-  knitr::kable(booktabs = TRUE) |> 
-  column_spec(2:3, italic = TRUE) |> 
+    ~"Dependent", ~"Predictor", ~"Control", ~"Test",
+    "Categorical", "varied", "varied", "Logistic regression",
+    "Numeric", "varied", "varied", "Linear regression"
+  )
+multifactorial |>
+  knitr::kable(booktabs = TRUE) |>
+  column_spec(2:3, italic = TRUE) |>
   add_header_above(c("Variable roles" = 3, " "))
 ```
 
@@ -1769,7 +1785,7 @@ The most widely recognized form of communicating research is through a report. A
 
 <!-- Components -->
 
-The audience for your report will determine the level of detail and the type of information you will need to include in your report but there are some common elements to reference in any report. First, the research question and/ or hypothesis should be clearly stated and the motivation for the question should be explained. This will help the reader understand the context of the analysis and the importance of the results. Second, diagnostic procedures to verifiy or describe the data should be explained. This may include anomaly correction, missing data, data transformation, etc. and/ or descriptive summaries of the data including assessments of individual variables (central tendency, dispersion, distribution) and/ or relationships between variables ( association strength). Third, a blueprint of the methods used will describe the variable selection process, how the variables are operationalized, what analysis methods are employed, and how the variables are used in the statistical analysis. Fourth, the results from the analysis are reported. Reporting details will depend on the type of analysis and the particular method(s) employed. For inferential analyses this will include the test statistic(s) and some measure of confidence, In predictive analyses accuracy results will be reported. For exploratory analyses, the reporting of results will vary and often include visualizations and metrics that require more human interpretation than the other analysis types. Finally, the results are interpreted in light of the research question and/ or hypothesis. This will include a discussion of the limitations of the analysis and a discussion of the implications of the results for future research.
+The audience for your report will determine the level of detail and the type of information you will need to include in your report but there are some common elements to reference in any report. First, the research question and/ or hypothesis should be clearly stated and the motivation for the question should be explained. This will help the reader understand the context of the analysis and the importance of the results. Second, diagnostic procedures to verifiy or describe the data should be explained. This may include anomaly correction, missing data, data transformation, etc. and/ or descriptive summaries of the data including assessments of individual variables (central tendency, dispersion, distribution) and/ or relationships between variables (association strength). Third, a blueprint of the methods used will describe the variable selection process, how the variables are operationalized, what analysis methods are employed, and how the variables are used in the statistical analysis. Fourth, the results from the analysis are reported. Reporting details will depend on the type of analysis and the particular method(s) employed. For inferential analyses this will include the test statistic(s) and some measure of confidence. In predictive analyses, accuracy results will be reported. For exploratory analyses, the reporting of results will vary and often include visualizations and metrics that require more human interpretation than the other analysis types. Finally, the results are interpreted in light of the research question and/ or hypothesis. This will include a discussion of the limitations of the analysis and a discussion of the implications of the results for future research.
 
 ### Document {#sec-aa-document}
 
@@ -1783,7 +1799,7 @@ Together, data, code, and documentation form a **research compendium**. As you c
 
 <!-- Components -->
 
-We will have more to say about this in the next chapter but for now it will suffice to point to some key elements in a research compendium. First, the data used in the analysis should be saved as a separate file(s). As a given research project progresses to analysis, the data may be transformed and manipulated to best fit the needs of the analysis. Preserving the data in this stage adds to the complete picture of the data from collection to analysis. Second, since you are working programmatically, you can share your precise analysis step-by-step in code form. This allows others to reproduce your analysis and verify your results. Including code comments provides additional information to communicate the steps taken and your thought process. Finally, a codebook documents any additional information that helps understand the research better. This will often include guides for installing software and running the code to reproduce the analysis and an overview of the aims of the scripts and the contents of the data and datasets. 
+We will have more to say about this in the next chapter but for now it will suffice to point to some key elements in a research compendium. First, the data used in the analysis should be saved as a separate file(s). As a given research project progresses to analysis, the data may be transformed and manipulated to best fit the needs of the analysis. Preserving the data at each stage adds to the complete picture of the data from collection to analysis. Second, since you are working programmatically, you can share your precise analysis step-by-step in code form. This allows others to reproduce your analysis and verify your results. Including code comments provides additional information to communicate the steps taken and your thought process. Finally, a codebook documents any additional information that helps understand the research better. This will often include guides for installing software and running the code to reproduce the analysis and an overview of the aims of the scripts and the contents of the data and datasets. 
 
 ## Summary {.unnumbered}
 
@@ -1793,14 +1809,14 @@ In this chapter we have focused on description and analysis --the third componen
 #| label: fig-approaching-analysis-vis-sum
 #| fig-cap: 'Approaching analysis: visual summary'
 
-knitr::include_graphics("figures/approaching-analysis/aa-diki.drawio.png") 
+knitr::include_graphics("figures/approaching-analysis/aa-diki.drawio.png")
 ```
 
 Building on the strategies covered in [Chapter 2 "Understanding data"](#sec-understanding-data) to derive a rich relational dataset, in this chapter we outlined key points in approaching analysis. The first key step in any analysis is to perform a diagnostic assessment of the individual variables and relationships between variables. To select the appropriate descriptive measures we covered the various informational values that a variable can take. In addition to providing key information for reporting purposes, descriptive measures are important to explore so the researcher can get a better feel for the dataset before conducting an analysis.
 
 We outlined three data analysis types in this chapter: exploratory, predictive, and inferential. Each of these embodies distinct approaches to deriving knowledge from data. Ultimately the choice of analysis type is highly dependent on the goals of the research. Inferential analysis is centered around the goal of testing a hypothesis, and for this reason it is the most highly structured approach to analysis. This structure is aimed at providing the mechanisms to draw conclusions from the results that can be generalized to the target population. Predictive analysis has a less-ambitious but at times more relevant goal of examining the extent to which a given relationship can be established from the data to provide a model of language that can accurately predict an outcome using new data. This methodology is highly effective for applying different algorithmic approaches and examining relationships between an outcome variable and various configurations of variables. The ability to explore the data in multiple ways, is also a key strength of employing an exploratory analysis. The least structured and most variable of the analysis types, exploratory analyses are a powerful approach to generating knowledge from data in an area where clear predictions cannot be made.
 
-I rounded out this chapter with a short description of the importance of communicating the analysis process and results. Reporting, in its traditional form, is documented in prose in an article. This reporting aims to provide the key information that a reader will need to understand what was done, how it was done, and why it was done. This information also provides the necessary information for reader's with a critical eye to understand the analysis in more detail. Yet even the most detailed reporting in a write-up still leaves many practical, but key, points of the analysis obscured. A programming approach provides the procedural steps taken that when shared provide the exact methods applied. Together with the write-up a research compendium which provides the scripts to run the analysis and documentation on how to run the analysis forms an integral part of creating reproducible research.
+I rounded out this chapter with a short description of the importance of communicating the analysis process and results. Reporting, in its traditional form, is documented in prose in an article. This reporting aims to provide the key information that a reader will need to understand what was done, how it was done, and why it was done. This information also provides the necessary information for reader's with a critical eye to understand the analysis in more detail. Yet even the most detailed reporting in a write-up still leaves many practical, but key, points of the analysis obscured. A programming approach provides the procedural steps taken that when shared provide the exact methods applied. Together with the write-up, a research compendium which provides the scripts to run the analysis and documentation on how to run the analysis forms an integral part of creating reproducible research.
 
 ## Activities {.unnumbered}
 

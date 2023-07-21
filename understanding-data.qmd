@@ -316,11 +316,11 @@ In @exm-masc-df we see an example of an R data frame object which overlaps with 
 #| label: formats-masc-df
 #| linewidth: 0.95
 
-masc_exm <- 
-  readr::read_rds("data/understanding-data/formats_masc_df.rds")
-masc_exm |> 
-  slice(1:11) |> 
-  kable()
+# Read in data frame
+masc_exm <- readr::read_rds("data/understanding-data/formats_masc_df.rds")
+
+# Print data frame preview
+masc_exm |> slice(1:11)
 ```
 :::
 
@@ -369,7 +369,7 @@ readr::read_lines("data/understanding-data/formats_masc_xml.txt") |> # read in l
 
 The format of semi-structured data is often influenced by characteristics of the data or reflect an author's individual preferences. It is sometimes the case that data will be semi-structured in a less-standard format. For example, the SWDA corpus includes a *.utt* file extension for files which contain utterances annotated with dialogue act tags.
 
-::: {#exm-masc-xml}
+::: {#exm-swda-utt}
 **SWDA *.utt* file**
 
 ```{r}
@@ -422,11 +422,11 @@ Let's look at an example of a tidy dataset. Using the criteria just described, l
 #| label: tbl-ud-info-values-masc
 #| tbl-cap: "MASC dataset variables."
 
-masc_exm |> 
-  slice_head(n = 10) |> 
-  mutate(num_letters = nchar(word)) |> 
-  select(title, modality, date, ref_num, word, pos, num_letters) |> 
-  kable()
+masc_exm |>
+  slice_head(n = 10) |> # select first 10 rows
+  mutate(num_letters = nchar(word)) |> # add num_letters column
+  select(title, modality, date, ref_num, word, pos, num_letters) |> # select columns
+  kable(booktabs = TRUE) # print as table
 ```
 
 We have seven variables listed as headers for each of the columns. We could go one-by-one left-to-right but let's take another tack. Instead, let's identify all those variables that cannot be numeric --these are all the non-numeral variables: `title`, `modality`, `word`, and `pos`. The question to ask of these variables is whether they represent an order or rank. Since titles, modalities, words, and parts-of-speech are not ordered values, they are all categorical. 
@@ -484,8 +484,8 @@ text_tbl <- tibble::tribble(
   "1", "It's a beautiful day in the US, and our group decided to visit the famous Grand Canyon. As we reached the destination, Jane said, \"I can't believe we're finally here!\" The breathtaking view left us speechless; indeed, it was a sight to behold. During our trip, we encountered tourists from different countries, sharing stories and laughter. For all of us, this experience will be cherished forever."
 )
 
-text_tbl |> 
-  kable()
+text_tbl |>
+  kable(booktabs = TRUE)
 ```
 
 The types of transformations we apply will depend on the specific needs of the project, but can include those found in @tbl-ud-text-normalization.
@@ -513,12 +513,12 @@ Let's be conservative and only apply lowercasing to our toy dataset as seen in @
 #| label: tbl-ud-text-dataset-lowercase
 #| tbl-cap: "A toy dataset with two variables, `text_id` and `text`, where the text has been lowercased."
 
-text_tbl <- 
-  text_tbl |> 
+text_tbl <-
+  text_tbl |>
   mutate(text = stringr::str_to_lower(text))
 
-text_tbl |> 
-  kable()
+text_tbl |>
+  kable(booktabs = TRUE)
 ```
 
 When text normalization steps are motivated and applied with foresight they serve to enhance the quality of the data and improves the reliability of subsequent transformation steps.
@@ -535,9 +535,9 @@ Text variables can be tokenized at any linguistic level. To illustrate, consider
 
 library(tidytext)
 
-text_tbl |> 
-  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+") |> 
-  kable()
+text_tbl |>
+  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+") |>
+  kable(booktabs = TRUE)
 ```
 
 It is important to make explicit what the operationalization of our linguistic unit is as common terms such as sentence, word, *etc.* can be defined in different ways. For example, the sentence tokenization above is based on the assumption that sentences are separated by a period followed by a space. This is a suitable definition for this text, but likely will not be for other English text or for other languages/ writing scripts. For words, a very simple operationalization is to use whitespace separation (*e.g.* "I cannot believe it." -- ["I", "cannot", "believe", "it."]). However, this approach does not handle puntuation marks (*e.g.* ["it."]) or contractions (*e.g.* ["can't"]). A more sophisticated operationalization will be necessary for these, and possibly other, cases.
@@ -548,10 +548,10 @@ Another important token unit is the $n$-gram. Words or characters can be grouped
 #| label: tbl-ud-text-dataset-bigram
 #| tbl-cap: "A toy dataset with two variables, `text_id` and `bigram`, where the text has been tokenized at the bigram word level."
 
-text_tbl |> 
-  unnest_tokens(word, text, token = "ngrams", n = 2) |> 
+text_tbl |>
+  unnest_tokens(word, text, token = "ngrams", n = 2) |>
   slice_head(n = 10) |>
-  kable()
+  kable(booktabs = TRUE)
 ```
 
 In @tbl-ud-text-dataset-bigram we see that the first bigram is "it's a" --the first two words (based on whitespace separation) in the text. The second bigram is "a toy" --the second and third words in the text. This continues to the end of the text. $N$-gram tokenization can be useful to capture context that would otherwise would be lost from tokenizing words or characters at the unigram level. 
@@ -562,12 +562,12 @@ Up to this point our tokens have been surface forms. That is, they are the actua
 #| label: tbl-ud-text-dataset-lemmatization
 #| tbl-cap: "A toy dataset with two variables, `text_id` and `word`, where the text has been tokenized at the unigram word level and lemmatized."
 
-text_tbl |> 
-  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s") |> 
-  slice(3) |> 
+text_tbl |>
+  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s") |>
+  slice(3) |>
   unnest_tokens(word, sentence) |>
-  mutate(lemma = textstem::lemmatize_words(word)) |> 
-  kable()
+  mutate(lemma = textstem::lemmatize_words(word)) |>
+  kable(booktabs = TRUE)
 ```
 
 ::: {.callout}
@@ -587,10 +587,10 @@ Let's return to the MASC dataset and demonstrate recoding of categorical and num
 ```{r}
 #| label: ud-recode-dataset
 
-masc_recode_exm  <- 
-  masc_exm |> 
-  # slice_head(n = 10) |> 
-  mutate(num_letters = nchar(word)) |> 
+masc_recode_exm <-
+  masc_exm |>
+  # slice_head(n = 10) |>
+  mutate(num_letters = nchar(word)) |>
   select(title, modality, date, ref_num, word, pos, num_letters)
 ```
 
@@ -600,8 +600,8 @@ masc_recode_exm  <-
 
 # Recode the pos variable (PENN tagset) into major grammatical classes (noun, verb, adjective, adverb, pronoun, preposition, conjunction, determiner, interjection, particle, numeral, punctuation)
 
-masc_recode_cat_exm <- 
-  masc_recode_exm |> 
+masc_recode_cat_exm <-
+  masc_recode_exm |>
   mutate(major_pos = case_when(
     pos %in% c("NN", "NNS", "NNP", "NNPS") ~ "noun",
     pos %in% c("VB", "VBD", "VBG", "VBN", "VBP", "VBZ") ~ "verb",
@@ -616,12 +616,12 @@ masc_recode_cat_exm <-
     pos %in% c("CD") ~ "numeral",
     pos %in% c(".", ":", ";", "?", "!", ";", ",") ~ "punctuation",
     TRUE ~ "other"
-  )) |> 
+  )) |>
   select(title, modality, date, ref_num, word, pos, major_pos, num_letters)
 
-masc_recode_cat_exm |> 
-  slice_head(n = 10) |> 
-  kable()
+masc_recode_cat_exm |>
+  slice_head(n = 10) |>
+  kable(booktabs = TRUE)
 ```
 
 In @tbl-ud-recode-categorical, the `pos` variable has been recoded into major grammatical classes. The `major_pos` variable is a categorical variable with 12 levels, one for each major grammatical class in the Penn Treebank tagset. While the demonstration here demonstrates the simplification of a categorical variable, recoding can also be used to transliterate categorical variables. Continuing with the theme of POS tags, the `pos` variable could be recoded into a different tagset, such as the Universal Dependencies tagset [@Nivre2016].
@@ -634,19 +634,19 @@ Now, let's look at recoding the numeric variable `num_letters`. This variable re
 
 # Recode the num_letters variable into three categories: short, medium, and long words using the cut() function
 
-masc_recode_num_exm <- 
-  masc_recode_cat_exm |> 
+masc_recode_num_exm <-
+  masc_recode_cat_exm |>
   mutate(word_length = cut(
-    num_letters, 
-    breaks = c(0, 3, 5, 21), 
+    num_letters,
+    breaks = c(0, 3, 5, 21),
     labels = c("short", "medium", "long")
-  )) |> 
+  )) |>
   select(title, modality, date, ref_num, word, pos, major_pos, num_letters, word_length)
 
 # Print table
-masc_recode_num_exm |> 
-  slice_head(n = 10) |> 
-  kable()
+masc_recode_num_exm |>
+  slice_head(n = 10) |>
+  kable(booktabs = TRUE)
 ```
 
 In @tbl-ud-recode-numeric the variable `word_length` appears with the values `short`, `medium`, and `long`. This is now a categorical variable of type ordinal. Of note, is that the operational definition of used to create these word length bins should be made explicit in the documentation of the dataset. 
@@ -687,19 +687,19 @@ To illustrate the process of generating linguistic annotation with existing tool
 #| label: tbl-ud-masc-plain-dataset
 #| tbl-cap: "A MASC sample document in dataset tokenized into sentences."
 
-masc_generate_exm <- 
-  readtext::readtext("data/understanding-data/formats_masc_txt.txt") |> 
-  dplyr::as_tibble() |> 
-  # unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+", to_lower = FALSE) |> 
-  unnest_tokens(sentence, text, token = "sentences", to_lower = FALSE) |> 
-  mutate(sentence = str_squish(sentence)) |> 
-  mutate(text_id = "1") |> 
-  mutate(sentence_id = row_number()) |> 
+masc_generate_exm <-
+  readtext::readtext("data/understanding-data/formats_masc_txt.txt") |>
+  dplyr::as_tibble() |>
+  # unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+", to_lower = FALSE) |>
+  unnest_tokens(sentence, text, token = "sentences", to_lower = FALSE) |>
+  mutate(sentence = str_squish(sentence)) |>
+  mutate(text_id = "1") |>
+  mutate(sentence_id = row_number()) |>
   select(text_id, sentence_id, sentence)
 
-masc_generate_exm |> 
-  slice_head(n = 5) |> 
-  kable()
+masc_generate_exm |>
+  slice_head(n = 5) |>
+  kable(booktabs = TRUE)
 ```
 
 Applying a pre-trained model from the [Universal Dependencies (UD)](https://universaldependencies.org/)[^ud-ud] project, we can generate linguistic annotation for each token in the MASC. 
@@ -753,11 +753,11 @@ text_tbl <- tibble::tribble(
   "P6", "T6", "Spoken", "Hi, my name is X, and I'm a teacher. I teach English at a local high school."
 )
 
-written_tbl <- 
+written_tbl <-
   text_tbl |>
   dplyr::filter(modality == "Written")
 
-spoken_tbl <- 
+spoken_tbl <-
   text_tbl |>
   dplyr::filter(modality == "Spoken")
 ```
@@ -772,16 +772,16 @@ To illustate, consider the toy datasets in @tbl-ud-merge-dataset-written and @tb
 #| label: tbl-ud-merge-dataset-written
 #| tbl-cap: "Toy dataset of written text data."
 
-written_tbl |> 
-  kable(booktabs = TRUE) 
+written_tbl |>
+  kable(booktabs = TRUE)
 ```
 
 ```{r}
 #| label: tbl-ud-merge-dataset-spoken
 #| tbl-cap: "Toy dataset of spoken text data."
 
-spoken_tbl |> 
-  kable(booktabs = TRUE) 
+spoken_tbl |>
+  kable(booktabs = TRUE)
 ```
 
 These datasets, in @tbl-ud-merge-dataset-written and @tbl-ud-tbl-ud-merge-dataset-spoken, contain the same variables and variable types, but different observations --one in which the sample contains written language and the other spoken. Conveniently, they can be concatenated to create a single dataset that contains all of the observations, as seen in @tbl-ud-merge-dataset-concat.
@@ -790,8 +790,8 @@ These datasets, in @tbl-ud-merge-dataset-written and @tbl-ud-tbl-ud-merge-datase
 #| label: tbl-ud-merge-dataset-concat
 #| tbl-cap: "Toy dataset of written and spoken text data concatenated."
 
-concat_tbl <- 
-  bind_rows(written_tbl, spoken_tbl) 
+concat_tbl <-
+  bind_rows(written_tbl, spoken_tbl)
 
 concat_tbl |>
   kable(booktabs = TRUE)
@@ -817,7 +817,7 @@ participant_tbl <- tibble::tribble(
   "P6", "No", 39, "F"
 )
 
-participant_tbl |> 
+participant_tbl |>
   kable(booktabs = TRUE)
 ```
 
@@ -831,11 +831,11 @@ Since the two datasets share the `participant_id` variable, we can merge them to
 
 # Inner join text_tbl and participant_tbl based on participant_id
 
-text_participant_tbl <- 
+text_participant_tbl <-
   inner_join(concat_tbl, participant_tbl, by = "participant_id")
 
 text_participant_tbl |>
-  kable(booktabs = TRUE) 
+  kable(booktabs = TRUE)
 ```
 
 Another common case where joining datasets is useful is when there are external resources that can be used to enrich the dataset. For example, a dataset of text data may include a variable that identifies the language of each document. This variable can be used to join the dataset with a dataset of language metadata, such as the number of speakers of each language, as long as the language metadata dataset includes a variable that identifies the language of each document in the same format as the language variable in the text dataset.
@@ -889,7 +889,7 @@ tibble::tribble(
   "Variable type", "The type of information that the variable contains, *e.g.* 'categorical', 'ordinal', *etc.*",
   "Variable description", "A prose description expanding on the readable name and can include measurement units, allowed values, *etc.*"
 ) |>
-  kable()
+  kable(booktabs = TRUE)
 ``` 
 
 Organizing this information in a tabular format, such as a spreadsheet, can make it easy for others to read and understand your data dictionary. 

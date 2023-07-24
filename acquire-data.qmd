@@ -15,9 +15,9 @@ execute:
 
 Content:
 
-- [ ] Project Gutenberg (work on fixing or changing the data that is accessed)
-- [ ] Figure out what do do with Twitter API: can we still stream? Or is `rtoot` for Mastodon a better option at this point?
-- [ ] Figure out what to do with the web scraping section: Gutenberg Project (single page), SPLLOC (multiple pages), Maybe the American Presidency Project?
+- [x] Figure out what do do with Twitter API: can we still stream? Or is `rtoot` for Mastodon a better option at this point? Remove.
+- [x] Figure out what to do with the web scraping section: Gutenberg Project (single page), SPLLOC (multiple pages), Maybe the American Presidency Project?
+  - [x] Single page SOTU here (Federalist Papers LOC on Recipe)
 
 Exercises:
 
@@ -27,37 +27,79 @@ Exercises:
 
 Formatting:
 
-
 -->
 
 > The scariest moment is always just before you start.
 >
 > ―-- Stephen King
 
-::: callout-note
-## Keys
+::: {.callout}
+**{{< fa regular list-alt >}} Outcomes**
 
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+- [ ] change to outcomes/ update for new chapter content
+
+- ...
 - What are the most common strategies for acquiring corpus data?
 - What programmatic steps can we take to ensure the acquisition process is reproducible?
 - What is the importance of documenting data?
 :::
 
+<!--  
+Programming topics:
+- control statements
+  - `if` statements
+  - `message` function
+  - `stop` function
+- custom functions
+  - required and optional arguments
+  - argument checks
+  - `return` function
+  - `invisible` function
+-->
 ```{r}
 #| label: acquire-data-packages
 #| echo: false
 
-pacman::p_load(tidyverse, gutenbergr)
+pacman::p_load(tidyverse) # for the book
 ```
+
 
 There are three main ways to acquire corpus data using R that I will introduce you to: **downloads**, **APIs**, and **web scraping**. In this chapter we will start by manual and programmatically downloading a corpus as it is the most straightforward process for the novice R programmer and typically incurs the least number of steps. Along the way I will introduce some key R coding concepts including control statements and custom functions. Next I will cover using R packages to interface with APIs, both open-access and authentication-based. APIs will require us to delve into more detail about R objects and custom functions. Finally acquiring data from the web via webscraping is the most idiosyncratic and involves both knowledge of the web, more sophisticated R skills, and often some clever hacking skills. I will start with a crash course on the structure of web documents (HTML) and then scale up to a real-world example. To round out the chapter we will cover the process of ensuring that our data is documented in such a way as to provide sufficient information to understand its key sampling characteristics and the source from which it was drawn.
 
-::: callout-tip
-## Swirl
+::: {.callout}
+**{{< fa terminal >}} Swirl lesson**
 
-**What**: [Loops and vectorization](https://github.com/lin380/swirl)\
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+**What**: [Control Statements, Custom Functions](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To ....
 :::
+
+<!--  
+- [ ] Consider how to document the changes to the scaffolding.
+  - [ ] Use R or qmd?
+    - Quarto make more sense for documentation, but the rendered HTML appears side-by-side with the script files. This looks messy. Or I don't show the HTML output. Then, later in the book, I introduce how to tie the HTML output to a full website with `_site.yml`? 
+
+project/
+├── _main.R
+├── data/
+│   ├── analysis/
+│   ├── derived/
+│   └── original/
+├── output/
+│   ├── figures/
+│   ├── reports/
+│   ├── results/
+│   └── tables/
+├── README
+└── code/
+
+
+
+-->
 
 ## Downloads
 
@@ -72,6 +114,8 @@ Let's work with the CEDEL2 corpus [@Lozano2009] which provides a search interfac
 #| fig-cap: 'CEDEL2 Corpus homepage'
 #| echo: false
 
+# [ ] Update/ remove screenshot
+
 knitr::include_graphics("figures/acquire-data/ad-cedel2-site.png")
 ```
 
@@ -82,24 +126,46 @@ Following the search/ download link you can find a search interface that allows 
 #| fig-cap: 'Search and download interface for the CEDEL2 Corpus'
 #| echo: false
 
+# [ ] Update/ remove screenshot
+
 knitr::include_graphics("figures/acquire-data/ad-cedel2-search-download.png")
 ```
 
 The 'Download' link now appears for this search criteria. Following this link will provide the user a form to fill out. This particular resource allows for access to different formats to download (Texts only, Texts with metadata, CSV (Excel), CSV (Others)). I will select the 'CSV (Others)' option so that the data is structured for easier processing downstream when we work to curate the data in our next processing step. Then I will choose to save the CSV in the `data/original/` directory of my project and create a sub-directory called `cedel2/`.
 
-``` bash
+- [ ] Look at the `#exm-` environment to be able to make refs.
+
+```bash
 data/
-├── derived
-└── original
-    └── cedel2
+├── analysis/
+├── derived/
+└── original/
+    └── cedel2/
        └── texts.csv
 ```
 
 Other resources will inevitably include unique processes to obtaining the data, but in the end the data should be archived in the research structure in the `data/original/` directory and be treated as 'read-only'.
 
+- [ ] Add data origin discussion `cedel2_do.csv`
+- [ ] Add README discussion on manual steps taken to acquire the data
+
+
+```bash
+data/
+├── analysis/
+├── derived/
+├── output/
+│   ├── cedel2_do.csv
+│   └── cedel2
+│      └── texts.csv
+└── README
+```
+
 ### Programmatic
 
-There are many resources that provide corpus data is directly accessible for which programmatic approaches can be applied. Let's take a look at how this works starting with the a sample from the Switchboard Corpus, a corpus of 2,400 telephone conversations by 543 speakers. First we navigate to the site with a browser and download the file that we are looking for. In this case I found the Switchboard Corpus on the [NLTK data repository site](http://www.nltk.org/nltk_data/). More often than not this file will be some type of compressed archive file with an extension such as `.zip` or `.tz`, which is the case here. Archive files make downloading large single files or multiple files easy by grouping files and directories into one file. In R we can used the `download.file()` function from the base R library[^acquire-data-1]. There are a number of **arguments** that a function may require or provide optionally. The `download.file()` function minimally requires two: `url` and `destfile`. That is the file to download and the location where it is to be saved to disk.
+<!-- [ ] Update to SWDA information and download URL -->
+
+There are many resources that provide corpus data is directly accessible for which programmatic approaches can be applied. Let's take a look at how this works starting with the a sample from the Switchboard Dialog Act Corpus, a corpus of 2,400 telephone conversations by 543 speakers. First we navigate to the site with a browser and download the file that we are looking for. In this case I found the Switchboard Corpus on the [NLTK data repository site](http://www.nltk.org/nltk_data/). More often than not this file will be some type of compressed archive file with an extension such as `.zip` or `.tz`, which is the case here. Archive files make downloading large single files or multiple files easy by grouping files and directories into one file. In R we can used the `download.file()` function from the base R library[^acquire-data-1]. There are a number of **arguments** that a function may require or provide optionally. The `download.file()` function minimally requires two: `url` and `destfile`. That is the file to download and the location where it is to be saved to disk.
 
 [^acquire-data-1]: Remember base R packages are installed by default with R and are loaded and accessible by default in each R session.
 
@@ -118,8 +184,9 @@ As we can see looking at the directory structure for `data/` the `switchboard.zi
 
 ``` bash
 data
-├── derived
-└── original
+├── analysis/
+├── derived/
+└── original/
     └── switchboard.zip
 ```
 
@@ -140,15 +207,16 @@ The directory structure of `data/` now should look like this:
 
 ``` bash
 data
-├── derived
-└── original
-    ├── switchboard
+├── analysis/
+├── derived/
+└── original/
+    ├── switchboard/
     │   ├── README
-    │   ├── discourse
-    │   ├── disfluency
-    │   ├── tagged
-    │   ├── timed-transcript
-    │   └── transcript
+    │   ├── discourse/
+    │   ├── disfluency/
+    │   ├── tagged/
+    │   ├── timed-transcript/
+    │   └── transcript/
     └── switchboard.zip
 ```
 
@@ -168,11 +236,13 @@ url <- "https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpo
 download.file(url, temp)
 ```
 
-::: callout-warning
-## Tip
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
 
 In the previous code I've used the values stored in the objects `url` and `temp` in the `download.file()` function without specifying the argument names --only providing the names of the objects. R will assume that values of a function map to the ordering of the arguments. If your values do not map to ordering of the arguments you are required to specify the argument name and the value. To view the ordering of objects hit `TAB` after entering the function name or consult the function documentation by prefixing the function name with `?` and hitting `ENTER`.
 :::
+
 
 At this point our downloaded file is stored temporarily on disk and can be accessed and decompressed to our target directory using `temp` as the value for the argument `zipfile` from the `unzip()` function. I've assigned our target directory path to `target_dir` and used it as the value for the argument `exdir` to prepare us for the next tweak on our approach.
 
@@ -206,6 +276,9 @@ data
 
 The second issue I raised concerns the fact that running this code as part of our project will repeat the download each time. Since we would like to be good citizens and avoid unnecessary traffic on the web it would be nice if our code checked to see if we already have the data on disk and if it exists, then skip the download, if not then download it.
 
+- [ ] Assume basic knowledge of `if` statements. 
+- [ ] Consider change to `fs::dir_exists()`.
+
 To achieve this we need to introduce two new functions `if()` and `dir.exists()`. `dir.exists()` takes a path to a directory as an argument and returns the logical value, `TRUE`, if that directory exists, and `FALSE` if it does not. `if()` evaluates logical statements and processes subsequent code based on the logical value it is passed as an argument. Let's look at a toy example.
 
 ```{r}
@@ -234,6 +307,9 @@ if (num == 1) {
 
 The function `if()` is one of various functions that are called **control statements**. Theses functions provide a lot of power to make dynamic choices as code is run.
 
+- [ ] Assume basic knowledge of custom functions. 
+- [ ] Add strategies for argument checks: `stop()` and `message()`.
+
 Before we get back to our key objective to avoid downloading resources that we already have on disk, let me introduce another strategy to making code more powerful and ultimately more efficient and as well as more legible --the **custom function**. Custom functions are functions that the user writes to create a set of procedures that can be run in similar contexts. I've created a custom function named `eval_num()` below.
 
 ```{r}
@@ -252,13 +328,16 @@ Let's take a closer look at what's going on here. The function `function()` crea
 
 We can now use the function `eval_num()` to perform the task of evaluating whether a value of `num` is or is not equal to `1`.
 
-```{r ad-eval-num}
+```{r}
+#| label: ad-eval-num
 eval_num(num = 1)
 eval_num(num = 2)
 eval_num(num = 3)
 ```
 
 I've put these coding strategies together with our previous code in a custom function I named `get_zip_data()`. There is a lot going on here. Take a look first and see if you can follow the logic involved given what you now know.
+
+- [ ] Update to change `cat()` to `message()` and to include argument checks.
 
 ```{r}
 #| label: ad-get-zip-data-function
@@ -283,8 +362,8 @@ get_zip_data <- function(url, target_dir) {
 
 OK. You should have recognized the general steps in this function: the argument `url` and `target_dir` specify where to get the data and where to write the decompressed files, the `if()` statement evaluates whether the data already exists, if not (`!dir.exists(target_dir)`) then the data is downloaded and decompressed, if it does exist (`else`) then it is not downloaded.
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
 
 The prefixed `!` in the logical expression `dir.exists(target_dir)` returns the opposite logical value. This is needed in this case so when the target directory exists, the expression will return `FALSE`, not `TRUE`, and therefore not proceed in downloading the resource.
 :::
@@ -365,33 +444,24 @@ data
 At this point we have what we need to continue to the next step in our data analysis project. But before we go, we should do some housekeeping to document and organize this process to make our work reproducible. We will take advantage of the `project-template` directory structure, seen below.
 
 ``` bash
-├── README.md
-├── _pipeline.R
-├── analysis
-│   ├── 1_acquire_data.Rmd
-│   ├── 2_curate_dataset.Rmd
-│   ├── 3_transform_dataset.Rmd
-│   ├── 4_analyze_dataset.Rmd
-│   ├── 5_generate_article.Rmd
-│   ├── _session-info.Rmd
-│   ├── _site.yml
-│   ├── index.Rmd
-│   └── references.bib
-├── data
-│   ├── derived
-│   └── original
-│       ├── sbc
-│       └── scs
-├── functions
-└── output
-    ├── figures
-    └── results
+project/
+├── data/
+│   ├── analysis/
+│   ├── derived/
+│   └── original/
+├── output/
+├── README
+└── scripts/
+    ├── _main.R
+    ├── 1_acquire_data.R
+    ├── functions.R
+    └── ...
 ```
 
 First it is good practice to separate custom functions from our processing scripts. We can create a file in our `functions/` directory named `acquire_functions.R` and add our custom function `get_zip_data()` there.
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
 
 Note that that the `acquire_functions.R` file is an R script, not an Rmarkdown document. Therefore code chunks that are used in `.Rmd` files are not used, only the R code itself.
 :::
@@ -408,8 +478,8 @@ source(file = "../functions/acquire_functions.R")
 
 In this section, to sum up, we've covered how to access, download, and organize data contained in .zip files; the most common format for language data found on repositories and individual sites. This included an introduction to a few key R programming concepts and strategies including using functions, writing custom functions, and controlling program flow with control statements. Our approach was to gather data while also keeping in mind the reproducibility of the code. To this end I introduced programming strategies for avoiding unnecessary web traffic (downloads), scalable directory creation, and data documentation.
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
 
 The custom function `get_zip_data()` works with `.zip` files. There are many other compressed file formats (e.g. `.gz`, `.tar`, `.tgz`), however. In the R package `tadr` that accompanies this coursebook, a modified version of the `get_zip_data()` function, `get_compressed_data()`, extends the same logic to deal with a wider range of compressed file formats, including `.zip` files.
 
@@ -422,14 +492,18 @@ A convenient alternative method for acquiring data in R is through package inter
 
 [^acquire-data-2]: See Section \@ref(sources) for a list of some other API packages.
 
-```{=html}
 <!-- RESOURCES:
 - [rwhatsapp](https://github.com/JBGruber/rwhatsapp) work with personal chat history 
-- 
 -->
-```
 
-### Open access
+- [ ] Add discussion about APIs.
+  - [ ] Open access and authentication-based
+  - [ ] API documentation
+  - [ ] R interface packages
+    - [ ] Examples: `gutenbergr`, `rtweet`, `rtoot`, `rwhatsapp`, etc.
+
+- [ ] Introduce TalkBank repository, API, and `TBDBr` package.
+  - [ ] Functions
 
 Using R package interfaces, however, often requires some more knowledge about R objects and functions. Let's take a look at how to access data from Project Gutenberg through the `gutenbergr` package. Along the way we will touch upon various functions and concepts that are key to working with the R data types vectors and data frames including filtering and writing tabular data to disk in plain-text format.
 
@@ -466,8 +540,8 @@ Now that we have `pacman` installed and loaded into our R session, let's use the
 pacman::p_load(tidyverse, gutenbergr)
 ```
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
 
 Note that the arguments `tidyverse` and `gutenbergr` are comma-separated but not quoted when using `p_load()`. When using `install.packages()` to install, package names need to be quoted (character strings). `library()` can take quotes or no quotes, but only one package at a time.
 :::
@@ -478,14 +552,14 @@ Project Gutenberg provides access to thousands of texts in the public domain. Th
 
 ```{r}
 #| label: ad-glimpse-meta-data-gutenbergr
-
+#| eval: false
 glimpse(gutenberg_metadata) # summarize text meta-data
 glimpse(gutenberg_authors) # summarize authors meta-data
 glimpse(gutenberg_subjects) # summarize subjects meta-data
 ```
 
 ::: callout-warning
-## Tip
+**Tip**
 
 The `gutenberg_metadata`, `gutenberg_authors`, and `gutenberg_subjects` are periodically updated. To check to see when each data frame was last updated run:
 
@@ -498,7 +572,7 @@ Let's first add them manually here as a toy example by generating a vector of in
 
 ```{r}
 #| label: ad-int-vector-ex
-
+#| eval: false
 ids <- 1:5 # integer vector of values 1 to 5
 ids
 ```
@@ -507,7 +581,7 @@ To download the works from Project Gutenberg corresponding to the `gutenberg_id`
 
 ```{r}
 #| label: ad-download-ids-gutenbergr
-#| cache: true
+#| eval: false
 
 works_sample <- gutenberg_download(gutenberg_id = ids) # download works with `gutenberg_id` 1-5
 glimpse(works_sample) # summarize `works` dataset
@@ -517,7 +591,7 @@ Two attributes are returned: `gutenberg_id` and `text`. The `text` column contai
 
 ```{r}
 #| label: ad-metadata-attributes-gutenbergr
-
+#| eval: false
 names(gutenberg_metadata) # print the column names of the `gutenberg_metadata` data frame
 ```
 
@@ -525,8 +599,7 @@ Let's augment our previous download with the title and author of each of the wor
 
 ```{r}
 #| label: ad-download-ids-meta-gutenbergr
-#| cache: true
-
+#| eval: false
 # download works with `gutenberg_id` 1-5 including `title` and `author` as attributes
 works_sample <-
   gutenberg_download(
@@ -543,16 +616,15 @@ Now, in a more practical scenario we would like to select the values of `gutenbe
 
 ```{r}
 #| label: ad-eng-lit-subjects-gutenbergr
-#| cache: true
-
+#| eval: false
 # filter for only English literature
-ids <- 
+ids <-
   filter(gutenberg_subjects, subject_type == "lcc", subject == "PR")
 glimpse(ids)
 ```
 
 ::: callout-warning
-## Tip
+**Tip**
 
 The operators `=` and `==` are not equivalents. `==` is used for logical evaluation and `=` is an alternate notation for variable assignment (`<-`).
 :::
@@ -561,27 +633,29 @@ The `gutenberg_subjects` data frame does not contain information as to whether a
 
 ```{r}
 #| label: ad-eng-lit-subjects-text-gutenbergr
-#| tidy: false
+#| eval: false
 
 # Filter for only those works that have text
-ids_has_text <- 
-  filter(gutenberg_metadata, 
-         gutenberg_id %in% ids$gutenberg_id, 
-         has_text == TRUE)
+ids_has_text <-
+  filter(
+    gutenberg_metadata,
+    gutenberg_id %in% ids$gutenberg_id,
+    has_text == TRUE
+  )
 glimpse(ids_has_text)
 ```
 
 ::: callout-warning
-## Tip
+**Tip**
 
 A couple R programming notes on the code phrase `gutenberg_id %in% ids$gutenberg_id`. First, the `$` symbol in `ids$gutenberg_id` is the programmatic way to target a particular column in an R data frame. In this example we select the `ids` data frame and the column `gutenberg_id`, which is a integer vector. The `gutenberg_id` variable that precedes the `%in%` operator does not need an explicit reference to a data frame because the primary argument of the `filter()` function is this data frame (`gutenberg_metadata`). Second, the `%in%` operator logically evaluates whether the vector elements in `gutenberg_metadata$gutenberg_ids` are also found in the vector `ids$gutenberg_id` returning `TRUE` and `FALSE` accordingly. This effectively filters those ids which are not in both vectors.
 :::
 
-As we can see the number of works with text is fewer than the number of works listed, `r nrow(ids)` versus `r nrow(ids_has_text)`. Now we can safely do our random selection of 10 works, with the function `slice_sample()` and be confident that the ids we select will contain text when we take the next step by downloading the data.
+As we can see the number of works with text is fewer than the number of works listed, `nrow(ids)` versus `nrow(ids_has_text)`. Now we can safely do our random selection of 10 works, with the function `slice_sample()` and be confident that the ids we select will contain text when we take the next step by downloading the data.
 
 ```{r}
 #| label: ad-select-eng-lit-gutenbergr
-
+#| eval: false
 set.seed(123) # make the sampling reproducible
 ids_sample <- slice_sample(ids_has_text, n = 10) # sample 10 works
 glimpse(ids_sample) # summarize the dataset
@@ -591,8 +665,10 @@ glimpse(ids_sample) # summarize the dataset
 #| label: ad-eng-lit-download-gutenbergr
 #| eval: false
 
-works_pr <- gutenberg_download(gutenberg_id = ids_sample$gutenberg_id, 
-                               meta_fields = c("author", "title"))
+works_pr <- gutenberg_download(
+  gutenberg_id = ids_sample$gutenberg_id,
+  meta_fields = c("author", "title")
+)
 glimpse(works_pr) # summarize the dataset
 ```
 
@@ -600,15 +676,17 @@ glimpse(works_pr) # summarize the dataset
 #| label: ad-eng-lit-download-gutenbergr-save
 #| eval: false
 
-works_pr <- gutenberg_download(gutenberg_id = ids_sample$gutenberg_id, 
-                               meta_fields = c("author", "title"))
+works_pr <- gutenberg_download(
+  gutenberg_id = ids_sample$gutenberg_id,
+  meta_fields = c("author", "title")
+)
 write_rds(works_pr, file = "data/acquire-data/gutenberg_works_pr.rds")
 ```
 
 ```{r}
 #| label: ad-eng-lit-download-gutenbergr-show
 #| echo: false
-
+#| eval: false
 works_pr <- read_rds(file = "data/acquire-data/gutenberg_works_pr.rds") # read rds file from disk
 glimpse(works_pr) # summarize the dataset
 ```
@@ -619,8 +697,11 @@ To write our data frame to disk we will export it into a standard plain-text for
 
 ```{r}
 #| label: ad-csv-snippet
-
-works_pr |> head() |> format_csv() |> cat()
+#| eval: false
+works_pr |>
+  head() |>
+  format_csv() |>
+  cat()
 ```
 
 The first line contains the names of the columns and subsequent lines the observations. Data points that contain commas themselves (e.g. "Shaw, Bernard") are quoted to avoid misinterpreting these commas a deliminators in our data. To write this dataset to disk we will use the `reader::write_csv()` function.
@@ -636,7 +717,7 @@ To avoid downloading dataset that already resides on disk, let's implement a sim
 
 ```{r}
 #| label: ad-get-gutenberg-subject-fun
-
+#| eval: false
 get_gutenberg_subject <- function(subject, target_file, sample_size = 10) {
   # Function: to download texts from Project Gutenberg with 
   # a specific LCC subject and write the data to disk.
@@ -684,20 +765,26 @@ Let's download American Literature now (LCC code "PQ").
 # and then write this dataset to disk in .rds format
 
 # Select all records with a particular LCC subject
-ids <- 
-  filter(gutenberg_subjects, 
-         subject_type == "lcc", subject == "PQ") # select subject
+ids <-
+  filter(
+    gutenberg_subjects,
+    subject_type == "lcc", subject == "PQ"
+  ) # select subject
 # Select only those records with plain text available
 set.seed(123) # make the sampling reproducible
-ids_sample <- 
-  filter(gutenberg_metadata, 
-         gutenberg_id %in% ids$gutenberg_id, # select ids in both data frames 
-         has_text == TRUE) |> # select those ids that have text
-  slice_sample(n = sample_size) # sample N works 
+ids_sample <-
+  filter(
+    gutenberg_metadata,
+    gutenberg_id %in% ids$gutenberg_id, # select ids in both data frames
+    has_text == TRUE
+  ) |> # select those ids that have text
+  slice_sample(n = sample_size) # sample N works
 # Download sample with associated `author` and `title` metadata
-works_pq <- 
-  gutenberg_download(gutenberg_id = ids_sample$gutenberg_id, 
-                     meta_fields = c("author", "title"))
+works_pq <-
+  gutenberg_download(
+    gutenberg_id = ids_sample$gutenberg_id,
+    meta_fields = c("author", "title")
+  )
 
 write_rds(x = works_pq, file = "data/acquire-data/gutenberg_works_pq.rds")
 ```
@@ -732,175 +819,6 @@ data
         ├── timed-transcript
         └── transcript
 ```
-
-### Authentication
-
-```{=html}
-<!-- Other APIs:
-
-- News API https://newsapi.org/ with newsanchor package 
-
--->
-```
-
-Some APIs and the R interfaces that provide access to them require authentication. This may either be through an interactive process that is mediated between R and the web service and/ or by visiting the developer website of the particular API. In either case, there is an extra step that is necessary to make the connect to the API to access the data.
-
-Let's take a look at the popular micro-blogging platform Twitter. The rtweet package [@R-rtweet] provides access to tweets in various ways. To get started install and/or load the rtweet package.
-
-```{r}
-#| label: ad-p-load-rtweet
-#| message: false
-
-pacman::p_load(rtweet) # install/load rtweet package
-```
-
-Now before a researcher can access data from Twitter with rtweet, [an authentication token must be setup and made accessible](https://docs.ropensci.org/rtweet/articles/auth.html). After following the steps for setting up an authentication token and saving it, that token can be accessed with the `auth_as()` function.
-
-```{r}
-#| label: ad-auth-as-rtweet
-#| eval: false
-
-auth_as(twitter_auth) # load the saved `twitter_auth` token
-```
-
-Now that we the R session is authenticated, we can explore a popular method for querying the Twitter API which searchs tweets (`search_tweets`) posted in the recent past (6-9 days).
-
-Let's look at a typical query using the `search_tweets()` function.
-
-```{r}
-#| label: ad-rtweet-search-latinx
-#| eval: false
-
-rt_latinx <- 
-  search_tweets(q = "latinx", # query term
-                n = 100, # number of tweets desired
-                type = "mixed", # a mix of `recent` and `popular` tweets
-                include_rts = FALSE) # do not include RTs
-```
-
-```{r}
-#| label: ad-rtweet-search-latinx-copy
-#| eval: false
-#| echo: false
-
-# copy the rt_latinx.rds file from the `project_implementation` R project to the local `resources/` directory
-fs::file_copy(path = "../project_implementation/data/original/twitter/rt_latinx.rds", 
-              new_path = "resources/06-acquire-data/rt_latinx.rds")
-```
-
-```{r}
-#| label: ad-rtweet-search-latinx-read
-#| echo: false
-
-rt_latinx <- readr::read_rds(file = "data/acquire-data/rt_latinx.rds")
-```
-
-Looking at the arguments in this function, we see I've specified the query term to be 'latinx'. This is a single word query but if the query included multiple words, the spaces between would be interpreted as the logical `AND` (only match tweets with all the individual terms). If one would like to include multi-word expressions, the expressions should be enclosed by single quotes (i.e. `q = "'spanish speakers' AND latinx"`). Another approach would be to include the logical `OR` (match tweets with either of the terms). Multi-word expressions can be included as in the previous case. Of note, hashtags are acceptable terms, so `q = "#latinx"` would match tweets with this hashtag.
-
-The number of results has been set at '100', but this is the default, so I could have left it out. But you can increase the number of desired tweets. There are rate limits which cap the number of tweets you can access in a given 15-minute time period.
-
-Another argument of importance is the `type` argument. This argument has three possible attributes `popular`, `recent`, and `mixed`. When the `popular` attribute he Twitter API will tend to return fewer tweets than specified by `n`. With `recent` or `mixed` you will most likely get the `n` you specified (note that `mixed` is a mix of `popular` and `recent`).
-
-A final argument to note is the `include_rts` whose attribute is logical. If `FALSE` no retweets will be included in the results. This is often what a language researcher will want.
-
-Now, once the `search_tweets` query has been run, there a a large number of variables that are included in the resulting data frame. Here's an overview of the names of the variables and the vector types for each variable.
-
-```{r}
-#| label: ad-rtweet-rt-latinx-variables-prep
-#| include: false
-
-rt_variables <- 
-  rt_latinx |> 
-  map_df(typeof) |> 
-  glimpse() |> 
-  as.data.frame() |> 
-  t()
-```
-
-```{r}
-#| label: tbl-ad-rtweet-variables-table
-#| tbl-cap: "Variables and variable types returned from Twitter API via rtweet's `search_tweets()` function."
-#| echo: false
-
-rt_variables |> 
-    knitr::kable(booktabs = TRUE)
-```
-
-The [Twitter API documentation for the standard Search Tweets call](https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets), which is what `search_tweets()` interfaces with has quite a few variables (35 to be exact). For many purposes it is not necessary to keep all the variables. Furthermore, since we will want to write a plain-text file to disk as part of our project, we will need to either convert or eliminate any of the variables that are marked as type `list`. The most common variable to convert is the `coordinates` variable, as it will contain the geolocation codes for those Twitter users' tweets captured in the query that have geolocation enabled on their device. It is of note, however, that using `search_tweets()` without specifying that only tweets with geocodes should be captured (`geocode =`) will tend to return very few, if any, tweets with geolocation information as the majority of Twitter users do not have geolocation enabled.
-
-Let's assume that we want to keep all the variables that are not of type `list`. One option is to use `select()` and name each variable we want to keep. On the other hand we can use a combination of `select()` and negated `!where()` to select all the variables that are not lists (`is_list`). Let's do the later approach.
-
-```{r}
-#| label: ad-rtweet-select-not-list
-
-rt_latinx_subset <- 
-  rt_latinx |> # dataset
-  select(!where(is_list))  # select all variables that are NOT lists
-
-rt_latinx_subset |> # subsetted dataset
-  glimpse() # overview
-```
-
-Now we have the 30 variables which can be written to disk as a plain-text file. Let's go ahead a do this, but wrap it in a function that does all the work we've just laid out in one function. In addition we will check to see if the same query has been run, and skip running the query if the dataset is on disk.
-
-```{r}
-#| label: ad-rtweet-write-search-tweets
-#| eval: false
-
-write_search_tweets <- 
-  function(query, path, n = 100, type = "mixed", include_rts = FALSE) {
-    # Function
-    # Conduct a Twitter search query and write the results to a csv file
-    
-    if(!file.exists(path)) { # check to see if the file already exists
-      cat("File does not exist \n") # message
-      
-      library(rtweet) # to use Twitter API
-      library(tidyverse) # to manipulate data
-      
-      auth_get() # get authentication token
-      
-      results <- # query results
-        search_tweets(q = query, # query term
-                      n = n, # number of tweets desired (default 100)
-                      type = type, # type of query
-                      include_rts = include_rts) |>  # to include RTs
-        select(!where(is_list))  # remove list variables
-      
-      if(!dir.exists(dirname(path))) { # isolate directory and check if exists
-        cat("Creating directory \n") # message
-        
-        dir.create(path = dirname(path), # isolate and create directory (remove file name)
-                   recursive = TRUE, # create embedded directories if necessary
-                   showWarnings = FALSE) # do not report warnings
-      }
-      
-      write_csv(x = results, file = path) # write results to csv file 
-      cat("Twitter search results written to disk \n") # message
-      
-    } else {
-      cat("File already exists! \n") # message
-    }
-  }
-```
-
-Let's run this function with the same query as above.
-
-```{r}
-#| label: ad-rtweet-latinx-function
-#| eval: false
-
-write_search_tweets(query = "latinx", path = "../data/original/twitter/rt_latinx.csv")
-```
-
-And the appropriate directory structure and file have been written to disk.
-
-``` bash
-data/original/twitter/
-└── rt_latinx.csv
-```
-
-In sum, this subsection provided an overview to acquiring data from web service APIs through R packages. We took at closer look at the `gutenbergr` package which provides programmatic access to works available on Projec t Gutenberg and the `rtweet` package which provides authenticated access to Twitter. Working with package interfaces requires more knowledge of R including loading/ installing packages, working with vectors and data frames, and exporting data from an R session. We touched on these programming concepts and also outlined a method to create a reproducible workflow.
 
 ## Web scraping
 
@@ -959,7 +877,6 @@ The aim of a web scrape is to download the HTML file, parse the document structu
 ```{r}
 #| label: ad-read-html-toy
 #| message: false
-#| cache: false
 
 pacman::p_load(rvest) # install/ load `rvest`
 
@@ -971,16 +888,16 @@ html
 
 ```{r}
 #| label: ad-parse-html-toy-1
-#| cache: false
 
-html |> 
+html |>
   html_elements("div")
 ```
 
 Notice that `html_elements("div")` has returned both `div` tags. To isolate one of tags by its class, we add the class name to the tag separating it with a `.`.
 
-```{r ad-parse-html-toy-2, eval=TRUE, echo=TRUE}
-html |> 
+```{r}
+#| label: ad-parse-html-toy-2
+html |>
   html_elements("div.intro")
 ```
 
@@ -989,7 +906,7 @@ Great. Now say we want to drill down and isolate the subordinate `<p>` nodes. We
 ```{r}
 #| label: ad-parse-html-toy-3
 
-html |> 
+html |>
   html_elements("div.intro p")
 ```
 
@@ -998,18 +915,18 @@ To extract the text contained within a node we use the `html_text()` function.
 ```{r}
 #| label: ad-parse-html-toy-4
 
-html |> 
-  html_elements("div.intro p") |> 
+html |>
+  html_elements("div.intro p") |>
   html_text()
 ```
 
 The result is a character vector with two elements corresponding to the text contained in each `<p>` tag. If you were paying close attention you might have noticed that the second element in our vector includes extra whitespace after the period. To trim leading and trailing whitespace from text we can add the `trim = TRUE` argument to `html_text()`.
 
-```{r , eval=TRUE, echo=TRUE}
+```{r}
 #| label: ad-parse-html-toy-5
 
-html |> 
-  html_elements("div.intro p") |> 
+html |>
+  html_elements("div.intro p") |>
   html_text(trim = TRUE)
 ```
 
@@ -1020,7 +937,11 @@ From here we would then work to organize the text into a format we want to store
 <!-- update: change website to scrape -->
 <!-- remember to remove `eval = FALSE` from code chunks to run -->
 
-With some basic understanding of HTML and how to use the `rvest` package, let's turn to a realistic example. Say we want to acquire lyrics from the online music website and database [last.fm](https://www.last.fm/). The first step in any web scrape is to investigate the site and page(s) we want to scrape to ascertain if there any licensing restrictions. Many, but not all websites, will include a plain text file [`robots.txt`](https://www.cloudflare.com/learning/bots/what-is-robots.txt/) at the root of the main URL. This file is declares which webpages a 'robot' (including web scraping scripts) can and cannot access. We can use the `robotstxt` package to find out which URLs are accessible ^[It is important to check the paths of sub-domains as some website allow access in some areas and not in others].
+With some basic understanding of HTML and how to use the `rvest` package, let's turn to a realistic example. 
+
+
+
+Say we want to acquire ... . The first step in any web scrape is to investigate the site and page(s) we want to scrape to ascertain if there any licensing restrictions. Many, but not all websites, will include a plain text file [`robots.txt`](https://www.cloudflare.com/learning/bots/what-is-robots.txt/) at the root of the main URL. This file is declares which webpages a 'robot' (including web scraping scripts) can and cannot access. We can use the `robotstxt` package to find out which URLs are accessible ^[It is important to check the paths of sub-domains as some website allow access in some areas and not in others].
 
 <!-- change domain -->
 
@@ -1029,7 +950,7 @@ With some basic understanding of HTML and how to use the `rvest` package, let's 
 
 pacman::p_load(robotstxt) # load/ install `robotstxt`
 
-paths_allowed(paths = "https://www.last.fm/") # check permissions
+# paths_allowed(paths = "https://www.last.fm/") # check permissions
 ```
 
 <!-- screenshot of page to scrape -->
@@ -1041,7 +962,7 @@ The next step includes identifying the URL we want to target and exploring the s
 #| fig-cap: 'Lyrics page from last.fm'
 #| echo: false
 
-knitr::include_graphics("figures/acquire-data/ad-lastfm-webpage-lyrics.png")
+# knitr::include_graphics("figures/acquire-data/ad-lastfm-webpage-lyrics.png")
 ```
 
 As in our toy example, first we want to feed the HTML web address to the `read_html()` function to parse the tags into elements. We will then assign the result to `html`.
@@ -1077,7 +998,7 @@ html
 #| label: ad-print-html-lyrics-lastfm
 #| echo: false
 
-lyrics_url <- "https://www.last.fm/music/Radiohead/_/Karma+Police/+lyrics" # to use later 
+lyrics_url <- "https://www.last.fm/music/Radiohead/_/Karma+Police/+lyrics" # to use later
 # read page back in from disk
 html <- read_html(x = "data/acquire-data/lastfm_web.html", encoding = "UTF-8")
 html
@@ -1090,7 +1011,7 @@ At this point we have captured and parsed the raw HTML assigning it to the objec
 #| fig-cap: 'Using the "Inspect Element" command to explore raw html.'
 #| echo: false
 
-knitr::include_graphics("figures/acquire-data/ad-lastfm-artist-inspect.png")
+# knitr::include_graphics("figures/acquire-data/ad-lastfm-artist-inspect.png")
 ```
 
 <!-- change class/ tag/ attribute appropriately -->
@@ -1101,8 +1022,8 @@ From @fig-ad-inspect-element-artist-lastfm we see that the element we want to ta
 
 ```{r}
 #| label: ad-extract-artist-lastfm-1
-
-html |> 
+#| eval: false
+html |>
   html_element("a.header-new-crumb")
 ```
 
@@ -1110,10 +1031,10 @@ We can then extract the text with `html_text()`.
 
 ```{r}
 #| label: ad-extract-artist-lastfm-2
-
-artist <- 
-  html |> 
-  html_element("a.header-new-crumb") |> 
+#| eval: false
+artist <-
+  html |>
+  html_element("a.header-new-crumb") |>
   html_text()
 artist
 ```
@@ -1124,10 +1045,10 @@ Let's extract the song title in the same way.
 
 ```{r}
 #| label: ad-extract-song-title
-
-song <- 
-  html |> 
-  html_element("h1.header-new-title") |> 
+#| eval: false
+song <-
+  html |>
+  html_element("h1.header-new-title") |>
   html_text()
 song
 ```
@@ -1138,18 +1059,18 @@ Now if we inspect the HTML of the lyrics page, we will notice that the lyrics ar
 #| label: fig-ad-inspect-element-lyrics-lastfm
 #| fig-cap: 'Using the "Inspect Element" command to explore raw html.'
 #| echo: false
-
-knitr::include_graphics("figures/acquire-data/ad-lastfm-lyrics-inspect.png")
+#| eval: false
+# knitr::include_graphics("figures/acquire-data/ad-lastfm-lyrics-inspect.png")
 ```
 
 Since there are multiple elements that we want to extract, we will need to use the `html_elements()` function instead of the `html_element()` which only targets one element.
 
 ```{r}
 #| label: ad-extract-lyrics
-
-lyrics <- 
-  html |> 
-  html_elements("p.lyrics-paragraph") |> 
+#| eval: false
+lyrics <-
+  html |>
+  html_elements("p.lyrics-paragraph") |>
   html_text()
 lyrics
 ```
@@ -1158,8 +1079,8 @@ At this point, we have isolated and extracted the artist, song, and lyrics from 
 
 ```{r}
 #| label: ad-create-tibble-lastfm-1
-
-tibble(artist, song, lyrics) |> 
+#| eval: false
+tibble(artist, song, lyrics) |>
   glimpse()
 ```
 
@@ -1169,7 +1090,7 @@ For good documentation let's add our object `lyrics_url` to the data frame, whic
 
 ```{r}
 #| label: ad-create-tibble-lastfm-2
-
+#| eval: false
 song_lyrics <- tibble(artist, song, lyrics, lyrics_url)
 ```
 
@@ -1194,7 +1115,7 @@ Before we get to iteration, let's first create a couple functions to make it pos
 
 ```{r}
 #| label: ad-get-lyrics-function
-
+#| eval: false
 get_lyrics <- function(lyrics_url) {
   # Function: Scrape last.fm lyrics page for: artist, song, 
   # and lyrics from a provided content link. 
@@ -1236,7 +1157,8 @@ get_lyrics <- function(lyrics_url) {
 ```
 
 ::: callout-warning
-## Tip
+**Tip**
+
 The `get_lyrics` function includes all of the code developed previously, but also includes: (1) output messages (`cat()`), (2) a processing pause (`Sys.sleep()`), and (3) code to manage opening and closing web connections (`url()` and `close()`). 
 
 Points (1) and (2) will be useful when we iterate over this function to provide status messages and to reduce server load when processing multiple webpages from a web domain. (3) will be necessary to manage webpages that are non-existent. As we will see, we will generate url link to multiple song lyrics some of which will not be valid. To avoid errors that will stop the processing these steps have been incorporated here.
@@ -1246,6 +1168,7 @@ Points (1) and (2) will be useful when we iterate over this function to provide 
 
 ```{r}
 #| label: ad-write-content-function
+#| eval: false
 
 write_content <- function(content, target_file) {
   # Function: Write the tibble content to disk. Create the directory if
@@ -1269,8 +1192,8 @@ With just these two functions, we can take a lyrics URL from last.fm and scrape 
 
 lyrics_url <- "https://www.last.fm/music/Pixies/_/Where+Is+My+Mind%3F/+lyrics"
 
-lyrics_url |> 
-  get_lyrics() |> 
+lyrics_url |>
+  get_lyrics() |>
   write_content(target_file = "../data/original/lastfm/lyrics.csv")
 ```
 
@@ -1287,8 +1210,8 @@ Last.fm provides a genres page where some of the top genres are listed and can b
 #| label: fig-ad-genre-page-lastfm
 #| fig-cap: 'Genre page on last.fm'
 #| echo: false
-
-knitr::include_graphics("figures/acquire-data/ad-lastfm-genres.png")
+#| eval: false
+# knitr::include_graphics("figures/acquire-data/ad-lastfm-genres.png")
 ```
 
 Diving into a a particular genre, 'rock' for example, you will get a listing of the top tracks in that genre. 
@@ -1297,8 +1220,8 @@ Diving into a a particular genre, 'rock' for example, you will get a listing of 
 #| label: fig-ad-genre-tracks-list-lastfm
 #| fig-cap: 'Tracks by genre list page on last.fm'
 #| echo: false
-
-knitr::include_graphics("figures/acquire-data/ad-lastfm-genre-tracks-list.png")
+#| eval: false
+# knitr::include_graphics("figures/acquire-data/ad-lastfm-genre-tracks-list.png")
 ```
 
 If we inspect the HTML elements for the track names in @fig-ad-genre-tracks-list-lastfm, we can see that a relative URL is found for the track. In this case, I have 'Smells Like Teen Spirit' by Nirvana highlighted in the inspector. If we follow this link to the track page and then to the lyrics for the track, you will notice that the relative URL on the track listings page has all the unique information. Only the web domain `https://www.last.fm` and the post-pended `/+lyrics` is missing. 
@@ -1307,7 +1230,7 @@ So with this we can put together a function which gets the track listing for a l
 
 ```{r}
 #| label: ad-get-genre-lyrics-url-lastfm
-
+#| eval: false
 get_genre_lyrics_urls <- function(last_fm_genre) {
   # Function: Scrapes a given last.fm genre title for top tracks in
   # that genre and then creates links to the lyrics pages for these tracks
@@ -1345,17 +1268,18 @@ saveRDS(hip_hop_lyrics, file = "data/acquire-data/hip_hop_lyrics.rds")
 #| label: ad-demo-get-genre-lyrics-urls-lastfm
 #| eval: false
 
-get_genre_lyrics_urls("hip+hop") |>  # get urls for top hip hop tracks
+get_genre_lyrics_urls("hip+hop") |> # get urls for top hip hop tracks
   head(n = 10) # only display 10 tracks
 ```
 
 ```{r}
 #| label: ad-print-get-genre-lyrics-urls-lastfm
 #| echo: false
+#| eval: false
 
 hip_hop_lyrics <- read_rds(file = "data/acquire-data/hip_hop_lyrics.rds")
 cat("Scraping top songs from: hip+hop genre:\n")
-hip_hop_lyrics |> 
+hip_hop_lyrics |>
   head(n = 10)
 ```
 
@@ -1379,7 +1303,7 @@ This approach, however, has a couple of problems. (1) our `get_lyrics()` functio
 
 # Note: will run, but with occasional errors
 get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
-  map(get_lyrics) |>  # scrape lyrics url
+  map(get_lyrics) |> # scrape lyrics url
   bind_rows() |> # combine tibbles into one
   write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
 ```
@@ -1388,6 +1312,7 @@ This preceding pipeline conceptually will work. However, on my testing, it turns
 
 ```{r}
 #| label: ad-get-lyrics-catch-lastfm
+#| eval: false
 
 # Wrap the `get_lyrics()` function with `tryCatch()` to 
 # skip URLs that have no lyrics
@@ -1406,7 +1331,7 @@ Updating the pipeline with the `get_lyrics_catch()` function would look like thi
 
 # Note: will run, but we can do better
 get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
-  map(get_lyrics_catch) |>  # scrape lyrics url
+  map(get_lyrics_catch) |> # scrape lyrics url
   bind_rows() |> # combine tibbles into one
   write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
 ```
@@ -1415,7 +1340,7 @@ This will work, but as we have discussed before one of this goals we have we acq
 
 ```{r}
 #| label: ad-download-lyrics-lastfm-function
-
+#| eval: false
 download_lastfm_lyrics <- function(last_fm_genre, target_file) {
   # Function: get last.fm lyric urls by genre and write them to disk
   
@@ -1549,16 +1474,26 @@ At this point you have both a bird’s eye view of the data available on the web
 
 ## Activities {.unnumbered}
 
-::: callout-tip
-## Recipe
+- [ ] Add description of outcomes
+
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
+
+<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+- [ ] update
 
 **What**: [Control statements, custom functions, and iteration](https://lin380.github.io/tadr/articles/recipe_6.html)\
 **How**: Read Recipe 6 and participate in the Hypothes.is online social annotation.\
 **Why**: To increase your ability to produce effective, concise, and reproducible code. The three main areas we will cover are working with control statements, writing custom functions, and leveraging iteration. These programming strategies are often useful for acquiring data but, as we will see, they are powerful concepts that can be used throughout a reproducible research project. 
 :::
 
-::: callout-tip
-## Lab
+::: {.callout}
+**{{< fa flask >}} Lab**
+
+<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+- [ ] update
 
 **What**: [Control statements, custom functions, and iteration](https://github.com/lin380/lab_6)\
 **How**: Clone, fork, and complete the steps in Lab 6.\
@@ -1567,17 +1502,17 @@ At this point you have both a bird’s eye view of the data available on the web
 
 ## Questions {.unnumbered}
 
-::: callout-note
-## Conceptual questions
+::: {.callout}
+**Conceptual questions**
 
-1. ...
-2. ...
+- ...
+- ...
 
 :::
 
-::: callout-note
-## Technical exercises
+::: {.callout}
+**Technical exercises**
 
-1. ...
-2. ...
+- ...
+- ...
 :::

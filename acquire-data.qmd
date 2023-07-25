@@ -38,12 +38,11 @@ Formatting:
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-- [ ] change to outcomes/ update for new chapter content
+<!-- [x] change to outcomes/ update for new chapter content -->
 
-- ...
-- What are the most common strategies for acquiring corpus data?
-- What programmatic steps can we take to ensure the acquisition process is reproducible?
-- What is the importance of documenting data?
+- Identify common strategies for acquiring corpus data.
+- Describe how to organize and document data acquisition to support reproducibility.
+- Recall R programming concepts and strategies relevant to acquiring data.
 :::
 
 <!--  
@@ -58,30 +57,11 @@ Programming topics:
   - `return` function
   - `invisible` function
 -->
-```{r}
-#| label: acquire-data-packages
-#| echo: false
-
-pacman::p_load(tidyverse) # for the book
-```
-
-
-There are three main ways to acquire corpus data using R that I will introduce you to: **downloads**, **APIs**, and **web scraping**. In this chapter we will start by manual and programmatically downloading a corpus as it is the most straightforward process for the novice R programmer and typically incurs the least number of steps. Along the way I will introduce some key R coding concepts including control statements and custom functions. Next I will cover using R packages to interface with APIs, both open-access and authentication-based. APIs will require us to delve into more detail about R objects and custom functions. Finally acquiring data from the web via webscraping is the most idiosyncratic and involves both knowledge of the web, more sophisticated R skills, and often some clever hacking skills. I will start with a crash course on the structure of web documents (HTML) and then scale up to a real-world example. To round out the chapter we will cover the process of ensuring that our data is documented in such a way as to provide sufficient information to understand its key sampling characteristics and the source from which it was drawn.
-
-::: {.callout}
-**{{< fa terminal >}} Swirl lesson**
-
-<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-**What**: [Control Statements, Custom Functions](https://github.com/qtalr/lessons)\
-**How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
-**Why**: To ....
-:::
 
 <!--  
-- [ ] Consider how to document the changes to the scaffolding.
-  - [ ] Use R or qmd?
-    - Quarto make more sense for documentation, but the rendered HTML appears side-by-side with the script files. This looks messy. Or I don't show the HTML output. Then, later in the book, I introduce how to tie the HTML output to a full website with `_site.yml`? 
+- [x] Consider how to document the changes to the scaffolding.
+  - [x] Use R or qmd?
+    - Quarto make more sense for documentation, but the rendered HTML appears side-by-side with the script files. This looks messy. Or I don't show the HTML output. Then, later in the book (Chapter 13: collaboration), I introduce how to tie the HTML output to a full website with `_site.yml`? 
 
 project/
 ├── _main.R
@@ -97,75 +77,195 @@ project/
 ├── README
 └── code/
 
-
-
 -->
+
+
+```{r}
+#| label: acquire-data-packages
+#| echo: false
+
+pacman::p_load(tidyverse) # for the book
+```
+
+As we start down the path to executing our research blueprint, our first step is to acquire the primary data that will be employed in the project. This chapter covers three widely-used strategies for acquiring corpus data: downloads, APIs (Application Programming Interfaces), and web scraping. We get started with the most straighforward approaches from an implementation standpoint, gradually escalating to more advanced methods. We will encounter various file formats and folder structures in the process and we will address how to effectively organize our data for subsequent processing. Crucial to our efforts is the process of documenting our data. We will learn to provide data origin information to ensure key characteristics of the data and its source are documented. Along the way we will explore R coding concepts including control statements and custom functions relevant to the task of acquiring data. By the end of this chapter, you will not only be adept at acquiring data from diverse sources but also capable of documenting it comprehensively, enabling you to replicate the process in the future.
+
+::: {.callout}
+**{{< fa terminal >}} Swirl lesson**
+
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+**What**: [Control Statements, Custom Functions](https://github.com/qtalr/lessons)\
+**How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
+**Why**: To recognize the logic behind code that can make dynamic choices and to recall how functions serve to produce efficient, reusable, and more legible code.
+:::
 
 ## Downloads
 
+The most common and straightforward method for acquiring corpus data is through direct downloads. In a nutshell, this method involves navigating to a website, locating the data, and downloading it to your computing environment. In some cases access to the data requires manual intervention and in others the process can be implemented programmatically. The data may be contained in a single file or multiple files. The files may be compressed or uncompressed. The data may be hierarchically organized or not. Each resource will have its own unique characteristics that will influence the process of acquiring the data. In this section we will work through a few examples to demonstrate the general process of acquiring data through downloads. 
+
 ### Manual
 
-The first acquisition method I will cover here is inherently non-reproducible from the standpoint that the programming implementation cannot acquire the data based solely on running the project code itself. In other words, it requires manual intervention. Manual downloads are typical for data resources which are not openly accessible on the public facing web. These can be resources that require institutional or private licensing ([Language Data Consortium](https://www.ldc.upenn.edu/), [International Corpus of English](http://ice-corpora.net/ice/), [BYU Corpora](https://www.corpusdata.org/), etc.), require authorization/ registration ([The Language Archive](https://archive.mpi.nl/tla/), [COW Corpora](https://www.webcorpora.org/), etc.), and/ or are only accessible via resource search interfaces ([Corpus of Spanish in Southern Arizona](https://cesa.arizona.edu/), [Corpus Escrito del Español como L2 (CEDEL2)](http://cedel2.learnercorpora.com/), etc.).
+In contrast to the other data acquisition methods we will cover in this chapter, **manual downloads** require human intervention. This means that manual downloads are non-reproducible in a strict sense and require that we keep track of and document our procedure. It is a very common for research projects to acquire data through manual downloads as many data resources are not openly accessible online. These can be resources that require institutional or private licensing and fees ([Language Data Consortium](https://www.ldc.upenn.edu/), [International Corpus of English](http://ice-corpora.net/ice/), [BYU Corpora](https://www.corpusdata.org/), *etc.*), require authorization/ registration ([The Language Archive](https://archive.mpi.nl/tla/), [COW Corpora](https://www.webcorpora.org/), *etc.*), and/ or are only accessible via resource search interfaces ([Corpus of Spanish in Southern Arizona](https://cesa.arizona.edu/), [Corpus Escrito del Español como L2 (CEDEL2)](http://cedel2.learnercorpora.com/), *etc.*).
 
-Let's work with the CEDEL2 corpus [@Lozano2009] which provides a search interface and open access to the data through the search interface. The homepage can be seen in @fig-ad-show-page-cedel2-1.
+Let's take a look at how to acquire data from a resource that requires manual intervention. The resource we will use is the [Corpus Escrito del Español como L2 (CEDEL2)](http://cedel2.learnercorpora.com/) [@Lozano2009], a corpus of Spanish learner writing. It includes L2 writing from students with a variety of L1 backgrounds. For comparative puposes it also includes native writing for Spanish, English, and several other languages. 
 
-```{r}
-#| label: fig-ad-show-page-cedel2-1
-#| fig-cap: 'CEDEL2 Corpus homepage'
-#| echo: false
-
-# [ ] Update/ remove screenshot
-
-knitr::include_graphics("figures/acquire-data/ad-cedel2-site.png")
-```
-
-Following the search/ download link you can find a search interface that allows the user to select the sub-corpus of interest. I've selected the subcorpus "Learners of L2 Spanish" and specified the L1 as English.
+The CEDEL2 corpus is a freely available resource, but to access the data you must first use a search interface to select the relevant characteristics of the data of interest. Following the search/ download link you can find a search interface that allows the user to select the subcorpus and filter the results by a set of attributes, seen in @fig-ad-cedel2-search.
 
 ```{r}
-#| label: fig-ad-show-page-cedel2-2
+#| label: fig-ad-cedel2-search
 #| fig-cap: 'Search and download interface for the CEDEL2 Corpus'
 #| echo: false
 
-# [ ] Update/ remove screenshot
-
-knitr::include_graphics("figures/acquire-data/ad-cedel2-search-download.png")
+knitr::include_graphics("figures/acquire-data/ad-cedel2-search.png")
 ```
 
-The 'Download' link now appears for this search criteria. Following this link will provide the user a form to fill out. This particular resource allows for access to different formats to download (Texts only, Texts with metadata, CSV (Excel), CSV (Others)). I will select the 'CSV (Others)' option so that the data is structured for easier processing downstream when we work to curate the data in our next processing step. Then I will choose to save the CSV in the `data/original/` directory of my project and create a sub-directory called `cedel2/`.
+For this example let's assume that we want to acquire data to use in a study comparing the use of the Spanish preterite and imperfect past tense aspect in written texts by English L1 learners of Spanish to native Spanish speakers. To do this we will first select the subcorpus "Learners of L2 Spanish". We will set the results to provide full texts and filter the results to "L1 English - L2 Spanish". Additionally, we will set the medium to "Written". This will provide us with a set of texts for the L2 learners that we can use for our study. The search parameters and results are shown in @fig-ad-cedel2-results.
 
-- [ ] Look at the `#exm-` environment to be able to make refs.
+```{r}
+#| label: fig-ad-cedel2-results
+#| fig-cap: "Search results for the CEDEL2 Corpus"
+#| echo: false
 
-```bash
+knitr::include_graphics("figures/acquire-data/ad-cedel2-results.png")
+```
+
+The 'Download' link now appears for this search criteria. Following this link will provide the user a form to fill out. This particular resource allows for access to different formats to download (Texts only, Texts with metadata, CSV (Excel), CSV (Others)). I will select the 'CSV (Others)' option so that the data is structured for easier processing downstream when we work to curate the data in our next processing step. Then I will choose to save the CSV in the *data/original/* directory of my project and create a sub-directory named *cedel2/*, as seen in @exm-ad-cedel2-learners-download.
+
+::: {#exm-ad-cedel2-learners-download}
+
+```
 data/
 ├── analysis/
 ├── derived/
 └── original/
     └── cedel2/
-       └── texts.csv
+       └── cedel2-l1-english-learners.csv
+```
+:::
+
+Note that the file is named to reflect the search criteria used to acquire the data. In combination with other data documentation, this will help us to maintain transparency.
+
+Now, after downloading the data for the L2 learners and the native speakers into the appropriate directory, we move on to the next processing step, right? Not so fast! Imagine we are working on a project with a collaborator. How will they know where the data came from? What if we need to come back to this data in the future? How will we know what characteristics we used to filter the data? The directory and filenames may not be enough. To address these questions we need to document the origin of the data, and in the case of data acquired through manual downloads, we need to document the procedures we took to acquire the data to the best of our ability.
+
+As discussed in @sec-ud-data-origin, all acquired data should be accompanied by a data origin file. The majority of this information can typically be identified on the resource's website and/ or the resource's documentation. In the case of the CEDEL2 corpus, the corpus homepage provides most of the information we need. 
+
+Structurally, data documentation files should be stored close to the data they describe. So for our data origin file this means adding it to the *data/original/* directory. Naming the file in a transparent way is also important. I've named the file *cedel2_do.csv* to reflect the name of the corpus, the meaning of the file as data origin with *_do*, and the file extension *.csv* to reflect the file format. CSV files reflect tabular content. It is not required that data origin files are tabular, but it makes it easier to read and display them in literate programming documents. 
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
+There are many ways to create and edit CSV files. You can use a spreadsheet program like MS Excel or Google Sheets, a text editor like Notepad or TextEdit, or a code editor like RStudio or VS Code. 
+
+Using a spreadsheet program is the easiest method for creating and editing tabular data. The key is to save the file as a CSV file, and not as an Excel file.
+:::
+
+In @tbl-ad-cedel2-do, I've created a data origin file for the CEDEL2 corpus.
+
+```{r}
+#| label: tbl-ad-cedel2-do
+#| tbl-cap: "Data origin file for the CEDEL2 corpus"
+#| tbl-colwidths: [25, 75]
+#| echo: false
+
+# Display CEDEL2 data origin file
+read_csv("data/acquire-data/ad-cedel2_do.csv") |> 
+  knitr::kable(booktabs = TRUE)
 ```
 
-Other resources will inevitably include unique processes to obtaining the data, but in the end the data should be archived in the research structure in the `data/original/` directory and be treated as 'read-only'.
+Given this is a manual download we also need to document the procedure used to retrieve the data in prose. The script to acquire the data is not used to programmatically retrieve data in this case, but we can still document the process in a script file. I've created a Quarto file named *1_acquire_data.qmd* in the *code/* directory of my project. 
 
-- [ ] Add data origin discussion `cedel2_do.csv`
-- [ ] Add README discussion on manual steps taken to acquire the data
+A glimpse at the directory structure of the project at this point is seen in @exm-ad-cedel2-structure.
 
+::: {#exm-ad-cedel2-structure}
 
-```bash
-data/
-├── analysis/
-├── derived/
+```
+project/
+├── code/
+│   ├── 1_acquire_data.qmd
+│   └── ...
+├── data/
+│   ├── analysis/
+│   ├── derived/
+│   └── original/
+│       ├── cedel2_do.csv
+│       └── cedel2/
+|           ├── cedel2-l1-english-learners.csv
+|           └── cedel2-native-spanish-speakers.csv
 ├── output/
-│   ├── cedel2_do.csv
-│   └── cedel2
-│      └── texts.csv
-└── README
+│   ├── figures/
+│   ├── reports/
+│   ├── results/
+│   └── tables/
+├── README.md
+└── _main.R
 ```
+:::
+
+
+
+In the *1_acquire_data.qmd* file I've added example sections to display the data origin CSV file as a table and to document the data download procedures, as seen in @exm-ad-cedel2-acquire-data-qmd.
+
+::: {#exm-ad-cedel2-acquire-data-qmd}
+
+````{.quarto filename="1_acquire_data.qmd"}
+---
+title: "Acquire data"
+---
+
+## Overview
+
+The goal of this script is to acquire and document data for this project from the CEDEL2 corpus. The acquired data will be stored in the `data/original/cedel2/` directory.
+
+## Data origin
+
+To document the origin of the data we created a file named `cedel2_do.csv` in the `data/original/` directory. This file contains the following information: 
+
+```{{r}}
+#| label: tbl-cedel2-data-origin
+#| tbl-cap: "Data origin file for the CEDEL2 corpus"
+#| echo: false
+
+# Display data origin file
+readr::read_csv("../data/original/cedel2_do.csv") |> 
+  knitr::kable()
+```
+
+## Download procedures
+
+The process to acquire data from the CEDEL2 corpus involved the following steps:
+
+L2 Spanish Learners:
+
+1. Navigate to the [CEDEL2 Corpus](http://cedel2.learnercorpora.com/search) search interface
+2. Select the subcorpus "Learners of L2 Spanish"
+3. Set the results to provide full texts
+4. Filter the results to "L1 English - L2 Spanish"
+5. Set the medium to "Written"
+6. Download the data in CSV format
+7. Save the CSV file to the `data/original/cedel2/` directory as `cedel2-l1-english-learners.csv`
+
+Spanish natives: 
+
+1. ...
+
+````
+:::
+
+The output from *1_acquire_data.qmd* will contain a table displaying the data origin file and a prose section documenting the data acquisition process. This will provide a transparent record of the data acquisition process for future reference.
+
+Other resources will inevitably include unique processes to obtaining the data, but in the end the data should be archived in the research structure in the *data/original/* directory and documented in the appropriate places. The acquired data is treated as 'read-only', meaning it is not modified in any way. This gives us a transparent starting point for subsequent processing steps.
+
 
 ### Programmatic
 
 <!-- [ ] Update to SWDA information and download URL -->
 
-There are many resources that provide corpus data is directly accessible for which programmatic approaches can be applied. Let's take a look at how this works starting with the a sample from the Switchboard Dialog Act Corpus, a corpus of 2,400 telephone conversations by 543 speakers. First we navigate to the site with a browser and download the file that we are looking for. In this case I found the Switchboard Corpus on the [NLTK data repository site](http://www.nltk.org/nltk_data/). More often than not this file will be some type of compressed archive file with an extension such as `.zip` or `.tz`, which is the case here. Archive files make downloading large single files or multiple files easy by grouping files and directories into one file. In R we can used the `download.file()` function from the base R library[^acquire-data-1]. There are a number of **arguments** that a function may require or provide optionally. The `download.file()` function minimally requires two: `url` and `destfile`. That is the file to download and the location where it is to be saved to disk.
+There are many resources that provide corpus data that is directly accessible for which programmatic downloads can be applied. A **programmatic download** is a download in which the process can be automated. Thus, this is a reproducible process. The data can be acquired by anyone with the appropriate access and the necessary code. This process is documented in a script file. The data origin file, however, is still necessary to document by hand and integrate into our project structure.
+
+- [ ] pick upu here
+
+
+Let's take a look at how this works starting with the a sample from the Switchboard Dialog Act Corpus, a corpus of 2,400 telephone conversations by 543 speakers. First we navigate to the site with a browser and download the file that we are looking for. In this case I found the Switchboard Corpus on the [NLTK data repository site](http://www.nltk.org/nltk_data/). More often than not this file will be some type of compressed archive file with an extension such as `.zip` or `.tz`, which is the case here. Archive files make downloading large single files or multiple files easy by grouping files and directories into one file. In R we can used the `download.file()` function from the base R library[^acquire-data-1]. There are a number of **arguments** that a function may require or provide optionally. The `download.file()` function minimally requires two: `url` and `destfile`. That is the file to download and the location where it is to be saved to disk.
 
 [^acquire-data-1]: Remember base R packages are installed by default with R and are loaded and accessible by default in each R session.
 

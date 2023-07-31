@@ -7,4 +7,4 @@ The goal of this textbook is to provide readers with foundational knowledge and 
 
 This textbook is geared towards advanced undergraduates, graduate students, and researchers looking to expand their methodological toolbox. It assumes no prior knowledge of programming or quantitative methods and prioritizes practical application and intuitive understanding over technical details. 
 
-{{< fa wrench >}} **This textbook is currently under development.**
+<img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/0698449d50f2b95517562295a59d414afc68b369/svgs/solid/wrench.svg" width="25" height="25"> **This textbook is currently under development.**

@@ -15,8 +15,6 @@ execute:
 Ready for review.
 :::
 
-
-
 <!--
 
 Content:
@@ -71,11 +69,7 @@ Formatting:
 
 ```{r}
 #| label: aa-packages
-
-# Avoid kableextra from outputting HTML on kable tables
-options(kableExtra.auto_format = FALSE)
-
-pacman::p_load(TBDBr, skimr, janitor, kableExtra, effectsize, patchwork)
+pacman::p_load(skimr, janitor, kableExtra, effectsize, tidytext)
 ```
 
 <!-- [x] Revise introduction to fit new outline/ content -->
@@ -106,6 +100,9 @@ A descriptive assessment of the dataset includes a set of diagnostic measures an
 ```{r}
 #| label: aa-belc
 #| eval: false
+
+# TalkBank API
+library(TBDBr)
 
 # Talkbank: BELC
 corpus_name <- "slabank"
@@ -227,7 +224,7 @@ There are two primary approaches to dealing with missing data: deletion and reco
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
 
-For more information on missing data, see the [missing data chapter](https://bookdown.org/ajkurz/Approaching-Analysis/missing-data.html) in this book.
+For more information on missing data, see the {{< fa wrench >}} in this book.
 :::
 
 In either case, it is important to consider the implications of missing data for the analysis. For example, if the missing data is not at random or include a sizeable portion of the values of interest, then the analysis may be biased.
@@ -467,11 +464,13 @@ The most common measure of dispersion for numeric variables is the **standard de
 
 Let's now consider the relevant central tendency and dispersion of the variables in the BELC dataset in @tbl-aa-belc-descriptive-stats. 
 
-:::{#tbl-aa-belc-descriptive-stats layout-ncol=2}
-
 ```{r}
-#| label: tbl-aa-belc-descriptive-stats-1
-#| tbl-cap: "Categorical variables"
+#| label: tbl-aa-belc-descriptive-stats
+#| tbl-cap: "Central tendency and dispersion of the variables in the BELC dataset"
+#| tbl-subcap: 
+#| - "Categorical variables"
+#| - "Numeric variables"
+#| layout-ncol: 2
 
 belc_essay_tbl |>
   # custom skim function
@@ -481,11 +480,6 @@ belc_essay_tbl |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
   kable()
-```
-
-```{r}
-#| label: tbl-aa-belc-descriptive-stats-2
-#| tbl-cap: "Numeric variables"
 
 belc_essay_tbl |>
   aa_skim() |>
@@ -497,9 +491,6 @@ belc_essay_tbl |>
   kable(digits = 2)
 ```
 
-Central tendency and dispersion of the variables in the BELC dataset
-:::
-
 In @tbl-aa-belc-descriptive-stats-1 we see the measures for categorical variables. The `top_counts` variable gives us a short list of the most frequent levels of the variable. From `top_count` we can gather whether the variable has one mode or is multimodel. Both `essay_id` and `part_id` have the same most frequent value for the levels listed. On the other hand, `sex` and `group` have a single mode. We can also appreciate the dispersion of these variables based on the `norm_entropy` of each variable. `essay_id` is completely balanced across the levels, so it has a normalized entropy of 1. the other variables are not as balanced, but still quite balanced as the normalized entropy is close to 1.
 
 In @tbl-aa-belc-descriptive-stats-2 the numeric variables have a column for the mean, median, standard deviation, and IQR for each. The variable `tokens` has a larger difference between the mean and median than the other variables and the standard deviation is relatively large suggesting that the values are more spread out around the mean. In the case of `ttr` the mean and median are quite close and the standard deviation is relatively small suggesting that the values are more tightly clustered around the mean.
@@ -508,7 +499,7 @@ When interpreting these summary values, it is important to only directly compare
 
 However, we can transform the central tendency and dispersion scores for numeric variables to make them more comparable by standardizing the scale of the values. **Standardization** is a scale-based transformation that changes the scale of the values to a common scale, or *z-scores*. It involves two separate transformations: centering and scaling. **Centering** is a transformation that subtracts the mean or median from each value. The result is a mean and median of zero. **Scaling** is a transformation that divides each value by the standard deviation or IQR. 
 
-In @tbl-aa-belc-descriptive-stats-standardized we see the same summary statistics as in @tbl-aa-belc-descriptive-stats-2, but the values have been standardized for the mean and standard deviation. The mean is now zero and the standard deviation is one. This allows us to compare the median and IQR of the variables more directly. 
+In @tbl-aa-belc-descriptive-stats-standardized, we see the same summary statistics as in @tbl-aa-belc-descriptive-stats-2, but the values have been standardized for the mean and standard deviation. The mean is now zero and the standard deviation is one. This allows us to compare the median and IQR of the variables more directly. 
 
 ```{r}
 #| label: tbl-aa-belc-descriptive-stats-standardized
@@ -567,6 +558,7 @@ A **bar plot** is a type of plot where the x-axis is a categorical variable and 
 #|   - "Sex"
 #|   - "Time group"
 #|   - "Participant ID"
+#| fig-height: 3
 #| layout-ncol: 3
 
 # Function to create bar plots ----
@@ -581,7 +573,8 @@ create_barplot <- function(data, variable, x_lab = NULL, y_lab = NULL) {
   ggplot(freq_table, aes(x = {{ variable }}, y = n)) +
     geom_bar(stat = "identity") +
     ylim(ylim) +
-    labs(x = x_lab, y = y_lab)
+    labs(x = x_lab, y = y_lab) +
+    theme_qtalr(font_size = 13)
 }
 
 # Bar plots for categorical variables ----
@@ -624,7 +617,7 @@ The most common visualizations of the distribution of a numeric variable are his
 #| fig-subcap:
 #|  - "Histogram"
 #|  - "Density plot"
-#| fig-height: 2
+#| fig-height: 3
 #| layout-ncol: 2
 
 # Define range for x-axis
@@ -660,6 +653,7 @@ In @fig-aa-belc-histograms we see histograms for the variables `tokens`, `types`
 #|  - "Number of tokens"
 #|  - "Number of types"
 #|  - "Type-token ratio score"
+#| fig-height: 3
 #| layout-ncol: 3
 
 # Histograms ----
@@ -669,23 +663,24 @@ hist_tokens_p <-
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
   # geom_density() +
   labs(x = "Number of tokens", y = "") +
-  theme(axis.text.y = element_blank())
+  theme(axis.text.y = element_blank()) +
+  theme_qtalr(font_size = 13)
 
 hist_types_p <-
   belc_essay_tbl |>
   ggplot(aes(x = types)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
-  # geom_density() +
   labs(x = "Number of types", y = "") +
-  theme(axis.text.y = element_blank())
+  theme(axis.text.y = element_blank()) +
+  theme_qtalr(font_size = 13)
 
 hist_ttr_p <-
   belc_essay_tbl |>
   ggplot(aes(x = ttr)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "black", fill = "white") +
-  # geom_density() +
   labs(x = "Type-token ratio", y = "") +
-  theme(axis.text.y = element_blank())
+  theme(axis.text.y = element_blank()) +
+  theme_qtalr(font_size = 13)
 
 hist_tokens_p
 hist_types_p
@@ -701,8 +696,7 @@ It is important to recognize that outliers contribute undue influence to overall
 ```{r}
 #| label: fig-aa-belc-boxplot
 #| fig-cap: "Boxplot for the variable `ttr`."
-#| fig-width: 4
-#| fig-asp: .6
+#| fig-height: 3
 
 p1 <-
   belc_essay_tbl |>
@@ -726,9 +720,8 @@ Now let's consider boxplots from another angle. In @fig-aa-belc-histogram-boxplo
 #| fig-subcap:
 #| - "Histogram"
 #| - "Boxplot (horizontal)"
+#| fig-height: 3
 #| layout-ncol: 1
-#| fig-width: 4
-#| fig-asp: .6
 
 # Calculate quantiles and mean
 quants <-
@@ -785,13 +778,24 @@ In @fig-aa-belc-histogram-density-trimmed, we see two boxplots. @fig-aa-belc-box
 #| layout-ncol: 2
 
 # Boxplot (original) ----
+
+ttr_mean <-
+  belc_essay_tbl |>
+  pull(ttr) |>
+  mean()
+ttr_median <-
+  belc_essay_tbl |>
+  pull(ttr) |>
+  median()
+
 belc_essay_tbl |>
   ggplot(aes(y = ttr)) +
   geom_boxplot() +
   # add X annotation for mean
-  geom_segment(aes(x = -0.38, xend = 0.38, y = mean(ttr), yend = mean(ttr)), linetype = "dashed") +
+  geom_segment(aes(x = -0.38, xend = 0.38, y = ttr_mean, yend = ttr_mean), linetype = "dashed") +
+  annotate("text", x = -0.09, y = ttr_mean, label = paste("Mean:", round(ttr_mean, 2)), hjust = 0, vjust = -0.4) +
+  annotate("text", x = -0.1, y = ttr_median, label = paste("Median:", round(ttr_median, 2)), hjust = 0, vjust = 1.4) +
   labs(y = "Type-Token Ratio Score", x = "") +
-  # remove x-axis labels
   theme(axis.text.x = element_blank())
 
 # Boxplot (trimmed) ----
@@ -800,18 +804,30 @@ belc_essay_tbl <-
   # Filter out essays with less than 10 tokens or a type-token ratio of 1
   filter(ttr != 1)
 
+ttr_mean <-
+  belc_essay_tbl |>
+  pull(ttr) |>
+  mean()
+ttr_median <-
+  belc_essay_tbl |>
+  pull(ttr) |>
+  median()
+
+
 belc_essay_tbl |>
   ggplot(aes(y = ttr)) +
   geom_boxplot() +
   # add X annotation for mean
   geom_segment(aes(x = -0.38, xend = 0.38, y = mean(ttr), yend = mean(ttr)), linetype = "dashed") +
+  annotate("text", x = -0.09, y = ttr_mean, label = paste("Mean:", round(ttr_mean, 2)), hjust = 0, vjust = -0.4) +
+  annotate("text", x = -0.1, y = ttr_median, label = paste("Median:", round(ttr_median, 2)), hjust = 0, vjust = 1.4) +
   labs(y = "Type-Token Ratio Score", x = "") +
   # remove x-axis labels
   theme(axis.text.x = element_blank()) +
   ylim(0.4, 1.0)
 ```
 
-We can now appreciate the effect that the outliers had on the mean value of the `ttr` variable as the difference between the mean and median is now smaller. 
+We can now appreciate the relatively larger effect that the outliers had on the mean value of the `ttr` variable. As outliers are removed as the difference between the mean and median will become smaller. 
 
 <!-- Normal distribution/ skewed distributions -->
 
@@ -828,6 +844,7 @@ Stepping away from our BELC dataset, I've created simulated data that fit normal
 #|  - "Left skewed distribution"
 #|  - "Normal distribution"
 #|  - "Right skewed distribution"
+#| fig-height: 3
 #| layout-ncol: 3
 
 shape1 <- 6
@@ -842,7 +859,8 @@ ggplot(left_skew_data, aes(x = value)) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
   theme(axis.text = element_blank()) +
-  labs(x = "Values", y = "Density")
+  labs(x = "Values", y = "Density") +
+  theme_qtalr(font_size = 13)
 
 # Normal distribution ----
 set.seed(123)
@@ -853,7 +871,8 @@ ggplot(norm_data, aes(x = value)) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
   labs(x = "Values", y = "Density") +
-  theme(axis.text = element_blank())
+  theme(axis.text = element_blank()) +
+  theme_qtalr(font_size = 13)
 
 
 # Right skewed distribution ----
@@ -865,7 +884,8 @@ ggplot(right_skew_data, aes(x = value)) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
   theme(axis.text = element_blank()) +
-  labs(x = "Values", y = "Density")
+  labs(x = "Values", y = "Density") +
+  theme_qtalr(font_size = 13)
 
 ```
 
@@ -906,10 +926,10 @@ All things distribution are matters of degree, so there are no hard and fast rul
 | Score Range | Evaluation |
 |-------------|------------|
 | -0.5 to 0.5 | Approximately symmetric |
-| -1 to -0.5 (or) 0.5 to 1 | Moderately skewed |
-| < -1 (or) > 1 | Highly skewed |
+| -1 to -0.5 or 0.5 to 1 | Moderately skewed |
+| < -1 or > 1 | Highly skewed |
 
-: Skewness scores {#tbl-aa-skewness}
+: Skewness scores {#tbl-aa-skewness}{tbl-colwidths="[45, 55]" .sm .striped}
 
 | Score Range | Evaluation |
 |-------------|------------|
@@ -917,7 +937,7 @@ All things distribution are matters of degree, so there are no hard and fast rul
 | Equal to 3 | Normal peak |
 | > 3 | More peaked than normal |
 
-: Kurtosis scores {#tbl-aa-kurtosis}
+: Kurtosis scores {#tbl-aa-kurtosis}{tbl-colwidths="[45, 55]" .sm .striped}
 
 Rules of thumb for skewness and kurtosis scores.
 :::
@@ -937,6 +957,7 @@ The question is which type of distribution does each numeric variable in the BEL
 #| - "Type-token ratio score"
 #| - "Number of types"
 #| - "Proportion of L2 words"
+#| fig-height: 3
 #| layout-ncol: 3
 
 belc_essay_tbl <-
@@ -951,19 +972,22 @@ belc_essay_tbl <-
 belc_essay_tbl |>
   ggplot(aes(x = ttr)) +
   geom_density() +
-  labs(x = "Type-token ratio", y = "Probability")
+  labs(x = "Type-token ratio", y = "Probability") +
+  theme_qtalr(font_size = 13)
 
 # Number of types ----
 belc_essay_tbl |>
   ggplot(aes(x = types)) +
   geom_density() +
-  labs(x = "Number of types", y = "Probability")
+  labs(x = "Number of types", y = "Probability") +
+  theme_qtalr(font_size = 13)
 
 # Proportion of L2 words ----
 belc_essay_tbl |>
   ggplot(aes(x = prop_l2)) +
   geom_density() +
-  labs(x = "Proportion of L2 words", y = "Probability")
+  labs(x = "Proportion of L2 words", y = "Probability") +
+  theme_qtalr(font_size = 13)
 ```
 
 
@@ -981,7 +1005,8 @@ belc_essay_tbl |>
   select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |>
   mutate(distribution = factor(distribution, levels = c("ttr", "types", "tokens", "prop_l2"))) |>
   arrange(distribution) |>
-  kable()
+  kable() |> 
+  kable_styling()
 ```
 
 Given the characteristics of the numeric variables in the BELC dataset, although none of them are perfectly normal, but only `prop_l2` is highly skewed. Therefore, if we intend to use these variables 'as-is' in statistical measures or tests, we now know whether to choose parametric or non-parametric alternatives. 
@@ -1006,7 +1031,7 @@ The directionality of a relationship will take the form of a tabular or graphic 
 | **Ordinal**     | -                 | Contingency table/ Bar plot | Pivot table/ Boxplot |
 | **Numeric**     | -                 | -                           | Scatterplot          |
 
-: Appropriate summary types for different combinations of variable types. {#tbl-aa-summary-types}
+: Appropriate summary types for different combinations of variable types. {#tbl-aa-summary-types}{tbl-colwidths="[14, 22, 30, 22]" .sm .striped}
 
 <!-- Nominal + ? -->
 
@@ -1016,34 +1041,28 @@ In @tbl-aa-belc-contingency-tables we see contingency tables for the categorical
 
 <!-- sex + group contingency table -->
 
-::: {#tbl-aa-belc-contingency-tables layout-ncol=2}
-
 ```{r}
-#| label: tbl-aa-belc-contingency-tables-1
-#| tbl-cap: "Counts"
+#| label: tbl-aa-belc-contingency-tables
+#| tbl-cap: "Contingency tables for categorical variable `sex` and ordinal variable `group` in the BELC dataset."
+#| tbl-subcap:
+#| - "Counts"
+#| - "Percentages"
+#| layout-ncol: 2
 
 belc_essay_tbl |>
   tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
-  kable()
-```
-
-
-```{r}
-#| label: tbl-aa-belc-contingency-tables-2
-#| tbl-cap: "Percentages"
+  kable() |>
+  kable_styling()
 
 belc_essay_tbl |>
   tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
   adorn_percentages("row") |>
   adorn_pct_formatting(digits = 2) |>
-  # adorn_ns() |>
-  kable()
+  kable() |>
+  kable_styling()
 ```
-
-Contingency tables for categorical variable `sex` and ordinal variable `group` in the BELC dataset.
-:::
 
 A contingency table may include only counts, as in @tbl-aa-belc-contingency-tables-1, or may include proportions or percentages in an effort to normalize the counts and make them more comparable, as in @tbl-aa-belc-contingency-tables-2.
 
@@ -1057,6 +1076,7 @@ It is sometimes helpful to visualize a contingency table as a bar plot when ther
 #| fig-subcap:
 #| - "Counts"
 #| - "Proportions"
+#| fig-height: 3
 #| layout-ncol: 2
 
 belc_essay_tbl |>
@@ -1086,7 +1106,8 @@ In @tbl-aa-belc-pivot-table, we see a pivot table for the relationship between `
 belc_essay_tbl |>
   group_by(group) |>
   summarise(mean_tokens = mean(tokens)) |>
-  kable()
+  kable() |> 
+  kable_styling()
 ```
 
 We see that the mean number of tokens increases from Group T1 to T4, which is consistent with the idea that the students in the higher groups are writing longer essays. 
@@ -1103,6 +1124,7 @@ In @fig-aa-belc-boxplot-violin-plot, we see both a boxplot and a violin plot for
 #| fig-subcap:
 #| - "Boxplot"
 #| - "Violin plot"
+#| fig-height: 3
 #| layout-ncol: 2
 
 belc_essay_tbl |>
@@ -1132,6 +1154,7 @@ In @fig-aa-belc-scatter-plot, we see a scatterplot and a scatterplot with a tren
 #| fig-subcap:
 #| - "Points"
 #| - "Points with a linear trend line"
+#| fig-height: 3
 #| layout-ncol: 2
 
 belc_essay_tbl |>
@@ -1142,7 +1165,7 @@ belc_essay_tbl |>
 belc_essay_tbl |>
   ggplot(aes(x = types, y = ttr)) +
   geom_point(color = "black", alpha = 0.5) +
-  geom_smooth(method = "lm", se = FALSE, linetype = "dashed", color = "black", size = 1) +
+  geom_smooth(method = "lm", se = FALSE) +
   labs(x = "Number of types", y = "Type-Token Ratio score")
 ```
 
@@ -1162,7 +1185,7 @@ There are a number of measures of assocation, depending on the types of variable
 | **Numeric**<br>*Non-parametric* | -                      | -                       | Kendall's $\tau$                  | Pearson's $r$               |
 | **Numeric**<br>*Parametric*     | -                      | -                       | -                           | Pearson's $r$               |
 
-: Measures of association or correlation strength for different combinations of variable types. {#tbl-aa-association-measures tbl-colwidths="[20, 20, 20, 20, 20]"}
+: Measures of association or correlation strength for different combinations of variable types. {#tbl-aa-association-measures tbl-colwidths="[20, 20, 20, 20, 20]" .sm .striped}
 
 Association measures often are expressed as a number between -1 and 1, where 0 indicates no association, -1 indicates a perfect negative association, and 1 indicates a perfect positive association. The closer the number is to 0, the weaker the association. The closer the number is to -1 or 1, the stronger the association. Association statistics are often accompanied by a **confidence interval** (CI), which is a range of values that is likely to contain the true value of the association in the population. The confidence interval is expressed as a percentage, such as 95%, which means that if we were to repeat the study 100 times, 95 of those studies would produce a confidence interval that contains the true value of the association in the population. If the range between the lower and higher bounds of the confidence interval contains 0, then the association is likely no different than chance.
 
@@ -1295,7 +1318,8 @@ sotu_tbl <-
 sotu_tbl |> # select the tibble
   slice_head(n = 10) |> # select first 10 addresses
   mutate(addresses = str_trunc(addresses, 50, "right")) |> # truncate addresses
-  kable()
+  kable() |> 
+  kable_styling()
 ```
 
 A dataset such as this one could serve as a starting point to explore many different types of research questions. In order to maintain research coherence so our efforts to not careen into a free-for-all, we need to tether our feature engineering to a unit of analysis that is relevant to the research question. A **unit of analysis** is the entity that we are interested in studying. Not to be confused with the unit of observation, which is the entity that we are able to observe and measure. 
@@ -1322,7 +1346,8 @@ eda_approaches <-
     "Co-occurence analysis", "Vector Space Models"
   )
 eda_approaches |>
-  kable()
+  kable() |> 
+  kable_styling()
 ```
 
 The first group, **descriptive methods** can be seen as a (more robust) extenstion of the descriptive statistics covered earlier in this chapter including statistic, tabular, and visual techniques. For example, a frequency analysis of the SOTU dataset could be used to identify the most common words used by U.S. political parties in their addresses, in @fig-aa-eda-sotu-descriptive-1, or a co-occurence analysis could be used to identify the most common words the appear after the term "free", in @fig-aa-eda-sotu-descriptive-2, in the dataset.
@@ -1344,10 +1369,8 @@ sotu_freq_p <- # Frequency plots
   ggplot(aes(x = reorder(feature, frequency), y = frequency, color = group)) + # plot
   geom_point() + # point plot
   labs(
-    x = "Terms", y = "Term frequency", color = "Party",
-    title = "20 Most Frequent Terms"
+    x = "Terms", y = "Term frequency", color = "Party"
   ) +
-  scale_color_manual(values = c("blue", "red")) + # color by party
   # place legend below plot
   theme(legend.position = "bottom", legend.box = "horizontal") +
   coord_flip() # flip axes
@@ -1381,17 +1404,15 @@ sotu_free_p <-
   graph_from_data_frame() |>
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = log(n), label_size = log(n)), show.legend = FALSE, arrow = a) +
-  # geom_node_point(color = "lightblue") +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1, size = 3) +
-  theme_void() +
-  labs(title = "Bigrams with 'Free' as the first word")
+  theme_void()
 ```
 
 ```{r}
 #| label: aa-eda-sotu-keyness
 #| eval: false
 
-sotu_keyness_p <- # Barplot: keyness
+sotu_keyness_p <- # Barplot: keyness 
   sotu_corpus |>
   tokens(remove_punct = TRUE) |>
   tokens_remove(pattern = stopwords("en")) |>
@@ -1420,14 +1441,14 @@ sotu_keyness_p <- # Barplot: keyness
 #| fig-subcap:
 #| - "Frequency analysis of the 20 most frequent terms by party."
 #| - "Co-occurence analysis of the terms that appear after the term 'free'."
+#| fig-height: 3
 #| layout-ncol: 2
-#| fig-height: 4
 
 sotu_freq_p # Frequency plots 
 sotu_free_p # Co-occurence analysis
 ```
 
-The second group, **unsupervised learning** is a subtype of machine learning in which an algorithm is used to find patterns within and between variables in the data without any guidance (supervision). In this way, the algorithm, or machine learner, is left to make connections and associations wherever they may appear in the input data. If we were interested in finding word-use continuities and discontinuities between presidents, we could use a clustering algorithm, seen in @fig-aa-eda-sotu-unsupervised-1. Or if we wanted to uncover themes ... [ADD: modify plot] we could use a vector space model, as in @fig-aa-eda-sotu-unsupervised-2.
+The second group, **unsupervised learning** is a subtype of machine learning in which an algorithm is used to find patterns within and between variables in the data without any guidance (supervision). In this way, the algorithm, or machine learner, is left to make connections and associations wherever they may appear in the input data. If we were interested in finding word-use continuities and discontinuities between presidents, we could use a clustering algorithm, seen in @fig-aa-eda-sotu-unsupervised-1. Or if we wanted to uncover themes ... {{< fa wrench >}} [ADD: modify plot] we could use a vector space model, as in @fig-aa-eda-sotu-unsupervised-2.
 
 <!-- Add unsupervised learning graphics -->
 
@@ -1438,7 +1459,7 @@ The second group, **unsupervised learning** is a subtype of machine learning in 
 # Clustering (hierarchical) analysis
 # dendrogram
 
-library(factoextra) # for fviz_dend()
+library(factoextra) # for fviz_dend() 
 
 sotu_hclust <-
   sotu_corpus |>
@@ -1455,7 +1476,7 @@ sotu_pres_p <-
     cex = .5,
     k = 2,
     k_colors = c("black", "darkgrey")
-  )
+  ) + labs(title = "")
 ```
 
 ```{r}
@@ -1518,8 +1539,7 @@ sotu_tsne_p <-
   geom_text_repel(data = sotu_tsne_sampled, aes(label = label), color = "black", min.segment.length = 0, size = 3) +
   theme_minimal() +
   labs(x = "Component 1", y = "Component 2", color = "Cluster") +
-  scale_color_brewer(palette = "Greys", direction = -1, type = "qual") +
-  ggtitle("t-SNE visualization with K-means Clustering")
+  scale_color_brewer(palette = "Greys", direction = -1, type = "qual")
 ```
 
 
@@ -1529,8 +1549,8 @@ sotu_tsne_p <-
 #| fig-subcap:
 #| - "Hierarchical clustering of the SOTU corpus."
 #| - "Word embedding space in the SOTU corpus."
+#| fig-height: 3
 #| layout-ncol: 2
-#| fig-height: 4
 
 sotu_pres_p # clustering analysis 
 sotu_tsne_p # word embeddings
@@ -1606,14 +1626,14 @@ The approach to interrogating the dataset includes three main steps: feature eng
 
 The elephant in the room is, what type of machine learning algorithm do I use? Well, there are many different types of machine learning algorithms, each with their own strengths and weaknesses. The first rough cut is to decide what type of outcome variable we are predicting: categorical or numeric. If the outcome variable is categorical, we are performing a **classification** task, and if the outcome variable is numeric, we are performing a **regression** task. As we see in @tbl-pda-algorithms, there are various algorithms that can be used for each task. 
 
-| Classification         | Regression                | Learner type       |
+| Classification         | Regression                | Learner type  |
 |:-----------------------|:--------------------------|:--------------|
 | Logistic Regression    | Linear Regression         | Interpretable |
 | Decision Tree          | Regression Tree           | Interpretable |
 | Support Vector Machine | Support Vector Regression | Black box     |
-| Multilayer Perceptron         | Multilayer Perceptron            | Black box     |
+| Multilayer Perceptron  | Multilayer Perceptron     | Black box     |
 
-: Some common supervised learning algorithms used in PDA. {#tbl-pda-algorithms tbl-colwidths="[33, 33, 33]"}
+: Some common supervised learning algorithms used in PDA. {#tbl-pda-algorithms tbl-colwidths="[33, 33, 33]" .sm .striped}
 
 I've included a column in @tbl-pda-algorithms that charaterizes a second consideration which is whether we want an interpretable model or a black box model. When talking about whether a model is interpretable or not, we are not referring to the evaluation of the accuracy of the model. Rather, we are referring to the inner workings of the model itself that allow us to understand how the model is making its predictions. An **interpretable model** is one that can be understood and explored by humans, while a **black box model** is one whose inner workings are not trivially unraveled. The advantage of an interpretable model is that it researchers can go beyond evaluating prediction accuracy and probe feature-outcome associations. On the other hand, if the goal is to simply boost prediction accuracy, interpretability may not be a concern.
 
@@ -1646,7 +1666,7 @@ Finally, there are a number of algorithm-specific strengths and weaknesses to be
 | **Actual: natives**    | 26294 (90% of 29215) | 2921 (10% of 29215)   |
 | **Actual: nonnatives** | 730 (10% of 7304)    | 6574 (90% of 7304)    |
 
-: Confusion matrix for the utterance type classification task. {#tbl-aa-confusion-matrix}
+: Confusion matrix for the utterance type classification task. {#tbl-aa-confusion-matrix}{.sm .striped}
 
 Since regression tasks predict numeric values, the accuracy of the model is calculated by comparing the difference between the predicted and actual values. 
 
@@ -1685,7 +1705,8 @@ A dataset based on the Switchboard Dialog Act Corpus (SWDA) [@SWDA2008], seen in
 
 # SWDA data dictionary ----
 read_csv("data/approaching-analysis/swda_transformed_1_dd.csv") |>
-  kable()
+  kable() |> 
+  kable_styling()
 ```
 
 The Alternative Hypothesis may be formulated in this way:
@@ -1797,7 +1818,7 @@ The audience for your report will determine the level of detail and the type of 
 
 <!-- Purpose -->
 
-While a good report will include the most vital information to understand the procedures, results, and findings of an analysis, there is much more information generated in the course of an analysis which does not traditionally appear in prose. If a research project is conducted programmatically, however,  data, code, and documentation can be made available to others as part of the communication process. Increasingly, researchers are sharing their data and code as part of the publication process. This allows others to reproduce the analysis and verify the results contributing to the collaborative nature of the scientific process. [CITATION]
+While a good report will include the most vital information to understand the procedures, results, and findings of an analysis, there is much more information generated in the course of an analysis which does not traditionally appear in prose. If a research project is conducted programmatically, however,  data, code, and documentation can be made available to others as part of the communication process. Increasingly, researchers are sharing their data and code as part of the publication process. This allows others to reproduce the analysis and verify the results contributing to the collaborative nature of the scientific process. {{< fa wrench >}} [CITATION]
 
 <!-- Research compendium -->
 
@@ -1814,6 +1835,7 @@ In this chapter we have focused on description and analysis --the third componen
 ```{r}
 #| label: fig-approaching-analysis-vis-sum
 #| fig-cap: 'Approaching analysis: visual summary'
+#| out.width: '75%'
 
 knitr::include_graphics("figures/approaching-analysis/aa-diki.drawio.png")
 ```

@@ -16,21 +16,9 @@ Under development.
 :::
 
 
-<!--
+<!--  
 
-Content:
-
-- [x] Figure out what do do with Twitter API: can we still stream? Or is `rtoot` for Mastodon a better option at this point? Remove.
-- [x] Figure out what to do with the web scraping section: Gutenberg Project (single page), SPLLOC (multiple pages), Maybe the American Presidency Project?
-  - [x] Single page SOTU here (Federalist Papers LOC on Recipe)
-
-Exercises:
-
-- [ ] Add concept questions to the Activities
-- [ ] Add exercises to the Activities
-- [ ] Add thought questions/ case studies to prose sections
-
-Formatting:
+[ ] Consider project naming conventions: "_main.R" vs. "-main.R", etc. Quarto doesn't work well with the underscore when using the filename environment.
 
 -->
 
@@ -176,7 +164,7 @@ In @tbl-ad-cedel2-do, I've created a data origin file for the CEDEL2 corpus.
 #| echo: false
 
 # Display CEDEL2 data origin file for documentation
-read_csv("data/acquire-data/ad-cedel2_do.csv") |> 
+read_csv("data/acquire-data/ad-cedel2_do.csv") |>
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -261,7 +249,7 @@ Manually downloading other resources will inevitably include unique processes fo
 
 ### Programmatic
 
-<!-- [ ] Update to SWDA information and download URL -->
+<!-- [x] Update to SWDA information and download URL -->
 
 There are many resources that provide corpus data that is directly accessible for which programmatic downloads can be applied. A **programmatic download** is a download in which the process can be automated through code. Thus, this is a reproducible process. The data can be acquired by anyone with access to the necessary code. 
 
@@ -587,49 +575,272 @@ A convenient alternative method for acquiring data in R is through package inter
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
 
-Many, many web services provide API access. These APIs span all kinds of data, from text to images to video to audio. Visit the [Public APIs website](https://publicapis.io/) to explore the diversity of APIs available. ROpenSci maintains a curated list of R packages that provide access to data from web services. Visit the [ROpenSci website](https://ropensci.org/packages/data-access/) to explore the packages available.
+Many, many web services provide API access. These APIs span all kinds of data, from text to images to video to audio. Visit the [Public APIs website](https://publicapis.io/) to explore the diversity of APIs available. 
+
+ROpenSci maintains a curated list of R packages that provide access to data from web services. Visit the [ROpenSci website](https://ropensci.org/packages/data-access/) to explore the packages available.
 :::
 
-<!-- Change list of examples: gutenbergr, rwhatsapp, rtoot, jstor? -->
+<!-- APIs of interest to linguists -->
 
-Examples of APIs that provide access to text data include the [Project Gutenberg](https://www.gutenberg.org/) API, the [Twitter](https://developer.twitter.com/en/docs) API, and the [Facebook](https://developers.facebook.com/docs/apis-and-sdks) API. In this section, we will explore the [TalkBank](https://talkbank.org/) API, which provides access to a large collection of spoken language corpora. We will use the [TBDBr](
+In addition to popular public APIs, there are also APIs that provide access to repositories and databases which are of particular interest to linguists. For example, [Wordbank](http://wordbank.stanford.edu/) provides access to a large collection of child language corpora through the `wordbankr` package [@R-wordbankr], and [Glottolog](https://glottolog.org/), [World Atlas of Language Structures](https://wals.info/) (WALS), and [PHOIBLE](https://phoible.org/) provide access to large collections of language metadata that can be accessed through the `lingtypology` package [@R-lingtypology]. 
 
+<!-- TalkBank -->
 
-- [ ] **Pick up here**
-  - Introduce CABANK and TalkBank: Useful for a study aiming to research spoken British English, either in isoloation or in comparison to American English (SWDA). 
-  - Introduce `TBDBr` package. Show available functions in the package. `ls(getNamespace("TBDBr"))`, Basic arguments for `get*()` functions: `corpusName` and `corpora`
-  - Same for these function, demonstrate. So, ideally we could use one function to get all the data we need.
-  - [ ] Write custom function to download all resources for a TalkBank API resource.
+Let's work with an R package that provides access to the [TalkBank](https://talkbank.org/) database. The TalkBank project {{< fa wrench >}} [CITATION] contains a large collection of spoken language corpora from various contexts: conversation, child language, multilinguals, *etc*. Resource information, web interfaces, and links to download data in various formats can be found by perusing individual resources linked from the main page. However, the `TBDBr` package [@R-TBDBr] provides convenient access to data using R once a data resource is identified.
 
+<!-- CABNC -->
 
+The CABNC [@Albert2015] contains the [demographically sampled portion](http://www.natcorp.ox.ac.uk/docs/URG/BNCdes.html#body.1_div.1_div.5_div.1) of the spoken portion of the British National Corpus (BNC) [@Leech1992].
 
-- [ ] Where to add the function. 
-  - [ ] In the relevant script, `1_acquire_data.qmd` in this case.
-  - [ ] In a separate file, `functions.R` in this case.
-  - [ ] If you have multiple functions, it is good practice to put them in a separate file. Cleans up the main script and makes it easier to find the functions you need and reuse them in other scripts, if needed.
+Useful for a study aiming to research spoken British English, either in isoloation or in comparison to American English (SWDA). 
 
-::: {#exm-ad-functions-r}
+First, we need to install and load the `TBDBr` package. The `install.package()` and `library()` functions work just great for this. An alternative is to use the `pacman` package [@R-pacman] to install and load the package in one step with the function `p_load()`, as shown in @exm-ad-install-load-pacman.
 
-```bash 
-project/
-├── code/
-│   ├── 1_acquire_data.qmd
-│   ├── ...
-│   └── functions.R
-├── data/
-│   ├── analysis/
-│   ├── derived/
-│   └── original/
-├── output/
-│   ├── figures/
-│   ├── reports/
-│   ├── results/
-│   └── tables/
-├── README.md
-└── _main.R
+::: {#exm-ad-install-load-pacman}
+```{r}
+#| label: ad-install-load-pacman
+
+# Install and load the TBDBr package
+pacman::p_load(TBDBr)
 ```
 :::
 
+<!-- TBDBr functions -->
+
+The `TBDBr` package provides a set of common `get*()` functions for acquiring data from the TalkBank corpus resources. These include:
+
+- `getParticipants()`
+- `getTranscripts()`
+- `getTokens()`
+- `getTokenTypes()`
+- `getUtterances()`
+
+For each of these function the first argument is `corpusName`, which is the name of the corpus resource as it appears in the TalkBank database. The second argument is `corpora`, which takes a character vector describing the path to the data. For the CABNC, these arguments are `"ca"` and `c("ca", "CABNC")` respectively. To determine these values, TBDBr provides the `getLegalValues()` interactive function which allows you to interactively select the repository name, corpus name, and transcript name (if necessary).
+
+Another important aspect of these function is that they return data frame objects. Since we are accessing data that is in a structured database, this makes sense. However, we should always check the documentation for the object type that is returned by function to be aware of how to work with the data.
+
+Let's start by retrieving the utterance data for the CABNC and preview the data frame it returns using `glimpse()`. 
+
+::: {#exm-ad-get-utterances}
+```{r}
+#| label: ad-get-utterances
+
+# Set corpus_name and corpus_path
+corpus_name <- "ca"
+corpus_path <- c("ca", "CABNC")
+
+# Get utterance data
+utterances <- 
+  getUtterances(
+    corpusName = corpus_name, 
+    corpora = corpus_path)
+
+# Preview the data
+glimpse(utterances)
+```
+:::
+
+<!-- Inspecting data  -->
+
+Inspecting the output from @exm-ad-get-utterances, we see that the data frame contains `r nrow(utterances)` observations and `r ncol(utterances)` variables. 
+
+The summary provided by `glimpse()` also provides other useful information. First, we see the data type of each variable. Interestingly, the data type for each variable in the data frame is `list`. Being that a list is two-dimensional data type, like a data frame, we have list-type data in each value. This is known as a **nested structure**. We will see, and create, nested structures later, but for now it will suffice to say that we would like to 'unnest' these lists and reveal the list-contained vector types at the data frame level.
+
+To do this we will pass the `utterances` data frame to the `unnest()` function from the `tidyr` package [@R-tidyr]. `unnest()` takes a data frame and a vector of variable names to unnest, `cols = c()`. To unnest all variables, we will use the `everything()` function from `dplyr` [@R-dplyr] to select all variables. We will use the result to overwrite the `utterances` object with the unnested data frame.
+
+::: {#exm-ad-unnest}
+```{r}
+#| label: ad-unnest
+
+# Unnest the data frame
+utterances <- 
+  utterances |> 
+  unnest(cols = everything())
+
+# Preview the data
+glimpse(utterances)
+```
+:::
+
+The output from @exm-ad-unnest shows that the variables are now one-dimensional vector types.
+
+Returning to the information about our data frame from `glimpse()`, the second thing to notice is we get a short preview of the values for each variable. There are a couple things we can gleen from this. One is that we can confirm or clarify the meaning of the variable names by looking at the values. The other thing to consider is whether the values show any patterns that may be worthy of more scrutiny. For example, various variables appear to contain the same values for each observation. For a variable like `filename`, this is expected as the first values likely correspond to the same file. However, for the variables `postcodes` and `gems` the values are 'NA'. This suggests that these variables may not contain any useful information and we may want to remove them later.
+
+<!-- Writing data -->
+
+For now, however, we want to acquire and store the data in its original form (or as closely as possible). So now, we have acquired the utterances data and have it in our R session as a data frame. To store this data in a file, we will first need to consider the file format. Data frames are tabular, so that gives us a few options. Since we are working in R, we could store this data as an R object, in the form of an RDS file. An RDS file is a binary file that can be read back into R as an R object. This is a good option if we want to store the data for use in R, but not if we want to share the data with others or use it in other software. Another option is to store the data as a spreadsheet file, such as XSLX (MS Excel). This may make viewing and editing the contents more convenient, but it depends on the software available to you and others. A third, more viable option, is to store the data as a CSV file. CSV files are plain text files that can be read and written by most software. This makes CSV files one of the most popular for sharing tablular data. For this reason, we will store the data as a CSV file.
+
+The `readr` package [@R-readr] provides the `write_csv()` function for writing data frames to CSV files. The first argument is the data frame to write, and the second argument is the path to the file to write. Note, however, that the directories in the path we specify need to exist. If they do not, we will get an error. In this case, I would like to write the file *utterances.csv* to the *../data/original/cabnc/* directory. The original project structure does not contain a *cabnc/* directory, so I need to create one. To do this, I will use `dir_create()` from the `fs` package [@R-fs]. 
+
+::: {#exm-ad-write-csv}
+```{r}
+#| label: ad-write-csv
+#| eval: false
+
+# Create the target directory
+dir_create("../data/original/cabnc/")
+
+# Write the data frame to a CSV file
+write_csv(utterances, "../data/original/cabnc/utterances.csv")
+```
+:::
+
+Chaining the steps covered in Examples [-@exm-ad-get-utterances], [-@exm-ad-unnest], and [-@exm-ad-write-csv], we have a succinct and legible code to acquire, adjust, and write utterances from the CABNC in @exm-ad-get-unnest-write-csv.
+
+::: {#exm-ad-get-unnest-write-csv}
+```{r}
+#| label: ad-get-unnest-write-csv
+#| eval: false
+
+# Set corpus_name and corpus_path
+corpus_name <- "ca"
+corpus_path <- c("ca", "CABNC")
+
+# Create the target directory
+dir_create("../data/original/cabnc/")
+
+# Get utterance data
+getUtterances(
+  corpusName = corpus_name,
+  corpora = corpus_path
+) |>
+  unnest(cols = everything()) |> 
+  write_csv("../data/original/cabnc/utterances.csv")
+```
+:::
+
+<!-- Function -->
+
+If our goal is just to acquire utterances, then we are done acquiring data and we move on to the next step. However, if we want to acquire other datasets from the CABNC, say participants, tokens, *etc.*, then we can either repeat the steps in @exm-ad-get-unnest-write-csv for each data type, or we can write a function to do this for us. A function serves us to make our code more legible and reusable for the CABNC, and since the TalkBank data is structured similarly across corpora, we can also use the function to acquire data from other corpora, if need be. 
+
+To write a function, we need to consider the following:
+
+1. What is the name of the function?
+2. What arguments does the function take?
+3. What functionality does the function provide?
+4. Does the function have optional arguments?
+5. How does the function return the results?
+
+Taking each in turn, the name of the function should be descriptive of what the function does. In this case, we are acquiring and writing data from Talkbank corpora. A possible name is `get_talkbank_data()`. The required arguments of the the `get*()` functions will definitely figure in our function. In addition, we will need to specify the path to the directory to write the data.
+
+::: {#exm-ad-get-talkbank-data-1}
+```{r}
+#| label: ad-get-talkbank-data-1
+#| eval: false
+
+get_talkbank_data <- function(corpus_name, corpus_path, target_dir) {
+  # ...
+}
+```
+:::
+
+The next thing to consider is what functionality the function provides. In this case, we want to acquire and write data from Talkbank corpora. We can start by leveraging the code steps in @exm-ad-get-unnest-write-csv, making some adjustments to the code replacing the hard-coded values with the function arguments and adding code to create the target file name based on the `target_dir` argument.
+
+::: {#exm-ad-get-talkbank-data-2}
+```{r}
+#| label: ad-get-talkbank-data-2
+#| eval: false
+
+get_talkbank_data <- function(corpus_name, corpus_path, target_dir) {
+  
+  # Create the target directory
+  dir_create(target_dir)
+
+  # Set up file path name
+  utterances_file  <- path(target_dir, "utterances.csv")
+  
+  # Acquire data and write to file
+  getUtterances(corpusName = corpus_name, corpora = corpus_path) |> 
+    unnest(cols = everything()) |> 
+    write_csv(utterances_file)
+}
+```
+:::
+
+Before we address the obvious feature missing, which is the fact that this function in @exm-ad-get-talkbank-data-2 only acquires and writes data for utterances, let's consider some functionality which would make this function more user-friendly. 
+
+What if the data is already acquired? Do we want to overwrite it, or should the function skip the process for files that already exist? By skipping the process, we can save time and computing resources. If the files are periodically updated, then we might want to overwrite existing files. To achieve this functionality we will use an `if()` statement to check if the file exists. If it does, then we will skip the process. If it does not, then we will acquire and write the data.
+
+::: {#exm-ad-get-talkbank-data-3}
+```{r}
+#| label: ad-get-talkbank-data-3
+#| eval: false
+
+get_talkbank_data <- function(corpus_name, corpus_path, target_dir) {
+  
+  # Create the target directory
+  dir_create(target_dir)
+
+  # Set up file path name
+  utterances_file  <- path(target_dir, "utterances.csv")
+  
+  # If the file does not exist, then...
+  # Acquire data and write to file
+  if(!file_exists(utterances_file)) {
+    getUtterances(corpusName = corpus_name, corpora = corpus_path) |> 
+      unnest(cols = everything()) |> 
+      write_csv(utterances_file)
+  }
+}
+```
+:::
+
+We can also add functionality to @exm-ad-get-talkbank-data-3 to force overwrite existing files, if need be. To do this, we will add an optional argument to the function, `force`, which will be a logical value. We will set the default to `force = FALSE` to preserve the existing functionality. If `force = TRUE`, then we will overwrite existing files. Then we add another condition to the `if()` statement to check if `force = TRUE`. If it is, then we will overwrite existing files.
+
+::: {#exm-ad-get-talkbank-data-4}
+```{r}
+#| label: ad-get-talkbank-data-4
+#| eval: false
+
+get_talkbank_data <- function(corpus_name, corpus_path, target_dir, force = FALSE) {
+  
+  # Create the target directory
+  dir_create(target_dir)
+
+  # Set up file path name
+  utterances_file  <- path(target_dir, "utterances.csv")
+  
+  # If the file does not exist, then...
+  # Acquire data and write to file
+  if(!file_exists(utterances_file) | force) {
+    getUtterances(corpusName = corpus_name, corpora = corpus_path) |> 
+      unnest(cols = everything()) |> 
+      write_csv(utterances_file)
+  }
+}
+```
+:::
+
+From this point, we add the functionality to acquire and write the other data available from Talkbank corpora, such as participants, tokens, *etc.* This involves adding additional file path names and `if()` statements to check if the files exist surrounding the processing steps to @exm-ad-get-talkbank-data-4. It may be helpful to perform other input checks, print messages, *etc.* for functions that we plan to share with others. I will leave these enhancements as an exercise for the reader.
+
+<!-- Function location -->
+
+Before we leave the topic of functions, let's consider where to put functions after we write them. Here are a few options: 
+
+1. In the same script as the code that uses the function. 
+2. In a separate script, such as *functions.R*.
+3. In a package, which is loaded by the script that uses the function.
+
+The general heuristic for choosing where to put functions is to put them in the same script as the code that uses them if the function is only used in that script. If the function is used in multiple scripts or the function or number of functions clutters the readability of the code, then put it in a separate script. If the function is used in multiple projects, then put it in an R package.
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+If you are interested in learning more about writing functions, check out the [Writing Functions chapter](https://r4ds.had.co.nz/functions.html) in the [R for Data Science](https://r4ds.had.co.nz/) book.
+
+If you find yourself writing functions that are useful for multiple projects, you may want to consider creating an R package. R packages are a great way to share your code with others. If you are interested in learning more about creating R packages, check out the [R Packages book](https://r-pkgs.org/) by Hadley Wickham and Jenny Bryan.
+:::
+
+In this case, we will put the function in a separate file, *functions.R*, in the same directory as the other code files as in @exm-ad-functions-r.
+
+::: {#exm-ad-functions-r}
+```bash
+code/
+│   ├── 1_acquire_data.qmd
+│   ├── ...
+│   └── functions.R
+```
+:::
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
@@ -637,33 +848,44 @@ project/
 Note that that the *functions.R* file is an R script, not a Quarto document. Therefore code blocks that are used in *.qmd* files are not used, only the R code and code comments.
 :::
 
-We then use the `source()` function to read that function into our current script to make it available to use as needed. It is good practice to source your functions early on a script so that it is available for use throughout the script.
+To include this, or other functions in in the R session of the code file that uses them, use the `source()` function, as seen in @exm-ad-source-functions.
 
-(note relative path to functions.R)
-
-::: {#exm-ad-source-function}
+::: {#exm-ad-source-functions}
 ```{r}
-#| label: ad-source-function
+#| label: ad-source-functions
 #| eval: false
 
-# Load custom functions for this project
-source(file = "functions.R")
+# Source functions
+source("functions.R")
 ```
 :::
 
-...
+Given the utility of this function to my projects and potentially others', I've included the `get_talkbank_data()` function in the `qtalrkit` package. You can view the source code by calling the function without parentheses `()`, or on the `qtalrkit` GitHub repository.
 
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
+After running the `get_talkbank_data()` function, we can see that the data has been acquired and written to the *data/original/cabnc/* directory.
 
-Writing functions is a great way to make your code more reproducible. If you find yourself repeating the same code over and over again, it is a good candidate for a function. Functions can be used to automate repetitive tasks, but they can also be used to make your code more readable. If you find yourself writing code that is difficult to understand, it is a good candidate for a function. Functions can be used to make your code more readable by abstracting away the details of the code and providing a name that describes what the code does. This is especially useful when you are writing code that will be used by others. If you are interested in learning more about writing functions, check out the [Writing Functions chapter](https://r4ds.had.co.nz/functions.html) in the [R for Data Science](https://r4ds.had.co.nz/) book.
-
-If you find yourself writing functions that are useful for multiple projects, you may want to consider creating an R package. R packages are a great way to share your code with others. If you are interested in learning more about creating R packages, check out the [R Packages book](https://r-pkgs.org/) by Hadley Wickham and Jenny Bryan.
+::: {#exm-ad-functions-r}
+```bash 
+data/
+├── analysis
+├── derived
+└── original
+    └── cabnc
+        ├── participants.csv
+        ├── token_types.csv
+        ├── tokens.csv
+        ├── transcripts.csv
+        └── utterances.csv
+```
 :::
 
+<!-- Note on documentation -->
+
+Add comments to your code in *1-acquire-data.Rmd and create and complete the data origin documentation file for this resource, and the acquisition is complete. 
 
 ## Web scraping {#sec-web-scraping}
 
+<!--  
 - [ ] Add example of `rvest::read_html()` 
 - [ ] ? Add example of `httr::GET()` with `httr::content()`.
 - [ ] `xml2::write_html()`
@@ -674,82 +896,11 @@ Federalist papers
 - Example of scraping a single page
 - Example of scraping multiple pages
   - Pulling out links from single page and then scraping those pages
-
-
------
-
-**Previous material:**
-
-### APIs
-
-A convenient alternative method for acquiring data in R is through package interfaces to web services. These interfaces are built using R code to make connections with resources on the web through **Application Programming Interfaces** (APIs). Websites such as Project Gutenberg, Twitter, Facebook, and many others provide APIs to allow access to their data under certain conditions, some more limiting for data collection than others. Programmers (like you!) in the R community take up the task of wrapping calls to an API with R code to make accessing that data from R possible. For example, [gutenbergr](https://CRAN.R-project.org/package=gutenbergr) provides access to Project Gutenberg, [rtweet](https://CRAN.R-project.org/package=rtweet) to Twitter, and [Rfacebook](https://CRAN.R-project.org/package=Rfacebook) to Facebook.[^acquire-data-2]
-
-[^acquire-data-2]: See Section \@ref(sources) for a list of some other API packages.
-
-<!-- RESOURCES:
-- [rwhatsapp](https://github.com/JBGruber/rwhatsapp) work with personal chat history 
 -->
 
-- [ ] Add discussion about APIs.
-  - [ ] Open access and authentication-based
-  - [ ] API documentation
-  - [ ] R interface packages: Examples: `gutenbergr`, `rtweet`, `rtoot`, `rwhatsapp`, etc.
+There are many resources available through downloads and APIs. There are, however, cases in which you want to acquire data from the public-facing web. R can be used to access the web programmatically through a process known as web scraping. The complexity of web scrapes can vary but in general it requires more advanced knowledge of R as well as the structure of the language of the web: HTML (Hypertext Markup Language).
 
-- [ ] Introduce TalkBank repository, API, and `TBDBr` package.
-  - [ ] Functions
-
-Using R package interfaces, however, often requires some more knowledge about R objects and functions. Let's take a look at how to access data from Project Gutenberg through the `gutenbergr` package. Along the way we will touch upon various functions and concepts that are key to working with the R data types vectors and data frames including filtering and writing tabular data to disk in plain-text format.
-
-To get started let's install and/ or load the `gutenbergr` package. If a package is not part of the R base library, we cannot assume that the user will have the package in their library. The standard approach for installing and then loading a package is by using the `install.packages()` function and then calling `library()`.
-
-```{r}
-#| label: ad-standard-install-load-gutenbergr
-#| eval: false
-
-install.packages("gutenbergr") # install `gutenbergr` package
-library(gutenbergr) # load the `gutenbergr` package
-```
-
-This approach works just fine, but luck has it that there is an R package for installing and loading packages! The [pacman](https://CRAN.R-project.org/package=pacman) package includes a set of functions for managing packages. A very useful one is `p_load()` which will look for a package on a system, load it if it is found, and install and then load it if it is not found. This helps potentially avoid using unnecessary bandwidth to install packages that may already exist on a user's system. But, to use `pacman` we need to include the code to install and load it with the functions `install.packages()` and `library()`. I've included some code that will mimic the behavior of `p_load()` for installing `pacman` itself, but as you can see it is not elegant, luckily it's only used once as we add it to the SETUP section of our master file, `_pipeline.R`.
-
-```{r}
-#| label: install-load-pacman
-#| eval: false
-
-# Load `pacman`. If not installed, install then load.
-if (!require("pacman", character.only = TRUE)) {
-  install.packages("pacman")
-  library("pacman", character.only = TRUE)
-}
-```
-
-At this point we have data and could move on to processing this dataset in preparation for analysis. However, we are aiming for a reproducible workflow and this code does not conform to our principle of modularity: each subsequent step in our analysis will depend on running this code first. Furthermore, running this code as it is creates issues with bandwidth, as in our previous examples from direct downloads. To address modularity we will write the dataset to disk in **plain-text format**. In this way each subsequent step in our analysis can access the dataset locally. To address bandwidth concerns, we will devise a method for checking to see if the dataset is already downloaded and skip the download, if possible, to avoid accessing the Project Gutenberg server unnecessarily.
-
-To write our data frame to disk we will export it into a standard plain-text format for two-dimensional datasets: a CSV file (comma-separated value). The CSV structure for this dataset will look like this:
-
-```{r}
-#| label: ad-csv-snippet
-#| eval: false
-works_pr |>
-  head() |>
-  format_csv() |>
-  cat()
-```
-
-The first line contains the names of the columns and subsequent lines the observations. Data points that contain commas themselves (e.g. "Shaw, Bernard") are quoted to avoid misinterpreting these commas a deliminators in our data. To write this dataset to disk we will use the `reader::write_csv()` function.
-
-```{r}
-#| label: ad-write-csv-brit
-#| eval: false
-
-write_csv(works_pr, file = "../data/original/gutenberg_works_pr.csv")
-```
-
-### Web scraping
-
-There are many resources available through manual and direct downloads from repositories and individual sites and R package interfaces to web resources with APIs, but these resources are relatively limited to the amount of public-facing textual data recorded on the web. In the case that you want to acquire data from webpages, R can be used to access the web programmatically through a process known as web scraping. The complexity of web scrapes can vary but in general it requires more advanced knowledge of R as well as the structure of the language of the web: HTML (Hypertext Markup Language).
-
-#### A toy example
+#### HTML: language of the web
 
 HTML is a cousin of XML (eXtensible Markup Language) and as such organizes web documents in a hierarchical format that is read by your browser as you navigate the web. Take for example the toy webpage I created as a demonstration in @fig-ad-example-webpage.
 
@@ -758,25 +909,23 @@ HTML is a cousin of XML (eXtensible Markup Language) and as such organizes web d
 #| fig-cap: 'Example web page.'
 #| echo: false
 
-knitr::include_graphics("figures/acquire-data/ad-example-webpage.png")
+knitr::include_graphics("figures/acquire-data/ad-test-html.png")
 ```
 
-The file accessed by my browser to render this webpage is `test.html` and in plain-text format looks like this:
+The file accessed by my browser to render this webpage is `test.html` and in plain-text format as seen in @exm-ad-html-structure.
 
-```{r}
-#| label: ad-html-structure
-#| comment: ""
-#| echo: false
-
-web_file <- '
+::: {#exm-ad-html-structure}
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>My website</title>
   </head>
   <body>
     <div class="intro">
       <p>Welcome!</p>
-      <p>This is my first website. </p>
+      <p>This is my first website.</p>
     </div>
     <table>
       <tr>
@@ -791,52 +940,104 @@ web_file <- '
     </div>
   </body>
 </html>
-'
-paste(web_file) |> cat()
 ```
+:::
 
 Each element in this file is delineated by an opening and closing tag, `<head></head>`. Tags are nested within other tags to create the structural hierarchy. Tags can take class and id labels to distinguish them from other tags and often contain other attributes that dictate how the tag is to behave when rendered visually by a browser. For example, there are two `<div>` tags in our toy example: one has the label `class = "intro"` and the other `class = "conc"`. `<div>` tags are often used to separate sections of a webpage that may require special visual formatting. The `<a>` tag, on the other hand, creates a web link. As part of this tag's function, it requires the attribute `href=` and a web protocol --in this case it is a link to an email address `mailto:francojc@wfu.edu`. More often than not, however, the `href=` contains a URL (Uniform Resource Locator). A working example might look like this: `<a href="https://francojc.github.io/">My homepage</a>`.
 
-The aim of a web scrape is to download the HTML file, parse the document structure, and extract the elements containing the relevant information we wish to capture. Let's attempt to extract some information from our toy example. To do this we will need the [rvest](https://CRAN.R-project.org/package=rvest)[@R-rvest] package. First, install/load the package, then, read and parse the HTML from the character vector named `web_file` assigning the result to `html`.
+The aim of a web scrape is to download the HTML file(s) that contain the data we are interested in. This will include more information that we may ultimately need, but by downloading the raw source HTML we are effectively creating a local archive, or copy, of the webpage. Thus, if the webpage is updated or removed from the web, we will still have access to the data we accessed.
+
+Later in the curation process we will parse (*i.e.* read and extract) target information that is relevant for the research at hand. However, it often useful to parse the raw HTML in the process of acquiring data if we are interested in harvesting data from multiple pages and we would like to use the HTML structure to guide our data extraction (*i.e.* URLs to other pages)
+
+To provide some preliminary background on working with HTML, we will use the toy example above to demonstrate how to read and parse HTML using R. To do this we will use the [rvest](https://CRAN.R-project.org/package=rvest)[@R-rvest] package. First, install/load the package, then, read and parse the HTML from the character vector named `web_file` assigning the result to `html`.
 
 ```{r}
-#| label: ad-read-html-toy
-#| message: false
+#| label: ad-html-toy
+#| echo: false
 
-pacman::p_load(rvest) # install/ load `rvest`
-
-html <- read_html(web_file) # read raw html and parse to xml
-html
+web_file <- '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>My website</title>
+  </head>
+  <body>
+    <div class="intro">
+      <p>Welcome!</p>
+      <p>This is my first website.</p>
+    </div>
+    <table>
+      <tr>
+        <td>Contact me:</td>
+        <td>
+          <a href="mailto:francojc@wfu.edu">francojc@wfu.edu</a>
+        </td>
+      </tr>
+    </table>
+    <div class="conc">
+      <p>Good-bye!</p>
+    </div>
+  </body>
+</html>'
 ```
 
-`read_html()` parses the raw HTML into an object of class `xml_document`. The summary output above shows that tags the HTML structure have been parsed into 'elements'. The tag elements can be accessed by using the `html_elements()` function by specifying the tag to isolate.
+::: {#exm-ad-read-html-toy}
+```{r}
+#| label: ad-read-html-toy
 
+# Load package
+library(rvest) # read and parse HTML
+
+html <- read_html(web_file) # retrieve raw html
+html
+```
+:::
+
+In @exm-ad-read-html-toy `read_html()` retrieves the raw HTML and it makes it accessible to parsing in R. Being a subtype of XML, `read_html()` converts the raw HTML into an object of class `xml_document`, as we can see by calling `class()` on the `html` object in @exm-ad-class-html-toy-class.
+
+::: {#exm-ad-class-html-toy-class}
+```{r}
+#| label: ad-class-html-toy-class
+
+class(html)
+```
+:::
+
+An object of class `xml_document` represents each HTML tag as a node. The tag nodes are elements can be accessed by using the `html_elements()` function by specifying the tag/node/element to isolate.
+
+::: {#exm-ad-parse-html-toy-1}
 ```{r}
 #| label: ad-parse-html-toy-1
 
 html |>
   html_elements("div")
 ```
+:::
 
-Notice that `html_elements("div")` has returned both `div` tags. To isolate one of tags by its class, we add the class name to the tag separating it with a `.`.
+Notice that the output of @exm-ad-parse-html-toy-1 has returned both `div` tags and their respective children, tags contained within. To isolate one of tags by its class, we add the class name to the tag separating it with a `.`.
 
+::: {#exm-ad-parse-html-toy-2}
 ```{r}
 #| label: ad-parse-html-toy-2
 html |>
   html_elements("div.intro")
 ```
+:::
 
-Great. Now say we want to drill down and isolate the subordinate `<p>` nodes. We can add `p` to our node filter.
+Great. Now say we want to drill down and isolate the subordinate `<p>` nodes. We can add `p` to our node filter, as in @exm-ad-parse-html-toy-3.
 
+::: {#exm-ad-parse-html-toy-3}
 ```{r}
 #| label: ad-parse-html-toy-3
 
 html |>
   html_elements("div.intro p")
 ```
+:::
 
 To extract the text contained within a node we use the `html_text()` function.
 
+::: {#exm-ad-parse-html-toy-4}
 ```{r}
 #| label: ad-parse-html-toy-4
 
@@ -844,9 +1045,11 @@ html |>
   html_elements("div.intro p") |>
   html_text()
 ```
+:::
 
-The result is a character vector with two elements corresponding to the text contained in each `<p>` tag. If you were paying close attention you might have noticed that the second element in our vector includes extra whitespace after the period. To trim leading and trailing whitespace from text we can add the `trim = TRUE` argument to `html_text()`.
+The result of @exm-ad-parse-html-toy-4 is a character vector with two elements corresponding to the text contained in each `<p>` tag. If you were paying close attention you might have noticed that the second element in our vector includes extra whitespace after the period. To trim leading and trailing whitespace from text we can add the `trim = TRUE` argument to `html_text()`, as in @exm-ad-parse-html-toy-5.
 
+::: {#exm-ad-parse-html-toy-5}
 ```{r}
 #| label: ad-parse-html-toy-5
 
@@ -854,540 +1057,223 @@ html |>
   html_elements("div.intro p") |>
   html_text(trim = TRUE)
 ```
+:::
 
-From here we would then work to organize the text into a format we want to store it in and write the results to disk. Let's leave writing data to disk for later in the chapter. For now keep our focus on working with `rvest` to acquire data from html documents working with a more practical example.
+With this basic understanding of how to read and parse HTML, we can now turn to a more realistic example.
 
-#### A practical example
+#### Federalist Papers
 
-<!-- update: change website to scrape -->
-<!-- remember to remove `eval = FALSE` from code chunks to run -->
+<!-- update: change website to scrape 
 
-With some basic understanding of HTML and how to use the `rvest` package, let's turn to a realistic example. 
+Library Of Congress
+Federalist Papers: https://guides.loc.gov/federalist-papers/full-text
+Paths allowed: TRUE
+-->
 
-
-
-Say we want to acquire ... . The first step in any web scrape is to investigate the site and page(s) we want to scrape to ascertain if there any licensing restrictions. Many, but not all websites, will include a plain text file [`robots.txt`](https://www.cloudflare.com/learning/bots/what-is-robots.txt/) at the root of the main URL. This file is declares which webpages a 'robot' (including web scraping scripts) can and cannot access. We can use the `robotstxt` package to find out which URLs are accessible ^[It is important to check the paths of sub-domains as some website allow access in some areas and not in others].
-
-<!-- change domain -->
-
-```{r}
-#| label: ad-web-permissions
-
-pacman::p_load(robotstxt) # load/ install `robotstxt`
-
-# paths_allowed(paths = "https://www.last.fm/") # check permissions
-```
+Say we investigate the authorship question of the the Federalist Papers following in the footsteps of @Mosteller1963. We want to scrape the text of the Federalist Papers from the Library of Congress website. The main page for the Federalist Papers is located at *https://guides.loc.gov/federalist-papers/full-text* and can be seen in @fig-ad-web-scrape-screenshot.
 
 <!-- screenshot of page to scrape -->
 
-The next step includes identifying the URL we want to target and exploring the structure of the HTML document. Take the following webpage I have identified, seen in @fig-ad-example-lyrics-page-lastfm. 
-
 ```{r}
-#| label: fig-ad-example-lyrics-page-lastfm
-#| fig-cap: 'Lyrics page from last.fm'
+#| label: fig-ad-web-scrape-screenshot
+#| fig-cap: "Screenshot of the Library of Congress website for the Federalist Papers"
 #| echo: false
 
-# knitr::include_graphics("figures/acquire-data/ad-lastfm-webpage-lyrics.png")
+knitr::include_graphics("figures/acquire-data/ad-fed-papers-loc-main.png")
 ```
 
-As in our toy example, first we want to feed the HTML web address to the `read_html()` function to parse the tags into elements. We will then assign the result to `html`.
+The main page contains links to the text of each of the 85 papers. Our goal will be to scrape and archive the raw HTML for this page and then parse the HTML to extract the links to each of the papers. We will then scrape and archive the raw HTML for each of the 85 papers.
+
+The first step in any web scrape is to investigate the site and page(s) we want to scrape to ascertain if there any licensing restrictions. Many, but not all websites, will include a plain text file [`robots.txt`](https://www.cloudflare.com/learning/bots/what-is-robots.txt/) at the root of the main URL. This file is declares which webpages a 'robot' (including web scraping scripts) can and cannot access. We can use the `robotstxt` package to find out which URLs are accessible ^[It is important to check the paths of sub-domains as some website allow access in some areas and not in others].
+
+<!-- check domain -->
+
+::: {#exm-ad-fed-permissions}
+```{r}
+#| label: ad-web-permissions
+
+# Install and load package
+pacman::p_load(robotstxt)
+
+# URL for the Federalist Papers (LOC)
+url <- "https://guides.loc.gov/federalist-papers/full-text"
+
+# Check permissions
+paths_allowed(url)
+```
+:::
 
 <!-- rvest::read_html() -->
 
+The next step is to read and parse the raw HTML. We can do this using the `read_html()` function. 
+
+::: {#exm-ad-fed-read-html}
 ```{r}
-#| label: ad-read-write-read-page-x
-#| echo: false
-#| eval: false
+#| label: ad-fed-read-html
 
-# download page, as to avoid server load/ article limits
-pacman::p_load(httr)
-# get and write to disk
-GET(url = "https://www.last.fm/music/Radiohead/_/Karma+Police/+lyrics", write_disk(path = "resources/06-acquire-data/lastfm_web.html"))
-```
+# Read raw html and parse to xml
+html <- read_html(url)
 
-<!-- show code, but don't evaluate -->
-
-```{r}
-#| label: ad-read-page-lyrics-lastfm
-#| eval: false
-
-# read and parse html as an xml object
-lyrics_url <- "https://www.last.fm/music/Radiohead/_/Karma+Police/+lyrics"
-html <- read_html(lyrics_url) # read raw html and parse to xml
+# Preview html
 html
 ```
-
-<!-- show html object -->
-
-```{r}
-#| label: ad-print-html-lyrics-lastfm
-#| echo: false
-
-lyrics_url <- "https://www.last.fm/music/Radiohead/_/Karma+Police/+lyrics" # to use later
-# read page back in from disk
-html <- read_html(x = "data/acquire-data/lastfm_web.html", encoding = "UTF-8")
-html
-```
-
-At this point we have captured and parsed the raw HTML assigning it to the object named `html`. The next step is to identify the html elements that contain the information we want to extract from the page. To do this it is helpful to use a browser to inspect specific elements of the webpage. Your browser will be equipped with a command that you can enable by hovering your mouse over the element of the page you want to target and using a right click to select "Inspect" (Chrome) or "Inspect Element" (Safari, Brave). This will split your browser window vertical or horizontally showing you the raw HTML underlying the webpage.
-
-```{r}
-#| label: fig-ad-inspect-element-artist-lastfm
-#| fig-cap: 'Using the "Inspect Element" command to explore raw html.'
-#| echo: false
-
-# knitr::include_graphics("figures/acquire-data/ad-lastfm-artist-inspect.png")
-```
-
-<!-- change class/ tag/ attribute appropriately -->
-
-From @fig-ad-inspect-element-artist-lastfm we see that the element we want to target is contained within an `<a></a>` tag. Now this tag is common and we don't want to extract every `a` so we use the class `header-new-crumb` to specify we only want the artist name. Using the convention described in our toy example, we can isolate the artist of the lyrics page.
-
-<!-- change class/ tag/ attribute appropriately -->
-
-```{r}
-#| label: ad-extract-artist-lastfm-1
-#| eval: false
-html |>
-  html_element("a.header-new-crumb")
-```
-
-We can then extract the text with `html_text()`.
-
-```{r}
-#| label: ad-extract-artist-lastfm-2
-#| eval: false
-artist <-
-  html |>
-  html_element("a.header-new-crumb") |>
-  html_text()
-artist
-```
-
-Let's extract the song title in the same way. 
-
-<!-- change class/ tag/ attribute appropriately -->
-
-```{r}
-#| label: ad-extract-song-title
-#| eval: false
-song <-
-  html |>
-  html_element("h1.header-new-title") |>
-  html_text()
-song
-```
-
-Now if we inspect the HTML of the lyrics page, we will notice that the lyrics are contained in `<p></p>` tags with the class `lyrics-paragraph`. 
-
-```{r}
-#| label: fig-ad-inspect-element-lyrics-lastfm
-#| fig-cap: 'Using the "Inspect Element" command to explore raw html.'
-#| echo: false
-#| eval: false
-# knitr::include_graphics("figures/acquire-data/ad-lastfm-lyrics-inspect.png")
-```
-
-Since there are multiple elements that we want to extract, we will need to use the `html_elements()` function instead of the `html_element()` which only targets one element.
-
-```{r}
-#| label: ad-extract-lyrics
-#| eval: false
-lyrics <-
-  html |>
-  html_elements("p.lyrics-paragraph") |>
-  html_text()
-lyrics
-```
-
-At this point, we have isolated and extracted the artist, song, and lyrics from the webpage. Each of these elements are stored in character vectors in our R session. To complete our task we need to write this data to disk as plain text. With an eye towards a tidy dataset, an ideal format to store the data is in a CSV file where each column corresponds to one of the elements from our scrape and each row an observation. A CSV file is a tabular format and so before we can write the data to disk let's coerce the data that we have into tabular format. We will use the `tibble()` function here to streamline our data frame creation. ^[`tibble` objects are `data.frame` objects with some added extra bells and whistles that we won't get into here.] Feeding each of the vectors `artist`, `song`, and `lyrics` as arguments to `tibble()` creates the tabular format we are looking for.
-
-```{r}
-#| label: ad-create-tibble-lastfm-1
-#| eval: false
-tibble(artist, song, lyrics) |>
-  glimpse()
-```
-
-Notice that there are seven rows in this data frame, one corresponding to each paragraph in `lyrics`. R has a bias towards working with vectors of the same length. As such each of the other vectors (`artist`, and `song`) are replicated, or recycled, until they are the same length as the longest vector `lyrics`, which a length of seven. 
-
-For good documentation let's add our object `lyrics_url` to the data frame, which contains the actual web link to this page, and assign the result to `song_lyrics`.
-
-```{r}
-#| label: ad-create-tibble-lastfm-2
-#| eval: false
-song_lyrics <- tibble(artist, song, lyrics, lyrics_url)
-```
-
-The final step is to write this data to disk. To do this we will use the `write_csv()` function. 
-
-<!-- adjust target file -->
-
-```{r}
-#| label: ad-write-csv-lastfm
-#| eval: false
-
-write_csv(x = song_lyrics, path = "../data/original/lyrics.csv")
-```
-
-#### Scaling up
-
-At this point you may be think, 'Great, I can download data from a single page, but what about downloading multiple pages?' Good question. That's really where the strength of a programming approach takes hold. Extracting information from multiple pages is not fundamentally different than working with a single page. However, it does require more sophisticated understanding of the web and R coding strategies, in particular __iteration__.  
-
-Before we get to iteration, let's first create a couple functions to make it possible to efficiently reuse the code we have developed so far: 
-
-1. the `get_lyrics` function wraps the code for scraping a single lyrics webpage from last.fm. 
-
-```{r}
-#| label: ad-get-lyrics-function
-#| eval: false
-get_lyrics <- function(lyrics_url) {
-  # Function: Scrape last.fm lyrics page for: artist, song, 
-  # and lyrics from a provided content link. 
-  # Return as a tibble/data.frame
-  
-  cat("Scraping song lyrics from:", lyrics_url, "\n")
-  
-  pacman::p_load(tidyverse, rvest) # install/ load package(s)
-  
-  url <- url(lyrics_url, "rb") # open url connection 
-  html <- read_html(url) # read and parse html as an xml object
-  close(url) # close url connection
-  
-  artist <- 
-    html |> 
-    html_element("a.header-new-crumb") |> 
-    html_text()
-  
-  song <- 
-    html |> 
-    html_element("h1.header-new-title") |> 
-    html_text()
-  
-  lyrics <- 
-    html |> 
-    html_elements("p.lyrics-paragraph") |> 
-    html_text()
-  
-  cat("...one moment ")
-  
-  Sys.sleep(1) # sleep for 1 second to reduce server load
-  
-  song_lyrics <- tibble(artist, song, lyrics, lyrics_url)
-  
-  cat("... done! \n")
-  
-  return(song_lyrics)
-}
-```
-
-::: callout-warning
-**Tip**
-
-The `get_lyrics` function includes all of the code developed previously, but also includes: (1) output messages (`cat()`), (2) a processing pause (`Sys.sleep()`), and (3) code to manage opening and closing web connections (`url()` and `close()`). 
-
-Points (1) and (2) will be useful when we iterate over this function to provide status messages and to reduce server load when processing multiple webpages from a web domain. (3) will be necessary to manage webpages that are non-existent. As we will see, we will generate url link to multiple song lyrics some of which will not be valid. To avoid errors that will stop the processing these steps have been incorporated here.
 :::
 
-2. the `write_content` writes the webscraped data to our local machine, including functionality to create the necessary directory structure of the target file path we choose.
+At this point we have captured the raw HTML assigning it to the object named `html`. Let's archive the raw HTML to a file in our project directory. We can do this using the `write_html()` function from the `xml2` package [@R-xml2].
 
+::: {#exm-ad-fed-write-html}
 ```{r}
-#| label: ad-write-content-function
+#| label: ad-fed-write-html
 #| eval: false
 
-write_content <- function(content, target_file) {
-  # Function: Write the tibble content to disk. Create the directory if
-  # it does not already exist.
-  
-  pacman::p_load(tidyverse) # install/ load packages
-  
-  target_dir <- dirname(target_file) # identify target file directory structure
-  dir.create(path = target_dir, recursive = TRUE, showWarnings = FALSE) # create directory
-  write_csv(content, target_file) # write csv file to target location
-  
-  cat("Content written to disk!\n")
-}
+# Create directory for HTML files
+dir_create("../data/original/federalist_papers/")
+
+# Write raw html to file
+write_html(html, "../data/original/federalist_papers/main.html")
 ```
+:::
 
-With just these two functions, we can take a lyrics URL from last.fm and scrape and write the data to disk like this.
+Our update project directory structure can be seen in @exm-ad-fed-project-dir.
 
-```{r}
-#| label: ad-get-write-single-lyric-lastfm
-#| eval: false
-
-lyrics_url <- "https://www.last.fm/music/Pixies/_/Where+Is+My+Mind%3F/+lyrics"
-
-lyrics_url |>
-  get_lyrics() |>
-  write_content(target_file = "../data/original/lastfm/lyrics.csv")
-```
-
-```bash
-data/original/lastfm/
-└── lyrics.csv
-```
-
-Now we could manually search and copy URLs and run this function pipeline. This would be fine if we had just a few particular URLs that we wanted to scrape. But if we want to, say, scrape a set of lyrics grouped by genre. We would probably want a more programmatic approach. The good news is we can leverage our understanding of webscraping to scrape last.fm to harvest the information needed to create and store links to songs by genre. We can then pass these links to a pipeline, similar to the previous one, to scrape lyrics for many songs and store the results in files grouped by genre.
-
-Last.fm provides a genres page where some of the top genres are listed and can be further explored.  
-
-```{r}
-#| label: fig-ad-genre-page-lastfm
-#| fig-cap: 'Genre page on last.fm'
-#| echo: false
-#| eval: false
-# knitr::include_graphics("figures/acquire-data/ad-lastfm-genres.png")
-```
-
-Diving into a a particular genre, 'rock' for example, you will get a listing of the top tracks in that genre. 
-
-```{r}
-#| label: fig-ad-genre-tracks-list-lastfm
-#| fig-cap: 'Tracks by genre list page on last.fm'
-#| echo: false
-#| eval: false
-# knitr::include_graphics("figures/acquire-data/ad-lastfm-genre-tracks-list.png")
-```
-
-If we inspect the HTML elements for the track names in @fig-ad-genre-tracks-list-lastfm, we can see that a relative URL is found for the track. In this case, I have 'Smells Like Teen Spirit' by Nirvana highlighted in the inspector. If we follow this link to the track page and then to the lyrics for the track, you will notice that the relative URL on the track listings page has all the unique information. Only the web domain `https://www.last.fm` and the post-pended `/+lyrics` is missing. 
-
-So with this we can put together a function which gets the track listing for a last.fm genre, scrapes the relative URLs for each of the tracks, and creates a full absolute URL to the lyrics page. 
-
-```{r}
-#| label: ad-get-genre-lyrics-url-lastfm
-#| eval: false
-get_genre_lyrics_urls <- function(last_fm_genre) {
-  # Function: Scrapes a given last.fm genre title for top tracks in
-  # that genre and then creates links to the lyrics pages for these tracks
-  
-  cat("Scraping top songs from:", last_fm_genre, "genre: \n")
-  
-  pacman::p_load(tidyverse, rvest) # install/ load packages
-  
-  # create web url for the genre listing page
-  genre_listing_url <- 
-    paste0("https://www.last.fm/tag/", last_fm_genre, "/tracks") 
-  
-  genre_lyrics_urls <- 
-    read_html(genre_listing_url) |> # read raw html and parse to xml
-    html_elements("td.chartlist-name a") |> # isolate the track elements
-    html_attr("href") |> # extract the href attribute
-    paste0("https://www.last.fm", ., "/+lyrics") # join the domain, relative artist path, and the post-pended /+lyrics to create an absolute URL
-  
-  return(genre_lyrics_urls)
-}
-```
-
-With this function, all we need is to identify the verbatim way last.fm lists the genres. For Rock, it is `rock` but for Hip Hop, it is `hip+hop`. 
-
-```{r}
-#| label: ad-save-get-genre-lyrics-urls-lastfm
-#| echo: false
-#| eval: false
-
-hip_hop_lyrics <- get_genre_lyrics_urls("hip+hop")
-saveRDS(hip_hop_lyrics, file = "data/acquire-data/hip_hop_lyrics.rds")
-```
-
-```{r}
-#| label: ad-demo-get-genre-lyrics-urls-lastfm
-#| eval: false
-
-get_genre_lyrics_urls("hip+hop") |> # get urls for top hip hop tracks
-  head(n = 10) # only display 10 tracks
-```
-
-```{r}
-#| label: ad-print-get-genre-lyrics-urls-lastfm
-#| echo: false
-#| eval: false
-
-hip_hop_lyrics <- read_rds(file = "data/acquire-data/hip_hop_lyrics.rds")
-cat("Scraping top songs from: hip+hop genre:\n")
-hip_hop_lyrics |>
-  head(n = 10)
-```
-
-So now we have a method to scrape URLs by genre and list them in a vector. Our approach, then, could be to pass these lyrics URLs to our existing pipeline which downloads the lyrics (`get_lyrics()`) and then writes them to disk (`write_content()`). 
-
-```{r}
-#| label: ad-example-genre-pipeline-lastfm-1
-#| eval: false
-
-# Note: will not run
-get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
-  get_lyrics() |> # scrape lyrics url
-  write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
-```
-
-This approach, however, has a couple of problems. (1) our `get_lyrics()` function only takes one URL at a time, but the result of `get_genre_lyrics_urls()` will produce many URLs. We will be able to solve this with iteration using the [purrr]() package, specifically the `map()` function which will iteratively map each URL output from `get_genre_lyrics_urls()` to `get_lyrics()` in turn. (2) the output from our iterative application of `get_lyrics()` will produce a tibble for each URL, which then sets up a problem with writing the tibbles to disk with the `write_content()` function. To avoid this we will want to combine the tibbles into one single tibble and then send it to be written to disk. The `bind_rows()` function will do just this. 
-
-```{r}
-#| label: ad-example-genre-pipeline-lastfm-2
-#| eval: false
-
-# Note: will run, but with occasional errors
-get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
-  map(get_lyrics) |> # scrape lyrics url
-  bind_rows() |> # combine tibbles into one
-  write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
-```
-
-This preceding pipeline conceptually will work. However, on my testing, it turns out that some of the URLs that are generated in the `get_genre_lyrics_urls()` do not exist on the site. That is, the song is listed but no lyrics have been added to the song site. This will mean that when the URL is sent to the `get_lyrics()` function, there will be an error when attempting to download and parse the page with `read_html()` which will halt the entire process. To avoid this error, we can wrap the `get_lyrics()` function in a function designed to attempt to download and parse the URL (`tryCatch()`), but if there is an error, it will skip it and move on to the next URL without stopping the processing. This approach is reflected in the `get_lyrics_catch()` function below. 
-
-```{r}
-#| label: ad-get-lyrics-catch-lastfm
-#| eval: false
-
-# Wrap the `get_lyrics()` function with `tryCatch()` to 
-# skip URLs that have no lyrics
-
-get_lyrics_catch <- function(lyrics_url) {
-  tryCatch(get_lyrics(lyrics_url), 
-           error = function(e) return(NULL)) # no, URL, return(NULL)/ skip
-}
-```
-
-Updating the pipeline with the `get_lyrics_catch()` function would look like this:
-
-```{r}
-#| label: ad-example-genre-pipeline-lastfm-3
-#| eval: false
-
-# Note: will run, but we can do better
-get_genre_lyrics_urls("hip+hop") |> # get lyrics urls for specific genre
-  map(get_lyrics_catch) |> # scrape lyrics url
-  bind_rows() |> # combine tibbles into one
-  write_content(target_file = "../data/original/lastfm/hip_hop.csv") # write to disk
-```
-
-This will work, but as we have discussed before one of this goals we have we acquiring data for a reproducible research project is to make sure that we are developing efficient code that will not burden site's server we are scraping from. In this case, we would like to check to see if the data is already downloaded. If not, then the script should run. If so, then the script does not run. Of course this is a perfect use of a conditional statement. To make this a single function we can call, I've wrapped the functions we created for getting lyric URLs from last.fm, scraping the URLs, and writing the results to disk in the `download_lastfm_lyrics()` function below. I also added a line to add a `last_fm_genre` column to the combined tibble to store the name of the genre we scraped (i.e. `mutate(genre = last_fm_genre)`.
-
-```{r}
-#| label: ad-download-lyrics-lastfm-function
-#| eval: false
-download_lastfm_lyrics <- function(last_fm_genre, target_file) {
-  # Function: get last.fm lyric urls by genre and write them to disk
-  
-  if(!file.exists(target_file)) {
-    
-    cat("Downloading data.\n")
-    
-    get_genre_lyrics_urls(last_fm_genre) |> 
-      map(get_lyrics_catch) |> 
-      bind_rows() |> 
-      mutate(genre = last_fm_genre) |> 
-      write_content(target_file)
-    
-  } else {
-    cat("Data already downloaded!\n")
-  }
-}
-```
-
-Now we can call this function on any genre on the last.fm site and download the top 50 song lyrics for that genre (provided they all have lyrics pages).
-
-```{r}
-#| label: ad-download-lyrics-genre-lastfm-show
-#| eval: false
-
-# Scrape lyrics for 'pop'
-download_lastfm_lyrics(last_fm_genre = "pop", target_file = "../data/original/lastfm/pop.csv")
-
-# Scrape lyrics for 'rock'
-download_lastfm_lyrics(last_fm_genre = "rock", target_file = "../data/original/lastfm/rock.csv")
-
-# Scrape lyrics for 'hip hop'
-download_lastfm_lyrics(last_fm_genre = "hip+hop", target_file = "../data/original/lastfm/hip_hop.csv")
-
-# Scrape lyrics for 'metal'
-download_lastfm_lyrics(last_fm_genre = "metal", target_file = "../data/original/lastfm/metal.csv")
-```
-
-Now we can see that our web scrape data is organized in a similar fashion to the other data we acquired in this chapter.
-
+::: {#exm-ad-fed-project-dir}
 ```bash
 data/
+|── analysis/
 ├── derived/
 └── original/
-    ├── cedel2/
-    │   └── texts.csv
-    ├── gutenberg/
-    │   ├── works_pq.csv
-    │   └── works_pr.csv
-    ├── lastfm/
-    │   ├── country.csv
-    │   ├── hip_hop.csv
-    │   ├── lyrics.csv
-    │   ├── metal.csv
-    │   ├── pop.csv
-    │   └── rock.csv
-    ├── sbc/
-    │   ├── meta-data/
-    │   └── transcriptions/
-    ├── scs/
-    │   ├── README
-    │   ├── discourse
-    │   ├── disfluency
-    │   ├── documentation/
-    │   ├── tagged
-    │   ├── timed-transcript
-    │   └── transcript
-    └── twitter/
-        └── rt_latinx.csv
+    └── federalist_papers/
+        └── main.html
+```
+:::
+
+<!-- Scraping URLs -->
+
+Now, we also want to scrape the HTML that contains of the pages corresponding to the 85 Federalist Papers. Perusing the main page we can see that papers are organized into nine groups, *e.g.* "Federalist Nos. 1-10". So our aim will be to scrape the HTML for each of these nine pages. We can do this using the `rvest` package, but we need to identify the HTML elements that contain the URLs first.
+
+<!-- Inspect HTML -->
+
+To do this it is helpful to use a browser to inspect specific elements of the webpage, much as we did in the toy example in @exm-ad-html-structure. To view the raw and displayed HTML, your browser will be equipped with a command that you can enable by hovering your mouse over the element of the page you want to target and using a right click to select "Inspect" (Chrome) or "Inspect Element" (Safari, Brave). This will split your browser window vertical or horizontally showing you the displayed and raw HTML underlying the webpage. 
+
+We can see the HTML elements that contain the URLs in @fig-ad-fed-inspect.
+
+<!-- screenshot of inspecting HTML -->
+
+<!-- [ ] make a screenshot of elements to scrape -->
+
+::: {#exm-ad-fed-inspect}
+```{r}
+#| label: fig-ad-fed-inspect
+#| fig-cap: "Screenshot of the HTML elements containing the URLs for the Federalist Papers"
+#| echo: false
+
+# knitr::include_graphics("figures/acquire-data/ad-fed-papers-loc-inspect.png")
+```
+:::
+
+```{r}
+#| label: ad-fed-papers-loc-url-ul
+
+html |> 
+  html_nodes("ul")
 ```
 
-Again, it is important to add these custom functions to our `acquire_functions.R` script in the `functions/` directory so we can access them in our scripts more efficiently and make our analysis steps more succinct and legible. 
+```{r}
+#| label: ad-fed-papers-loc-url-ul-class
 
+html |> 
+  html_nodes("ul") |> 
+  html_attr("class")
+```
+
+```{r}
+#| label: ad-fed-papers-loc-url-ul-li
+
+html |> 
+  html_nodes("ul.s-lg-subtab-ul") |> 
+  html_nodes("li")
+```
+
+```{r}
+#| label: ad-fed-papers-loc-url-ul-li-a
+
+html |> 
+  html_nodes("ul.s-lg-subtab-ul") |> 
+  html_nodes("li") |> 
+  html_nodes("a") |> 
+  html_attr("href")
+```
+
+```{r}
+#| label: ad-fed-papers-loc-url-ul-li-a-text
+
+html |> 
+  html_nodes("ul.s-lg-subtab-ul") |> 
+  html_nodes("li") |> 
+  html_nodes("a") |> 
+  html_text()
+```
+
+Assign the URLs to fed_urls and the titles to fed_titles
+
+```{r}
+#| label: ad-fed-papers-loc-url-ul-li-a-text-assign
+
+fed_urls <- html |> 
+  html_nodes("ul.s-lg-subtab-ul") |> 
+  html_nodes("li") |> 
+  html_nodes("a") |> 
+  html_attr("href")
+
+fed_titles <- html |>
+  html_nodes("ul.s-lg-subtab-ul") |> 
+  html_nodes("li") |> 
+  html_nodes("a") |> 
+  html_text()
+```
+
+Retrieve the HTML for each of the nine pages in `fed_urls` and assign to `fed_html`
+
+```{r}
+#| label: ad-fed-papers-read-html
+
+fed_html <- fed_urls |> 
+  map(read_html)
+```
+
+Write this HTML to files in the `../data/original/federalist_papers/` directory with the names from `fed_titles`
+
+```{r}
+#| label: ad-fed-papers-write-html
+#| eval: false
+
+fed_html |> 
+  map2(fed_titles, ~write_html(.x, paste0("../data/original/federalist_papers/", .y, ".html")))
+```
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
+- Iteration: `message()`, `Sys.sleep()` 
+- code to manage opening and closing web connections (`url()` and `close()`). 
+
+Useful when we iterate over this function to provide status messages and to reduce server load when processing multiple webpages from a web domain. (3) will be necessary to manage webpages that are non-existent. 
+:::
+
+<!-- Web scraping: acquire raw HTML: process in curation step -->
+
+
+<!-- Efficient code -->
+
+This will work, but as we have discussed before one of this goals we have we acquiring data for a reproducible research project is to make sure that we are developing efficient code that will not burden site's server we are scraping from. In this case, we would like to check to see if the data is already downloaded. If not, then the script should run. If so, then the script does not run. Of course this is a perfect use of a conditional statement. 
+
+<!-- Section summary  -->
 
 In this section we covered scraping language data from the web. The rvest package provides a host of functions for downloading and parsing HTML. We first looked at a toy example to get a basic understanding of how HTML works and then moved to applying this knowledge to a practical example. To maintain a reproducible workflow, the code developed in this example was grouped into task-oriented functions which were in turn joined and wrapped into a function that provided convenient access to our workflow and avoided unnecessary downloads (in the case the data already exists on disk).
 
+<!-- Summary: tech and help -->
+
 Here we have built on previously introduced R coding concepts and demonstrated various others. Web scraping often requires more knowledge of and familiarity with R as well as other web technologies. Rest assured, however, practice will increase confidence in your abilities. I encourage you to practice on your own with other websites. You will encounter problems. Consult the R documentation in RStudio or online and lean on the R community on the web at sites such as [Stack Overflow](https://stackoverflow.com/) *inter alia*.
-
-### Documentation
-
-As part of the data acquisition process it is important include documentation that describes the data resource(s) that will serve as the base for a research project. For all resources the data should include as much information possible that outlines the sampling frame of the data [@Adel2020]. For a corpus sample acquired from a repository will often include documentation which will outline the sampling frame --this most likely will be the very information which leads a researcher to select this resource for the project at hand. It is important to include this documentation (HTML or PDF file) or reference to the documentation (article citation or link^[Note that web links can change and it is often best to safeguard the documentation by downloading the HTML documentation page instead of linking]) within the reproducible project's directory structure.
-
-In other cases where the data acquisition process is formulated and conducted by the researcher for the specific aims of the research (i.e. API and web scraping approaches), the researcher should make an effort to document those aspects which are key for the study, but that may also be of interest to other researchers for similar research questions. This will may include language characteristics such as modality, register, genre, etc., speaker/ writer characteristics such as demographics, time period(s), context of the linguistic communication, etc. and process characteristics such as the source of the data, the process of acquisition, date of acquisition, etc. However, it is important to recognize that each language sample and the resource from which it is drawn is unique. As a general rule of thumb, a researcher should document the resource as if this were a resource *they* were to encounter for the first time. To archive this information, it is standard practice to include a `README` file in the relevant directory where the data is stored.
-
-```bash
-data/
-├── derived/
-└── original/
-    ├── cedel2/
-    │   ├── documentation/
-    │   └── texts.csv
-    ├── gutenberg/
-    │   ├── README.md
-    │   ├── works_pq.csv
-    │   └── works_pr.csv
-    ├── lastfm/
-    │   ├── README.md
-    │   ├── country.csv
-    │   ├── hip_hop.csv
-    │   ├── lyrics.csv
-    │   ├── metal.csv
-    │   ├── pop.csv
-    │   └── rock.csv
-    ├── sbc/
-    │   ├── meta-data/
-    │   └── transcriptions/
-    ├── scs/
-    │   ├── README
-    │   ├── discourse
-    │   ├── disfluency
-    │   ├── documentation/
-    │   ├── tagged
-    │   ├── timed-transcript
-    │   └── transcript
-    └── twitter/
-        ├── README.md
-        └── rt_latinx.csv
-```
-
-For both existing corpora and data samples acquired by the researcher it is also important to signal if there are conditions and/ or licensing restrictions that one should heed when using and potentially sharing the data. In some cases existing corpus data come with restrictions on data sharing. These can be quite restrictive and ultimately require that the corpus data not be included in publically available reproducible project or data can only be shared in a derived format. If this the case, it is important to document the steps to legally acquire the data so that a researcher can acquire their own license and take full advantage of your reproducible project. 
-
-In the case of data from APIs or web scraping, there too may be stipulations on sharing data. A growing number of data sources apply one of [the available Creative Common Licenses](https://creativecommons.org/about/cclicenses/). Check the source of your data for more information and if you are a member of a research institution you will likely have a [specialist](https://zsr.wfu.edu/digital-scholarship/copyright/) on [Copyright and Fair Use](https://www.copyright.gov/fair-use/more-info.html). 
 
 ## Summary {-}
 

@@ -208,11 +208,9 @@ format: html
 ---
 
 ## Overview
-
 The goal of this script is to acquire and document data for this project from the CEDEL2 corpus. The acquired data will be stored in the `data/original/cedel2/` directory.
 
 ## Data origin
-
 To document the origin of the data we created a file named `cedel2_do.csv` in the `data/original/` directory. This file contains the following information: 
 
 ```{{r}}
@@ -221,16 +219,12 @@ To document the origin of the data we created a file named `cedel2_do.csv` in th
 #| echo: false
 
 # Display data origin file
-readr::read_csv("../data/original/cedel2_do.csv") |> 
-  knitr::kable()
+readr::read_csv("../data/original/cedel2_do.csv") |> knitr::kable()
 ```
-
-## Download procedures
-
+## Download procedures  
 The process to acquire data from the CEDEL2 corpus involved the following steps:
 
-L2 Spanish Learners:
-
+L2 Spanish Learners:  
 1. Navigate to the [CEDEL2 Corpus](http://cedel2.learnercorpora.com/search) search interface
 2. Select the subcorpus "Learners of L2 Spanish"
 3. Set the results to provide full texts
@@ -240,7 +234,6 @@ L2 Spanish Learners:
 7. Save the CSV file to the `data/original/cedel2/` directory as `cedel2-l1-english-learners.csv`
 
 Spanish natives: 
-
 ````
 
 The output from *1_acquire_data.qmd* will contain a table displaying the data origin file and a prose section documenting the data acquisition process. This will provide a transparent record of the data acquisition process for future reference.
@@ -279,11 +272,9 @@ To document the origin of the data we created a file named ...
 # Load libraries
 library(tidyverse)
 ```
-
 ```{{r}}
 # .. additional code here to acquire data ...
 ```
-
 ... and so on
 
 ````
@@ -881,10 +872,10 @@ data/
 
 <!-- Note on documentation -->
 
-Add comments to your code in *1-acquire-data.Rmd and create and complete the data origin documentation file for this resource, and the acquisition is complete. 
+Add comments to your code in *1-acquire-data.Rmd* and create and complete the data origin documentation file for this resource, and the acquisition is complete. 
 
 ## Web scraping {#sec-web-scraping}
-
+ 
 <!--  
 - [ ] Add example of `rvest::read_html()` 
 - [ ] ? Add example of `httr::GET()` with `httr::content()`.
@@ -907,6 +898,7 @@ HTML is a cousin of XML (eXtensible Markup Language) and as such organizes web d
 ```{r}
 #| label: fig-ad-example-webpage
 #| fig-cap: 'Example web page.'
+#| out.width: '100%'
 #| echo: false
 
 knitr::include_graphics("figures/acquire-data/ad-test-html.png")
@@ -1063,13 +1055,6 @@ With this basic understanding of how to read and parse HTML, we can now turn to 
 
 #### Federalist Papers
 
-<!-- update: change website to scrape 
-
-Library Of Congress
-Federalist Papers: https://guides.loc.gov/federalist-papers/full-text
-Paths allowed: TRUE
--->
-
 Say we investigate the authorship question of the the Federalist Papers following in the footsteps of @Mosteller1963. We want to scrape the text of the Federalist Papers from the Library of Congress website. The main page for the Federalist Papers is located at *https://guides.loc.gov/federalist-papers/full-text* and can be seen in @fig-ad-web-scrape-screenshot.
 
 <!-- screenshot of page to scrape -->
@@ -1077,6 +1062,7 @@ Say we investigate the authorship question of the the Federalist Papers followin
 ```{r}
 #| label: fig-ad-web-scrape-screenshot
 #| fig-cap: "Screenshot of the Library of Congress website for the Federalist Papers"
+#| out.width: '100%'
 #| echo: false
 
 knitr::include_graphics("figures/acquire-data/ad-fed-papers-loc-main.png")
@@ -1110,6 +1096,7 @@ The next step is to read and parse the raw HTML. We can do this using the `read_
 ::: {#exm-ad-fed-read-html}
 ```{r}
 #| label: ad-fed-read-html
+#| eval: false
 
 # Read raw html and parse to xml
 html <- read_html(url)
@@ -1118,6 +1105,15 @@ html <- read_html(url)
 html
 ```
 :::
+
+```{r}
+#| label: ad-fed-read-html-disk
+#| echo: false
+
+# Read html from disk to avoid re-scraping
+html <- read_html("data/acquire-data/fed_papers_main.html")
+html
+```
 
 At this point we have captured the raw HTML assigning it to the object named `html`. Let's archive the raw HTML to a file in our project directory. We can do this using the `write_html()` function from the `xml2` package [@R-xml2].
 
@@ -1149,7 +1145,7 @@ data/
 
 <!-- Scraping URLs -->
 
-Now, we also want to scrape the HTML that contains of the pages corresponding to the 85 Federalist Papers. Perusing the main page we can see that papers are organized into nine groups, *e.g.* "Federalist Nos. 1-10". So our aim will be to scrape the HTML for each of these nine pages. We can do this using the `rvest` package, but we need to identify the HTML elements that contain the URLs first.
+Now, we also want to scrape the HTML that contains of the pages corresponding to the 85 Federalist Papers. Perusing the main page we can see that papers are organized into nine groups, *e.g.* "Federalist Nos. 1-10". So our aim will be to scrape the HTML for each of these nine pages. We can do this using the `rvest` package, but we need to identify the HTML elements that contain the URLs first in the main webpage we have in `html`.
 
 <!-- Inspect HTML -->
 
@@ -1159,25 +1155,43 @@ We can see the HTML elements that contain the URLs in @fig-ad-fed-inspect.
 
 <!-- screenshot of inspecting HTML -->
 
-<!-- [ ] make a screenshot of elements to scrape -->
-
-::: {#exm-ad-fed-inspect}
 ```{r}
 #| label: fig-ad-fed-inspect
 #| fig-cap: "Screenshot of the HTML elements containing the URLs for the Federalist Papers"
+#| out.width: '100%'
 #| echo: false
 
-# knitr::include_graphics("figures/acquire-data/ad-fed-papers-loc-inspect.png")
+knitr::include_graphics("figures/acquire-data/ad-fed-papers-loc-inspect.png")
 ```
-:::
 
+Let's take a closer look at the source HTML in @fig-ad-fed-inspect-source so we can inspect the elements that contain the URLs and divise a strategy for isolating them to be extracted.
+
+<!-- screenshot of inpecting source HTML -->
+
+```{r}
+#| label: fig-ad-fed-inspect-source
+#| fig-cap: "Screenshot of the source HTML for the Federalist Papers"
+#| out.width: '100%'
+#| echo: false
+
+knitr::include_graphics("figures/acquire-data/ad-fed-papers-loc-inspect-source.png")
+```
+
+
+In @fig-ad-fed-inspect-source we can see that the HTML elements that contain the URLs are nested within a `<ul>` element. The `<ul>` element has a set of class attributes (`.s-lg-subtab-ul`, `nav`, `nav-pills`, `nav-stacked`). If one of these is unique to this `<ul>` element we can use it to isolate the element. Let's search the HTML for all the `<ul>` elements on the page. 
+
+::: {#exm-ad-fed-papers-loc-url-ul}
 ```{r}
 #| label: ad-fed-papers-loc-url-ul
 
 html |> 
   html_nodes("ul")
 ```
+:::
 
+The output from @exm-ad-fed-papers-loc-url-ul shows that there are 4 `<ul>` elements on the page. It's a little hard to see in the output, but the second `<ul>` element is the one we are targeting, as it contains the class attributes we identified in @fig-ad-fed-inspect-source. We can use the `html_attr()` function to extract the `class` attribute from the `<ul>` elements to see if one of them is unique to the `<ul>` element we want to isolate.
+
+::: {#exm-ad-fed-papers-loc-url-ul-class}
 ```{r}
 #| label: ad-fed-papers-loc-url-ul-class
 
@@ -1185,7 +1199,11 @@ html |>
   html_nodes("ul") |> 
   html_attr("class")
 ```
+:::
 
+Effectively this is the case, as the second `<ul>` element in the output of @exm-ad-fed-papers-loc-url-ul-class has a unique class attribute, `.s-lg-subtab-ul`. We can use this to isolate the element using the `html_nodes()` function. We then pipe this to another `html_nodes()` function to isolate the `<li>` elements nested within the `<ul>` element. See @exm-ad-fed-papers-loc-url-ul-class-s-lg-subtab-ul.
+
+::: {#exm-ad-fed-papers-loc-url-ul-class-s-lg-subtab-ul}
 ```{r}
 #| label: ad-fed-papers-loc-url-ul-li
 
@@ -1193,7 +1211,11 @@ html |>
   html_nodes("ul.s-lg-subtab-ul") |> 
   html_nodes("li")
 ```
+:::
 
+Great. Now, to get the URLs we add another `html_nodes()` function to @exm-ad-fed-papers-loc-url-ul-class-s-lg-subtab-ul to isolate the `<a>` elements nested within the `<li>` elements and then a function `html_attr()` to extract the value of an attribute. In this case, the attribute of the `<a>` elements we want is `href`. See @exm-ad-fed-papers-loc-url-ul-li-a. 
+
+::: {#exm-ad-fed-papers-loc-url-ul-li-a}
 ```{r}
 #| label: ad-fed-papers-loc-url-ul-li-a
 
@@ -1203,96 +1225,139 @@ html |>
   html_nodes("a") |> 
   html_attr("href")
 ```
+:::
 
+We can assign the URLs to a variable, `fed_urls`.
+
+With the URLs in hand, we can now retrieve the HTML for each of the nine pages. We can, of course, do this manually, as in @exm-ad-fed-papers-read-write-html-manual.
+
+::: {#exm-ad-fed-papers-read-write-html-manual}
 ```{r}
-#| label: ad-fed-papers-loc-url-ul-li-a-text
-
-html |> 
-  html_nodes("ul.s-lg-subtab-ul") |> 
-  html_nodes("li") |> 
-  html_nodes("a") |> 
-  html_text()
-```
-
-Assign the URLs to fed_urls and the titles to fed_titles
-
-```{r}
-#| label: ad-fed-papers-loc-url-ul-li-a-text-assign
-
-fed_urls <- html |> 
-  html_nodes("ul.s-lg-subtab-ul") |> 
-  html_nodes("li") |> 
-  html_nodes("a") |> 
-  html_attr("href")
-
-fed_titles <- html |>
-  html_nodes("ul.s-lg-subtab-ul") |> 
-  html_nodes("li") |> 
-  html_nodes("a") |> 
-  html_text()
-```
-
-Retrieve the HTML for each of the nine pages in `fed_urls` and assign to `fed_html`
-
-```{r}
-#| label: ad-fed-papers-read-html
-
-fed_html <- fed_urls |> 
-  map(read_html)
-```
-
-Write this HTML to files in the `../data/original/federalist_papers/` directory with the names from `fed_titles`
-
-```{r}
-#| label: ad-fed-papers-write-html
+#| label: ad-fed-papers-read-write-html-manual
 #| eval: false
 
-fed_html |> 
-  map2(fed_titles, ~write_html(.x, paste0("../data/original/federalist_papers/", .y, ".html")))
+# Read the HTML from the first URL in `fed_urls`
+html <- read_html(fed_urls[1])
+write_html(html, "../data/original/federalist_papers/fed1.html")
+
+# Read the HTML from the second URL in `fed_urls`
+html <- read_html(fed_urls[2])
+write_html(html, "../data/original/federalist_papers/fed2.html")
+
+# ... and so on
 ```
+:::
+
+But this is tedious and error prone, furthermore, it doesn't scale well. If we had 1000 URLs to retrieve the HTML from, we would have to write 1000 lines of code. Instead, we can write a function to do this for us. See @exm-ad-fed-papers-read-write-function.
+
+::: {#exm-ad-fed-papers-read-write-function}
+```{r}
+#| label: ad-fed-papers-read-write-function
+#| eval: false
+
+# Function to retrieve HTML from a URL and write to a file
+read_write_html <- function(url) {
+  # Create a file name and path from the URL
+  file_name <- path_file(url) |> path_ext_set(".html")
+  file_path <- path("../data/original/federalist_papers/", file_name)
+
+  # Read the HTML from the URL
+  html <- read_html(url)
+
+  # Write the HTML to the file
+  write_xml(html, file_path)
+}
+```
+:::
+
+The function in @exm-ad-fed-papers-read-write-function takes a URL as it's only argument. It then creates a file name and path from the URL. The file name is the last part of the URL, with the extension `.html`. The file path is the path to the `federalist_papers` directory in the `data/original` directory. The function then reads the HTML from the URL and writes it to the file.
+
+@exm-ad-fed-papers-read-write-function might not seem like a step up from @exm-ad-fed-papers-read-write-html-manual, but it is. We can now use the `map() ` function from `purrr` to iterate over the URLs in `fed_urls` and apply the `read_write_html()` function to each URL. See @exm-ad-fed-papers-read-write-map.
+
+::: {#exm-ad-fed-papers-read-write-map}
+```{r}
+#| label: ad-fed-papers-read-write-map
+#| eval: false
+
+# Retrieve the HTML from each URL in `fed_urls` and write to a file
+fed_urls |> 
+  map(read_write_html)
+```
+:::
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
-- Iteration: `message()`, `Sys.sleep()` 
-- code to manage opening and closing web connections (`url()` and `close()`). 
+When processing multiple webpages, it's often important to manage the load on the server. In R, we can use the `Sys.sleep()` to introduce short delays between requests. This helps reduce server load when iterating over a list of webpages. 
 
-Useful when we iterate over this function to provide status messages and to reduce server load when processing multiple webpages from a web domain. (3) will be necessary to manage webpages that are non-existent. 
+For example, we can use `Sys.sleep(1)` in our function to introduce a 1 second delay between requests. 
+
+```r
+read_write_html <- function(url) {
+  Sys.sleep(1) # 1 second delay
+  # ...
+}
+```
+
+Another tip is to use the `message()` function to print a status message to the console. This can be helpful when processing a large number of webpages. 
+
+```r
+read_write_html <- function(url) {
+  Sys.sleep(1) # 1 second delay
+  message("Processing ", url) # Prints: "Processing https://www.example.com"
+  # ...
+}
+```
 :::
 
-<!-- Web scraping: acquire raw HTML: process in curation step -->
+The result of @exm-ad-fed-papers-read-write-map can be seen in the project directory in @exm-ad-fed-papers-directory. 
+
+::: {#exm-ad-fed-papers-directory}
+```bash
+data/
+|-- analysis/
+|-- derived/
+└── original/
+    └── federalist_papers/
+        |-- main.html
+        |-- text-1-10.html
+        |-- text-11-20.html
+        |-- text-21-30.html
+        |-- text-31-40.html
+        |-- text-41-50.html
+        |-- text-51-60.html
+        |-- text-61-70.html
+        |-- text-71-80.html
+        └── text-81-85.html
+```
+:::
 
 
-<!-- Efficient code -->
 
-This will work, but as we have discussed before one of this goals we have we acquiring data for a reproducible research project is to make sure that we are developing efficient code that will not burden site's server we are scraping from. In this case, we would like to check to see if the data is already downloaded. If not, then the script should run. If so, then the script does not run. Of course this is a perfect use of a conditional statement. 
-
-<!-- Section summary  -->
-
-In this section we covered scraping language data from the web. The rvest package provides a host of functions for downloading and parsing HTML. We first looked at a toy example to get a basic understanding of how HTML works and then moved to applying this knowledge to a practical example. To maintain a reproducible workflow, the code developed in this example was grouped into task-oriented functions which were in turn joined and wrapped into a function that provided convenient access to our workflow and avoided unnecessary downloads (in the case the data already exists on disk).
+And of course, to finish the acquisition process, we need to ensure we have documented the code and created a data origin file. Since we have created this resource it much of the information will be up to use to document. Keep in mind that the data origin file should be written in a way that is transparent to the researcher and to would-be collaborators and the general research community.
 
 <!-- Summary: tech and help -->
 
-Here we have built on previously introduced R coding concepts and demonstrated various others. Web scraping often requires more knowledge of and familiarity with R as well as other web technologies. Rest assured, however, practice will increase confidence in your abilities. I encourage you to practice on your own with other websites. You will encounter problems. Consult the R documentation in RStudio or online and lean on the R community on the web at sites such as [Stack Overflow](https://stackoverflow.com/) *inter alia*.
+In this section, we have built on previously introduced R coding concepts and employed various others in the process of acquiring data from the web. We have also considered topics that are more general in nature and concern interacting with data found on the internet. As you likely appreciate, web scraping often requires more knowledge of and familiarity with R as well as other web technologies. Rest assured, however, practice will increase confidence in your abilities. I encourage you to practice on your own with other websites. 
 
 ## Summary {-}
 
-In this chapter we have covered a lot of ground. On the surface we have discussed three methods for acquiring corpus data for use in text analysis. In the process we have delved into various aspects of the R programming language. Some key concepts include writing custom functions and working with those function in an iterative manner. We have also considered topics that are more general in nature and concern interacting with data found on the internet. 
+In this chapter we have covered a lot of ground. On the surface we have discussed three methods for acquiring corpus data for use in text analysis. In the process we have delved into various aspects of the R programming language. Some key concepts include writing custom functions, control statements, and applying functions iteratively. We have also considered topics that are more general in nature and concern interacting with data found on the internet. 
 
 Each of these methods should be approached in a way that is transparent to the researcher and to would-be collaborators and the general research community. For this reason the documentation of the steps taken to acquire data are key both in the code and in human-facing documentation. 
 
-At this point you have both a bird’s eye view of the data available on the web and strategies on how to access a great majority of it. It is now time to turn to the next step in our data analysis project: data curation. In the next posts I will cover how to wrangle your raw data into a tidy dataset. This will include working with and incorporating meta-data as well as augmenting a dataset with linguistic annotations.
+At this point you have both a bird’s eye view of the data available on the web and strategies on how to access a great majority of it. It is now time to turn to the next step in our data analysis project: data curation. In the next chapter, I will cover how to wrangle your raw data into a tidy dataset. 
 
 ## Activities {.unnumbered}
 
-- [ ] Add description of outcomes 
+- [ ] {{< fa wrench >}} Add description of outcomes 
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**
 
 <!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-- [ ] update
+- [ ] {{< fa wrench >}} update
 
 **What**: [Control statements, custom functions, and iteration](https://lin380.github.io/tadr/articles/recipe_6.html)\
 **How**: Read Recipe 6 and participate in the Hypothes.is online social annotation.\
@@ -1304,7 +1369,7 @@ At this point you have both a bird’s eye view of the data available on the web
 
 <!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-- [ ] update
+- [ ] {{< fa wrench >}} update
 
 **What**: [Control statements, custom functions, and iteration](https://github.com/lin380/lab_6)\
 **How**: Clone, fork, and complete the steps in Lab 6.\
@@ -1312,6 +1377,8 @@ At this point you have both a bird’s eye view of the data available on the web
 :::
 
 ## Questions {.unnumbered}
+
+- [ ] {{< fa wrench >}} create conceptual and technical questions
 
 ::: {.callout}
 **Conceptual questions**

@@ -11,9 +11,7 @@ Content:
 
 - [ ] Shoot for 5k words per chapter (12*5k = 60k words)
 
-- [x] Add a further reading section to each chapter! --instead I will add these to 'Consider this' or 'Dive deeper' sections.
-- [x] In addition to "Consider this" sections, include "Dive deeper" sections which point readers to more advanced topics.
-- [ ] Use ChatGPT for quotes to the beginnings of chapters
+- [ ] Add these to 'Consider this' or 'Dive deeper' sections.
 - [ ] [plausible](https://plausible.io/) is a privacy-conscious alternative to Google Analytics (paid service, or self-hosted)
 - [ ] Review chapter prose for use of active and passive voice. A balance should be struck.
 
@@ -21,22 +19,11 @@ Exercises:
 
 - [ ] Change lab names to reflect the task in a more inviting hands-on way. For example, "Dataset manipulation: tokenization and joining datasets" could become "Consumer Reviews of Amazon Products for sentiment analysis".
 - [ ] Change recipe and lab numbering to mimic the chapter numbering. That is instead of Preface (Ch. 0) Recipe #1 and Lab #1 --change to Recipe #0 and Lab #0? Then chapter 1 will have Recipe and Lab #1 and so on.
-- [ ] (ChatGPT prompt) Write some conceptual questions/ hands-on exercises for a textbook on quantitative text analysis for linguistics using R, specifically for a chapter entitled "understanding data" with the following chapter summary: 
 
 Formatting:
-- [x] Change callouts to greyscale (no color)
-  - [x] Edit Latex output to include callout icons (used in HTML)
-    - Possible solution: https://stackoverflow.com/questions/74647399/define-a-new-callout-in-quarto (Not sure if this will work for PDF output)
-  - [x] Change code blocks to greyscale (no color)
 - [ ] Change images and figures (plots) to greyscale (no color)
-  - [ ] For plots, create a function that will change the default ggplot2 theme to greyscale (no color)
-- [ ] Change tables and verbatim wrapping for latex output
-- [ ] Add `fig-` and `tbl-` to all figures and tables and connect these to the text. The print book will not necessarily have these elements and the text coordinated in a linear fashion.
-- [ ] Change hand-drawn figures to `ggplot2` figures or `mermaid` diagrams.
-- [ ] Consider what to do with the hand-drawn visual summaries and the DIKI hierarchy.
-  - [ ] Possible solution is draw.io (https://www.draw.io/) or mermaid (https://mermaid-js.github.io/mermaid/#/)
+- [ ] Change hand-drawn figures to drawio pngs
 - [ ] Update images to high-res, greyscale, and add alt text (see @fig-summaries-boxplots-belc)
-- [ ] Update any mermaid diagrams to greyscale, alt-text, and correct sizing
 - [ ] Add indexing to the key terms in the book (can Quarto do HTML indexing?)
 - [ ] Fix package info listing --for all packages used in the book.
 - [ ] Add a section on how to cite the book.
@@ -46,8 +33,7 @@ Formatting:
 
 - [ ] Change the `|>` pipe to `%>%` pipe in all code chunks
   - Reasoning: `%>%` is more flexible to use and is more common in the R community. It does, however, require the `magrittr` package to be loaded.
-- [ ] Change from `pacman` to `pak` for package management and loading
-- [ ] Fix code wrapping in PDF version
+- [ ] Note`pacman` (install/ loads) to `pak` (installs) for package management and loading
 
 -->
 
@@ -102,29 +88,127 @@ The development of this book has benefited from the generous feedback from the f
 
 This textbook was built with the `quarto` package [@R-quarto] and the `bookdown` package [@R-bookdown] for R. The source code for this book is available on [GitHub](https://github.com/qtalr/book).
 
-<!-- 
- - [ ] Replace `tadr` with `qtalrkit`.  
--->
-
 ```{r}
 #| label: common
 #| include: false
 
-pacman::p_load(tidyverse, rmarkdown, here, knitr, webshot, tadr, qtalrkit, tidytext, readtext) # default packages
+# Description: Common settings
 
-ggplot2::theme_set(ggplot2::theme_minimal()) # set default ggplot2 theme
+# Packages ---------------------------------------------------------------
+pacman::p_load(
+  ggplot2,
+  tibble,
+  dplyr,
+  tidyr,
+  readr,
+  stringr,
+  reprex,
+  rstudioapi,
+  here,
+  rmarkdown,
+  knitr,
+  qtalrkit
+)
 
-filter <- dplyr::filter # avoid conflict with `stats` package
+# Plots ------------------------------------------------------------------
 
-options(digits = 3) # default to 3 decimal places
+# Plot theme
+theme_qtalr <-
+  function(font = "", font_size = 9) {
+    ggplot2::theme_minimal() %+replace%
 
-options(knitr.table.format = function() {
-  if (knitr::is_latex_output()) {
-    "latex"
-  } else {
-    "pipe"
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(
+          family = font,
+          size = font_size * 1.5
+        ),
+        plot.subtitle = ggplot2::element_text(
+          family = font,
+          size = font_size * 1.25
+        ),
+        plot.caption = ggplot2::element_text(
+          family = font,
+          size = font_size * 0.75
+        ),
+        axis.title = ggplot2::element_text(
+          family = font,
+          size = font_size
+        ),
+        axis.text = ggplot2::element_text(
+          family = font,
+          size = font_size * 0.75
+        ),
+        legend.title = ggplot2::element_text(
+          family = font,
+          size = font_size
+        ),
+        legend.text = ggplot2::element_text(
+          family = font,
+          size = font_size * 0.75
+        )
+      )
   }
-})
+
+# Set theme
+ggplot2::theme_set(theme_qtalr())
+
+# Color palettes
+
+if (knitr::is_latex_output()) {
+  # if output is latex, use greyscale palette
+  custom_pal <- c("#000000", "#525252", "#717171", "#929292", "#BABABA", "#DADADA") # print palette
+} else {
+  # if output is not latex, use colorblind palette
+  custom_pal <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") # colorblind palette
+}
+
+# Set color palettes
+scale_color_discrete <- function(...) {
+  ggplot2::scale_color_manual(..., values = custom_pal)
+}
+
+# Set fill palettes
+scale_fill_discrete <- function(...) {
+  ggplot2::scale_fill_manual(..., values = custom_pal)
+}
+
+# Set linetype 
+scale_linetype_discrete <- function(...) {
+  ggplot2::scale_linetype_manual(..., values = c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash"))
+}
+
+# Geom defaults 
+
+update_geom_defaults("smooth", list(colour = "#525252"))
+update_geom_defaults("point", list(colour = "#929292"))
+
+
+# Options ----------------------------------------------------------------
+
+options(digits = 3) # number of digits to print
+
+# Misc -------------------------------------------------------------------
+
+# Avoid conflict with stats::filter
+filter <- dplyr::filter 
+
+# Avoid kableextra from outputting HTML on kable tables
+options(kableExtra.auto_format = FALSE)
+
+# # Adjust linewidth
+# hook_output <- knit_hooks$get("output") # get the default output hook
+
+# knit_hooks$set(output = function(x, options) {
+#   # this hook is used only when the linewidth option is not NULL
+#   if (!is.null(n <- options$linewidth)) { # if linewidth is not NULL
+#     x <- knitr:::split_lines(x) # split the output into lines
+#     # any lines wider than n should be wrapped
+#     x <- strwrap(x, width = n * getOption("width"))
+#     x <- paste(x, collapse = "\n")
+#   }
+#   hook_output(x, options)
+# })
+
 ```
 
 

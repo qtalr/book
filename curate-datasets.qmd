@@ -21,8 +21,10 @@ execute:
 Content:
 
 - [ ] adding a description of the importance of the 'unit of analysis' in the structuring of the curated dataset
-    - Note: this is touched upon in the 'Foundations' part, but it is important to see how this is implemented in the curation process. 
-    - Also it should be mentioned that many times you want to keep the unit of observation and sometimes the unit of analysis somewhat flexible, so that you can explore different ways of framing the data (especially in the case of IDA approaches).
+  - Note: this is touched upon in the 'Foundations' part, but it is important to see how this is implemented in the curation process. 
+  - Also it should be mentioned that many times you want to keep the unit of observation and sometimes the unit of analysis somewhat flexible, so that you can explore different ways of framing the data (especially in the case of IDA approaches).
+- [ ] the unit of analysis is tied with the research question --so consider how to frame the curation process for the various data/ datasets so that the unit of analysis
+  - [ ] Note: the unit of observation is where we are going in the next chapter with "Transform datasets". So we need to make sure that we are clear about the distinction between the two.
 
 Exercises:
 
@@ -42,8 +44,13 @@ Formatting:
 >
 > --- Robert Ferrigno
 
-::: callout-note
-## Keys
+::: {.callout}
+**{{< fa regular list-alt >}} Outcomes**
+
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] change to outcomes -->
+
 - what are some of the formats that data can take?
 - what R programming strategies are used to read these formats into tabular, tidy dataset structures?
 - what is the importance of maintaining modularity between data and data processing in a reproducible research project?
@@ -55,16 +62,23 @@ Formatting:
 #| message: false
 #| echo: false
 
+# [ ] confirm packages used in this chapter, that are not in the _common.qmd file
+
 # Packages
-pacman::p_load(tidyverse, readtext, tidytext, knitr)
+pacman::p_load(tidyverse, readtext, tidytext, knitr, kableExtra)
 ```
 
-In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. As Acquired data can come in a wide variety of formats that depend largely on the richness of the metadata that is included, but also can reflect individual preferences. In this chapter we will consider three general types of formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate (see [Chapter 4, section 4.2](#sec-framing-research.html#research-question). The resulting dataset will be the base from which we will work to further transform the dataset such that it aligns with the analysis method(s) that we will implement. And as in previous implementation steps, we will discuss the important role of documentation.  
+- [ ] Revise: to reflect the new structure/ content of the chapter
 
-::: callout-tip
-## Swirl
+In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. As Acquired data can come in a wide variety of formats that depend largely on the richness of the metadata that is included, but also can reflect individual preferences. In this chapter we will consider three general types of formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate (see [Chapter 4, section 4.2](#sec-framing-research.html#research-question). The resulting dataset will be the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation requited for the analysis method(s) that we will implement. And, as in previous implementation steps, we will discuss the important role of documentation.  
 
-**What**: [Regular Expressions](https://github.com/qtalr/lessons)\
+::: {.callout}
+**{{< fa terminal >}} Swirl lesson**
+
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+
+**What**: [Pattern Matching and Manipulate Datasets](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To learn the basics of how to define search patterns to match strings, or characters, using Regular Expressions.
 :::
@@ -77,6 +91,9 @@ As an example of an unstructured source of text data, let's take a look at the [
 
 ### Orientation
 
+
+<!-- [ ] Update directory structure and reference to the data -->
+
 With the data downloaded into the `data/original/europarle/` directory we see that there are two files. One corresponding to the source language (Spanish) and one for the target language (English). 
 
 ```bash
@@ -86,6 +103,9 @@ data/original/europarle/
 ```
 
 Looking at the first 10 lines of the first file, we can see that this is running text. 
+
+<!-- [ ] consider making this display explicit -->
+<!-- [ ] also consider removing the namespace prefixing, and just show the loading the the library -->
 
 ```{r}
 #| eval: false
@@ -109,15 +129,26 @@ So with what we have we'd like to create a data frame that has the seen in @tbl-
 #| tbl-cap: "Idealized structure for the Europarle Corpus dataset."
 #| echo: false
 
+# [ ] I need to review the use of kable() across the book, as I think I am using it in different ways
+#    - kable()
+#    - kable(booktabs = TRUE)
+#    - kable(booktabs = TRUE) |> kable_styling()
+#    - kable(booktabs = TRUE) |> kable_styling(latex_options = c("striped", "hold_position"))
+
 tribble(
   ~type, ~sentence_id, ~sentence,
   "Source", 1, "...sentence from source language",
   "Target", 1, "...sentence from target language"
-) |> 
-  knitr::kable(booktabs = TRUE)
+) |>
+  kable(booktabs = TRUE) |> 
+  kable_styling()
 ```
 
 ### Tidy the data
+
+<!-- 
+- [ ] make clear reference to "idealized structure" table, for each of the sections (unstructured, structured, semi-structured)
+-->
 
 To create this dataset structure lets's read the files with the `readtext()` function from readtext package and assign them to a meaningful variable.
 
@@ -126,11 +157,13 @@ To create this dataset structure lets's read the files with the `readtext()` fun
 #| label: cd-unstructured-read-europarle-resources
 #| include: false
 
+# [ ] look into `readtext()` as I think we can read both files at once, although we will need to add a column to identify the language
+
 # read the data from the resources directory
-europarle_en <-  
+europarle_en <-
   readtext::readtext("data/curate-datasets/europarle/europarl-v7.es-en.en", verbosity = 0)
 
-europarle_es <- 
+europarle_es <-
   readtext::readtext("data/curate-datasets/europarle/europarl-v7.es-en.es", verbosity = 0)
 ```
 
@@ -139,17 +172,20 @@ europarle_es <-
 #| label: cd-unstructured-read-europarle-show
 
 # Read the Europarle files
-europarle_en <-  # English target text
+europarle_en <- # English target text
   readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-                     verbosity = 0) # don't show warnings
+    verbosity = 0
+  ) # don't show warnings
 
 europarle_es <- # Spanish source text
   readtext::readtext("../data/original/europarle/europarl-v7.es-en.es", # path to the data
-                     verbosity = 0) # don't show warnings
+    verbosity = 0
+  ) # don't show warnings
 ```
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa exclamation-triangle >}} Warning**
+
 The `readtext()` function can read many different types of file formats, from structured to unstructured. However, it depends in large part on the extension of the file to recognize what algorithm to use when reading a file. In this particular case the Europarle files do not have a typical extension (they have `.en` and `.es`). The `readtext()` function will treat them as plain text (`.txt`), but it will throw a warning message. To suppress the warning message you can add the `verbosity = 0` argument.
 :::
 
@@ -160,15 +196,20 @@ Now there are a couple things to note about thbe `europarle_en` and `europarle_e
 #| label: cd-unstructured-inspect-europarle-readtext-structure
 #| linewidth: 0.9
 
+# [ ] use `glimpse()` instead of `str()`?
+
 str(europarle_en) # inspect the structure of the object
 ```
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
 Note that the `str()` function from base R is similar to `glimpse()`. However, `glimpse()` will attempt to show you as much data as possible. In this case since our column `text` is a very long character vector it will take a long time to render. I've chosen the `str()` function as it will automatically truncate the data.
 :::
 
-The columns are `doc_id` and `text`. `doc_id` is created by readtext to index each file that is read in. The `text` column is where the text appears. The fact that we only have one row means that all the text in the entire file is contained in one cell! We will want to break this cell up into rows for each sentence, but for now let's work with getting the columns to line up with our idealized dataset structure. 
+<!-- [ ] I need to standardize how I refer to packages `readtext` -->
+
+The columns are `doc_id` and `text`. `doc_id` is created by `readtext` to index each file that is read in. The `text` column is where the text appears. The fact that we only have one row means that all the text in the entire file is contained in one cell! We will want to break this cell up into rows for each sentence, but for now let's work with getting the columns to line up with our idealized dataset structure. 
 
 First let's change the type of data frame that we are working with to a tibble. This will make sure we don't accidentally print hundreds of lines to our R Markdown output and/ or the R Console. Then we will rename the `doc_id` column to `type` and change the value of that column to "Target" (for English) and "Source" (for Spanish). 
 
@@ -176,26 +217,31 @@ First let's change the type of data frame that we are working with to a tibble. 
 #| eval: false
 #| label: cd-unstructured-modify-dataset-structure
 
-europarle_target <- 
+europarle_target <-
   europarle_en |> # readtext data frame
   as_tibble() |> # convert to tibble
   rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Target") # change type value to 'Target'
 
-europarle_source <- 
+europarle_source <-
   europarle_es |> # readtext data frame
   as_tibble() |> # convert to tibble
   rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Source") # change type value to 'Source'
 ```
 
-We have two objects now, one corresponding to the 'Source' and the other the 'Target' parallel texts. Let's now join these two datasets, one on top of the other --that is, by rows. We wil use the `bind_rows()` function for this.
+We have two objects now, one corresponding to the 'Source' and the other the 'Target' parallel texts. 
+
+
+- [ ] Note: joining is a part of the **transformation** stage. 
+
+Let's now join these two datasets, one on top of the other --that is, by rows. We wil use the `bind_rows()` function for this.
 
 ```{r}
 #| eval: false
 #| label: cd-unstructured-bind-europarle
 
-europarle <- 
+europarle <-
   bind_rows(europarle_target, europarle_source)
 
 str(europarle) # inspect the structure of the object
@@ -205,25 +251,32 @@ The `europarle` dataset now has 2 columns, as before, and 2 rows --each correspo
 
 Remember our goal is to create a dataset structure with three columns `type`, `sentence_id`, and `sentence`. At the moment we have `type` and `text` --where `text` has all of the sentences in for each type in a cell. So we are going to want to break up the `text` column into sentences, group the sentences that are created by `type`, and then number these sentences so that they are aligned between the distinct types. 
 
+- [ ] Note: this is tokenization, a **transformation** step.
+
 To break up the text into sentences we are going to turn to the tidytext package. This package has a extremely useful function `unnest_tokens()` which provides an effective way to break text into various units (see `?tidytext::unnest_tokens` for a full list of token types). Since I know from looking at the raw text that each sentence is on its own line, the best strategy to break the text into sentence units is to find a way to break each line into a new row in our dataset. To do this we need to use the `token = "regex"` (for Regular Expression) and use the `pattern = "\\n"` which tells R to look for carriage returns to use as the breaking criterion.
 
 ```{r}
 #| eval: false
 #| label: cd-unstructured-europarle-unnest-sentences
 
-europarle_sentences <- 
-  europarle |> 
-  tidytext::unnest_tokens(output = sentence, # new column
-                          input = text, # column to find text
-                          token = "regex", # use a regular expression to break up the text
-                          pattern = "\\n", # break text by carriage returns (returns after lines)
-                          to_lower = FALSE) # do not lowercase the text
+europarle_sentences <-
+  europarle |>
+  tidytext::unnest_tokens(
+    output = sentence, # new column
+    input = text, # column to find text
+    token = "regex", # use a regular expression to break up the text
+    pattern = "\\n", # break text by carriage returns (returns after lines)
+    to_lower = FALSE
+  ) # do not lowercase the text
 
 glimpse(europarle_sentences) # preview the structure
 ```
 
-::: callout-warning
-## Tip
+- [ ] Note: Regular Expressions are covered in the Swirl lesson 'Pattern Matching', but I'm not sure if I should be working with this here. Hmmm. I have to consider what to do with this chapter in terms of skills development.
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
 Regular Expressions are a powerful pattern matching syntax. They are used extensively in text manipulation and we will see them again and again. A good website to practice Regular Expressions is [RegEx101](https://regex101.com/). You can also install the regexplain package in R to get access to a useful [RStudio Addin](https://rstudio.github.io/rstudioaddins/). 
 :::
 
@@ -234,16 +287,16 @@ Our new `europarle_sentences` object is a data frame with almost 4 million rows!
 #| label: tbl-cd-unstructured-europarle-add-sentence-id
 #| tbl-cap: "First ten sentences in the Europarle Corpus curated dataset."
 
-europarle_sentences_id <- 
+europarle_sentences_id <-
   europarle_sentences |> # dataset
   group_by(type) |> # group by type
   mutate(sentence_id = row_number()) |> # add a row number for each sentence for each level of type
   select(type, sentence_id, sentence) |> # select the relevant columns to keep
-  ungroup() |>  # ungroup by type
+  ungroup() |> # ungroup by type
   arrange(sentence_id, type) # arrange the dataset
 
-europarle_sentences_id |> 
-  slice_head(n = 10) |> 
+europarle_sentences_id |>
+  slice_head(n = 10) |>
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -267,8 +320,10 @@ Since this dataset is derived by our work, we will added it to the `derived/` di
 
 # Write the curated dataset to disk
 fs::dir_create(path = "../data/derived/europarle/") # create the europarle directory
-write_csv(x = europarle_sentences_id, # object to write
-          file = "../data/derived/europarle/europarle_curated.csv") # target file location/ name
+write_csv(
+  x = europarle_sentences_id, # object to write
+  file = "../data/derived/europarle/europarle_curated.csv"
+) # target file location/ name
 ```
 
 This is how the directory structure under the `derived/` directory looks now. 
@@ -295,52 +350,75 @@ In our discussion we worked step by step to curate the Europarle Corpus, adding 
 #| label: cd-unstructured-europarle-summary-code
 
 # Read data and set up `type` column
-europarle_en <-  
+europarle_en <-
   readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-                     verbosity = 0) |> # don't show warnings
+    verbosity = 0
+  ) |> # don't show warnings
   as_tibble() |> # covert to tibble
   rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Target") # change type value to 'Target'
 
-europarle_es <- 
+europarle_es <-
   readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-                     verbosity = 0) |>  # don't show warnings
+    verbosity = 0
+  ) |> # don't show warnings
   as_tibble() |> # covert to tibble
   rename(type = doc_id) |> # rename doc_id to type
   mutate(type = "Source") # change type value to 'Source'
 
 # Join the datasets by rows
-europarle <- 
+europarle <-
   bind_rows(europarle_en, europarle_es)
 
 # Segment the `text` column into `sentence` units
-europarle <- 
+europarle <-
   europarle |> # dataset
-  tidytext::unnest_tokens(output = sentence, # new column
-                          input = text, # column to find text
-                          token = "regex", # use a regular expression to break up the text
-                          pattern = "\\n", # break text by carriage returns (returns after lines)
-                          to_lower = FALSE) # do not lowercase the text
+  tidytext::unnest_tokens(
+    output = sentence, # new column
+    input = text, # column to find text
+    token = "regex", # use a regular expression to break up the text
+    pattern = "\\n", # break text by carriage returns (returns after lines)
+    to_lower = FALSE
+  ) # do not lowercase the text
 
 # Add `sentence_id` to each `type`
-europarle <- 
+europarle <-
   europarle |> # dataset
   group_by(type) |> # group by type
   mutate(sentence_id = row_number()) |> # add a row number for each sentence for each level of type
   select(type, sentence_id, sentence) |> # select the relevant columns to keep
-  ungroup() |>  # ungroup by type
+  ungroup() |> # ungroup by type
   arrange(sentence_id, type) # arrange the dataset
 
 # Write the curated dataset to disk
 fs::dir_create(path = "../data/derived/europarle/") # create the europarle directory
-write_csv(x = europarle_sentences_id, # object to write
-          file = "../data/derived/europarle/europarle_curated.csv") # target file location/ name
+write_csv(
+  x = europarle_sentences_id, # object to write
+  file = "../data/derived/europarle/europarle_curated.csv"
+) # target file location/ name
 ```
 
 ## Structured
 
+- [ ] revise this section: include R package (languageR::datives) and CSV file?
+  - [ ] is is not clear that a truly structured dataset would need any curation. What could I say about structured data that would be useful? I could talk about verifying the data structure is as expected.
+
 On the opposite side of the spectrum from unstructured data, structured data includes more metadata information --often much more. The association of metadata with the language to be analyzed means that the data has already be curated to some degree, therefore it is more apt to discuss structured data as a dataset. There are two questions, however, that need to be taken into account. One, logistical question, is what file format the dataset is in and how to we read it into R. And the second, more research-based, is whether the data is curated in a fashion that makes sense for the current research. Let's look at each of these questions briefly and then get to a practical example. 
 
+Formats ... file types
+
+- [ ] only databases, R datasets/ RDS files, and potentially .csv files are structured data. I need to make this clear.
+
+- [ ] add example case(s):
+  - [ ] R package datasets 
+    - [ ] languageR::dative
+    - [ ] janeaustenr::austen_books
+    - [ ] ...
+  - [ ] R package corpora (quanteda::corpus) + tidytext::tidy()
+  - [ ] CABNC CSV files
+
+
+CSV
 There are file formats which are purposely designed for storing structured datasets. Some very common file types are .csv, .xml, .json, etc. The data within these files is explicitly organized. For example, in a .csv file, the dataset structure is represented by delimiting the columns and rows by commas. 
 
 ```text
@@ -357,230 +435,34 @@ When read into R, the .csv file format is converted to a data frame with the app
 #| tbl-cap: "Example .csv file in R"
 #| echo: false
 
-csv_file_example <- 
+csv_file_example <-
   read_csv(file = "data/curate-datasets/csv_file_example.csv")
-csv_file_example |> 
+csv_file_example |>
   knitr::kable(booktabs = TRUE)
 ```
 
-<!-- [ ] add xml or json format example? -->
+With an understanding of how the information is encoded in various formats, we can now turn to considerations about how the original dataset is structured and how that structure is to be used for a given research project. The curation process that is reflected in a structured dataset may or may not initially align with the goals of our research either in terms of the type(s) of information or the unit of analysis of the structured dataset. The aim, then, is to take advantage of the information and curate it such that it does align. 
 
-With an understanding of how the information is encoding into a file, we can now turn to considerations about how the original dataset is structure and how that structure is to be used for a given research project. The curation process that is reflected in a structured dataset may or may not initially align with the goals of our research either in terms of the type(s) of information or the unit of analysis of the structured dataset. The aim, then, is to take advantage of the information and curate it such that it does align. 
+As an example case of curating structured datasets, we will look at ...
 
-As an example case of curating structured datasets, we will look at the song lyric datasets acquired from Last.fm in the [previous chapter](#sec-acquire-data). 
+- [ ] R package datasets 
+  - [ ] languageR::dative
+  - [ ] janeaustenr::austen_books
+  - [ ] ...
+- [ ] R package corpora (quanteda::corpus) + tidytext::tidy()
+- [ ] CABNC CSV files
 
 ### Orientation
 
-The individual datasets from the Last.fm webscrape are found inside the `data/original/lastfm/` directory, and includes the `README.md` documentation file.
-
-
-```bash
-data/
-├── derived/
-└── original/
-    └── lastfm/
-        ├── README.md
-        ├── country.csv
-        ├── hip_hop.csv
-        ├── lyrics.csv
-        ├── metal.csv
-        ├── pop.csv
-        └── rock.csv
-```
-
-Let's take a look at the structure of one of genres from these set of lyrics to familiarize ourselves with the structure. 
-
-```{r}
-#| eval: false
-#| label: tbl-cd-structured-read-lastfm-single-show
-#| tbl-cap: "Example file from the Last.fm dataset of song lyrics."
-
-lf_country <- read_csv(file = "../data/original/lastfm/country.csv") # read the csv file
-lf_country |> # dataset
-  slice_head(n = 10) |> # first 10 observations 
-knitr::kable(booktabs = TRUE) # print pretty table
-```
-
-```{r}
-#| eval: false
-#| label: tbl-cd-structured-read-single-run
-#| tbl-cap: "Example file from the Last.fm dataset of song lyrics."
-#| echo: false
-#| message: false
-
-lf_country <- read_csv(file = "data/curate-datasets/lastfm/country.csv") # read the csv file
-lf_country |> # dataset
-  slice_head(n = 10) |> # first 10 observations 
-  knitr::kable(booktabs = TRUE) # print pretty table
-```
-
-We can see a couple important characteristics from this preview of the dataset. First, we see the columns include `artist`, `song`, `lyrics`, `lyrics_url`, and `genre`. Second, we see that for each son the lyrics are segmented across multiple rows.
-
-::: callout-warning
-## Tip
-You may notice that in addition to the lyrics being separated by line, there appears to be an artifact from the original webscrape of this data which has individual lyric lines run in to the next. An example is the the lyrics "... hurt myself toda**yT**osee if I still fee**lI** focus...". We will address this issue when it comes time to normalize the dataset in the transform process.
-:::
-
-Given the fact that each of these files will include a `genre` label, that means that we will be able to read in each of these files in one operation and the distinction between genres will be recoverable. The next thing to think about is how we want to curate the dataset for our purposes. That is, what should the base structure of our curated dataset look like? 
-
-Let's make the assumption that we want to have the columns `artist`, `song`, `lyrics`, and `genre`. The `lyrics_url` could be useful for documentation purposes, but for our text analysis it does not appear to be very relevant --so we will drop it. The second aspect concerns the observations. As it stands, the dataset the observations reflect the formatting of the website from which the lyrics were drawn. A potentially better organization would to have each observation correspond to all the lyrics for a single song. In this case we will want to collapse the current `lyrics` column's values into lyrics for the entire song --maintaining the other measure for each of the other columns.
-
-With this structure in mind, we are shooting for an idealized structure such as the one below. 
-
-```{r}
-#| eval: false
-#| label: tbl-cd-structured-idealized-dataset
-#| tbl-cap: "Idealized structure for the Last.fm dataset."
-#| echo: false
-
-tribble(
-  ~artist, ~song, ~lyrics, ~genre,
-  "Johnny Cash", "Hurt", "...lyrics for the song...", "country",
-  "Johnny Cash", "Ring of Fire", "...lyrics for the song...", "country",
-) |> 
-  knitr::kable(booktabs = TRUE)
-```
-
 ### Tidy the datasets
 
-So our objectives are set, let's first read in all the files. To do this we will again use the `readtext()` function. But instead of reading one file at a time we will read all the files of interest (those with the .csv extension) in one go. The `readtext()` function allows for the use of 'wildcard' notation (`*`) in the file(s) path to enable pattern matching. 
+- [ ] Add idealized structure for the dataset(s)
 
-So the files in the `data/original/lastfm/` directory look like this. 
-
-```bash
-../data/original/lastfm/README.md
-../data/original/lastfm/country.csv
-../data/original/lastfm/hip_hop.csv
-../data/original/lastfm/lyrics.csv
-../data/original/lastfm/metal.csv
-../data/original/lastfm/pop.csv
-../data/original/lastfm/rock.csv
-```
-
-We want all the files, except the `REAME.md` file. To do this we want our path to look like this: 
-
-```bash
-../data/original/lastfm/*.csv
-```
-
-The wildcard `*` replaces the genre names and this effectively only matches files ending in `.csv`. 
-
-Great, that will capture the files we are looking for but when working with `readtext()` we will need to set the `text_field` argument to the column that corresponds to the text in our dataset. That is the `lyrics` column. Let's go ahead and do this and convert the result to a tibble.
-
-```{r}
-#| eval: false
-#| label: cd-structured-read-lastfm-all-show
-
-lastfm <- 
-  readtext(file = "../data/original/lastfm/*.csv", # files to match using *.csv
-           text_field = "lyrics") |> # text column from the datasets
-  as_tibble() # convert to a tibble
-
-glimpse(lastfm) # preview
-```
-
-```{r}
-#| eval: false
-#| label: cd-structured-read-lastfm-all-run
-#| echo: false
-
-lastfm <- 
-  readtext::readtext(file = "data/curate-datasets/lastfm/*.csv", # files to match using *.csv
-           text_field = "lyrics") |> # text column from the datasets
-  as_tibble() # convert to a tibble
-
-glimpse(lastfm) # preview
-```
-
-Looking at the preview of the data frame we now have in `lastfm` there are a couple things to note. First, we see that a column `doc_id` has been added. This column is used by `readtext()` to index the file from which the data was read. In our case since we already have sufficient information to index our dataset, we can drop this column. Next we see that the `lyrics` column has been renamed to `text`. This is because we set this as the `text_field` when we read in the files. We can easily rename this column, but we'll leave that for later. 
-
-Let's go ahead and drop the columns that we have decided will not figure in our curated dataset. We can use the `select()` function to either select those columns we want to keep or by using the `-` operator, identify the columns we want to drop. The decision of 'selecting' or 'deselecting' is usually one of personal choice and code succinctness. In this case, we are dropping two columns and keeping four, so let's deselect. I will assign the result to the same name as our current dataset, effectively overwriting that dataset. 
-
-```{r}
-#| eval: false
-#| label: cd-structured-lastfm-drop-columns
-
-lastfm <- # new dataset
-  select(lastfm, # original dataset
-         -doc_id, -lyrics_url) # drop these columns
-
-glimpse(lastfm) # preview
-```
-
-Now let's work to collapse the lyrics in the `text` column by each distinct `artist`, `song`, and `genre` combination. We will use the `group_by()` function to create `artist` `song` `genre` groupings and then use `summarize()` to create a new column in which the `text` field is collapsed into all the song lyrics for this grouping. Inside the `summarize()` function we use `str_flatten()` with the argument `collapse = " "` to collapse each observation in `text` leaving a single whitespace between the observations (otherwise each line would then be joined contiguously to the next). 
-
-```{r}
-#| eval: false
-#| label: cd-structure-lastfm-collapse-text
-
-lastfm <- 
-  lastfm |> # dataset
-  group_by(artist, song, genre) |> # grouping
-  summarise(lyrics = str_flatten(text, collapse = " ")) |>  # collapse text into the new column `lyrics` (dropping `text`)
-  ungroup() # unset the groupings
-
-glimpse(lastfm) # preview
-```
-
-Let's take a look at the first 5 observations from this collapsed dataset. 
-
-```{r}
-#| eval: false
-#| label: tbl-cd-structure-lastfm-collapse-table
-#| tbl-cap: "Sample lyrics from Last.fm dataset collapsed by artist, song, and genre."
-
-lastfm |> # dataset
-  slice_head(n = 5) |> # first 5 observations
-  knitr::kable(booktabs = TRUE) # print pretty table
-```
-
-At this point, the only thing left to do to get this dataset to align with our idealized dataset structure is to organize the column ordering (using `select()`). I will also arrange the dataset alphabetically by `genre` and `artist` (using `arrange()`). 
-
-```{r}
-#| eval: false
-#| label: tbl-cd-structure-lastfm-order-arrange
-#| tbl-cap: "Sample lyrics from curated Last.fm dataset."
-
-lastfm <- 
-  lastfm |> # original dataset
-  select(artist, song, lyrics, genre) |> # order columns (and rename `text` to `lyrics`)
-  arrange(genre, artist) # arrange rows by `genre` and `artist`
-
-lastfm |> # curated dataset
-  slice_head(n = 5) |> # first 5 observations
-  knitr::kable(booktabs = TRUE) # print pretty table
-```
+So our objectives are set, let's ...
 
 ### Write dataset
 
-We now have a curated dataset that we can write to disk. Again, as with the Europarle Corpus dataset we curated before, we will write this dataset to the `data/derived/` directory --effectively ensuring that it is clear that this dataset was created by our project work. 
-
-```{r}
-#| eval: false
-#| label: cd-structured-lastfm-write
-
-fs::dir_create(path = "../data/derived/lastfm/") # create lastfm subdirectory
-write_csv(lastfm, 
-          file = "../data/derived/lastfm/lastfm_curated.csv") # write lastfm to disk and label as the curated dataset
-```
-
-And here's an overview of our new directory structure.
-
-```bash
-data/
-├── derived/
-│   └── lastfm/
-│       └── lastfm_curated.csv
-└── original/
-    └── lastfm/
-        ├── README.md
-        ├── country.csv
-        ├── hip_hop.csv
-        ├── lyrics.csv
-        ├── metal.csv
-        ├── pop.csv
-        └── rock.csv
-```
+We now have a curated dataset that we can write to disk. 
 
 ### Summary
 
@@ -590,44 +472,20 @@ Again, to summarize, here is the code that will accomplish the steps we covered 
 #| eval: false
 #| label: cd-structured-code-summary
 
-# Read Last.fm lyrics and subset relevant columns
-lastfm <- 
-  readtext(file = "../data/original/lastfm/*.csv", # files to match using *.csv
-           text_field = "lyrics") |> # text column from the datasets
-  as_tibble() |> # convert to a tibble
-  select(-doc_id, -lyrics_url) # drop these columns
-
-# Collapse text by artist, song, and genre grouping
-lastfm <- 
-  lastfm |> # dataset
-  group_by(artist, song, genre) |> # grouping
-  summarise(lyrics = str_flatten(text, collapse = " ")) |>  # collapse text into the new column `lyrics` (dropping `text`)
-  ungroup() # unset the groupings
-
-# Order columns and arrange rows
-lastfm <- 
-  lastfm |> # original dataset
-  select(artist, song, lyrics, genre) |> # order columns (and rename `text` to `lyrics`)
-  arrange(genre, artist) # arrange rows by `genre` and `artist`
-
-# Write curated dataset to disk
-fs::dir_create(path = "../data/derived/lastfm/") # create lastfm subdirectory
-write_csv(lastfm, 
-          file = "../data/derived/lastfm/lastfm_curated.csv") # write lastfm to disk and label as the curated dataset
+# ...
 ```
 
 ## Semi-structured
 
 At this point we have discussed curating unstructured data and structured datasets. Between these two extremes falls semi-structured data. And as the name suggests, it is a hybrid between unstructured and structured data. This means that there will be important structured metadata included with unstructured elements. The file formats and approaches to encoding the structured aspects of the data vary widely from resource to resource and therefore often requires more detailed attention to the structure of the data and often includes more sophisticated programming strategies to curate the data to produce a tidy dataset. 
 
-As an example we will work with the The Switchboard Dialog Act Corpus (SDAC) which extends the [Switchboard Corpus](https://catalog.ldc.upenn.edu/LDC97S62) with speech act annotation. **(ADD CITATION)**
 
-::: callout-warning
-## Tip
-The SDAC dialogues (`swb1_dialogact_annot.tar.gz`) are available as a [free download from the LDC](https://catalog.ldc.upenn.edu/docs/LDC97S62/). To download, decompress, and organize this resource, follow the strategies discussed in ["Acquire data"](#acquire-data) for Direct Downloads. The tadr package provides the `tadr::get_compressed_data()` function to accomplish this step.
-:::
 
 ### Orientation
+
+- [ ] this SWDA data has been mentioned, reference is all that is needed.
+
+As an example we will work with the The Switchboard Dialog Act Corpus (SDAC) which extends the [Switchboard Corpus](https://catalog.ldc.upenn.edu/LDC97S62) with speech act annotation. **(ADD CITATION)**
 
 The main directory structure of the SDAC data looks like this:
 
@@ -678,8 +536,8 @@ Let's take a look at the first conversation file (`sw_0001_4325.utt`) to see how
 #| linewidth: 0.9
 
 readtext::readtext("data/understanding-data/formats_sdac_sample.txt", verbosity = 0) |> # sw_0001_4325.utt
-    pull(text) |>
-    cat(fill = TRUE)
+  pull(text) |>
+  cat(fill = TRUE)
 ```
 
 There are few things to take note of here. First we see that the conversation files have a meta-data header offset from the conversation text by a line of `=` characters. Second the header contains meta-information of various types. Third, the text is interleaved with an annotation scheme. 
@@ -714,29 +572,44 @@ The first information is the document id (`4325`), the second and third correspo
 In sum, we have 1155 conversation files. Each file has two parts, a header and text section, separated by a line of `=` characters. The header section contains a 'FILENAME' line which has the document id, and ids for speaker A and speaker B. The text section is annotated with DAMSL tags beginning each line, followed by speaker, turn number, utterance number, and the utterance text. With this knowledge in hand, let's set out to create a tidy dataset with the following column structure:
 
 ```{r}
-#| eval: false
 #| label: tbl-cd-semi-sdac-idealized-dataset
 #| tbl-cap: "Idealized structure for the SDAC dataset."
 #| echo: false
 
 # Sample data (created with `dput()`)
 
-structure(list(doc_id = c("4325", "4325", "4325"), damsl_tag = c("o ", 
-"qw ", "qy^d "), speaker = c("A", "A", "B"), turn_num = c("1", 
-"1", "2"), utterance_num = c("1", "2", "1"), utterance_text = c("Okay.  /", 
-"{D So, }", "[ [ I guess, +"), speaker_id = c("1632", "1632", 
-"1519")), .Names = c("doc_id", "damsl_tag", "speaker", "turn_num", 
-"utterance_num", "utterance_text", "speaker_id"), row.names = c(NA, 
-3L), class = "data.frame") |> 
+structure(list(doc_id = c("4325", "4325", "4325"), damsl_tag = c(
+  "o ",
+  "qw ", "qy^d "
+), speaker = c("A", "A", "B"), turn_num = c(
+  "1",
+  "1", "2"
+), utterance_num = c("1", "2", "1"), utterance_text = c(
+  "Okay.  /",
+  "{D So, }", "[ [ I guess, +"
+), speaker_id = c(
+  "1632", "1632",
+  "1519"
+)), .Names = c(
+  "doc_id", "damsl_tag", "speaker", "turn_num",
+  "utterance_num", "utterance_text", "speaker_id"
+), row.names = c(
+  NA,
+  3L
+), class = "data.frame") |>
   knitr::kable(booktabs = TRUE)
 ```
 
 ### Tidy the data
 
+- [ ] Add idealized structure for the SWDA dataset
+
 ```{r}
 #| eval: false
 #| label: cd-semi-copy-data
 #| include: false
+
+# [ ] careful with this, it depends on the location of the project. It will be best to copy the data to the project ignored data/ directory for this chapter
 
 # copy the original data from the `project_implementation` project
 fs::dir_copy(path = "../project_implementation/data/original/sdac/", new_path = "data/curate-datasets/sdac/")
@@ -748,7 +621,9 @@ Let's begin by reading one of the conversation files into R as a character vecto
 #| eval: false
 #| label: cd-semi-sdac-read-example-file-show
 
-doc <- 
+# [ ] is it possible to use readtext, if not, then we need to explain why before jumping in to readr::read_lines()
+
+doc <-
   read_lines(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") # read a single file as character vector
 ```
 
@@ -757,7 +632,7 @@ doc <-
 #| label: cd-semi-sdac-read-example-file-run
 #| echo: false
 
-doc <- 
+doc <-
   read_lines(file = "data/curate-datasets/sdac/sw00utt/sw_0001_4325.utt") # read a single file as character vector
 ```
 
@@ -770,8 +645,9 @@ To isolate the vector element that contains the document and speaker ids, we use
 doc[str_detect(doc, pattern = "\\d+_\\d+_\\d+")] # isolate pattern
 ```
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
 The stringr package has a handy function `str_view()` and `str_view_all()` which allow for interactive pattern matching. There is also an RStudio Addin with the regexplain package which also can be very helpful for developing regular expression syntax.
 :::
 
@@ -785,6 +661,8 @@ doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
   str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
   str_split(pattern = "_") # split the character vector
 ```
+
+- [] I will have introduced lists in earlier material (swirl Objects), at least.
 
 A **list** is a special object type in R. It is an unordered collection of objects whose lengths can differ (contrast this with a data frame which is a collection of objects whose lengths are the same --hence the tabular format). In this case we have a list of length 1, whose sole element is a character vector of length 3 --one element per segment returned from our split. This is a desired result in most cases as if we were to pass multiple character vectors to our `str_split()` function we don't want the results to be conflated as a single character vector blurring the distinction between the individual character vectors. If we *would* like to conflate, or *flatten* a list, we can use the `unlist()` function.
 
@@ -804,10 +682,10 @@ Let's flatten the list in this case, as we have a single character vector, and a
 #| eval: false
 #| label: cd-semi-sdac-doc-info-4
 
-doc_speaker_info <- 
+doc_speaker_info <-
   doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
   str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
-  str_split(pattern = "_") |>  # split the character vector
+  str_split(pattern = "_") |> # split the character vector
   unlist() # flatten the list to a character vector
 ```
 
@@ -828,7 +706,7 @@ The next step is to isolate the text section extracting it from rest of the docu
 #| eval: false
 #| label: cd-semi-sdac-text
 
-doc |> 
+doc |>
   str_detect(pattern = "=+") |> # match 1 or more `=`
   which() # find vector index
 ```
@@ -839,7 +717,7 @@ So for this file `31` is the index in `doc` where the `=` sequence occurs. Now i
 #| eval: false
 #| label: cd-semi-sdac-text-2
 
-doc |> 
+doc |>
   str_detect(pattern = "={3,}") |> # match 3 or more `=`
   which() # find vector index
 ```
@@ -852,9 +730,9 @@ We will get the same result for this file, but will safeguard ourselves a bit as
 #| eval: false
 #| label: cd-semi-sdac-text-3
 
-text_start_index <- 
-  doc |> 
-  str_detect(pattern = "={3,}") |> # match 3 or more `=` 
+text_start_index <-
+  doc |>
+  str_detect(pattern = "={3,}") |> # match 3 or more `=`
   which() # find vector index
 text_start_index <- text_start_index + 1 # increment index by 1
 ```
@@ -956,19 +834,20 @@ I've chained each of these steps in the code below, dropping the original `text`
 #| label: cd-semi-sdac-text-parse
 
 # Extract column information from `text`
-data <- 
+data <-
   data |> # current dataset
-  mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) |>  # extract damsl tags
+  mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) |> # extract damsl tags
   mutate(speaker_turn = str_extract(string = text, pattern = "[AB]\\.\\d+")) |> # extract speaker_turn pairs
   mutate(utterance_num = str_extract(string = text, pattern = "utt\\d+")) |> # extract utterance number
-  mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) |>  # extract utterance text
+  mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) |> # extract utterance text
   select(-text) # drop the `text` column
 
 glimpse(data) # preview the data set
 ```
 
-::: callout-warning
-## Tip
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
 One twist you will notice is that regular expressions in R require double backslashes (`\\\\`) where other programming environments use a single backslash (`\\`).
 :::
 
@@ -982,8 +861,10 @@ To separate the values of a column into two columns we use the `separate()` func
 
 data <-
   data |> # current dataset
-  separate(col = speaker_turn, # source column
-           into = c("speaker", "turn_num")) # separate speaker_turn into distinct columns: speaker and turn_num
+  separate(
+    col = speaker_turn, # source column
+    into = c("speaker", "turn_num")
+  ) # separate speaker_turn into distinct columns: speaker and turn_num
 
 glimpse(data) # preview the data set
 ```
@@ -995,7 +876,7 @@ To remove unwanted leading or trailing whitespace we apply the `str_trim()` func
 #| label: cd-semi-sdac-text-clean
 
 # Clean up column information
-data <- 
+data <-
   data |> # current dataset
   mutate(damsl_tag = str_trim(damsl_tag)) |> # remove leading/ trailing whitespace
   mutate(utterance_num = str_replace(string = utterance_num, pattern = "utt", replacement = "")) |> # remove 'utt'
@@ -1012,7 +893,7 @@ To round out our tidy dataset for this single conversation file we will connect 
 #| label: cd-semi-sdac-speaker-ids
 
 # Link speaker with speaker_id
-data <- 
+data <-
   data |> # current dataset
   mutate(speaker_id = case_when( # create speaker_id
     speaker == "A" ~ speaker_a_id, # speaker_a_id value when A
@@ -1029,6 +910,9 @@ Here's the custom function with some extra code to print a progress message for 
 ```{r}
 #| eval: false
 #| label: cd-semi-extract-sdac-metadata-function
+
+# [ ] rename to `extract_swda_data()`.
+# [ ] add to `qtalrkit` package, note the convention of `extract_` prefix for curation functions. In combination with `get_compressed_data()` this corpus can be curated with few steps.
 
 extract_sdac_metadata <- function(file) {
   # Function: to read a Switchboard Corpus Dialogue file and extract meta-data
@@ -1103,7 +987,7 @@ As a sanity check we will run the `extract_sdac_metadata()` function on a the co
 #| eval: false
 #| label: cd-extract-sdac-metadata-test-show
 
-extract_sdac_metadata(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") |> 
+extract_sdac_metadata(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") |>
   glimpse()
 ```
 
@@ -1112,7 +996,7 @@ extract_sdac_metadata(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") |
 #| label: cd-extract-sdac-metadata-test-run
 #| echo: false
 
-extract_sdac_metadata(file = "data/curate-datasets/sdac/sw00utt/sw_0001_4325.utt") |> 
+extract_sdac_metadata(file = "data/curate-datasets/sdac/sw00utt/sw_0001_4325.utt") |>
   glimpse()
 ```
 
@@ -1124,11 +1008,13 @@ So now it's time to create a vector with the paths to all of the conversation fi
 #| eval: false
 #| label: cd-semi-sdac-list-files-show
 
-sdac_files <- 
-  fs::dir_ls(path = "../data/original/sdac/", # source directory
-             recurse = TRUE, # traverse all sub-directories
-             type = "file", # only return files
-             regexp = "\\.utt$") # only return files ending in .utt
+sdac_files <-
+  fs::dir_ls(
+    path = "../data/original/sdac/", # source directory
+    recurse = TRUE, # traverse all sub-directories
+    type = "file", # only return files
+    regexp = "\\.utt$"
+  ) # only return files ending in .utt
 head(sdac_files) # preview file paths
 ```
 
@@ -1138,11 +1024,13 @@ head(sdac_files) # preview file paths
 #| echo: false
 #| results: hide
 
-sdac_files <- 
-  fs::dir_ls(path = "data/curate-datasets/sdac/", # source directory
-             recurse = TRUE, # traverse all sub-directories
-             type = "file", # only return files
-             regexp = "\\.utt$") # only return files ending in .utt
+sdac_files <-
+  fs::dir_ls(
+    path = "data/curate-datasets/sdac/", # source directory
+    recurse = TRUE, # traverse all sub-directories
+    type = "file", # only return files
+    regexp = "\\.utt$"
+  ) # only return files ending in .utt
 head(sdac_files)
 ```
 
@@ -1163,9 +1051,9 @@ o pass each conversation file in the vector of paths to our conversation files i
 #| results: hide
 
 # Read files and return a tidy dataset
-sdac <- 
+sdac <-
   sdac_files |> # pass file names
-  map(extract_sdac_metadata) |> # read and tidy iteratively 
+  map(extract_sdac_metadata) |> # read and tidy iteratively
   bind_rows() # bind the results into a single data frame
 ```
 
@@ -1187,8 +1075,9 @@ Again as in the previous cases, we will write this dataset to disk to prepare fo
 #| label: cd-semi-sdac-write
 
 fs::dir_create(path = "../data/derived/sdac/") # create sdac subdirectory
-write_csv(sdac, 
-          file = "../data/derived/sdac/sdac_curated.csv") # write sdac to disk and label as the curated dataset
+write_csv(sdac,
+  file = "../data/derived/sdac/sdac_curated.csv"
+) # write sdac to disk and label as the curated dataset
 ```
 
 The directory structure now looks like this: 
@@ -1229,28 +1118,35 @@ To round out this section I've provided a code summary of the steps involved to 
 #| label: cd-semi-sdac-summary-code
 
 # Source the `extract_sdac_metadata()` function
-source("../functions/curate_functions.R") 
+source("../functions/curate_functions.R")
 
 # Get list of the corpus files (.utt)
-sdac_files <- 
-  fs::dir_ls(path = "../data/original/sdac/", # source directory
-             recurse = TRUE, # traverse all sub-directories
-             type = "file", # only return files
-             regexp = "\\.utt$") # only return files ending in .utt
+sdac_files <-
+  fs::dir_ls(
+    path = "../data/original/sdac/", # source directory
+    recurse = TRUE, # traverse all sub-directories
+    type = "file", # only return files
+    regexp = "\\.utt$"
+  ) # only return files ending in .utt
 
 # Read files and return a tidy dataset
-sdac <- 
+sdac <-
   sdac_files |> # pass file names
-  map(extract_sdac_metadata) |> # read and tidy iteratively 
+  map(extract_sdac_metadata) |> # read and tidy iteratively
   bind_rows() # bind the results into a single data frame
-  
+
 # Write curated dataset to disk
 fs::dir_create(path = "../data/derived/sdac/") # create sdac subdirectory
-write_csv(sdac, 
-          file = "../data/derived/sdac/sdac_curated.csv") # write sdac to disk and label as the curated dataset
+write_csv(sdac,
+  file = "../data/derived/sdac/sdac_curated.csv"
+) # write sdac to disk and label as the curated dataset
 ```
 
 ## Documentation
+
+- [ ] consider whether to leave this section, or integrate into the previous sections (most likely, the first section 'unstructured data')
+  - [ ] note that the description of what a data dictionary is for and is in it, has already been covered in a previous chapter.
+  - [ ] however, the function `data_dic_starter()` is new and should be introduced (somewhere), again, probably in the first section 'unstructured data'
 
 At this stage we again want to ensure that the data that we have derived is well-documented. Where in the data acquisition process the documentation was focused on the sampling frame, curated datasets require documentation that describes the structure of the now rectangular dataset and its attributes. This documentation is known as a **data dictionary**. At the curation stage this documentation often contains the following information [@HowMakeData10-2021]: 
 
@@ -1284,7 +1180,7 @@ Running this function in the R Console on the curated dataset (in this case the 
 #| tbl-cap: "Data dictionary starter structure for the SDAC curated dataset."
 #| echo: false
 
-tibble(variable_name = names(sdac), name = "", description = "") |> 
+tibble(variable_name = names(sdac), name = "", description = "") |>
   knitr::kable(booktabs = TRUE)
 ```
 
@@ -1314,22 +1210,32 @@ data/
 
 In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data --unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of meta-information included. The results from our data curation resulted in a curated dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. In addition to the code we use to derived the curated dataset's structure, we also include a data dictionary which documents the names of the variables and provides sufficient description of these variables so that it is clear what our dataset contains.
 
+- [ ] emphasize the importance of ahereing to the unit of analysis for the research, and how this is reflected in the curated dataset. And how unit of observation derived from the transformational steps in the next chapter.
+
 It is important to recognized that this curated dataset will form the base for the next step in our text analysis project and the last step in data preparation for analysis: dataset transformation. This last step in preparing data for analysis is to convert this curated dataset into a dataset that is directly aligned with the research aims (i.e. analysis method(s)) of the project. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. 
 
 ## Activities {.unnumbered}
 
-::: callout-tip
-## Recipe
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
 
-**What**: [Regular Expressions and reshaping datasets](https://lin380.github.io/tadr/articles/recipe_7.html)\
+<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] edit links and goals/ outcomes -->
+
+**What**: [Pattern Matching and Manipulate Datasets](https://lin380.github.io/tadr/articles/recipe_7.html)\
 **How**: Read Recipe 7 and participate in the Hypothes.is online social annotation.\
 **Why**: To how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to change the dimensions of a dataset to either expand or collapse columns or rows.
 :::
 
-::: callout-tip
-## Lab
+::: {.callout}
+**{{< fa flask >}} Lab**
 
-**What**: [Regular Expressions and reshaping datasets](https://github.com/lin380/lab_7)\
+<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] edit links and goals/ outcomes -->
+
+**What**: [Pattern Matching and Manipulate Datasets](https://github.com/lin380/lab_7)\
 **How**: Clone, fork, and complete the steps in Lab 7.\
 **Why**: To gain experience working with coding strategies reshaping data using tidyverse functions and regular expressions, to practice reading/ writing data from/ to disk, and to
 implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
@@ -1337,16 +1243,16 @@ implement organizational strategies for organizing and documenting a dataset in 
 
 ## Questions {.unnumbered}
 
-::: callout-note
-## Conceptual questions
+::: {.callout}
+{{< fa wrench >}} **Conceptual questions**
 
 1. ...
 2. ...
 
 :::
 
-::: callout-note
-## Technical exercises
+::: {.callout}
+{{< fa wrench >}} **Technical questions**
 
 1. ...
 2. ...

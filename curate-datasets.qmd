@@ -1,7 +1,6 @@
 ---
 execute: 
   echo: true
-  eval: false
 ---
 
 # Curate datasets {#sec-curate-datasets}
@@ -35,7 +34,7 @@ Exercises:
 Formatting:
 
 - [ ] cite the packages used
-- [ ] cite the Europarle Corpus 
+- [ ] cite the europarl Corpus 
 - [ ] correct the file names for Switchboard to reflect the dataset_curated.csv, and dataset_data_dictionary.csv format
 
 -->
@@ -65,68 +64,124 @@ Formatting:
 # [ ] confirm packages used in this chapter, that are not in the _common.qmd file
 
 # Packages
-pacman::p_load(tidyverse, readtext, tidytext, knitr, kableExtra)
+pacman::p_load(readtext)
 ```
 
 - [ ] Revise: to reflect the new structure/ content of the chapter
 
-In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. As Acquired data can come in a wide variety of formats that depend largely on the richness of the metadata that is included, but also can reflect individual preferences. In this chapter we will consider three general types of formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate (see [Chapter 4, section 4.2](#sec-framing-research.html#research-question). The resulting dataset will be the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation requited for the analysis method(s) that we will implement. And, as in previous implementation steps, we will discuss the important role of documentation.  
+In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. In this chapter we will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method(s) that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.  
 
 ::: {.callout}
 **{{< fa terminal >}} Swirl lesson**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-
+<!-- Learn how to use regular expressions to match patterns in text using the *stringr* package. Learn how to manipulate data using the `dplyr` package. -->
 **What**: [Pattern Matching and Manipulate Datasets](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
-**Why**: To learn the basics of how to define search patterns to match strings, or characters, using Regular Expressions.
+**Why**: To familiarize yourself with the basics of using the pattern matching syntax Regular Expressions and the `dplyr` package to manipulate datasets.
 :::
 
 ## Unstructured
 
-The bulk of text that is available in the wild is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within explicit. Explicit information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data. This information needs to be added or derived for the purposes of the research, either through manual inspection or (semi-)automatic processes. For now, however, our job is just to get the unstructured data into a structured format with a minimal set of metadata that we can derive from the resource. 
-
-As an example of an unstructured source of text data, let's take a look at the [Europarle Parallel Corpus](https://www.statmt.org/europarl/), as introduced in [Chapter 2 "Understanding data"](#sec-understanding-data). This data contains parallel texts (source and translated documents) from the European Parliamentary proceedings for some 21 European languages. Here we will focus in on the translation from Spanish to English (Spanish-English). 
+The bulk of text ever created is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable. Remember that text in itself is not information. Only when given explicit context does text become informative. The explicit contextual information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data. This information needs to be added or derived for the purposes of the research, either through manual inspection or (semi-)automatic processes. For now, however, our job is just to get the unstructured data into a structured format with a minimal set of metadata that we can derive from the resource.
 
 ### Orientation
 
+As an example of an unstructured source of corpus data, let's take a look at the [Europarl Parallel Corpus](https://www.statmt.org/europarl/) [@Koehn2005]. This corpus contains parallel texts (source and translated documents) from the European Parliamentary proceedings between 1996-2011 for some 21 European languages. 
 
-<!-- [ ] Update directory structure and reference to the data -->
+Let's assuming we selected this corpus data because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the compressed file, and inspecting the decompressed structure, we have the the file structure seen in @exm-cd-europarl-file-structure. 
 
-With the data downloaded into the `data/original/europarle/` directory we see that there are two files. One corresponding to the source language (Spanish) and one for the target language (English). 
-
+::: {#exm-cd-europarl-file-structure}
 ```bash
-data/original/europarle/
-├── europarl-v7.es-en.en
-└── europarl-v7.es-en.es
+project/
+├── code/
+│   ├── 1-acquire-data.qmd
+│   ├── 2-curate-data.qmd
+│   └── ...
+├── data/
+│   ├── analysis/
+│   ├── derived/
+│   └── original/
+│       │── europarl_do.csv
+│       └── europarl/
+│           ├── europarl-v7.es-en.en
+│           └── europarl-v7.es-en.es
+├── output/
+│   ├── figures/
+│   ├── reports/
+│   ├── results/
+│   └── tables/
+├── README.md
+└── _main.R
 ```
+:::
 
-Looking at the first 10 lines of the first file, we can see that this is running text. 
-
-<!-- [ ] consider making this display explicit -->
-<!-- [ ] also consider removing the namespace prefixing, and just show the loading the the library -->
+The *europarl_do.csv* file contains the data origin information documented as part of the acquisition process. The contents are seen in @tbl-cd-europarl-data-origin.
 
 ```{r}
-#| eval: false
-#| label: unstructured-data-europarle-sample
-#| comment: ">"
-#| linewidth: 0.9
+#| label: tbl-cd-europarl-data-origin
+#| tbl-cap: "Data origin: Europarl Corpus"
 #| echo: false
 
-readtext::readtext("data/understanding-data/formats_europarle-en_sample.txt") |>
-  pull(text) |>
-  cat(fill = TRUE)
+# Read in the data origin file and display it as a table
+read_csv("data/curate-datasets/cd-europarl_do.csv") |>
+  kable() |>
+  kable_styling()
 ```
 
-The only meta information that we can surmise from these files is the fact that we know one is the source language and one is the target language and that each sentence is aligned (parallel) with the lines in the other file. 
+```{r}
+#| label: cd-acquire-europarl
+#| eval: false
+#| echo: false
 
-So with what we have we'd like to create a data frame that has the seen in @tbl-cd-unstructured-europarle-structure-example.  
+get_compressed_data(
+  url = "https://www.statmt.org/europarl/v7/es-en.tgz",
+  target_dir = "../data/original/europarl",
+  confirmed = TRUE
+)
+```
+
+<!-- [x] Update directory structure and reference to the data -->
+
+Now let's get familiar with the corpus directory structure and the files. In @exm-cd-europarl-file-structure, we see that there are two corpus files, *europarl-v7.es-en.es* and *europarl-v7.es-en.en*, that contain the source and target language texts, respectively. The file names indicate that the files contain Spanish-English parallel texts. The *.es* and *.en* extensions indicate the language of the text.
+
+Looking at the beginning of the *.es* and *.en* files, in @exm-cd-europarl-sample-source and @exm-cd-europarl-sample-target, we see that the files contain a series of lines in either the source or target language. 
+
+::: {layout="[50, -1, 50]" layout-valign="top" layout-align="left"}
+
+::: {#exm-cd-europarl-sample-source}
+*europarl-v7.es-en.es* sample
+```xml
+Reanudación del período de sesiones
+Declaro reanudado el período de sesiones del Parlamento Europeo, interrumpido el viernes 17 de diciembre pasado, y reitero a Sus Señorías mi deseo de que hayan tenido unas buenas vacaciones.
+Como todos han podido comprobar, el gran "efecto del año 2000" no se ha producido. En cambio, los ciudadanos de varios de nuestros países han sido víctimas de catástrofes naturales verdaderamente terribles.
+Sus Señorías han solicitado un debate sobre el tema para los próximos días, en el curso de este período de sesiones.
+A la espera de que se produzca, de acuerdo con muchos colegas que me lo han pedido, pido que hagamos un minuto de silencio en memoria de todas las víctimas de las tormentas, en los distintos países de la Unión Europea afectados.
+```
+:::
+
+::: {#exm-cd-europarl-sample-target}
+*europarl-v7.es-en.en* sample
+```xml
+Resumption of the session
+I declare resumed the session of the European Parliament adjourned on Friday 17 December 1999, and I would like once again to wish you a happy new year in the hope that you enjoyed a pleasant festive period.
+Although, as you will have seen, the dreaded 'millennium bug' failed to materialise, still the people in a number of countries suffered a series of natural disasters that truly were dreadful.
+You have requested a debate on this subject in the course of the next few days, during this part-session.
+In the meantime, I should like to observe a minute' s silence, as a number of Members have requested, on behalf of all the victims concerned, particularly those of the terrible storms, in the various countries of the European Union.
+```
+:::
+:::
+
+We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.
+
+Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the "idealized structure" of the data. For a curated dataset there are two considerations. First, we want to maintain the original structure of the data as much as possible. This provides a link to the original data and gives us a default dataset structure from which we can derive other structures that fit our analysis needs. Second, we want to add structure to the data that makes it easier to work with. This is the 'tidy' part of the data curation process. The aim is to embue the dataset with as much of the metadata the data resource makes available.
+
+Given what we know about the data, we can define the idealized structure of the data as seen in @tbl-cd-europarl-structure-example.
 
 ```{r}
-#| eval: false
-#| label: tbl-cd-unstructured-europarle-structure-example
-#| tbl-cap: "Idealized structure for the Europarle Corpus dataset."
+#| label: tbl-cd-europarl-structure-example
+#| tbl-cap: "Idealized structure for the europarl Corpus dataset."
 #| echo: false
 
 # [ ] I need to review the use of kable() across the book, as I think I am using it in different ways
@@ -136,70 +191,81 @@ So with what we have we'd like to create a data frame that has the seen in @tbl-
 #    - kable(booktabs = TRUE) |> kable_styling(latex_options = c("striped", "hold_position"))
 
 tribble(
-  ~type, ~sentence_id, ~sentence,
-  "Source", 1, "...sentence from source language",
-  "Target", 1, "...sentence from target language"
+  ~doc_id, ~type, ~line_id, ~line,
+  1, "Source", 1, "...line from source language",
+  2, "Source", 2, "...",
+  3, "Source", 3, "...",
+  4, "Target", 1, "...line from target language",
+  5, "Target", 2, "...",
+  6, "Target", 3, "..."
 ) |>
-  kable(booktabs = TRUE) |> 
-  kable_styling()
+  kable(booktabs = TRUE) |>
+  kable_styling(latex_options = c("hold_position"))
 ```
+
+The dataset structure in @tbl-cd-europarl-structure-example has four columns. The first column, `doc_id` is a unique identifier for each line in the corpus. `type`, indicates whether the line is from the source or target language. The third column, `line_id`, is a unique identifier for each line for each `type`. The last column, `line`, contains the text of the line, and maintains the structure of the original data. The observations are lines.
+
+Our task now is to develop code that will read the original data and render the idealized structure as a curated dataset we will write to the *data/derived/* directory. The code we develop will be added to the *2-curate-data.qmd* file. And finally, the dataset will be documented with a data dictionary file. 
 
 ### Tidy the data
 
 <!-- 
-- [ ] make clear reference to "idealized structure" table, for each of the sections (unstructured, structured, semi-structured)
+- [x] make clear reference to "idealized structure" table, for each of the sections (unstructured, structured, semi-structured)
 -->
 
-To create this dataset structure lets's read the files with the `readtext()` function from readtext package and assign them to a meaningful variable.
+To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. There are many ways to read data, but for illustrative purposes we will use the `readtext()` function from the `readtext` package [@R-readtext]. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory. 
 
 ```{r}
+#| label: cd-europarl-readtext-show
 #| eval: false
-#| label: cd-unstructured-read-europarle-resources
-#| include: false
 
-# [ ] look into `readtext()` as I think we can read both files at once, although we will need to add a column to identify the language
+# Load package
+library(readtext)
 
-# read the data from the resources directory
-europarle_en <-
-  readtext::readtext("data/curate-datasets/europarle/europarl-v7.es-en.en", verbosity = 0)
-
-europarle_es <-
-  readtext::readtext("data/curate-datasets/europarle/europarl-v7.es-en.es", verbosity = 0)
+# Read Europarl files .es and .en
+europarl_docs_tbl <-
+  readtext("../data/original/europarl/*") |> # read in files
+  tibble() # convert to tibble
 ```
 
+::: {#exm-cd-europarl-readtext}
 ```{r}
-#| eval: false
-#| label: cd-unstructured-read-europarle-show
+#| label: cd-europarl-readtext-run
+#| echo: false
+#| message: false
 
-# Read the Europarle files
-europarle_en <- # English target text
-  readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-    verbosity = 0
-  ) # don't show warnings
+# Load package
+library(readtext)
 
-europarle_es <- # Spanish source text
-  readtext::readtext("../data/original/europarle/europarl-v7.es-en.es", # path to the data
-    verbosity = 0
-  ) # don't show warnings
+readtext_options(verbosity = 0) # no messages from readtext
+
+# Read Europarl files .es and .en
+europarl_docs_tbl <- 
+  readtext("data/curate-datasets/europarl/*") |> 
+  tibble() 
 ```
+:::
+
+In @exm-cd-europarl-readtext, the `readtext()` function reads all the files in the *../data/curate-datasets/europarl/* directory and returns a tibble.
 
 ::: {.callout}
 **{{< fa exclamation-triangle >}} Warning**
 
-The `readtext()` function can read many different types of file formats, from structured to unstructured. However, it depends in large part on the extension of the file to recognize what algorithm to use when reading a file. In this particular case the Europarle files do not have a typical extension (they have `.en` and `.es`). The `readtext()` function will treat them as plain text (`.txt`), but it will throw a warning message. To suppress the warning message you can add the `verbosity = 0` argument.
+The `readtext()` function can read many different types of file formats, from structured to unstructured. However, it depends in large part on the extension of the file to recognize what algorithm to use when reading a file. In this particular case, the Europarl files do not have a typical extension (they have `.en` and `.es`). The `readtext()` function will treat them as plain text (`.txt`), but it will throw a warning message. To suppress the warning message you can add the `verbosity = 0` argument or set `readtext_options(verbosity = 0)`.
 :::
 
-Now there are a couple things to note about thbe `europarle_en` and `europarle_es` objects. If we inspect their structure, we will find that the dimensions of the data frame that is created is one row by two columns. 
+Let's inspect the `europarl_docs_tbl` object with the `str()` function, in @exm-cd-europarl-readtext-str.
 
+::: {#exm-cd-europarl-readtext-str}
 ```{r}
-#| eval: false
-#| label: cd-unstructured-inspect-europarle-readtext-structure
-#| linewidth: 0.9
+#| label: cd-europarl-readtext-str
 
-# [ ] use `glimpse()` instead of `str()`?
-
-str(europarle_en) # inspect the structure of the object
+# Preview data
+str(europarl_docs_tbl) 
 ```
+:::
+
+We see that the output from @exm-cd-europarl-readtext-str is a tibble with two columns, `doc_id` and `text`. The `doc_id` column contains the name of the file from which the text was read. The `text` column contains the text of the file. There are two observations, one for each file. 
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
@@ -207,195 +273,273 @@ str(europarle_en) # inspect the structure of the object
 Note that the `str()` function from base R is similar to `glimpse()`. However, `glimpse()` will attempt to show you as much data as possible. In this case since our column `text` is a very long character vector it will take a long time to render. I've chosen the `str()` function as it will automatically truncate the data.
 :::
 
-<!-- [ ] I need to standardize how I refer to packages `readtext` -->
+<!-- [x] I need to standardize how I refer to packages `readtext` -->
 
-The columns are `doc_id` and `text`. `doc_id` is created by `readtext` to index each file that is read in. The `text` column is where the text appears. The fact that we only have one row means that all the text in the entire file is contained in one cell! We will want to break this cell up into rows for each sentence, but for now let's work with getting the columns to line up with our idealized dataset structure. 
+The fact that we only have one row for each file means that all the text in each file is contained in one cell! We want to break these cells up into rows for each line, as they appear in the original data. You may be wondering why the `readtext()` function did not do this for us, after all the original data was already separated into lines. The reason is that the `readtext()` function chose to read the files as plain text, and plain text does not have any structure. The line breaks, however, are still there, they are just represented as a special character, `\n`. Comparing @exm-cd-europarl-text-lines and @exm-cd-europarl-text-lines-raw, we can see that the text is a single long character vector, and that the line breaks are represented as `\n`.
 
-First let's change the type of data frame that we are working with to a tibble. This will make sure we don't accidentally print hundreds of lines to our R Markdown output and/ or the R Console. Then we will rename the `doc_id` column to `type` and change the value of that column to "Target" (for English) and "Source" (for Spanish). 
-
+::: {#exm-cd-europarl-text-lines}
 ```{r}
-#| eval: false
-#| label: cd-unstructured-modify-dataset-structure
+#| label: cd-europarl-text-lines
 
-europarle_target <-
-  europarle_en |> # readtext data frame
-  as_tibble() |> # convert to tibble
-  rename(type = doc_id) |> # rename doc_id to type
-  mutate(type = "Target") # change type value to 'Target'
-
-europarle_source <-
-  europarle_es |> # readtext data frame
-  as_tibble() |> # convert to tibble
-  rename(type = doc_id) |> # rename doc_id to type
-  mutate(type = "Source") # change type value to 'Source'
+# Preview first 50 characters
+europarl_docs_tbl |> 
+  pull(text) |> 
+  str_trunc(50) |> 
+  str_view() 
 ```
+:::
 
-We have two objects now, one corresponding to the 'Source' and the other the 'Target' parallel texts. 
-
-
-- [ ] Note: joining is a part of the **transformation** stage. 
-
-Let's now join these two datasets, one on top of the other --that is, by rows. We wil use the `bind_rows()` function for this.
-
+::: {#exm-cd-europarl-text-lines-raw}
 ```{r}
-#| eval: false
-#| label: cd-unstructured-bind-europarle
+#| label: cd-europarl-text-lines-raw
 
-europarle <-
-  bind_rows(europarle_target, europarle_source)
-
-str(europarle) # inspect the structure of the object
+# Preview first 50 raw characters
+europarl_docs_tbl |> 
+  pull(text) |> 
+  str_trunc(50) |> 
+  str_view(use_escapes = TRUE)
 ```
+:::
 
-The `europarle` dataset now has 2 columns, as before, and 2 rows --each corresponding to the distinct language types (Source/ Target). 
+In @exm-cd-europarl-text-lines, we can see a truncated version of the text as it is in a printed format. The `str_trunc()` function from the `stringr` package [@R-stringr] truncates the text to the first 50 characters. The `str_view()` function from the same package allows us to see the text in a viewer pane. 
 
-Remember our goal is to create a dataset structure with three columns `type`, `sentence_id`, and `sentence`. At the moment we have `type` and `text` --where `text` has all of the sentences in for each type in a cell. So we are going to want to break up the `text` column into sentences, group the sentences that are created by `type`, and then number these sentences so that they are aligned between the distinct types. 
-
-- [ ] Note: this is tokenization, a **transformation** step.
-
-To break up the text into sentences we are going to turn to the tidytext package. This package has a extremely useful function `unnest_tokens()` which provides an effective way to break text into various units (see `?tidytext::unnest_tokens` for a full list of token types). Since I know from looking at the raw text that each sentence is on its own line, the best strategy to break the text into sentence units is to find a way to break each line into a new row in our dataset. To do this we need to use the `token = "regex"` (for Regular Expression) and use the `pattern = "\\n"` which tells R to look for carriage returns to use as the breaking criterion.
-
-```{r}
-#| eval: false
-#| label: cd-unstructured-europarle-unnest-sentences
-
-europarle_sentences <-
-  europarle |>
-  tidytext::unnest_tokens(
-    output = sentence, # new column
-    input = text, # column to find text
-    token = "regex", # use a regular expression to break up the text
-    pattern = "\\n", # break text by carriage returns (returns after lines)
-    to_lower = FALSE
-  ) # do not lowercase the text
-
-glimpse(europarle_sentences) # preview the structure
-```
-
-- [ ] Note: Regular Expressions are covered in the Swirl lesson 'Pattern Matching', but I'm not sure if I should be working with this here. Hmmm. I have to consider what to do with this chapter in terms of skills development.
+In @exm-cd-europarl-text-lines-raw, we can see the raw text, that is, the text as it is stored in the computer. The `use_escapes = TRUE` argument tells the `str_view()` function to show the special characters as they are stored in the computer. This includes the `\n` line-feed character, which represents a line break.
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
-Regular Expressions are a powerful pattern matching syntax. They are used extensively in text manipulation and we will see them again and again. A good website to practice Regular Expressions is [RegEx101](https://regex101.com/). You can also install the regexplain package in R to get access to a useful [RStudio Addin](https://rstudio.github.io/rstudioaddins/). 
+The `str_view()` with the argument `use_escapes = TRUE` also allows you to see other special characters, such as `\t` (tab) and `\r` (carriage return) as well as Unicode characters, such as `\u00f3n` (ó), `\u00ed` (í), *etc.*. These characters are not visible in the printed version of the text, but they are there in the raw text.
 :::
 
-Our new `europarle_sentences` object is a data frame with almost 4 million rows! The final step to get to our envisioned dataset structure is to add the `sentence_id` column which will be calculated by grouping the data by `type` and then assigning a row number to each of the sentences in each group. 
+We can see that the text is a single long character vector, and that the line breaks are represented as `\n`. So our goal is to split the text for each file into lines creating a new row for each line created. 
 
+To do this we will use another function from the stringr package, `str_split()`, whose function is to split a character vector into smaller character vectors based on some splitting criteria. In @exm-cd-europarl-text-lines-tbl, we use the `str_split()` function to split the text into lines based on the `\n` character and assign it to the new column `lines` using `mutate()`. Since we will not need the `text` column anymore, we can use `select()` to drop it.
+
+::: {#exm-cd-europarl-text-lines-tbl}
 ```{r}
-#| eval: false
-#| label: tbl-cd-unstructured-europarle-add-sentence-id
-#| tbl-cap: "First ten sentences in the Europarle Corpus curated dataset."
+#| label: cd-europarl-text-lines-tbl
 
-europarle_sentences_id <-
-  europarle_sentences |> # dataset
-  group_by(type) |> # group by type
-  mutate(sentence_id = row_number()) |> # add a row number for each sentence for each level of type
-  select(type, sentence_id, sentence) |> # select the relevant columns to keep
-  ungroup() |> # ungroup by type
-  arrange(sentence_id, type) # arrange the dataset
+# Split text into lines
+europarl_lines_tbl <- 
+  europarl_docs_tbl |> 
+  mutate(lines = str_split(text, "\n")) |> 
+  select(-text)
 
-europarle_sentences_id |>
-  slice_head(n = 10) |>
-  knitr::kable(booktabs = TRUE)
+# Preview
+europarl_lines_tbl
 ```
+:::
+
+Previewing the output in @exm-cd-europarl-text-lines-tbl, we can see that the `lines` column contains a list of character vectors. Why is this so? `str_split()` takes a character vector and splits it, as we know. It is a vectorized function, meaning that it can take a vector of character vectors and split each one into subsegments. Since any given input character vector can have a different number of subsegments, the number of subsegments in each file could be different. The ideal object for such data is a list. So `str_split()` returns a list of character vectors.
+
+The list of character vectors, lines in our case, is still associated with the respective `doc_id` value. However, we want to create a new row for each line in the list. To do this, we will use the `unnest()` function from the `tidyr` package [@R-tidyr]. The `unnest()` function takes a list column and creates a new row for each element in the list. We use the `unnest()` function to create a new row for each line in the `lines` column. We can see the output from @exm-cd-europarl-text-lines-tbl-unnest.
+
+::: {#exm-cd-europarl-text-lines-tbl-unnest}
+```{r}
+#| label: cd-europarl-text-lines-tbl-unnest
+
+# Create a new row for each line
+europarl_lines_tbl <- 
+  europarl_lines_tbl |> 
+  unnest(lines)
+
+# Preview
+europarl_lines_tbl |> 
+  slice_head(n = 5)
+```
+:::
+
+Remember that the data in the Europarl corpus is aligned, meaning that each line in the source file is aligned with a line in the target file. So we need to make sure that the number of lines in each file is the same. We can do this by grouping the data by `doc_id` and then counting the number of lines in each file. We can do this using the `group_by()` and `count()` functions from the `dplyr` package [@R-dplyr]. We can see the output in @exm-cd-europarl-text-lines-tbl-count.
+
+::: {#exm-cd-europarl-text-lines-tbl-count}
+```{r}
+#| label: cd-europarl-text-lines-tbl-count
+
+# Count the number of lines in each file
+europarl_lines_tbl |> 
+  group_by(doc_id) |> 
+  count()
+```
+:::
+
+The output of @exm-cd-europarl-text-lines-tbl-count shows that the number of lines in each file is the same. This is good. If the number of lines in each file was different, we would need to figure out why and fix it.
+
+We now have our `lines` column and the associated observations for our idealized dataset, in @tbl-cd-europarl-structure-example. Let's now leverage the existing `doc_id` to create the `type` column. The goal is to assign the value of `type` according to the `doc_id` value. Specifically, when `doc_id` is 'europarl-v7.es-en.es' type should be 'Source' and when `doc_id` is 'europarl-v7.es-en.en' type should be 'Target'. 
+
+We can do this using the `case_when()` function from the `dplyr` package [@R-dplyr]. The `case_when()` function takes a series of conditions and assigns a value based on the first condition that is met. In this case, we will use `mutate()` to create the `type` column and then use the `doc_id` column to create the conditions and the `type` column to assign the values from `case_when()`. We will store the output in a new object called `europarl_lines_type_tbl`, as seen in @exm-cd-europarl-text-lines-type-tbl.
+
+::: {#exm-cd-europarl-text-lines-type-tbl}
+```{r}
+#| label: cd-europarl-text-lines-type-tbl
+
+# Create `type` column
+europarl_lines_type_tbl <- 
+  europarl_lines_tbl |> 
+  mutate(type = case_when(
+    doc_id == "europarl-v7.es-en.es" ~ "Source",
+    doc_id == "europarl-v7.es-en.en" ~ "Target"
+  ))
+
+# Preview dataset
+glimpse(europarl_lines_type_tbl)
+```
+:::
+
+The preview output from @exm-cd-europarl-text-lines-type-tbl shows us that we now have three columns, `doc_id`, `lines`, and `type`. The `type` column has been created and the values have been assigned according to the `doc_id` values. 
+
+We can now overwrite the `doc_id` column with a unique identifier for each line. A numeric identifier makes sense. We can do this by using the `mutate()` function to assign `doc_id` a sequential number with `row_number()`, which increments by 1 for each row. We will store the output in a new object called `europarl_lines_type_id_tbl`, as seen in @exm-cd-europarl-text-lines-type-id-tbl.
+
+::: {#exm-cd-europarl-text-lines-type-id-tbl}
+```{r}
+#| label: cd-europarl-text-lines-type-id-tbl
+
+# Create new `doc_id` column
+europarl_lines_type_id_tbl <- 
+  europarl_lines_type_tbl |> 
+  mutate(doc_id = row_number())
+
+# Preview dataset
+glimpse(europarl_lines_type_id_tbl)
+```
+:::
+
+The preview output from @exm-cd-europarl-text-lines-type-id-tbl shows us that we now have the same three columns, `doc_id`, `lines`, and `type`. However, the values in the `doc_id` column now reflect a unique identifier for each line.
+
+The last step to get to our envisioned dataset structure is to add the `line_id` column which will be calculated by grouping the data by `type` and then assigning a row number to each of the lines in each group. We use the `group_by()` function to perform the grouping as seen in @exm-cd-europarl-text-lines-type-id-line-id-tbl.
+
+::: {#exm-cd-europarl-text-lines-type-id-line-id-tbl}
+```{r}
+#| label: cd-europarl-text-lines-type-id-line-id-tbl
+
+# Create `line_id` column
+europarl_lines_type_id_line_id_tbl <- 
+  europarl_lines_type_id_tbl |> 
+  group_by(type) |> 
+  mutate(line_id = row_number()) |> 
+  ungroup()
+
+# Preview dataset
+glimpse(europarl_lines_type_id_line_id_tbl)
+```
+:::
+
+The preview output from @exm-cd-europarl-text-lines-type-id-line-id-tbl shows us that we now have the desired four columns, `doc_id`, `lines`, `type`, and `line_id`. 
+
+Before we get to writing the dataset to disk, let's organized it in a way that the columns are in the order we want and the rows are sorted in a way that makes sense.
+
+Reordering the columns involves using the `select()` function and list the order of the columns. To sort by columns, we will use `arrange()` and specify the columns to order by. We store the results in a more legible object, `europarl_curated_tbl`, as seen in @exm-cd-europarl-curated-tbl.
+
+::: {#exm-cd-europarl-curated-tbl}
+```{r}
+#| label: cd-europarl-text-lines-type-id-line-id-tbl-reorder
+
+# Reorder columns and sort rows
+europarl_curated_tbl <- 
+  europarl_lines_type_id_line_id_tbl |> 
+  select(doc_id, type, line_id, lines) |> 
+  arrange(line_id, type, doc_id)
+
+# Preview dataset
+glimpse(europarl_curated_tbl)
+```
+:::
+
+The preview output from @exm-cd-europarl-curated-tbl shows us that we now have the desired four columns, `doc_id`, `type`, `line_id`, and `lines`. The rows are sorted by `line_id`, `type`, and `doc_id`. This gives us a dataset that reads left to right from document to line oriented attributes and top to bottom by source-target line pairs.
 
 ### Write dataset
 
-At this point we have the curated dataset (`europarle_sentences_id`) in a tidy format. This dataset, however, is only in the current R session. We will want to write this dataset to disk so that in the next step of the text analysis workflow (transform data) we will be able to start work on this dataset and make changes as needed to fit our analysis needs. 
+At this point we have the curated dataset (`europarl_lines_type_id_line_id_tbl`) in a tidy format. This dataset, however, is only in the current R session. We will want to write this dataset to disk so that in the next step of the text analysis workflow (transformation) we will be able to start work on this dataset and make changes as needed to fit our analysis needs. 
 
-We will leverage the project directory structure which has distinct directories for `original/` and `derived/` data(sets). 
+We will leverage the project directory structure which has distinct directories for `original/` and `derived/` data(sets), seen in @exm-cd-europarl-write-directory.
 
+::: {#exm-cd-europarl-write-directory}
 ```bash
 data/
-├── derived
-└── original
+│── analysis/
+├── derived/
+└── original/
+    │── europarl_do.csv
+    └── europarl/
+        ├── europarl-v7.es-en.es
+        └── europarl-v7.es-en.en
 ```
+:::
 
-Since this dataset is derived by our work, we will added it to the `derived/` directory. I'll create a `europarle/` directory just to keep things organized. 
+Since this is a tabular, tidy dataset we have various options for the file type to write. Many of these formats are software-specific, such as `*.xlsx` for Microsoft Excel, `*.sav` for SPSS, `*.dta` for Stata, and `*.rds` for R. We will use the `*.csv` format since it is a common format that can be read by many software packages. We will use the `write_csv()` function from the `readr` package to write the dataset to disk.
 
+Now the question is where to save our CSV file. Since our `europarl_curated_tbl` dataset is derived by our work, we will added it to the `derived/` directory. I'll create a `europarl/` directory with `dir_create()` just to keep things organized. 
+
+::: {#exm-cd-unstructured-write-europarl}
 ```{r}
+#| label: cd-unstructured-write-europarl
 #| eval: false
-#| label: cd-unstructured-write-europarle
+
+# Create the europarl/ directory
+dir_create(path = "../data/derived/europarl/")
 
 # Write the curated dataset to disk
-fs::dir_create(path = "../data/derived/europarle/") # create the europarle directory
 write_csv(
-  x = europarle_sentences_id, # object to write
-  file = "../data/derived/europarle/europarle_curated.csv"
-) # target file location/ name
+  x = europarl_curated_tbl,
+  file = "../data/derived/europarl/europarl_curated.csv"
+) 
 ```
+:::
 
-This is how the directory structure under the `derived/` directory looks now. 
+After running the code in @exm-cd-unstructured-write-europarl, the directory structure under the `derived/` directory should look like @exm-cd-unstructured-write-europarl-directory.
 
+::: {#exm-cd-unstructured-write-europarl-directory}
 ```bash
 data/
-├── derived
-│   └── europarle
-│       └── europarle_curated.csv
-└── original
-    └──europarle
+│── analysis/
+├── derived/
+│   └── europarl/
+│       └── europarl_curated.csv
+└── original/
+    └──europarl
         ├── europarl-v7.es-en.en
         └── europarl-v7.es-en.es
 ```
+:::
 
 ### Summary
 
 In this section we worked with unstructured data and looked at how to read the data into an R session and manipulate the data to form a tidy dataset with a few columns that we could derive based on the information we have about the corpus. 
 
-In our discussion we worked step by step to curate the Europarle Corpus, adding in intermediate steps for illustration purposes. However, in a more realistic case the code would most likely make more extensive use of piping (`|>`) to reduce the number of intermediate objects and make the code more legible. Below I've included a sample of what that code might look like.
+In our discussion we worked step by step to curate the europarl Corpus, adding in intermediate steps for illustration purposes. However, in a more realistic case the code would most likely make more extensive use of piping (`|>`) to reduce the number of intermediate objects and make the code more legible. The final code base would be added to the *2-curate-data.qmd* file in the *code/* directory. 
+
+The final step, as always, is to document the dataset. For datasets the documentation is a data dictionary, as discussed in @sec-ud-data-dictionaries. As with data origin files, you can use spreadsheet software to create and/ or edit the data dictionary. 
+
+In the `qtalrkit` package we have a function, `create_data_dictionary()` that will generate the scaffolding for a data dictionary. The function takes two arguments, `data` and `file_path`. It reads the dataset columns and provides a template for the data dictionary. 
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+The `create_data_dictionary()` function provides a rudimentary data dictionary template by default. However, you can take advantage of OpenAI's text generation models to generate a more detailed data dictionary for you to edit. To do this create [an OpenAI account](https://platform.openai.com/signup) and [an API key](https://platform.openai.com/account/api-keys) and add this key to your R environment (`Sys.setenv(OPENAI_API_KEY = "sk..."`). Then you can specify the model you would like to use in the function with the `model = ` argument. For example, `model = "gpt-3.5-turbo"` will use the GPT-3.5 Turbo model.
+:::
+
+::: {#exm-cd-unstructured-data-dictionary}
+```{r}
+#| label: cd-unstructured-data-dictionary
+#| eval: false 
+
+# Create the data dictionary
+create_data_dictionary(
+  data = europarl_curated_tbl,
+  file_path <- "../data/derived/europarl/europarl_curated_dd.csv"
+)
+```
+:::
+
+An example of the data dictionary for the `europarl_curated_tbl` dataset is shown in @tbl-cd-unstructured-data-dictionary-example.
 
 ```{r}
-#| eval: false
-#| label: cd-unstructured-europarle-summary-code
+#| label: tbl-cd-unstructured-data-dictionary-example
+#| tbl-cap: "Data dictionary for the `europarl_curated_tbl` dataset."
+#| echo: false
 
-# Read data and set up `type` column
-europarle_en <-
-  readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-    verbosity = 0
-  ) |> # don't show warnings
-  as_tibble() |> # covert to tibble
-  rename(type = doc_id) |> # rename doc_id to type
-  mutate(type = "Target") # change type value to 'Target'
-
-europarle_es <-
-  readtext::readtext("../data/original/europarle/europarl-v7.es-en.en", # path to the data
-    verbosity = 0
-  ) |> # don't show warnings
-  as_tibble() |> # covert to tibble
-  rename(type = doc_id) |> # rename doc_id to type
-  mutate(type = "Source") # change type value to 'Source'
-
-# Join the datasets by rows
-europarle <-
-  bind_rows(europarle_en, europarle_es)
-
-# Segment the `text` column into `sentence` units
-europarle <-
-  europarle |> # dataset
-  tidytext::unnest_tokens(
-    output = sentence, # new column
-    input = text, # column to find text
-    token = "regex", # use a regular expression to break up the text
-    pattern = "\\n", # break text by carriage returns (returns after lines)
-    to_lower = FALSE
-  ) # do not lowercase the text
-
-# Add `sentence_id` to each `type`
-europarle <-
-  europarle |> # dataset
-  group_by(type) |> # group by type
-  mutate(sentence_id = row_number()) |> # add a row number for each sentence for each level of type
-  select(type, sentence_id, sentence) |> # select the relevant columns to keep
-  ungroup() |> # ungroup by type
-  arrange(sentence_id, type) # arrange the dataset
-
-# Write the curated dataset to disk
-fs::dir_create(path = "../data/derived/europarle/") # create the europarle directory
-write_csv(
-  x = europarle_sentences_id, # object to write
-  file = "../data/derived/europarle/europarle_curated.csv"
-) # target file location/ name
+read_csv("data/curate-datasets/cd-europarl_curated_dd.csv") |> 
+  kable() |> 
+  kable_styling() 
 ```
 
 ## Structured
@@ -454,6 +598,19 @@ As an example case of curating structured datasets, we will look at ...
 
 ### Orientation
 
+
+### Read the dataset
+
+
+### Explore the dataset
+
+```{r}
+#| eval: false
+#| label: cd-structured-code-explore
+
+# ...
+```
+
 ### Tidy the datasets
 
 - [ ] Add idealized structure for the dataset(s)
@@ -471,6 +628,27 @@ Again, to summarize, here is the code that will accomplish the steps we covered 
 ```{r}
 #| eval: false
 #| label: cd-structured-code-summary
+
+# ...
+```
+
+### Tidy the datasets
+
+- [ ] Add idealized structure for the dataset(s)
+
+So our objectives are set, let's ...
+
+### Write dataset
+
+We now have a curated dataset that we can write to disk. 
+
+### Summary
+
+Again, to summarize, here is the code that will accomplish the steps we covered in this section on curating structured datasets. 
+
+```{r}
+#| eval: false
+#| label: cd-structured-code-summary-unstructured
 
 # ...
 ```
@@ -648,7 +826,9 @@ doc[str_detect(doc, pattern = "\\d+_\\d+_\\d+")] # isolate pattern
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
-The stringr package has a handy function `str_view()` and `str_view_all()` which allow for interactive pattern matching. There is also an RStudio Addin with the regexplain package which also can be very helpful for developing regular expression syntax.
+Regular Expressions are a powerful pattern matching syntax. They are used extensively in text manipulation and we will see them again and again.
+
+To develop regular expressions, it is helpful to have a tool that allows you to interactively test your pattern matching. The stringr package has a handy function `str_view()` and `str_view_all()` which allow for interactive pattern matching. A good website to practice Regular Expressions is [RegEx101](https://regex101.com/). You can also install the regexplain package in R to get access to a useful [RStudio Addin](https://rstudio.github.io/rstudioaddins/). 
 :::
 
 The next step is to extract the three digit sequences that correspond to the `doc_id`, `speaker_a_id`, and `speaker_b_id`. First we extract the pattern that we have identified with `str_extract()` and then we can break up the single character vector into multiple parts based on the underscore `_`. The `str_split()` function takes a string and then a pattern to use to split a character vector. It will return a list of character vectors. 
@@ -1115,7 +1295,7 @@ To round out this section I've provided a code summary of the steps involved to 
 
 ```{r}
 #| eval: false
-#| label: cd-semi-sdac-summary-code
+#| label: cd-semi-structured-code-summary
 
 # Source the `extract_sdac_metadata()` function
 source("../functions/curate_functions.R")
@@ -1223,9 +1403,9 @@ It is important to recognized that this curated dataset will form the base for t
 
 <!-- [ ] edit links and goals/ outcomes -->
 
-**What**: [Pattern Matching and Manipulate Datasets](https://lin380.github.io/tadr/articles/recipe_7.html)\
+**What**: [Organizing and documenting datasets](https://lin380.github.io/tadr/articles/recipe_7.html)\
 **How**: Read Recipe 7 and participate in the Hypothes.is online social annotation.\
-**Why**: To how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to change the dimensions of a dataset to either expand or collapse columns or rows.
+**Why**: To rehearse methods for deriving tidying datasets to use a the base for further project-specific purposes. We will explore how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to change the dimensions of a dataset to either expand or collapse columns or rows.
 :::
 
 ::: {.callout}
@@ -1234,6 +1414,8 @@ It is important to recognized that this curated dataset will form the base for t
 <!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 <!-- [ ] edit links and goals/ outcomes -->
+
+<!-- [ ] update name of lab to something more lively -->
 
 **What**: [Pattern Matching and Manipulate Datasets](https://github.com/lin380/lab_7)\
 **How**: Clone, fork, and complete the steps in Lab 7.\

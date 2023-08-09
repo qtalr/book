@@ -86,9 +86,19 @@ In this chapter we will now look at the next step in a text analysis project: da
 
 The bulk of text ever created is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable. Remember that text in itself is not information. Only when given explicit context does text become informative. The explicit contextual information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data. This information needs to be added or derived for the purposes of the research, either through manual inspection or (semi-)automatic processes. For now, however, our job is just to get the unstructured data into a structured format with a minimal set of metadata that we can derive from the resource.
 
+### Reading data
+
+Let's consider some of the common file formats which contain unstructured data, such as TXT, PDF, and DOCX, and how to read these formats into an R session. 
+
+It is very common for unstructured data resources to include data that is in TXT files. These are the simplest of file formats which contain no formatting or explicit metadata. Many times TXT files have the *.txt* extension, but it is not required. There are many ways to read TXT files into R and many packages that can be used to do so. For example, using the `readr` package, we can choose to read the entire file into a single vector of character strings with `read_file()` or read the file by lines with `read_lines()` in which each line is a character string in a vector. 
+
+Less commonly used in prepared data resources, PDF and DOCX files are also formats for unstructured data. These formats are often more complex than TXT files as they contain formatting and embedded metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Therefore, we need to use packages and functions that can extract the text content from these files and potentially some of the metadata. For example, using the `readtext` package [@R-readtext], we can read the text content from PDF and DOCX files into a single vector of character strings with `readtext()`.
+
+Whether in TXT, PDF, or DOCX format, the resulting data structure will require further processing to convert the data into a tidy dataset. For example, we may need to split the data into multiple columns or rows, or extract metadata from the text content.
+
 ### Orientation
 
-As an example of an unstructured source of corpus data, let's take a look at the [Europarl Parallel Corpus](https://www.statmt.org/europarl/) [@Koehn2005]. This corpus contains parallel texts (source and translated documents) from the European Parliamentary proceedings between 1996-2011 for some 21 European languages. 
+As an example of curating an unstructured source of corpus data, let's take a look at the [Europarl Parallel Corpus](https://www.statmt.org/europarl/) [@Koehn2005]. This corpus contains parallel texts (source and translated documents) from the European Parliamentary proceedings between 1996-2011 for some 21 European languages. 
 
 Let's assuming we selected this corpus data because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the compressed file, and inspecting the decompressed structure, we have the the file structure seen in @exm-cd-europarl-file-structure. 
 
@@ -213,7 +223,7 @@ Our task now is to develop code that will read the original data and render the 
 - [x] make clear reference to "idealized structure" table, for each of the sections (unstructured, structured, semi-structured)
 -->
 
-To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. There are many ways to read data, but for illustrative purposes we will use the `readtext()` function from the `readtext` package [@R-readtext]. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory. 
+To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. We will use the `readtext()` function from the `readtext` package. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory. 
 
 ```{r}
 #| label: cd-europarl-readtext-show
@@ -313,7 +323,7 @@ The `str_view()` with the argument `use_escapes = TRUE` also allows you to see o
 
 We can see that the text is a single long character vector, and that the line breaks are represented as `\n`. So our goal is to split the text for each file into lines creating a new row for each line created. 
 
-To do this we will use another function from the stringr package, `str_split()`, whose function is to split a character vector into smaller character vectors based on some splitting criteria. In @exm-cd-europarl-text-lines-tbl, we use the `str_split()` function to split the text into lines based on the `\n` character and assign it to the new column `lines` using `mutate()`. Since we will not need the `text` column anymore, we can use `select()` to drop it.
+To do this we will use another function from the `stringr` package, `str_split()`, whose function is to split a character vector into smaller character vectors based on some splitting criteria. In @exm-cd-europarl-text-lines-tbl, we use the `str_split()` function to split the text into lines based on the `\n` character and assign it to the new column `lines` using `mutate()`. Since we will not need the `text` column anymore, we can use `select()` to drop it.
 
 ::: {#exm-cd-europarl-text-lines-tbl}
 ```{r}
@@ -448,7 +458,7 @@ The preview output from @exm-cd-europarl-curated-tbl shows us that we now have t
 
 ### Write dataset
 
-At this point we have the curated dataset (`europarl_lines_type_id_line_id_tbl`) in a tidy format. This dataset, however, is only in the current R session. We will want to write this dataset to disk so that in the next step of the text analysis workflow (transformation) we will be able to start work on this dataset and make changes as needed to fit our analysis needs. 
+At this point we have the curated dataset (`europarl_curated_tbl`) in a tidy format. This dataset, however, is only in the current R session. We will want to write this dataset to disk so that in the next step of the text analysis workflow (transformation) we will be able to start work on this dataset and make changes as needed to fit our analysis needs. 
 
 We will leverage the project directory structure which has distinct directories for `original/` and `derived/` data(sets), seen in @exm-cd-europarl-write-directory.
 
@@ -505,7 +515,7 @@ data/
 
 In this section we worked with unstructured data and looked at how to read the data into an R session and manipulate the data to form a tidy dataset with a few columns that we could derive based on the information we have about the corpus. 
 
-In our discussion we worked step by step to curate the europarl Corpus, adding in intermediate steps for illustration purposes. However, in a more realistic case the code would most likely make more extensive use of piping (`|>`) to reduce the number of intermediate objects and make the code more legible. The final code base would be added to the *2-curate-data.qmd* file in the *code/* directory. 
+In our discussion we worked step by step to curate the europarl Corpus, adding in intermediate steps for illustration purposes. However, in a more realistic case the code would most likely make more extensive use of piping (`|>`) to reduce the number of intermediate objects and make the code more legible. The final code base is added to the *2-curate-data.qmd* file in the *code/* directory. 
 
 The final step, as always, is to document the dataset. For datasets the documentation is a data dictionary, as discussed in @sec-ud-data-dictionaries. As with data origin files, you can use spreadsheet software to create and/ or edit the data dictionary. 
 
@@ -544,748 +554,384 @@ read_csv("data/curate-datasets/cd-europarl_curated_dd.csv") |>
 
 ## Structured
 
-- [ ] revise this section: include R package (languageR::datives) and CSV file?
-  - [ ] is is not clear that a truly structured dataset would need any curation. What could I say about structured data that would be useful? I could talk about verifying the data structure is as expected.
+Structured data already reflects the physical and semantic structure of a tidy dataset. This means that the data is already in a tabular format and the relationships between columns and rows are already well-defined. Therefore the heavy lifting of curating the data is already done. There are two remaining questions, however, that need to be taken into account. One, logistical question, is what file format the dataset is in and how to read it into R. And the second, more research-based, is whether the data may benefit from some additional curation and documentation to make it more amenable to analysis and more understandable to others.
 
-On the opposite side of the spectrum from unstructured data, structured data includes more metadata information --often much more. The association of metadata with the language to be analyzed means that the data has already be curated to some degree, therefore it is more apt to discuss structured data as a dataset. There are two questions, however, that need to be taken into account. One, logistical question, is what file format the dataset is in and how to we read it into R. And the second, more research-based, is whether the data is curated in a fashion that makes sense for the current research. Let's look at each of these questions briefly and then get to a practical example. 
+### Reading data
 
-Formats ... file types
+Let's consider some common formats for structured data and how to read them into R. First, we will consider R-native formats, such as package datasets and RDS files. Then will consider non-native formats, such as relational databases and datasets produced by other software. Finally, we will consider software agnostic formats, such as CSV.
 
-- [ ] only databases, R datasets/ RDS files, and potentially .csv files are structured data. I need to make this clear.
+R and some R packages provide structured datasets that are available for use directly within R. For example, the `languageR` package [@R-languageR] provides the `dative` dataset, which is a dataset containing the realization of the dative as NP or PP in the Switchboard corpus and the Treebank Wall Street Journal collection. The `janeaustenr` package [@R-janeaustenr] provides the `austen_books` dataset, which is a dataset of Jane Austen's novels. Package datasets are loaded into an R session using either the `data()` function, if the package is loaded, or the `::` operator, if the package is not loaded. For example, `data(dative)` or `languageR::dative`.
 
-- [ ] add example case(s):
-  - [ ] R package datasets 
-    - [ ] languageR::dative
-    - [ ] janeaustenr::austen_books
-    - [ ] ...
-  - [ ] R package corpora (quanteda::corpus) + tidytext::tidy()
-  - [ ] CABNC CSV files
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
 
+To explore the available datasets in a package, you can use the `data(package = "package_name")` function. For example, `data(package = "languageR")` will list the datasets available in the `languageR` package. You can also explore all the datasets available in the loaded packages with the `data()` function using no arguments. For example, `data()`.
+:::
 
-CSV
-There are file formats which are purposely designed for storing structured datasets. Some very common file types are .csv, .xml, .json, etc. The data within these files is explicitly organized. For example, in a .csv file, the dataset structure is represented by delimiting the columns and rows by commas. 
+R also provides a native file format for storing R objects, the RDS file. Any R object, including data frames, can be written from an R session to disk by using the `write_rds()` function from `readr`. The *.rds* files will be written to disk in a binary format that is not human-readable, which is not ideal for transparent data sharing. However, the files and the R objects can be read back into an R session using the `read_rds()` function with all the attributes intact, such as vector types, factor levels, *etc.*. 
 
-```text
+R provides a suite of tools for importing data from non-native structured sources such as databases and datasets from software such as SPSS, SAS, and Stata. For instance, if you are working with data stored in a relational database such as MySQL, PostgreSQL, or SQLite, you can use the `DBI` package [@R-DBI] to connect to the database and the `dbplyr` package [@R-dbplyr] to query the database using the SQL language. Files from SPSS (*.sav*), SAS (*.sas7bdat*), and Stata (*.dta*) can be read into R using the `haven` package [@R-haven].
+
+Software agnostic file formats include delimited files, such as CSV, TSV, *etc.*. These file formats lack the robust structural attributes of the other formats, but balance this shortcoming by storing structured data in more accessible, human-readable format. Delimited files are plain text files which use a delimiter, such as a comma (`,`), tab (`\t`), or pipe (`|`), to separate the columns and rows. For example, a CSV file is a delimited file where the columns and rows are separated by commas, as seen in @exm-cd-csv-example.
+
+::: {#exm-cd-csv-example}
+```xml
 column_1,column_2,column_3
 row 1 value 1,row 1 value 2,row 1 value 3
 row 2 value 1,row 2 value 2,row 2 value 3
 ```
+:::
 
-When read into R, the .csv file format is converted to a data frame with the appropriate structure. 
-
-```{r}
-#| eval: false
-#| label: tbl-cd-structured-example-table-csv
-#| tbl-cap: "Example .csv file in R"
-#| echo: false
-
-csv_file_example <-
-  read_csv(file = "data/curate-datasets/csv_file_example.csv")
-csv_file_example |>
-  knitr::kable(booktabs = TRUE)
-```
-
-With an understanding of how the information is encoded in various formats, we can now turn to considerations about how the original dataset is structured and how that structure is to be used for a given research project. The curation process that is reflected in a structured dataset may or may not initially align with the goals of our research either in terms of the type(s) of information or the unit of analysis of the structured dataset. The aim, then, is to take advantage of the information and curate it such that it does align. 
-
-As an example case of curating structured datasets, we will look at ...
-
-- [ ] R package datasets 
-  - [ ] languageR::dative
-  - [ ] janeaustenr::austen_books
-  - [ ] ...
-- [ ] R package corpora (quanteda::corpus) + tidytext::tidy()
-- [ ] CABNC CSV files
+Given the accessibility of delimited files, they are a common format for sharing structured data in reproducible research. It is not surprising, then, that this is the format which we have chosen for the derived datasets in this book.
 
 ### Orientation
 
+<!-- [ ] rethink the opening sentence -->
 
-### Read the dataset
+With an understanding of the various structured formats, we can now turn to considerations about how the original dataset is structured and how that structure is to be used for a given research project. As an example, we will work with the CABNC datasets acquired in @sec-acquire-data. The structure of the original dataset is shown in @exm-cd-cabnc-structure.
 
+::: {#exm-cd-cabnc-structure}
+```bash
+data/
+├── analysis/
+├── derived/
+└── original/
+    ├── cabnc_do.csv
+    └── cabnc/
+        ├── participants.csv
+        ├── token_types.csv
+        ├── tokens.csv
+        ├── transcripts.csv
+        └── utterances.csv
+```
+:::
 
-### Explore the dataset
+In addition to other important information, the data origin file *cabnc_do.csv* shown in @tbl-cd-cabnc-do informs us the the datasets are related by a common variable. 
 
 ```{r}
-#| eval: false
-#| label: cd-structured-code-explore
+#| label: tbl-cd-cabnc-do
+#| tbl-cap: "Data origin: CABNC datasets"
+#| echo: false
 
-# ...
+read_csv("data/curate-datasets/cd-cabnc_do.csv") |> 
+  kable() |> 
+  kable_styling()
 ```
 
-### Tidy the datasets
+The CABNC datasets are structured in a relational format, which means that the data is stored in multiple tables that are related to each other. The tables are related by a common column or set of columns, which are called a keys. A key is used to join the tables together to create a single dataset. There are two keys in the CABNC datasets, `filename` and `who`. Each variable corresponds to recording- and/ or participant-oriented datasets.
 
-- [ ] Add idealized structure for the dataset(s)
+Now, let's envision a scenario in which we want to organize a dataset that can be used in a study that aims to investigate the relationship between speaker demographics and utterances. An ideal dataset would contain information about speakers and their utterances. In their original format, the CABNC datasets separate information about utterances and speakers in separate tables, `cabnc_utterances` and `cabnc_participants`, respectively. The idealized dataset, then, will combine the variables from each of these tables into a single dataset.
 
-So our objectives are set, let's ...
+### Tidy the dataset
+
+With our idealized dataset in mind, let's start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the `read_csv()` function, as seen in @exm-cd-cabnc-read.
+
+::: {#exm-cd-cabnc-read}
+```{r}
+#| label: cd-cabnc-read
+
+# Read the relevant datasets
+cabnc_utterances <- 
+  read_csv("data/curate-datasets/cabnc/utterances.csv")
+cabnc_participants <- 
+  read_csv("data/curate-datasets/cabnc/participants.csv")
+```
+:::
+
+The next step is to inspect the structure of the datasets. We can use the `glimpse()` function for this task. 
+
+::: {#exm-cd-cabnc-glimpse}
+```{r}
+#| label: cd-cabnc-glimpse
+
+# Preview the structure of the datasets
+glimpse(cabnc_utterances)
+glimpse(cabnc_participants)
+```
+:::
+
+From visual inspection of the output of @exm-cd-cabnc-glimpse we can see that there are common variables in both datasets. It is also possible to intersect the datasets to see which variables are common using the `intersect()` function to intersect the column names of each data frame with the `names()` function, as seen in @exm-cd-cabnc-intersect.
+
+::: {#exm-cd-cabnc-intersect}
+```{r}
+#| label: cd-cabnc-intersect
+
+# Find the common variables
+common_vars <- 
+  intersect(
+    names(cabnc_utterances), 
+    names(cabnc_participants)
+  )
+
+# Print the common variables
+common_vars
+```
+:::
+
+Using both visual inspection and column name intersection, we can make sure that the variable names and the values are consistent across the datasets. For example, if the variable `filename` in one dataset is called `file_name` in another dataset, then we will need to rename the variable in one of the datasets so that the variable names are consistent. Furthermore, if the values in the `filename` variable are not consistent across the datasets, then we will need to make the values consistent, if possible, before joining the datasets.
+
+In this case, the variable names and values are consistent across the datasets. Therefore, we can join the datasets together using the `left_join()` function from the `dplyr` package, as seen in @exm-cd-cabnc-join. This function will take the dataset on the left (`x = `) and join it to the dataset on the right (`y = `). The `by` argument specifies the variables to join on. The choice of which dataset to put on the left usually depends on which dataset has the most detailed information. In this case, the `cabnc_utterances` dataset has more detailed information about the utterances so we will put this dataset on the left.
+
+::: {#exm-cd-cabnc-join}
+```{r}
+#| label: cd-cabnc-join
+
+# Join the datasets
+cabnc_tbl <- 
+  left_join(
+    x = cabnc_utterances, 
+    y = cabnc_participants, 
+    by = common_vars
+  )
+
+# Preview the dimensions of the joined dataset
+dim(cabnc_tbl)
+```
+:::
+
+The result of @exm-cd-cabnc-join should produce a dataset with the same number of observations as the `cabnc_utterances` dataset, seen in @exm-cd-cabnc-glimpse, and a combined number of unique variables from both datasets, that is 23 minus the four common variables, seen in @exm-cd-cabnc-intersect. The output of `dim()` confirms this.
+
+Now we will consider the variables that will be useful for future analysis. Since we are creating a curated dataset, the goal will be to retain as much information as possible from the original datasets. There are cases, however, in which there may be variables that are not informative and thus, will not prove useful for any analysis. These removable variables tend to be of one of two types: variables which show no variation across observations and variables where the information is redundant.
+
+Let's get a high-level summary of the variables in the dataset. We can use the `skim()` function from the `skimr` package [@R-skimr] to get a summary of the variables in the dataset^[Note I've modified the output of `skim()` for display purposes.].
+
+::: {#exm-cd-cabnc-skim}
+```{r}
+#| label: cd-cabnc-skim-show
+#| eval: false
+
+# Load package
+library(skimr)
+
+# Summarize the variables in the dataset
+skim(cabnc_tbl)
+```
+
+```{r}
+#| label: tbl-cd-cabnc-skim-run
+#| tbl-cap: "Summary of variables in the CABNC dataset"
+#| tbl-subcap: 
+#|  - "Categorical variables"
+#|  - "Logical variables"
+#|  - "Numeric variables"
+#| layout-nrow: 3
+#| echo: false
+
+# [ ] Issue with the ?caption showing up on the plots
+
+library(skimr)
+
+curate_skim <- skim_with(
+  base = sfl(complete_rate = complete_rate),
+  factor = sfl(n_unique = n_unique),
+  character = sfl(n_unique = n_unique),
+  numeric = sfl(mean = mean),
+  logical = sfl(mean = mean),
+  append = FALSE
+  )
+
+cabnc_tbl |> 
+  curate_skim() |> 
+  yank("character") |> 
+  select(variable = skim_variable, everything()) |>
+  tibble() |> 
+  kable() |> 
+  kable_styling(font_size = 8)
+
+cabnc_tbl |>
+  curate_skim() |>
+  yank("logical") |>
+  select(variable = skim_variable, everything()) |>
+  tibble() |>
+  kable() |>
+  kable_styling(font_size = 8)
+
+cabnc_tbl |>
+  curate_skim() |>
+  yank("numeric") |>
+  select(variable = skim_variable, everything()) |>
+  tibble() |>
+  kable() |>
+  kable_styling(font_size = 8)
+
+
+# cabnc_skm <- cabnc_tbl |> skim() |> partition()
+# cabnc_skm |> map_vec(kable)
+
+# skim_types <- unique(skim(cabnc_tbl)$skim_type)
+# purrr::walk(skim_types, ~ yank_tbl(cabnc_tbl, .x))
+```
+:::
+
+We see from the `skim()` output in @tbl-cd-cabnc-skim-run-2, that the variables `postcodes` and `gems` have no values. Therefore we can remove these variables from the dataset. On the other hand, in @tbl-cd-cabnc-skim-run-1, the variables `role` and `language` have the same value for every observation as the output shows `n_unique` is `1`. We can also remove these variables from the dataset.
+
+Another set of variables of potential interest are the `startTime` and `endTime` variables, in @tbl-cd-cabnc-skim-run-3. These each have a completion rate of less than 100%, specifically 84%. On first blush, it would seem that we would go ahead and remove them. However, we should pause and consider that these variables may still be of some use. At the curation stage, however, it is best to err on the side of caution and leave them in the dataset. We will decide later whether to keep or remove them as we explore the dataset further in the research. 
+
+Another consideration is whether we have variables that are clearly redundant. For example, the variables `age` and `monthage` are both measures of age, stated in different measures, looking back at @exm-cd-cabnc-glimpse. As such, we can remove one of these variables from the dataset. In this case, we will remove the `age` variable as it is the least straightforward to interpret.
+
+Another potentially redundant set of variables are `who` and `name` --both of which are speaker identifiers. The `who` variable is a unique identifier, but there may be some redundancy with the `name` variable, that is there may be two speakers with the same name. We can check this by looking at the number of unique values in the `who` and `name` variables from the `skim()` output in @tbl-cd-cabnc-skim-run-1. `who` has 568 unique values and `name` has 269 unique values. This suggests that there are multiple speakers with the same name.
+
+Another way to explore this is to look at the number of unique values in the `who` variable for each unique value in the `name` variable. We can do this using the `group_by()` and `summarize()` functions from the `dplyr` package. For each value of `name`, we will count the number of unique values in `who` and then sort the results in descending order.
+
+::: {#exm-cd-cabnc-who-name}
+```{r}
+#| label: cd-cabnc-who-name
+
+cabnc_tbl |>
+  group_by(name) |>
+  summarize(n = unique(who) |> length()) |>
+  arrange(desc(n))
+```
+:::
+
+It is good that we performed the check in @exm-cd-cabnc-who-name beforehand. In addition to speakers with the same name, such as 'Chris' and 'David', we also have multiple speakers with generic codes, such as 'None' and 'Unknown_speaker'. It is clear that `name` is redundant and we can safely remove it from the dataset.
+
+Another redundant variable is the `path` variable. This variable is not more informative than the `filename`, for our purposes. We will remove the `path` variable from the dataset too.
+
+In all, we will remove the following variables from the dataset: `postcodes`, `gems`, `role`, `language`, `age`, `name`, and `path`. To drop variables from a data frame we can use the `select()` function in combination with the `-` operator. The `-` operator tells the `select()` function to drop the variables that follow it. 
+
+::: {#exm-cd-cabnc-drop-vars}
+```{r}
+#| label: cd-cabnc-drop-vars
+
+# Drop variables
+cabnc_tbl <- 
+  cabnc_tbl |> 
+  select(-postcodes, -gems, -role, -language, -age, -name, -path)
+
+# Preview the dataset
+glimpse(cabnc_tbl)
+```
+:::
+
+
+Now we have a dataset with 12 informative variables which describe the utterances for each recording. There are variables about the recordings, such as the `filename`, about the speakers, such as the `sex` and `who`, and about the utterances, such as the `utterance`, `utt_num`, *etc.*. Let's organize the columns to read left to right from most general to most specific. Again we turn to the `select()` function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative. 
+
+::: {#exm-cd-cabnc-rename-vars}
+```{r}
+#| label: cd-cabnc-rename-vars
+
+# Rename variables
+cabnc_tbl <- 
+  cabnc_tbl |> 
+  select(
+    doc_id = filename,
+    utt_num,
+    utt_start = startTime,
+    utt_end = endTime,
+    utterance,
+    part_id = who,
+    part_age = monthage,
+    part_sex = sex,
+    num_words = numwords,
+    num_utts = numutts,
+    avg_utt_len = avgutt,
+    median_utt_len = medianutt
+  )
+
+# Preview the dataset
+glimpse(cabnc_tbl)
+```
+:::
+
+The variable order is organized after running @exm-cd-cabnc-rename-vars. Now let's sort the rows by `doc_id` and `utt_num` so that the utterances are in order. The `arrange()` function takes a data frame and a list of variables to sort by, in the order they are listed.
+
+::: {#exm-cd-cabnc-sort-rows}
+```{r}
+#| label: cd-cabnc-sort-rows
+
+# Sort rows
+cabnc_tbl <-
+  cabnc_tbl |>
+  arrange(doc_id, utt_num)
+
+# Preview the dataset
+cabnc_tbl |> 
+  slice_head(n = 10)
+```
+:::
+
+Applying the sorting in @exm-cd-cabnc-sort-rows, we can see that the utterances are now our desired order. We have now completed the curation of the structured dataset aiming to provide a base for further analysis into the recorded utterances of speakers from the CABNC corpus.
 
 ### Write dataset
 
-We now have a curated dataset that we can write to disk. 
+Let's now write this dataset to disk. Again, since this is a dataset we have created, we will store the dataset in the *data/derived/* directory. To keep the CABNC separate from any other datasets that we may need for our research project, I will create a subdirectory called *cabnc/* to store the dataset. Into this directory we can write a CSV file with our `cabnc_tbl` data frame with the `write_csv()` function, as seen in @exm-cd-cabnc-write-csv.
+
+::: {#exm-cd-cabnc-write-csv}
+```{r}
+#| label: cd-cabnc-write-csv
+#| eval: false
+
+# Create cabnc directory
+dir_create(path = "../data/derived/cabnc")
+
+# Write dataset to disk
+cabnc_tbl |> 
+  write_csv(path = "../data/derived/cabnc/cabnc_curated.csv")
+```
+:::
 
 ### Summary
 
-Again, to summarize, here is the code that will accomplish the steps we covered in this section on curating structured datasets. 
+In this section we covered the steps to curate a structured dataset. We started by loading the raw data into R using the `read_csv()` function. We then performed some exploratory data analysis to get a sense of the data. We then removed redundant variables and renamed the remaining variables to be more informative. Finally, we sorted the rows by `doc_id` and `utt_num` and wrote the dataset to disk.
+
+The final step is to create a data dictionary file for this dataset. We can do this using the `create_data_dictionary()` function, passing the data frame object name and a path to the directory where we want to store the data dictionary. The `create_data_dictionary()` function will create a CSV file with a data dictionary template in the specified directory. 
+
+::: {#exm-cd-cabnc-create-data-dict}
+```{r}
+#| label: cd-cabnc-create-data-dict
+#| eval: false
+
+# Create data dictionary
+create_data_dictionary(
+  data = cabnc_tbl,
+  file_path = "../data/derived/cabnc_curated_dd.csv"
+)
+```
+:::
+
+After running the code in @exm-cd-cabnc-create-data-dict, we can open the *cabnc_curated_dd.csv* file in the *data/derived/cabnc/* directory and fill in the data dictionary template. An example of an edited data dictionary is shown in @tbl-cd-cabnc-dd-example.
 
 ```{r}
-#| eval: false
-#| label: cd-structured-code-summary
+#| label: tbl-cd-cabnc-dd-example
+#| tbl-cap: "Data dictionary example for the curated CABNC dataset."
+#| echo: false
 
-# ...
+read_csv("data/curate-datasets/cd-cabnc_curated_dd.csv") |> 
+  kable() |> 
+  kable_styling()
 ```
 
-### Tidy the datasets
+And the final directory structure for the *data/* directory is shown in @exm-cd-cabnc-final-dir.
 
-- [ ] Add idealized structure for the dataset(s)
-
-So our objectives are set, let's ...
-
-### Write dataset
-
-We now have a curated dataset that we can write to disk. 
-
-### Summary
-
-Again, to summarize, here is the code that will accomplish the steps we covered in this section on curating structured datasets. 
-
-```{r}
-#| eval: false
-#| label: cd-structured-code-summary-unstructured
-
-# ...
+::: {#exm-cd-cabnc-final-dir}
+```bash
+data/
+├── analysis/
+├── derived/
+│   ├── cabnc_curated_dd.csv
+│   └── cabnc/
+│       └── cabnc_curated.csv
+└── original/
+    ├── cabnc_do.csv
+    └── cabnc/
+        ├── participants.csv
+        ├── token_types.csv
+        ├── tokens.csv
+        ├── transcripts.csv
+        └── utterances.csv
 ```
+:::
 
 ## Semi-structured
 
 At this point we have discussed curating unstructured data and structured datasets. Between these two extremes falls semi-structured data. And as the name suggests, it is a hybrid between unstructured and structured data. This means that there will be important structured metadata included with unstructured elements. The file formats and approaches to encoding the structured aspects of the data vary widely from resource to resource and therefore often requires more detailed attention to the structure of the data and often includes more sophisticated programming strategies to curate the data to produce a tidy dataset. 
 
-
-
-### Orientation
-
-- [ ] this SWDA data has been mentioned, reference is all that is needed.
-
-As an example we will work with the The Switchboard Dialog Act Corpus (SDAC) which extends the [Switchboard Corpus](https://catalog.ldc.upenn.edu/LDC97S62) with speech act annotation. **(ADD CITATION)**
-
-The main directory structure of the SDAC data looks like this:
-
-```bash
-data/
-├── derived/
-└── original/
-    └── sdac/
-        ├── README
-        ├── doc/
-        ├── sw00utt/
-        ├── sw01utt/
-        ├── sw02utt/
-        ├── sw03utt/
-        ├── sw04utt/
-        ├── sw05utt/
-        ├── sw06utt/
-        ├── sw07utt/
-        ├── sw08utt/
-        ├── sw09utt/
-        ├── sw10utt/
-        ├── sw11utt/
-        ├── sw12utt/
-        └── sw13utt/
-```
-
-The `README` file contains basic information about the resource, the `doc/` directory contains more detailed information about the dialog annotations, and each of the following directories prefixed with `sw...` contain individual conversation files. Here's a peek at internal structure of the first couple directories.
-
-```bash
-├── README
-├── doc
-│   └── manual.august1.html
-├── sw00utt
-│   ├── sw_0001_4325.utt
-│   ├── sw_0002_4330.utt
-│   ├── sw_0003_4103.utt
-│   ├── sw_0004_4327.utt
-│   ├── sw_0005_4646.utt
-```
-
-Let's take a look at the first conversation file (`sw_0001_4325.utt`) to see how it is structured.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-preview
-#| echo: false
-#| comment: ">"
-#| linewidth: 0.9
-
-readtext::readtext("data/understanding-data/formats_sdac_sample.txt", verbosity = 0) |> # sw_0001_4325.utt
-  pull(text) |>
-  cat(fill = TRUE)
-```
-
-There are few things to take note of here. First we see that the conversation files have a meta-data header offset from the conversation text by a line of `=` characters. Second the header contains meta-information of various types. Third, the text is interleaved with an annotation scheme. 
-
-Some of the information may be readily understandable, such as the various pieces of meta-data in the header, but to get a better understanding of what information is encoded here let's take a look at the `README` file. In this file we get a birds eye view of what is going on. In short, the data includes 1155 telephone conversations between two people annotated with 42 'DAMSL' dialog act labels. The `README` file refers us to the `doc/manual.august1.html` file for more information on this scheme.
-
-At this point we open the the `doc/manual.august1.html` file in a browser and do some investigation. We find out that 'DAMSL' stands for 'Discourse Annotation and Markup System of Labeling' and that the first characters of each line of the conversation text  correspond to one or a combination of labels for each utterance. So for our first utterances we have:
-
-```plain
-o = "Other"
-qw = "Wh-Question"
-qy^d = "Declarative Yes-No-Question"
-+ = "Segment (multi-utterance)"
-```
-
-Each utterance is also labeled for speaker ('A' or 'B'), speaker turn ('1', '2', '3', etc.), and each utterance within that turn ('utt1', 'utt2', etc.). There is other annotation provided withing each utterance, but this should be enough to get us started on the conversations.
-
-Now let's turn to the meta-data in the header. We see here that there is information about the creation of the file: 'FILENAME', 'TOPIC', 'DATE', etc. The `doc/manual.august1.html` file doesn't have much to say about this information so I returned to the [LDC Documentation](https://catalog.ldc.upenn.edu/docs/LDC97S62/) and found more information in the [Online Documentation](https://catalog.ldc.upenn.edu/docs/LDC97S62/) section. After some poking around in this documentation I discovered that that meta-data for each speaker in the corpus is found in the `caller_tab.csv` file. This tabular file does not contain column names, but the `caller_doc.txt` does. After inspecting these files manually and comparing them with the information in the conversation file I noticed that the 'FILENAME' information contained three pieces of useful information delimited by underscores `_`. 
-
-```plain
-*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*
-
-
-FILENAME:	4325_1632_1519
-TOPIC#:		323
-DATE:		920323
-TRANSCRIBER:	glp
-```
-
-The first information is the document id (`4325`), the second and third correspond to the speaker number: the first being speaker A (`1632`) and the second speaker B (`1519`).
-
-In sum, we have 1155 conversation files. Each file has two parts, a header and text section, separated by a line of `=` characters. The header section contains a 'FILENAME' line which has the document id, and ids for speaker A and speaker B. The text section is annotated with DAMSL tags beginning each line, followed by speaker, turn number, utterance number, and the utterance text. With this knowledge in hand, let's set out to create a tidy dataset with the following column structure:
-
-```{r}
-#| label: tbl-cd-semi-sdac-idealized-dataset
-#| tbl-cap: "Idealized structure for the SDAC dataset."
-#| echo: false
-
-# Sample data (created with `dput()`)
-
-structure(list(doc_id = c("4325", "4325", "4325"), damsl_tag = c(
-  "o ",
-  "qw ", "qy^d "
-), speaker = c("A", "A", "B"), turn_num = c(
-  "1",
-  "1", "2"
-), utterance_num = c("1", "2", "1"), utterance_text = c(
-  "Okay.  /",
-  "{D So, }", "[ [ I guess, +"
-), speaker_id = c(
-  "1632", "1632",
-  "1519"
-)), .Names = c(
-  "doc_id", "damsl_tag", "speaker", "turn_num",
-  "utterance_num", "utterance_text", "speaker_id"
-), row.names = c(
-  NA,
-  3L
-), class = "data.frame") |>
-  knitr::kable(booktabs = TRUE)
-```
+### Reading data
 
 ### Tidy the data
 
-- [ ] Add idealized structure for the SWDA dataset
-
-```{r}
-#| eval: false
-#| label: cd-semi-copy-data
-#| include: false
-
-# [ ] careful with this, it depends on the location of the project. It will be best to copy the data to the project ignored data/ directory for this chapter
-
-# copy the original data from the `project_implementation` project
-fs::dir_copy(path = "../project_implementation/data/original/sdac/", new_path = "data/curate-datasets/sdac/")
-```
-
-Let's begin by reading one of the conversation files into R as a character vector using the `read_lines()` function from the readr package.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-read-example-file-show
-
-# [ ] is it possible to use readtext, if not, then we need to explain why before jumping in to readr::read_lines()
-
-doc <-
-  read_lines(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") # read a single file as character vector
-```
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-read-example-file-run
-#| echo: false
-
-doc <-
-  read_lines(file = "data/curate-datasets/sdac/sw00utt/sw_0001_4325.utt") # read a single file as character vector
-```
-
-To isolate the vector element that contains the document and speaker ids, we use `str_detect()` from the stringr package. This function takes two arguments, a string and a pattern, and returns a logical value, `TRUE` if the pattern is matched or `FALSE` if not. We can use the output of this function, then, to subset the `doc` character vector and only return the vector element (line) that contains `digits_digits_digits` with a regular expression. The expression combines the digit matching operator `\\d` with the `+` operator to match 1 or more contiguous digits. We then separate three groups of `\\d+` with underscores `_`. The result is `\\d+_\\d+_\\d+`. 
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-doc-info-1
-
-doc[str_detect(doc, pattern = "\\d+_\\d+_\\d+")] # isolate pattern
-```
-
-::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
-
-Regular Expressions are a powerful pattern matching syntax. They are used extensively in text manipulation and we will see them again and again.
-
-To develop regular expressions, it is helpful to have a tool that allows you to interactively test your pattern matching. The stringr package has a handy function `str_view()` and `str_view_all()` which allow for interactive pattern matching. A good website to practice Regular Expressions is [RegEx101](https://regex101.com/). You can also install the regexplain package in R to get access to a useful [RStudio Addin](https://rstudio.github.io/rstudioaddins/). 
-:::
-
-The next step is to extract the three digit sequences that correspond to the `doc_id`, `speaker_a_id`, and `speaker_b_id`. First we extract the pattern that we have identified with `str_extract()` and then we can break up the single character vector into multiple parts based on the underscore `_`. The `str_split()` function takes a string and then a pattern to use to split a character vector. It will return a list of character vectors. 
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-doc-info-2
-
-doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
-  str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
-  str_split(pattern = "_") # split the character vector
-```
-
-- [] I will have introduced lists in earlier material (swirl Objects), at least.
-
-A **list** is a special object type in R. It is an unordered collection of objects whose lengths can differ (contrast this with a data frame which is a collection of objects whose lengths are the same --hence the tabular format). In this case we have a list of length 1, whose sole element is a character vector of length 3 --one element per segment returned from our split. This is a desired result in most cases as if we were to pass multiple character vectors to our `str_split()` function we don't want the results to be conflated as a single character vector blurring the distinction between the individual character vectors. If we *would* like to conflate, or *flatten* a list, we can use the `unlist()` function.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-doc-info-3
-
-doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
-  str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
-  str_split(pattern = "_") |> # split the character vector
-  unlist() # flatten the list to a character vector
-```
-
-Let's flatten the list in this case, as we have a single character vector, and assign this result to `doc_speaker_info`.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-doc-info-4
-
-doc_speaker_info <-
-  doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
-  str_extract(pattern = "\\d+_\\d+_\\d+") |> # extract the pattern
-  str_split(pattern = "_") |> # split the character vector
-  unlist() # flatten the list to a character vector
-```
-
-`doc_speaker_info` is now a character vector of length three. Let's subset each of the elements and assign them to meaningful variable names so we can conveniently use them later on in the tidying process.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-doc-info-5
-
-doc_id <- doc_speaker_info[1] # extract by index
-speaker_a_id <- doc_speaker_info[2] # extract by index
-speaker_b_id <- doc_speaker_info[3] # extract by index
-```
-
-The next step is to isolate the text section extracting it from rest of the document. As noted previously, a sequence of `=` separates the header section from the text section. What we need to do is to index the point in our character vector `doc` where that line occurs and then subset the `doc` from that point until the end of the character vector. Let's first find the point where the `=` sequence occurs. We will again use the `str_detect()` function to find the pattern we are looking for (a contiguous sequence of `=`), but then we will pass the logical result to the `which()` function which will return the element index number of this match. 
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text
-
-doc |>
-  str_detect(pattern = "=+") |> # match 1 or more `=`
-  which() # find vector index
-```
-
-So for this file `31` is the index in `doc` where the `=` sequence occurs. Now it is important to keep in mind that we are working with a single file from the `sdac/` data. We need to be cautious to not create a pattern that may be matched multiple times in another document in the corpus. As the `=+` pattern will match `=`, or `==`, or `===`, etc. it is not implausible to believe that there might be a `=` character on some other line in one of the other files. Let's update our regular expression to avoid this potential scenario by only matching sequences of three or more `=`. In this case we will make use of the curly bracket operators `{}`. 
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-2
-
-doc |>
-  str_detect(pattern = "={3,}") |> # match 3 or more `=`
-  which() # find vector index
-```
-
-We will get the same result for this file, but will safeguard ourselves a bit as it is unlikely we will find multiple matches for `===`, `====`, etc.
-
-`31` is the index for the `=` sequence, but we want the next line to be where we start reading the text section. To do this we increment the index by 1.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-3
-
-text_start_index <-
-  doc |>
-  str_detect(pattern = "={3,}") |> # match 3 or more `=`
-  which() # find vector index
-text_start_index <- text_start_index + 1 # increment index by 1
-```
-
-The index for the end of the text is simply the length of the `doc` vector. We can use the `length()` function to get this index.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-4
-
-text_end_index <- length(doc)
-```
-
-We now have the bookends, so to speak, for our text section. To extract the text we subset the `doc` vector by these indices.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-5
-
-text <- doc[text_start_index:text_end_index] # extract text
-head(text) # preview first lines of `text`
-```
-
-The text has some extra whitespace on some lines and there are blank lines as well. We should do some cleaning up before moving forward to organize the data. To get rid of the whitespace we use the `str_trim()` function which by default will remove leading and trailing whitespace from each line.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-6
-
-text <- str_trim(text) # remove leading and trailing whitespace
-head(text) # preview first lines of `text`
-```
-
-To remove blank lines we will use the a logical expression to subset the `text` vector. `text != ""` means return TRUE where lines are not blank, and FALSE where they are.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-7
-
-text <- text[text != ""] # remove blank lines
-head(text) # preview first lines of `text`
-```
-
-Our first step towards a tidy dataset is to now combine the `doc_id` and each element of `text` in a data frame. 
-
-```{r}
-#| eval: false
-#| label: tbl-cd-semi-sdac-text-8
-#| tbl-cap: "First 5 observations of prelim data curation of the SDAC data."
-
-data <- data.frame(doc_id, text) # tidy format `doc_id` and `text`
-slice_head(data, n = 5) |> # preview first lines of `text`
-  knitr::kable(booktabs = TRUE)
-```
-
-With our data now in a data frame, its time to parse the `text` column and extract the damsl tags, speaker, speaker turn, utterance number, and the utterance text itself into separate columns. To do this we will make extensive use of regular expressions. Our aim is to find a consistent pattern that distinguishes each piece of information from other other text in a given row of `data$text` and extract it. 
-
-The best way to learn regular expressions is to use them. To this end I've included a link to the interactive regular expression practice website [regex101](https://regex101.com).
-
-Open this site and copy the text below into the 'TEST STRING' field.  
-
-```plain
-o          A.1 utt1: Okay.  /
-qw          A.1 utt2: {D So, }
-qy^d          B.2 utt1: [ [ I guess, +
-+          A.3 utt1: What kind of experience [ do you, + do you ] have, then with child care? /
-+          B.4 utt1: I think, ] + {F uh, } I wonder ] if that worked. /
-qy          A.5 utt1: Does it say something? /
-sd          B.6 utt1: I think it usually does.  /
-ad          B.6 utt2: You might try, {F uh, }  /
-h          B.6 utt3: I don't know,  /
-ad          B.6 utt4: hold it down a little longer,  /
-```
-
-```{r}
-#| eval: false
-#| label: fig-cd-regex-101-image
-#| echo: false
-#| fig-cap: "RegEx101"
-
-knitr::include_graphics("figures/curate-datasets/cd-regex-101.png")
-```
-
-Now manually type the following regular expressions into the 'REGULAR EXPRESSION' field one-by-one (each is on a separate line). Notice what is matched as you type and when you've finished typing. You can find out exactly what the component parts of each expression are doing by toggling the top right icon in the window or hovering your mouse over the relevant parts of the expression.
-
-```plain
-^.+?\s
-[AB]\.\d+
-utt\d+
-:.+$
-```
-
-As you can now see, we have regular expressions that will match the damsl tags, speaker and speaker turn, utterance number, and the utterance text. To apply these expressions to our data and extract this information into separate columns we will make use of the `mutate()` and `str_extract()` functions. `mutate()` will take our data frame and create new columns with values we match and extract from each row in the data frame with `str_extract()`. Notice that `str_extract()` is different than `str_extract_all()`. When we work with `mutate()` each row will be evaluated in turn, therefore we only need to make one match per row in `data$text`. 
-
-I've chained each of these steps in the code below, dropping the original `text` column with `select(-text)`, and overwriting `data` with the results.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-parse
-
-# Extract column information from `text`
-data <-
-  data |> # current dataset
-  mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) |> # extract damsl tags
-  mutate(speaker_turn = str_extract(string = text, pattern = "[AB]\\.\\d+")) |> # extract speaker_turn pairs
-  mutate(utterance_num = str_extract(string = text, pattern = "utt\\d+")) |> # extract utterance number
-  mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) |> # extract utterance text
-  select(-text) # drop the `text` column
-
-glimpse(data) # preview the data set
-```
-
-::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
-
-One twist you will notice is that regular expressions in R require double backslashes (`\\\\`) where other programming environments use a single backslash (`\\`).
-:::
-
-There are a couple things left to do to the columns we extracted from the text before we move on to finishing up our tidy dataset. First, we need to separate the `speaker_turn` column into `speaker` and `turn_num` columns and second we need to remove unwanted characters from the `damsl_tag`, `utterance_num`, and `utterance_text` columns. 
-
-To separate the values of a column into two columns we use the `separate()` function. It takes a column to separate and character vector of the names of the new columns to create. By default the values of the input column will be separated by non-alphanumeric characters. In our case this means the `.` will be our separator.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-organize
-
-data <-
-  data |> # current dataset
-  separate(
-    col = speaker_turn, # source column
-    into = c("speaker", "turn_num")
-  ) # separate speaker_turn into distinct columns: speaker and turn_num
-
-glimpse(data) # preview the data set
-```
-
-To remove unwanted leading or trailing whitespace we apply the `str_trim()` function. For removing other characters we matching the character(s) and replace them with an empty string (`""`) with the `str_replace()` function. Again, I've chained these functions together and overwritten `data` with the results.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-text-clean
-
-# Clean up column information
-data <-
-  data |> # current dataset
-  mutate(damsl_tag = str_trim(damsl_tag)) |> # remove leading/ trailing whitespace
-  mutate(utterance_num = str_replace(string = utterance_num, pattern = "utt", replacement = "")) |> # remove 'utt'
-  mutate(utterance_text = str_replace(string = utterance_text, pattern = ":\\s", replacement = "")) |> # remove ': '
-  mutate(utterance_text = str_trim(utterance_text)) # trim leading/ trailing whitespace
-
-glimpse(data) # preview the data set
-```
-
-To round out our tidy dataset for this single conversation file we will connect the `speaker_a_id` and `speaker_b_id` with speaker A and B in our current dataset adding a new column `speaker_id`. The `case_when()` function does exactly this: allows us to map rows of `speaker` with the value "A" to `speaker_a_id` and rows with value "B" to `speaker_b_id`.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-speaker-ids
-
-# Link speaker with speaker_id
-data <-
-  data |> # current dataset
-  mutate(speaker_id = case_when( # create speaker_id
-    speaker == "A" ~ speaker_a_id, # speaker_a_id value when A
-    speaker == "B" ~ speaker_b_id # speaker_b_id value when B
-  ))
-
-glimpse(data) # preview the data set
-```
-
-We now have the tidy dataset we set out to create. But this dataset only includes one conversation file! We want to apply this code to all 1155 conversation files in the `sdac/` corpus. The approach will be to create a custom function which groups the code we've done for this single file and then iterative send each file from the corpus through this function and combine the results into one data frame. 
-
-Here's the custom function with some extra code to print a progress message for each file when it runs. 
-
-```{r}
-#| eval: false
-#| label: cd-semi-extract-sdac-metadata-function
-
-# [ ] rename to `extract_swda_data()`.
-# [ ] add to `qtalrkit` package, note the convention of `extract_` prefix for curation functions. In combination with `get_compressed_data()` this corpus can be curated with few steps.
-
-extract_sdac_metadata <- function(file) {
-  # Function: to read a Switchboard Corpus Dialogue file and extract meta-data
-  cat("Reading", basename(file), "...")
-  
-  # Read `file` by lines
-  doc <- read_lines(file) 
-  
-  # Extract `doc_id`, `speaker_a_id`, and `speaker_b_id`
-  doc_speaker_info <- 
-    doc[str_detect(doc, "\\d+_\\d+_\\d+")] |> # isolate pattern
-    str_extract("\\d+_\\d+_\\d+") |> # extract the pattern
-    str_split(pattern = "_") |> # split the character vector
-    unlist() # flatten the list to a character vector
-  doc_id <- doc_speaker_info[1] # extract `doc_id`
-  speaker_a_id <- doc_speaker_info[2] # extract `speaker_a_id`
-  speaker_b_id <- doc_speaker_info[3] # extract `speaker_b_id`
-  
-  # Extract `text`
-  text_start_index <- # find where header info stops
-    doc |> 
-    str_detect(pattern = "={3,}") |> # match 3 or more `=`
-    which() # find vector index
-  
-  text_start_index <- text_start_index + 1 # increment index by 1
-  text_end_index <- length(doc) # get the end of the text section
-  
-  text <- doc[text_start_index:text_end_index] # extract text
-  text <- str_trim(text) # remove leading and trailing whitespace
-  text <- text[text != ""] # remove blank lines
-  
-  data <- data.frame(doc_id, text) # tidy format `doc_id` and `text`
-  
-  # Extract column information from `text`
-  data <- 
-    data |> 
-    mutate(damsl_tag = str_extract(string = text, pattern = "^.+?\\s")) |>  # extract damsl tags
-    mutate(speaker_turn = str_extract(string = text, pattern = "[AB]\\.\\d+")) |> # extract speaker_turn pairs
-    mutate(utterance_num = str_extract(string = text, pattern = "utt\\d+")) |> # extract utterance number
-    mutate(utterance_text = str_extract(string = text, pattern = ":.+$")) |>  # extract utterance text
-    select(-text)
-  
-  # Separate speaker_turn into distinct columns
-  data <-
-    data |> # current dataset
-    separate(col = speaker_turn, # source column
-             into = c("speaker", "turn_num")) # separate speaker_turn into distinct columns: speaker and turn_num
-  
-  # Clean up column information
-  data <- 
-    data |> 
-    mutate(damsl_tag = str_trim(damsl_tag)) |> # remove leading/ trailing whitespace
-    mutate(utterance_num = str_replace(string = utterance_num, pattern = "utt", replacement = "")) |> # remove 'utt'
-    mutate(utterance_text = str_replace(string = utterance_text, pattern = ":\\s", replacement = "")) |> # remove ': '
-    mutate(utterance_text = str_trim(utterance_text)) # trim leading/ trailing whitespace
-  
-  # Link speaker with speaker_id
-  data <- 
-    data |> # current dataset
-    mutate(speaker_id = case_when( # create speaker_id
-      speaker == "A" ~ speaker_a_id, # speaker_a_id value when A
-      speaker == "B" ~ speaker_b_id # speaker_b_id value when B
-    ))
-  cat(" done.\n")
-  return(data) # return the data frame object
-}
-```
-
-As a sanity check we will run the `extract_sdac_metadata()` function on a the conversation file we were just working on to make sure it works as expected.
-
-```{r}
-#| eval: false
-#| label: cd-extract-sdac-metadata-test-show
-
-extract_sdac_metadata(file = "../data/original/sdac/sw00utt/sw_0001_4325.utt") |>
-  glimpse()
-```
-
-```{r}
-#| eval: false
-#| label: cd-extract-sdac-metadata-test-run
-#| echo: false
-
-extract_sdac_metadata(file = "data/curate-datasets/sdac/sw00utt/sw_0001_4325.utt") |>
-  glimpse()
-```
-
-Looks good!
-
-So now it's time to create a vector with the paths to all of the conversation files. `fs::dir_ls()` interfaces with our OS file system and will return the paths to the files in the specified directory. We also add a pattern to match conversation files (`regexp = \\.utt$`) so we don't accidentally include other files in the corpus. `recurse` set to `TRUE` means we will get the full path to each file.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-list-files-show
-
-sdac_files <-
-  fs::dir_ls(
-    path = "../data/original/sdac/", # source directory
-    recurse = TRUE, # traverse all sub-directories
-    type = "file", # only return files
-    regexp = "\\.utt$"
-  ) # only return files ending in .utt
-head(sdac_files) # preview file paths
-```
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-list-files-run
-#| echo: false
-#| results: hide
-
-sdac_files <-
-  fs::dir_ls(
-    path = "data/curate-datasets/sdac/", # source directory
-    recurse = TRUE, # traverse all sub-directories
-    type = "file", # only return files
-    regexp = "\\.utt$"
-  ) # only return files ending in .utt
-head(sdac_files)
-```
-
-```plain
-../data/original/sdac/sw00utt/sw_0001_4325.utt
-../data/original/sdac/sw00utt/sw_0002_4330.utt
-../data/original/sdac/sw00utt/sw_0003_4103.utt
-../data/original/sdac/sw00utt/sw_0004_4327.utt
-../data/original/sdac/sw00utt/sw_0005_4646.utt
-../data/original/sdac/sw00utt/sw_0006_4108.utt
-```
-
-o pass each conversation file in the vector of paths to our conversation files iteratively to the `extract_sdac_metadata()` function we use `map()`. This will apply the function to each conversation file and return a data frame for each. `bind_rows()` will then join the resulting data frames by rows to give us a single tidy dataset for all 1155 conversations. Note there is a lot of processing going on here we have to be patient.
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-tidy-all
-#| results: hide
-
-# Read files and return a tidy dataset
-sdac <-
-  sdac_files |> # pass file names
-  map(extract_sdac_metadata) |> # read and tidy iteratively
-  bind_rows() # bind the results into a single data frame
-```
-
-We now see that we have `nrow(sdac)` observations (individual utterances in this dataset). 
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-preview-complete
-
-glimpse(sdac) # preview complete curated dataset
-```
-
-### Write datasets
-
-Again as in the previous cases, we will write this dataset to disk to prepare for the next step in our text analysis project. 
-
-```{r}
-#| eval: false
-#| label: cd-semi-sdac-write
-
-fs::dir_create(path = "../data/derived/sdac/") # create sdac subdirectory
-write_csv(sdac,
-  file = "../data/derived/sdac/sdac_curated.csv"
-) # write sdac to disk and label as the curated dataset
-```
-
-The directory structure now looks like this: 
-
-```bash
-data/
-├── derived/
-│   └── sdac/
-│       └── sdac_curated.csv
-└── original/
-    └── sdac/
-        ├── README
-        ├── doc/
-        ├── sw00utt/
-        ├── sw01utt/
-        ├── sw02utt/
-        ├── sw03utt/
-        ├── sw04utt/
-        ├── sw05utt/
-        ├── sw06utt/
-        ├── sw07utt/
-        ├── sw08utt/
-        ├── sw09utt/
-        ├── sw10utt/
-        ├── sw11utt/
-        ├── sw12utt/
-        └── sw13utt/
-```
+### Write dataset
 
 ### Summary
 
@@ -1320,70 +966,6 @@ fs::dir_create(path = "../data/derived/sdac/") # create sdac subdirectory
 write_csv(sdac,
   file = "../data/derived/sdac/sdac_curated.csv"
 ) # write sdac to disk and label as the curated dataset
-```
-
-## Documentation
-
-- [ ] consider whether to leave this section, or integrate into the previous sections (most likely, the first section 'unstructured data')
-  - [ ] note that the description of what a data dictionary is for and is in it, has already been covered in a previous chapter.
-  - [ ] however, the function `data_dic_starter()` is new and should be introduced (somewhere), again, probably in the first section 'unstructured data'
-
-At this stage we again want to ensure that the data that we have derived is well-documented. Where in the data acquisition process the documentation was focused on the sampling frame, curated datasets require documentation that describes the structure of the now rectangular dataset and its attributes. This documentation is known as a **data dictionary**. At the curation stage this documentation often contains the following information [@HowMakeData10-2021]: 
-
-- names of the variables (as they appear in the dataset)
-- human-readable names for the variables
-- short prose descriptions of the variables, including units of measurement (where applicable)
-
-A data dictionary will take the format of a table and can be stored in a tabular-oriented file format (such as .csv). It is often easier to work with a spreadsheet to create this documentation. I suggest creating a .csv file with the basic structure of the documentation. You can do this however you choose, but I suggest using something along these lines as seen in the following custom function, `data_dic_starter()`. 
-
-```{r}
-#| eval: false
-#| label: cd-documentation-dic-starter-function"
-
-data_dic_starter <- function(data, file_path) {
-  # Function:
-  # Creates a .csv file with the basic information
-  # to document a curated dataset
-  
-  tibble(variable_name = names(data), # column with existing variable names 
-       name = "", # column for human-readable names
-       description = "") |> # column for prose description
-  write_csv(file = file_path) # write to disk
-}
-```
-
-Running this function in the R Console on the curated dataset (in this case the `sdac` dataset), will provide this structure. 
-
-```{r}
-#| eval: false
-#| label: tbl-cd-documentation-dic-starter-structure
-#| tbl-cap: "Data dictionary starter structure for the SDAC curated dataset."
-#| echo: false
-
-tibble(variable_name = names(sdac), name = "", description = "") |>
-  knitr::kable(booktabs = TRUE)
-```
-
-The resulting .csv file can then be opened with spreadsheet software (such as MS Excel, Google Sheets, etc.) and edited.^[Note on RStudio Cloud you will need to download the .csv file and, after editing, upload the complete data dictionary file. Make sure to save the edited file as a .csv file.]
-
-```{r}
-#| eval: false
-#| label: cd-documentation-starter-edit"
-#| echo: false
-
-knitr::include_graphics("figures/curate-datasets/cd-data-dictionary.png")
-```
-
-Save this file as a .csv file and replace the original starter file. Note that it is important to use a plain-text file format for the official documentation file and avoid proprietary formats to ensure open accessibility and future compatibility.^[Although based on spreadsheets, @Broman2018 outlines many of the best for good data organization regardless of the technology.]
-
-Our `data/derived/` directory now looks like this.
-
-```bash
-data/
-└── derived/
-    └── sdac/
-        ├── sdac_curated.csv
-        └── data_dictionary_sdac.csv
 ```
 
 ## Summary {.unnumbered}

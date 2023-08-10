@@ -1,6 +1,7 @@
 ---
 execute: 
   echo: true
+  cache: false
 ---
 
 # Curate datasets {#sec-curate-datasets}
@@ -929,52 +930,64 @@ At this point we have discussed curating unstructured data and structured datase
 
 ### Reading data
 
+The file formats associated with semi-structured data include a wide range. These include file formats conducive to more structured-leaning data, such as XML, HTML, and JSON, and file formats with more unstructured-leaning data, such as annotated TXT files. Annotated TXT files may in fact appear with the *.txt* extension, but may also appear with other, sometimes resource-specific, extensions, such as *.utt* for the Switchboard Dialogue Act Corpus or *.cha* for the CHILDES corpus annotation files, for example.
+
+The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format, as in @lst-cd-json-example. We can read the data into an R session with the `read_json()` function from the `jsonlite` package [@R-jsonlite]. For XML and HTML files, the `rvest` package provides the `read_xml()` and `read_html()` functions.
+
+```{#lst-cd-json-example .json filename="data.json" lst-cap="Example JSON file"}
+{
+    "data": [
+        {
+            "speaker": "Alice",
+            "age": 27,
+            "sex": "Female",
+            "word_form": "running",
+            "lemma_form": "run"
+        },
+        {
+            "speaker": "Bob",
+            "age": 35,
+            "sex": "Male",
+            "word_form": "jumped",
+            "lemma_form": "jump"
+        },
+        {
+            "speaker": "Charlie",
+            "age": 42,
+            "sex": "Male",
+            "word_form": "singing",
+            "lemma_form": "sing"
+        },
+        {
+            "speaker": "Diane",
+            "age": 32,
+            "sex": "Female",
+            "word_form": "walked",
+            "lemma_form": "walk"
+        }
+    ]
+}
+```
+
+Semi-structured data in TXT files can be read either as an entire file with `read_file()` or line-by-line with `read_lines()`. The choice of which approach to take depends on the structure of the data. If the data structure is line-based, then `read_lines()` often makes more sense than `read_file()`. However, in some cases, the data may be structured in a way that requires the entire file to be read into an R session and then subsequently parsed.
+
+### Orientation
+
 ### Tidy the data
 
 ### Write dataset
 
 ### Summary
 
-In this section we looked at semi-structured data. This type of data often requires the most work to organize into a tidy dataset. We continued to work with many of the R programming strategies introduced to this point in the coursebook. We also made more extensive use of regular expressions to pick out information from a semi-structured document format.
+In this section we looked at semi-structured data. This type of data often requires the most work to organize into a tidy dataset. We continued to work with many of the R programming strategies introduced to this point in the textbook. 
 
-To round out this section I've provided a code summary of the steps involved to conduct the curation of the Switchboard Dialogue Act Corpus files. Note that I've added the `extract_sdac_metadata()` custom function to a file called `curate_functions.R` and sourced this file. This will make the code more succinct and legible here, as well in your own research projects. 
-
-```{r}
-#| eval: false
-#| label: cd-semi-structured-code-summary
-
-# Source the `extract_sdac_metadata()` function
-source("../functions/curate_functions.R")
-
-# Get list of the corpus files (.utt)
-sdac_files <-
-  fs::dir_ls(
-    path = "../data/original/sdac/", # source directory
-    recurse = TRUE, # traverse all sub-directories
-    type = "file", # only return files
-    regexp = "\\.utt$"
-  ) # only return files ending in .utt
-
-# Read files and return a tidy dataset
-sdac <-
-  sdac_files |> # pass file names
-  map(extract_sdac_metadata) |> # read and tidy iteratively
-  bind_rows() # bind the results into a single data frame
-
-# Write curated dataset to disk
-fs::dir_create(path = "../data/derived/sdac/") # create sdac subdirectory
-write_csv(sdac,
-  file = "../data/derived/sdac/sdac_curated.csv"
-) # write sdac to disk and label as the curated dataset
-```
+...
 
 ## Summary {.unnumbered}
 
-In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data --unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of meta-information included. The results from our data curation resulted in a curated dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. In addition to the code we use to derived the curated dataset's structure, we also include a data dictionary which documents the names of the variables and provides sufficient description of these variables so that it is clear what our dataset contains.
+In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data --unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of metadata included. The results from data curation results in a dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. In addition to the code we use to derived the curated dataset's structure, we also include a data dictionary which documents the curated dataset.
 
 - [ ] emphasize the importance of ahereing to the unit of analysis for the research, and how this is reflected in the curated dataset. And how unit of observation derived from the transformational steps in the next chapter.
-
-It is important to recognized that this curated dataset will form the base for the next step in our text analysis project and the last step in data preparation for analysis: dataset transformation. This last step in preparing data for analysis is to convert this curated dataset into a dataset that is directly aligned with the research aims (i.e. analysis method(s)) of the project. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. 
 
 ## Activities {.unnumbered}
 

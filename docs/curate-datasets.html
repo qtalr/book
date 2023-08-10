@@ -349,7 +349,11 @@ div.csl-indent {
   <li>
 <a href="#semi-structured" id="toc-semi-structured" class="nav-link" data-scroll-target="#semi-structured"><span class="header-section-number">6.3</span> Semi-structured</a>
   <ul class="collapse">
-<li><a href="#summary-2" id="toc-summary-2" class="nav-link" data-scroll-target="#summary-2"><span class="header-section-number">6.3.1</span> Summary</a></li>
+<li><a href="#reading-data-2" id="toc-reading-data-2" class="nav-link" data-scroll-target="#reading-data-2"><span class="header-section-number">6.3.1</span> Reading data</a></li>
+  <li><a href="#orientation-2" id="toc-orientation-2" class="nav-link" data-scroll-target="#orientation-2"><span class="header-section-number">6.3.2</span> Orientation</a></li>
+  <li><a href="#tidy-the-data-1" id="toc-tidy-the-data-1" class="nav-link" data-scroll-target="#tidy-the-data-1"><span class="header-section-number">6.3.3</span> Tidy the data</a></li>
+  <li><a href="#write-dataset-2" id="toc-write-dataset-2" class="nav-link" data-scroll-target="#write-dataset-2"><span class="header-section-number">6.3.4</span> Write dataset</a></li>
+  <li><a href="#summary-2" id="toc-summary-2" class="nav-link" data-scroll-target="#summary-2"><span class="header-section-number">6.3.5</span> Summary</a></li>
   </ul>
 </li>
   <li><a href="#summary-3" id="toc-summary-3" class="nav-link" data-scroll-target="#summary-3">Summary</a></li>
@@ -484,7 +488,7 @@ Formatting:
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> _main.R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <em>europarl_do.csv</em> file contains the data origin information documented as part of the acquisition process. The contents are seen in <a href="#tbl-cd-europarl-data-origin">Table&nbsp;<span>6.1</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-data-origin_8fff548e6c15d9f8bf6eaa7551f13ddd">
+<div class="cell">
 <div class="cell-output-display">
 <div id="tbl-cd-europarl-data-origin" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -562,7 +566,7 @@ Formatting:
 <p>We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.</p>
 <p>Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the “idealized structure” of the data. For a curated dataset there are two considerations. First, we want to maintain the original structure of the data as much as possible. This provides a link to the original data and gives us a default dataset structure from which we can derive other structures that fit our analysis needs. Second, we want to add structure to the data that makes it easier to work with. This is the ‘tidy’ part of the data curation process. The aim is to embue the dataset with as much of the metadata the data resource makes available.</p>
 <p>Given what we know about the data, we can define the idealized structure of the data as seen in <a href="#tbl-cd-europarl-structure-example">Table&nbsp;<span>6.2</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-structure-example_663e30a624b24975b654d9ed015a7e3b">
+<div class="cell">
 <div class="cell-output-display">
 <div id="tbl-cd-europarl-structure-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -626,7 +630,7 @@ Formatting:
 - [x] make clear reference to "idealized structure" table, for each of the sections (unstructured, structured, semi-structured)
 -->
 <p>To create the idealized dataset structure in <a href="#tbl-cd-europarl-structure-example">Table&nbsp;<span>6.2</span></a>, lets’s start by reading the files into R. We will use the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function from the <code>readtext</code> package. <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> is a versatile function that can read many different types of text files (<em>e.g.</em> <em>.txt</em>, <em>.csv</em>, <em>xml</em>, <em>etc.</em>). It can also read multiple files at once using wildcard matching. We will use it to read the <em>.es</em> and <em>.en</em> files by passing the path to the directory where the files are located, and then use the <code>*</code> wildcard to read all the files in the directory.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-readtext-show_add5fb4a30d71c3e3e2b74910ac083b3">
+<div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/quanteda/readtext">readtext</a></span><span class="op">)</span></span>
 <span></span>
@@ -653,7 +657,7 @@ Formatting:
 <p>Let’s inspect the <code>europarl_docs_tbl</code> object with the <code><a href="https://rdrr.io/r/utils/str.html">str()</a></code> function, in <a href="#exm-cd-europarl-readtext-str">Example&nbsp;<span>6.5</span></a>.</p>
 <div id="exm-cd-europarl-readtext-str" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.5 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-readtext-str_f6f75e337188d8cd350e26016e0e1ed2">
+<div class="cell">
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">europarl_docs_tbl</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -679,7 +683,7 @@ Formatting:
 <p>The fact that we only have one row for each file means that all the text in each file is contained in one cell! We want to break these cells up into rows for each line, as they appear in the original data. You may be wondering why the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function did not do this for us, after all the original data was already separated into lines. The reason is that the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function chose to read the files as plain text, and plain text does not have any structure. The line breaks, however, are still there, they are just represented as a special character, <code>\n</code>. Comparing <a href="#exm-cd-europarl-text-lines">Example&nbsp;<span>6.6</span></a> and <a href="#exm-cd-europarl-text-lines-raw">Example&nbsp;<span>6.7</span></a>, we can see that the text is a single long character vector, and that the line breaks are represented as <code>\n</code>.</p>
 <div id="exm-cd-europarl-text-lines" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.6 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines_fd5b9ddb0cabf4a28aa432a0d819ee97">
+<div class="cell">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview first 50 characters</span></span>
 <span><span class="va">europarl_docs_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -695,7 +699,7 @@ Formatting:
 </div>
 <div id="exm-cd-europarl-text-lines-raw" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.7 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-raw_df56cb768cfeeb515bda56c9c0432006">
+<div class="cell">
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview first 50 raw characters</span></span>
 <span><span class="va">europarl_docs_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -724,7 +728,7 @@ Formatting:
 <p>To do this we will use another function from the <code>stringr</code> package, <code>str_split()</code>, whose function is to split a character vector into smaller character vectors based on some splitting criteria. In <a href="#exm-cd-europarl-text-lines-tbl">Example&nbsp;<span>6.8</span></a>, we use the <code>str_split()</code> function to split the text into lines based on the <code>\n</code> character and assign it to the new column <code>lines</code> using <code>mutate()</code>. Since we will not need the <code>text</code> column anymore, we can use <code>select()</code> to drop it.</p>
 <div id="exm-cd-europarl-text-lines-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.8 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl_bcc748bf3070bbc136d8f46430ce8aa7">
+<div class="cell">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Split text into lines</span></span>
 <span><span class="va">europarl_lines_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_docs_tbl</span> <span class="op">|&gt;</span> </span>
@@ -746,7 +750,7 @@ Formatting:
 <p>The list of character vectors, lines in our case, is still associated with the respective <code>doc_id</code> value. However, we want to create a new row for each line in the list. To do this, we will use the <code>unnest()</code> function from the <code>tidyr</code> package <span class="citation" data-cites="R-tidyr">(<a href="references.html#ref-R-tidyr" role="doc-biblioref">Wickham, Vaughan, and Girlich 2023</a>)</span>. The <code>unnest()</code> function takes a list column and creates a new row for each element in the list. We use the <code>unnest()</code> function to create a new row for each line in the <code>lines</code> column. We can see the output from <a href="#exm-cd-europarl-text-lines-tbl-unnest">Example&nbsp;<span>6.9</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-tbl-unnest" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.9 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl-unnest_86a56ae86c89b157f43c29fa27f048d5">
+<div class="cell">
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a new row for each line</span></span>
 <span><span class="va">europarl_lines_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_tbl</span> <span class="op">|&gt;</span> </span>
@@ -770,7 +774,7 @@ Formatting:
 <p>Remember that the data in the Europarl corpus is aligned, meaning that each line in the source file is aligned with a line in the target file. So we need to make sure that the number of lines in each file is the same. We can do this by grouping the data by <code>doc_id</code> and then counting the number of lines in each file. We can do this using the <code>group_by()</code> and <code>count()</code> functions from the <code>dplyr</code> package <span class="citation" data-cites="R-dplyr">(<a href="references.html#ref-R-dplyr" role="doc-biblioref">Wickham et al. 2023</a>)</span>. We can see the output in <a href="#exm-cd-europarl-text-lines-tbl-count">Example&nbsp;<span>6.10</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-tbl-count" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.10 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl-count_d752d3738d0db15b86db85fd11ea7d6f">
+<div class="cell">
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Count the number of lines in each file</span></span>
 <span><span class="va">europarl_lines_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">doc_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -790,7 +794,7 @@ Formatting:
 <p>We can do this using the <code>case_when()</code> function from the <code>dplyr</code> package <span class="citation" data-cites="R-dplyr">(<a href="references.html#ref-R-dplyr" role="doc-biblioref">Wickham et al. 2023</a>)</span>. The <code>case_when()</code> function takes a series of conditions and assigns a value based on the first condition that is met. In this case, we will use <code>mutate()</code> to create the <code>type</code> column and then use the <code>doc_id</code> column to create the conditions and the <code>type</code> column to assign the values from <code>case_when()</code>. We will store the output in a new object called <code>europarl_lines_type_tbl</code>, as seen in <a href="#exm-cd-europarl-text-lines-type-tbl">Example&nbsp;<span>6.11</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-type-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.11 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-tbl_da7735fc88fc7c81d6b5ed7b0cd494f8">
+<div class="cell">
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create `type` column</span></span>
 <span><span class="va">europarl_lines_type_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_tbl</span> <span class="op">|&gt;</span> </span>
@@ -814,7 +818,7 @@ Formatting:
 <p>We can now overwrite the <code>doc_id</code> column with a unique identifier for each line. A numeric identifier makes sense. We can do this by using the <code>mutate()</code> function to assign <code>doc_id</code> a sequential number with <code>row_number()</code>, which increments by 1 for each row. We will store the output in a new object called <code>europarl_lines_type_id_tbl</code>, as seen in <a href="#exm-cd-europarl-text-lines-type-id-tbl">Example&nbsp;<span>6.12</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-type-id-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.12 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-tbl_8a915577fe631ce68d3d2722fd7fa0ac">
+<div class="cell">
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create new `doc_id` column</span></span>
 <span><span class="va">europarl_lines_type_id_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_type_tbl</span> <span class="op">|&gt;</span> </span>
@@ -835,7 +839,7 @@ Formatting:
 <p>The last step to get to our envisioned dataset structure is to add the <code>line_id</code> column which will be calculated by grouping the data by <code>type</code> and then assigning a row number to each of the lines in each group. We use the <code>group_by()</code> function to perform the grouping as seen in <a href="#exm-cd-europarl-text-lines-type-id-line-id-tbl">Example&nbsp;<span>6.13</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-type-id-line-id-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.13 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-line-id-tbl_cff20cbd392611e0bfda70a83b8e3c8f">
+<div class="cell">
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create `line_id` column</span></span>
 <span><span class="va">europarl_lines_type_id_line_id_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_type_id_tbl</span> <span class="op">|&gt;</span> </span>
@@ -860,7 +864,7 @@ Formatting:
 <p>Reordering the columns involves using the <code>select()</code> function and list the order of the columns. To sort by columns, we will use <code>arrange()</code> and specify the columns to order by. We store the results in a more legible object, <code>europarl_curated_tbl</code>, as seen in <a href="#exm-cd-europarl-curated-tbl">Example&nbsp;<span>6.14</span></a>.</p>
 <div id="exm-cd-europarl-curated-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.14 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-line-id-tbl-reorder_baf8876eeb693abc2ca6e7ea4a19f1ea">
+<div class="cell">
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Reorder columns and sort rows</span></span>
 <span><span class="va">europarl_curated_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_type_id_line_id_tbl</span> <span class="op">|&gt;</span> </span>
@@ -899,7 +903,7 @@ Formatting:
 <p>Now the question is where to save our CSV file. Since our <code>europarl_curated_tbl</code> dataset is derived by our work, we will added it to the <code>derived/</code> directory. I’ll create a <code>europarl/</code> directory with <code>dir_create()</code> just to keep things organized.</p>
 <div id="exm-cd-unstructured-write-europarl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.16 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-unstructured-write-europarl_3da587daee8341590dead1938acc6865">
+<div class="cell">
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create the europarl/ directory</span></span>
 <span><span class="fu">dir_create</span><span class="op">(</span>path <span class="op">=</span> <span class="st">"../data/derived/europarl/"</span><span class="op">)</span></span>
 <span></span>
@@ -942,7 +946,7 @@ Formatting:
 </div>
 <div id="exm-cd-unstructured-data-dictionary" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.18 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-unstructured-data-dictionary_89179ee9671554bae4833b72051bffbc">
+<div class="cell">
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create the data dictionary</span></span>
 <span><span class="fu">create_data_dictionary</span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">europarl_curated_tbl</span>,</span>
@@ -951,7 +955,7 @@ Formatting:
 </div>
 </div>
 <p>An example of the data dictionary for the <code>europarl_curated_tbl</code> dataset is shown in <a href="#tbl-cd-unstructured-data-dictionary-example">Table&nbsp;<span>6.3</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-unstructured-data-dictionary-example_0b0310e24cd856825ad0fe9caa3c1eb2">
+<div class="cell">
 <div class="cell-output-display">
 <div id="tbl-cd-unstructured-data-dictionary-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1041,7 +1045,7 @@ Formatting:
 <span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> utterances.csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>In addition to other important information, the data origin file <em>cabnc_do.csv</em> shown in <a href="#tbl-cd-cabnc-do">Table&nbsp;<span>6.4</span></a> informs us the the datasets are related by a common variable.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-do_8d09142578a867f1a3d68e411c0172d1">
+<div class="cell">
 <div class="cell-output-display">
 <div id="tbl-cd-cabnc-do" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1097,7 +1101,7 @@ Formatting:
 <p>With our idealized dataset in mind, let’s start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the <code>read_csv()</code> function, as seen in <a href="#exm-cd-cabnc-read">Example&nbsp;<span>6.21</span></a>.</p>
 <div id="exm-cd-cabnc-read" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.21 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-read_6791f6579316b4108464bffb516a4a13">
+<div class="cell">
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read the relevant datasets</span></span>
 <span><span class="va">cabnc_utterances</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/curate-datasets/cabnc/utterances.csv"</span><span class="op">)</span></span>
@@ -1108,7 +1112,7 @@ Formatting:
 <p>The next step is to inspect the structure of the datasets. We can use the <code>glimpse()</code> function for this task.</p>
 <div id="exm-cd-cabnc-glimpse" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.22 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-glimpse_5338108eb12e38f8bb286a3cef6b3038">
+<div class="cell">
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview the structure of the datasets</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">cabnc_utterances</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1148,7 +1152,7 @@ Formatting:
 <p>From visual inspection of the output of <a href="#exm-cd-cabnc-glimpse">Example&nbsp;<span>6.22</span></a> we can see that there are common variables in both datasets. It is also possible to intersect the datasets to see which variables are common using the <code><a href="https://rdrr.io/r/base/sets.html">intersect()</a></code> function to intersect the column names of each data frame with the <code><a href="https://rdrr.io/r/base/names.html">names()</a></code> function, as seen in <a href="#exm-cd-cabnc-intersect">Example&nbsp;<span>6.23</span></a>.</p>
 <div id="exm-cd-cabnc-intersect" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.23 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-intersect_c46e46a412e8423282d5cf361c0eb4d5">
+<div class="cell">
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Find the common variables</span></span>
 <span><span class="va">common_vars</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/sets.html">intersect</a></span><span class="op">(</span></span>
@@ -1167,7 +1171,7 @@ Formatting:
 <p>In this case, the variable names and values are consistent across the datasets. Therefore, we can join the datasets together using the <code>left_join()</code> function from the <code>dplyr</code> package, as seen in <a href="#exm-cd-cabnc-join">Example&nbsp;<span>6.24</span></a>. This function will take the dataset on the left (<code>x =</code>) and join it to the dataset on the right (<code>y =</code>). The <code>by</code> argument specifies the variables to join on. The choice of which dataset to put on the left usually depends on which dataset has the most detailed information. In this case, the <code>cabnc_utterances</code> dataset has more detailed information about the utterances so we will put this dataset on the left.</p>
 <div id="exm-cd-cabnc-join" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.24 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-join_a874feacfd3f82671db8a612e60cf1bc">
+<div class="cell">
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join the datasets</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">left_join</span><span class="op">(</span></span>
@@ -1188,14 +1192,14 @@ Formatting:
 <p>Let’s get a high-level summary of the variables in the dataset. We can use the <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> function from the <code>skimr</code> package <span class="citation" data-cites="R-skimr">(<a href="references.html#ref-R-skimr" role="doc-biblioref">Waring et al. 2022</a>)</span> to get a summary of the variables in the dataset<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <div id="exm-cd-cabnc-skim" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.25 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-skim-show_c1909625eaa8358eb0d1a75661bd9a49">
+<div class="cell">
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/skimr/">skimr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summarize the variables in the dataset</span></span>
 <span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="va">cabnc_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="tbl-cd-cabnc-skim-run" class="cell tbl-parent quarto-layout-panel anchored" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-skim-run_18bf8060a1c976c2d63e97445bb29abd">
+<div id="tbl-cd-cabnc-skim-run" class="cell tbl-parent quarto-layout-panel anchored">
 <div class="panel-caption table-caption">
 <p>Table&nbsp;6.5: Summary of variables in the CABNC dataset</p>
 </div>
@@ -1366,7 +1370,7 @@ Formatting:
 <p>Another way to explore this is to look at the number of unique values in the <code>who</code> variable for each unique value in the <code>name</code> variable. We can do this using the <code>group_by()</code> and <code>summarize()</code> functions from the <code>dplyr</code> package. For each value of <code>name</code>, we will count the number of unique values in <code>who</code> and then sort the results in descending order.</p>
 <div id="exm-cd-cabnc-who-name" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.26 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-who-name_f5e4b0660b91188e0ced6f9f2c6067f1">
+<div class="cell">
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cabnc_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">summarize</span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">who</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1394,7 +1398,7 @@ Formatting:
 <p>In all, we will remove the following variables from the dataset: <code>postcodes</code>, <code>gems</code>, <code>role</code>, <code>language</code>, <code>age</code>, <code>name</code>, and <code>path</code>. To drop variables from a data frame we can use the <code>select()</code> function in combination with the <code>-</code> operator. The <code>-</code> operator tells the <code>select()</code> function to drop the variables that follow it.</p>
 <div id="exm-cd-cabnc-drop-vars" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.27 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-drop-vars_4f48c1e30a6edbeb2cd435b8712d5e82">
+<div class="cell">
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Drop variables</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">cabnc_tbl</span> <span class="op">|&gt;</span> </span>
@@ -1423,7 +1427,7 @@ Formatting:
 <p>Now we have a dataset with 12 informative variables which describe the utterances for each recording. There are variables about the recordings, such as the <code>filename</code>, about the speakers, such as the <code>sex</code> and <code>who</code>, and about the utterances, such as the <code>utterance</code>, <code>utt_num</code>, <em>etc.</em>. Let’s organize the columns to read left to right from most general to most specific. Again we turn to the <code>select()</code> function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative.</p>
 <div id="exm-cd-cabnc-rename-vars" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.28 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-rename-vars_38624c5363eb04d230a22b4a766701ed">
+<div class="cell">
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Rename variables</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">cabnc_tbl</span> <span class="op">|&gt;</span> </span>
@@ -1465,7 +1469,7 @@ Formatting:
 <p>The variable order is organized after running <a href="#exm-cd-cabnc-rename-vars">Example&nbsp;<span>6.28</span></a>. Now let’s sort the rows by <code>doc_id</code> and <code>utt_num</code> so that the utterances are in order. The <code>arrange()</code> function takes a data frame and a list of variables to sort by, in the order they are listed.</p>
 <div id="exm-cd-cabnc-sort-rows" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.29 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-sort-rows_bde0ff2144aaf83b20f8c4dd937612e3">
+<div class="cell">
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Sort rows</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cabnc_tbl</span> <span class="op">|&gt;</span></span>
@@ -1499,7 +1503,7 @@ Formatting:
 <p>Let’s now write this dataset to disk. Again, since this is a dataset we have created, we will store the dataset in the <em>data/derived/</em> directory. To keep the CABNC separate from any other datasets that we may need for our research project, I will create a subdirectory called <em>cabnc/</em> to store the dataset. Into this directory we can write a CSV file with our <code>cabnc_tbl</code> data frame with the <code>write_csv()</code> function, as seen in <a href="#exm-cd-cabnc-write-csv">Example&nbsp;<span>6.30</span></a>.</p>
 <div id="exm-cd-cabnc-write-csv" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.30 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-write-csv_239c3630ba10f90f498e74aba298962c">
+<div class="cell">
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create cabnc directory</span></span>
 <span><span class="fu">dir_create</span><span class="op">(</span>path <span class="op">=</span> <span class="st">"../data/derived/cabnc"</span><span class="op">)</span></span>
 <span></span>
@@ -1514,7 +1518,7 @@ Formatting:
 <p>The final step is to create a data dictionary file for this dataset. We can do this using the <code>create_data_dictionary()</code> function, passing the data frame object name and a path to the directory where we want to store the data dictionary. The <code>create_data_dictionary()</code> function will create a CSV file with a data dictionary template in the specified directory.</p>
 <div id="exm-cd-cabnc-create-data-dict" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.31 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-create-data-dict_6a21fdfebd5bf9c968875c021d064c87">
+<div class="cell">
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create data dictionary</span></span>
 <span><span class="fu">create_data_dictionary</span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">cabnc_tbl</span>,</span>
@@ -1523,7 +1527,7 @@ Formatting:
 </div>
 </div>
 <p>After running the code in <a href="#exm-cd-cabnc-create-data-dict">Example&nbsp;<span>6.31</span></a>, we can open the <em>cabnc_curated_dd.csv</em> file in the <em>data/derived/cabnc/</em> directory and fill in the data dictionary template. An example of an edited data dictionary is shown in <a href="#tbl-cd-cabnc-dd-example">Table&nbsp;<span>6.6</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-dd-example_ba6d3f191f1bc7004e22811f059efed3">
+<div class="cell">
 <div class="cell-output-display">
 <div id="tbl-cd-cabnc-dd-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1635,43 +1639,65 @@ Formatting:
 </section></section><section id="semi-structured" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="semi-structured">
 <span class="header-section-number">6.3</span> Semi-structured</h2>
 <p>At this point we have discussed curating unstructured data and structured datasets. Between these two extremes falls semi-structured data. And as the name suggests, it is a hybrid between unstructured and structured data. This means that there will be important structured metadata included with unstructured elements. The file formats and approaches to encoding the structured aspects of the data vary widely from resource to resource and therefore often requires more detailed attention to the structure of the data and often includes more sophisticated programming strategies to curate the data to produce a tidy dataset.</p>
-<section id="summary-2" class="level3" data-number="6.3.1"><h3 data-number="6.3.1" class="anchored" data-anchor-id="summary-2">
-<span class="header-section-number">6.3.1</span> Summary</h3>
-<p>In this section we looked at semi-structured data. This type of data often requires the most work to organize into a tidy dataset. We continued to work with many of the R programming strategies introduced to this point in the coursebook. We also made more extensive use of regular expressions to pick out information from a semi-structured document format.</p>
-<p>To round out this section I’ve provided a code summary of the steps involved to conduct the curation of the Switchboard Dialogue Act Corpus files. Note that I’ve added the <code>extract_sdac_metadata()</code> custom function to a file called <code>curate_functions.R</code> and sourced this file. This will make the code more succinct and legible here, as well in your own research projects.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-semi-structured-code-summary_6210bb31736473c2ca96a0a055c8e26e">
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Source the `extract_sdac_metadata()` function</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"../functions/curate_functions.R"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Get list of the corpus files (.utt)</span></span>
-<span><span class="va">sdac_files</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_ls.html">dir_ls</a></span><span class="op">(</span></span>
-<span>    path <span class="op">=</span> <span class="st">"../data/original/sdac/"</span>, <span class="co"># source directory</span></span>
-<span>    recurse <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># traverse all sub-directories</span></span>
-<span>    type <span class="op">=</span> <span class="st">"file"</span>, <span class="co"># only return files</span></span>
-<span>    regexp <span class="op">=</span> <span class="st">"\\.utt$"</span></span>
-<span>  <span class="op">)</span> <span class="co"># only return files ending in .utt</span></span>
-<span></span>
-<span><span class="co"># Read files and return a tidy dataset</span></span>
-<span><span class="va">sdac</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">sdac_files</span> <span class="op">|&gt;</span> <span class="co"># pass file names</span></span>
-<span>  <span class="fu">map</span><span class="op">(</span><span class="va">extract_sdac_metadata</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># read and tidy iteratively</span></span>
-<span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="op">)</span> <span class="co"># bind the results into a single data frame</span></span>
-<span></span>
-<span><span class="co"># Write curated dataset to disk</span></span>
-<span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/create.html">dir_create</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"../data/derived/sdac/"</span><span class="op">)</span> <span class="co"># create sdac subdirectory</span></span>
-<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">sdac</span>,</span>
-<span>  file <span class="op">=</span> <span class="st">"../data/derived/sdac/sdac_curated.csv"</span></span>
-<span><span class="op">)</span> <span class="co"># write sdac to disk and label as the curated dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="reading-data-2" class="level3" data-number="6.3.1"><h3 data-number="6.3.1" class="anchored" data-anchor-id="reading-data-2">
+<span class="header-section-number">6.3.1</span> Reading data</h3>
+<p>The file formats associated with semi-structured data include a wide range. These include file formats conducive to more structured-leaning data, such as XML, HTML, and JSON, and file formats with more unstructured-leaning data, such as annotated TXT files. Annotated TXT files may in fact appear with the <em>.txt</em> extension, but may also appear with other, sometimes resource-specific, extensions, such as <em>.utt</em> for the Switchboard Dialogue Act Corpus or <em>.cha</em> for the CHILDES corpus annotation files, for example.</p>
+<p>The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format, as in <a href="#lst-cd-json-example">File&nbsp;<span>6.1</span></a>. We can read the data into an R session with the <code>read_json()</code> function from the <code>jsonlite</code> package <span class="citation" data-cites="R-jsonlite">(<a href="references.html#ref-R-jsonlite" role="doc-biblioref">Ooms 2023</a>)</span>. For XML and HTML files, the <code>rvest</code> package provides the <code>read_xml()</code> and <code>read_html()</code> functions.</p>
+<div class="code-with-filename listing">
+<p>File&nbsp;6.1: Example JSON file</p>
+<div class="code-with-filename-file">
+<pre><strong>data.json</strong></pre>
 </div>
+<div class="sourceCode" id="lst-cd-json-example" data-lst-cap="Example JSON file"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="lst-cd-json-example-1"><a href="#lst-cd-json-example-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="lst-cd-json-example-2"><a href="#lst-cd-json-example-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"data"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="lst-cd-json-example-3"><a href="#lst-cd-json-example-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="lst-cd-json-example-4"><a href="#lst-cd-json-example-4" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"speaker"</span><span class="fu">:</span> <span class="st">"Alice"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-5"><a href="#lst-cd-json-example-5" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"age"</span><span class="fu">:</span> <span class="dv">27</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-6"><a href="#lst-cd-json-example-6" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"sex"</span><span class="fu">:</span> <span class="st">"Female"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-7"><a href="#lst-cd-json-example-7" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"word_form"</span><span class="fu">:</span> <span class="st">"running"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-8"><a href="#lst-cd-json-example-8" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"lemma_form"</span><span class="fu">:</span> <span class="st">"run"</span></span>
+<span id="lst-cd-json-example-9"><a href="#lst-cd-json-example-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="lst-cd-json-example-10"><a href="#lst-cd-json-example-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="lst-cd-json-example-11"><a href="#lst-cd-json-example-11" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"speaker"</span><span class="fu">:</span> <span class="st">"Bob"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-12"><a href="#lst-cd-json-example-12" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"age"</span><span class="fu">:</span> <span class="dv">35</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-13"><a href="#lst-cd-json-example-13" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"sex"</span><span class="fu">:</span> <span class="st">"Male"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-14"><a href="#lst-cd-json-example-14" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"word_form"</span><span class="fu">:</span> <span class="st">"jumped"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-15"><a href="#lst-cd-json-example-15" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"lemma_form"</span><span class="fu">:</span> <span class="st">"jump"</span></span>
+<span id="lst-cd-json-example-16"><a href="#lst-cd-json-example-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="lst-cd-json-example-17"><a href="#lst-cd-json-example-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="lst-cd-json-example-18"><a href="#lst-cd-json-example-18" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"speaker"</span><span class="fu">:</span> <span class="st">"Charlie"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-19"><a href="#lst-cd-json-example-19" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"age"</span><span class="fu">:</span> <span class="dv">42</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-20"><a href="#lst-cd-json-example-20" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"sex"</span><span class="fu">:</span> <span class="st">"Male"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-21"><a href="#lst-cd-json-example-21" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"word_form"</span><span class="fu">:</span> <span class="st">"singing"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-22"><a href="#lst-cd-json-example-22" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"lemma_form"</span><span class="fu">:</span> <span class="st">"sing"</span></span>
+<span id="lst-cd-json-example-23"><a href="#lst-cd-json-example-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="lst-cd-json-example-24"><a href="#lst-cd-json-example-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="lst-cd-json-example-25"><a href="#lst-cd-json-example-25" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"speaker"</span><span class="fu">:</span> <span class="st">"Diane"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-26"><a href="#lst-cd-json-example-26" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"age"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-27"><a href="#lst-cd-json-example-27" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"sex"</span><span class="fu">:</span> <span class="st">"Female"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-28"><a href="#lst-cd-json-example-28" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"word_form"</span><span class="fu">:</span> <span class="st">"walked"</span><span class="fu">,</span></span>
+<span id="lst-cd-json-example-29"><a href="#lst-cd-json-example-29" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"lemma_form"</span><span class="fu">:</span> <span class="st">"walk"</span></span>
+<span id="lst-cd-json-example-30"><a href="#lst-cd-json-example-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="lst-cd-json-example-31"><a href="#lst-cd-json-example-31" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="lst-cd-json-example-32"><a href="#lst-cd-json-example-32" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Semi-structured data in TXT files can be read either as an entire file with <code>read_file()</code> or line-by-line with <code>read_lines()</code>. The choice of which approach to take depends on the structure of the data. If the data structure is line-based, then <code>read_lines()</code> often makes more sense than <code>read_file()</code>. However, in some cases, the data may be structured in a way that requires the entire file to be read into an R session and then subsequently parsed.</p>
+</section><section id="orientation-2" class="level3" data-number="6.3.2"><h3 data-number="6.3.2" class="anchored" data-anchor-id="orientation-2">
+<span class="header-section-number">6.3.2</span> Orientation</h3>
+</section><section id="tidy-the-data-1" class="level3" data-number="6.3.3"><h3 data-number="6.3.3" class="anchored" data-anchor-id="tidy-the-data-1">
+<span class="header-section-number">6.3.3</span> Tidy the data</h3>
+</section><section id="write-dataset-2" class="level3" data-number="6.3.4"><h3 data-number="6.3.4" class="anchored" data-anchor-id="write-dataset-2">
+<span class="header-section-number">6.3.4</span> Write dataset</h3>
+</section><section id="summary-2" class="level3" data-number="6.3.5"><h3 data-number="6.3.5" class="anchored" data-anchor-id="summary-2">
+<span class="header-section-number">6.3.5</span> Summary</h3>
+<p>In this section we looked at semi-structured data. This type of data often requires the most work to organize into a tidy dataset. We continued to work with many of the R programming strategies introduced to this point in the textbook.</p>
+<p>…</p>
 </section></section><section id="summary-3" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary-3">Summary</h2>
-<p>In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data –unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of meta-information included. The results from our data curation resulted in a curated dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. In addition to the code we use to derived the curated dataset’s structure, we also include a data dictionary which documents the names of the variables and provides sufficient description of these variables so that it is clear what our dataset contains.</p>
+<p>In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data –unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of metadata included. The results from data curation results in a dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. In addition to the code we use to derived the curated dataset’s structure, we also include a data dictionary which documents the curated dataset.</p>
 <ul class="task-list">
 <li>
 <input type="checkbox">emphasize the importance of ahereing to the unit of analysis for the research, and how this is reflected in the curated dataset. And how unit of observation derived from the transformational steps in the next chapter.</li>
-</ul>
-<p>It is important to recognized that this curated dataset will form the base for the next step in our text analysis project and the last step in data preparation for analysis: dataset transformation. This last step in preparing data for analysis is to convert this curated dataset into a dataset that is directly aligned with the research aims (i.e.&nbsp;analysis method(s)) of the project. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps.</p>
-</section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
+</ul></section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1739,6 +1765,9 @@ Benoit, Kenneth, and Adam Obeng. 2023. <em>Readtext: Import and Handling for Pla
 </div>
 <div id="ref-Koehn2005" class="csl-entry" role="listitem">
 Koehn, P. 2005. <span>“Europarl: A Parallel Corpus for Statistical Machine Translation.”</span> <em>MT Summit X</em>, 12–16.
+</div>
+<div id="ref-R-jsonlite" class="csl-entry" role="listitem">
+Ooms, Jeroen. 2023. <em>Jsonlite: A Simple and Robust JSON Parser and Generator for r</em>. <a href="https://jeroen.r-universe.dev/jsonlite%0Ahttps://arxiv.org/abs/1403.2805">https://jeroen.r-universe.dev/jsonlite https://arxiv.org/abs/1403.2805</a>.
 </div>
 <div id="ref-R-DBI" class="csl-entry" role="listitem">
 R Special Interest Group on Databases (R-SIG-DB), Hadley Wickham, and Kirill Müller. 2022. <em>DBI: R Database Interface</em>. <a href="https://CRAN.R-project.org/package=DBI">https://CRAN.R-project.org/package=DBI</a>.

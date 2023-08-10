@@ -881,7 +881,13 @@ The file accessed by my browser to render this webpage is `test.html` and in pla
 ```
 :::
 
-Each element in this file is delineated by an opening and closing tag, `<head></head>`. Tags are nested within other tags to create the structural hierarchy. Tags can take class and id labels to distinguish them from other tags and often contain other attributes that dictate how the tag is to behave when rendered visually by a browser. For example, there are two `<div>` tags in our toy example: one has the label `class = "intro"` and the other `class = "conc"`. `<div>` tags are often used to separate sections of a webpage that may require special visual formatting. The `<a>` tag, on the other hand, creates a web link. As part of this tag's function, it requires the attribute `href=` and a web protocol --in this case it is a link to an email address `mailto:francojc@wfu.edu`. More often than not, however, the `href=` contains a URL (Uniform Resource Locator). A working example might look like this: `<a href="https://francojc.github.io/">My homepage</a>`.
+Each element in this file is delineated by an opening and closing HTML tag, `<head></head>`. Tags are nested within other tags to create the structural hierarchy. Tags can take class and id labels to distinguish them from other tags and often contain other attributes that dictate how the tag is to behave according to Cascading Style Sheet (CSS) rules when rendered visually by a browser. For example, there are two `<div>` tags in our toy example: one has the label `class = "intro"` and the other `class = "conc"`. `<div>` tags are often used to separate sections of a webpage that may require special visual formatting. The `<a>` tag, on the other hand, creates a web link. As part of this tag's function, it requires the attribute `href=` and a web protocol --in this case it is a link to an email address `mailto:francojc@wfu.edu`. More often than not, however, the `href=` contains a URL (Uniform Resource Locator). A working example might look like this: `<a href="https://francojc.github.io/">My homepage</a>`.
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+Cascading Style Sheets (CSS) are used to dictate how HTML elements are rendered visually by a browser. For example, the `div` tag with the class attribute `intro` could be targeted by a CSS rule to render the text in a larger font size and in bold. CSS rules are often written in a separate file and linked to the HTML file. For web scraping purposes, however, we are not interested in the visual rendering of the HTML file, but rather the structure of the HTML file. These tag attributes can provide useful information for parsing HTML files.
+:::
 
 The aim of a web scrape is to download the HTML file(s) that contain the data we are interested in. This will include more information that we may ultimately need, but by downloading the raw source HTML we are effectively creating a local archive, or copy, of the webpage. Thus, if the webpage is updated or removed from the web, we will still have access to the data we accessed.
 
@@ -1044,7 +1050,7 @@ The next step is to read and parse the raw HTML. We can do this using the `read_
 #| label: ad-fed-read-html
 #| eval: false
 
-# Read raw html and parse to xml
+# Read raw html and parse
 html <- read_html(url)
 
 # Preview html
@@ -1218,7 +1224,7 @@ read_write_html <- function(url) {
 
 The function in @exm-ad-fed-papers-read-write-function takes a URL as it's only argument. It then creates a file name and path from the URL. The file name is the last part of the URL, with the extension `.html`. The file path is the path to the `federalist_papers` directory in the `data/original` directory. The function then reads the HTML from the URL and writes it to the file.
 
-@exm-ad-fed-papers-read-write-function might not seem like a step up from @exm-ad-fed-papers-read-write-html-manual, but it is. We can now use the `map() ` function from `purrr` to iterate over the URLs in `fed_urls` and apply the `read_write_html()` function to each URL. See @exm-ad-fed-papers-read-write-map.
+@exm-ad-fed-papers-read-write-function might not seem like a step up from @exm-ad-fed-papers-read-write-html-manual, but it is. We can now use the `walk() ` function from `purrr` to iterate over the URLs in `fed_urls` and apply the `read_write_html()` function to each URL. See @exm-ad-fed-papers-read-write-map.
 
 ::: {#exm-ad-fed-papers-read-write-map}
 ```{r}
@@ -1227,7 +1233,7 @@ The function in @exm-ad-fed-papers-read-write-function takes a URL as it's only 
 
 # Retrieve the HTML from each URL in `fed_urls` and write to a file
 fed_urls |> 
-  map(read_write_html)
+  walk(read_write_html)
 ```
 :::
 
@@ -1277,8 +1283,6 @@ data/
         └── text-81-85.html
 ```
 :::
-
-
 
 And of course, to finish the acquisition process, we need to ensure we have documented the code and created a data origin file. Since we have created this resource it much of the information will be up to use to document. Keep in mind that the data origin file should be written in a way that is transparent to the researcher and to would-be collaborators and the general research community.
 

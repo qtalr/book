@@ -335,7 +335,6 @@ div.csl-indent {
   </ul>
 </li>
   <li><a href="#sec-apis" id="toc-sec-apis" class="nav-link" data-scroll-target="#sec-apis"><span class="header-section-number">5.2</span> APIs</a></li>
-  <li><a href="#sec-web-scraping" id="toc-sec-web-scraping" class="nav-link" data-scroll-target="#sec-web-scraping"><span class="header-section-number">5.3</span> Web scraping</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   <li><a href="#activities" id="toc-activities" class="nav-link" data-scroll-target="#activities">Activities</a></li>
   <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions">Questions</a></li>
@@ -392,7 +391,8 @@ Draft
 </div>
 </div>
 </div>
-<p>As we start down the path to executing our research blueprint, our first step is to acquire the primary data that will be employed in the project. This chapter covers three widely-used strategies for acquiring corpus data: downloads, APIs (Application Programming Interfaces), and web scraping. We get started with the most straighforward approaches from a conceptual standpoint, gradually escalating to more nuanced methods. We will encounter various file formats and folder structures in the process and we will address how to effectively organize our data for subsequent processing. Crucial to our efforts is the process of documenting our data. We will learn to provide data origin information to ensure key characteristics of the data and its source are documented. Along the way we will explore R coding concepts including control statements and custom functions relevant to the task of acquiring data. By the end of this chapter, you will not only be adept at acquiring data from diverse sources but also capable of documenting it comprehensively, enabling you to replicate the process in the future.</p>
+<p>As we start down the path to executing our research blueprint, our first step is to acquire the primary data that will be employed in the project. This chapter covers three widely-used strategies for acquiring corpus data: downloads and APIs (Application Programming Interfaces). We will encounter various file formats and folder structures in the process and we will address how to effectively organize our data for subsequent processing. Crucial to our efforts is the process of documenting our data. We will learn to provide data origin information to ensure key characteristics of the data and its source are documented.</p>
+<p>Along the way we will explore R coding concepts including control statements and custom functions relevant to the task of acquiring data. By the end of this chapter, you will not only be adept at acquiring data from diverse sources but also capable of documenting it comprehensively, enabling you to replicate the process in the future.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1131,409 +1131,8 @@ Note: `untar()` function arguments needed are not in order and need names
 </div>
 <!-- Note on documentation -->
 <p>Add comments to your code in <em>1-acquire-data.Rmd</em> and create and complete the data origin documentation file for this resource, and the acquisition is complete.</p>
-</section><section id="sec-web-scraping" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="sec-web-scraping">
-<span class="header-section-number">5.3</span> Web scraping</h2>
-<p>There are many resources available through downloads and APIs. There are, however, cases in which you want to acquire data from the public-facing web. R can be used to access the web programmatically through a process known as web scraping. The complexity of web scrapes can vary but in general it requires more advanced knowledge of R as well as the structure of the language of the web: HTML (Hypertext Markup Language).</p>
-<section id="html-language-of-the-web" class="level4"><h4 class="anchored" data-anchor-id="html-language-of-the-web">HTML: language of the web</h4>
-<p>HTML is a cousin of XML (eXtensible Markup Language) and as such organizes web documents in a hierarchical format that is read by your browser as you navigate the web. Take for example the toy webpage I created as a demonstration in <a href="#fig-ad-example-webpage">Figure&nbsp;<span>5.3</span></a>.</p>
-<div class="cell" data-hash="acquire-data_cache/html/fig-ad-example-webpage_6492e5e53f53fdd09b2125deefac67c2">
-<div class="cell-output-display">
-<div id="fig-ad-example-webpage" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="figures/acquire-data/ad-test-html.png" class="img-fluid figure-img" style="width:100.0%"></p>
-<figcaption class="figure-caption">Figure&nbsp;5.3: Example web page.</figcaption></figure>
-</div>
-</div>
-</div>
-<p>The file accessed by my browser to render this webpage is <code>test.html</code> and in plain-text format as seen in <a href="#exm-ad-html-structure">Example&nbsp;<span>5.26</span></a>.</p>
-<div id="exm-ad-html-structure" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.26 </strong></span>&nbsp;</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE </span>html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"<span class="dt">&gt;</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;head&gt;</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;meta</span> <span class="er">http-equiv</span><span class="ot">=</span><span class="st">"Content-Type"</span> <span class="er">content</span><span class="ot">=</span><span class="st">"text/html; charset=UTF-8"</span> <span class="kw">/&gt;</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;title&gt;</span>My website<span class="kw">&lt;/title&gt;</span></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/head&gt;</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;body&gt;</span></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"intro"</span><span class="kw">&gt;</span></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;p&gt;</span>Welcome!<span class="kw">&lt;/p&gt;</span></span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;p&gt;</span>This is my first website.<span class="kw">&lt;/p&gt;</span></span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/div&gt;</span></span>
-<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;table&gt;</span></span>
-<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;tr&gt;</span></span>
-<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;td&gt;</span>Contact me:<span class="kw">&lt;/td&gt;</span></span>
-<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;td&gt;</span></span>
-<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>          <span class="kw">&lt;a</span> <span class="er">href</span><span class="ot">=</span><span class="st">"mailto:francojc@wfu.edu"</span><span class="kw">&gt;</span>francojc@wfu.edu<span class="kw">&lt;/a&gt;</span></span>
-<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"conc"</span><span class="kw">&gt;</span></span>
-<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;p&gt;</span>Good-bye!<span class="kw">&lt;/p&gt;</span></span>
-<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/div&gt;</span></span>
-<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/body&gt;</span></span>
-<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Each element in this file is delineated by an opening and closing HTML tag, <code>&lt;head&gt;&lt;/head&gt;</code>. Tags are nested within other tags to create the structural hierarchy. Tags can take class and id labels to distinguish them from other tags and often contain other attributes that dictate how the tag is to behave according to Cascading Style Sheet (CSS) rules when rendered visually by a browser. For example, there are two <code>&lt;div&gt;</code> tags in our toy example: one has the label <code>class = "intro"</code> and the other <code>class = "conc"</code>. <code>&lt;div&gt;</code> tags are often used to separate sections of a webpage that may require special visual formatting. The <code>&lt;a&gt;</code> tag, on the other hand, creates a web link. As part of this tag’s function, it requires the attribute <code>href=</code> and a web protocol –in this case it is a link to an email address <code>mailto:francojc@wfu.edu</code>. More often than not, however, the <code>href=</code> contains a URL (Uniform Resource Locator). A working example might look like this: <code>&lt;a href="https://francojc.github.io/"&gt;My homepage&lt;/a&gt;</code>.</p>
-<div class="callout callout-style-simple callout-none no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
-<p>Cascading Style Sheets (CSS) are used to dictate how HTML elements are rendered visually by a browser. For example, the <code>div</code> tag with the class attribute <code>intro</code> could be targeted by a CSS rule to render the text in a larger font size and in bold. CSS rules are often written in a separate file and linked to the HTML file. For web scraping purposes, however, we are not interested in the visual rendering of the HTML file, but rather the structure of the HTML file. These tag attributes can provide useful information for parsing HTML files.</p>
-</div>
-</div>
-</div>
-<p>The aim of a web scrape is to download the HTML file(s) that contain the data we are interested in. This will include more information that we may ultimately need, but by downloading the raw source HTML we are effectively creating a local archive, or copy, of the webpage. Thus, if the webpage is updated or removed from the web, we will still have access to the data we accessed.</p>
-<p>Later in the curation process we will parse (<em>i.e.</em> read and extract) target information that is relevant for the research at hand. However, it often useful to parse the raw HTML in the process of acquiring data if we are interested in harvesting data from multiple pages and we would like to use the HTML structure to guide our data extraction (<em>i.e.</em> URLs to other pages)</p>
-<p>To provide some preliminary background on working with HTML, we will use the toy example above to demonstrate how to read and parse HTML using R. To do this we will use the <a href="https://CRAN.R-project.org/package=rvest">rvest</a><span class="citation" data-cites="R-rvest">(<a href="references.html#ref-R-rvest" role="doc-biblioref">Wickham 2022</a>)</span> package. First, install/load the package, then, read and parse the HTML from the character vector named <code>web_file</code> assigning the result to <code>html</code>.</p>
-<div id="exm-ad-read-html-toy" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.27 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-read-html-toy_a0cb094302e50de24c9036f378db42c6">
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rvest.tidyverse.org/">rvest</a></span><span class="op">)</span> <span class="co"># read and parse HTML</span></span>
-<span></span>
-<span><span class="va">html</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="va">web_file</span><span class="op">)</span> <span class="co"># retrieve raw html</span></span>
-<span><span class="va">html</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; {html_document}
-&gt; &lt;html&gt;
-&gt; [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8 ...
-&gt; [2] &lt;body&gt;\n    &lt;div class="intro"&gt;\n      &lt;p&gt;Welcome!&lt;/p&gt;\n      &lt;p&gt;This is  ...</code></pre>
-</div>
-</div>
-</div>
-<p>In <a href="#exm-ad-read-html-toy">Example&nbsp;<span>5.27</span></a> <code><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html()</a></code> retrieves the raw HTML and it makes it accessible to parsing in R. Being a subtype of XML, <code><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html()</a></code> converts the raw HTML into an object of class <code>xml_document</code>, as we can see by calling <code><a href="https://rdrr.io/r/base/class.html">class()</a></code> on the <code>html</code> object in <a href="#exm-ad-class-html-toy-class">Example&nbsp;<span>5.28</span></a>.</p>
-<div id="exm-ad-class-html-toy-class" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.28 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-class-html-toy-class_cefdb55f29fdaf6ab84b22bb5539adf9">
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">html</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] "xml_document" "xml_node"</code></pre>
-</div>
-</div>
-</div>
-<p>An object of class <code>xml_document</code> represents each HTML tag as a node. The tag nodes are elements can be accessed by using the <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements()</a></code> function by specifying the tag/node/element to isolate.</p>
-<div id="exm-ad-parse-html-toy-1" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.29 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-parse-html-toy-1_e65bb1818d25f77110c25e1ed3ba1a3a">
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">"div"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; {xml_nodeset (2)}
-&gt; [1] &lt;div class="intro"&gt;\n      &lt;p&gt;Welcome!&lt;/p&gt;\n      &lt;p&gt;This is my first web ...
-&gt; [2] &lt;div class="conc"&gt;\n      &lt;p&gt;Good-bye!&lt;/p&gt;\n    &lt;/div&gt;</code></pre>
-</div>
-</div>
-</div>
-<p>Notice that the output of <a href="#exm-ad-parse-html-toy-1">Example&nbsp;<span>5.29</span></a> has returned both <code>div</code> tags and their respective children, tags contained within. To isolate one of tags by its class, we add the class name to the tag separating it with a <code>.</code>.</p>
-<div id="exm-ad-parse-html-toy-2" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.30 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-parse-html-toy-2_6a0a90dcf3b441ecacee41bf24fa466a">
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">"div.intro"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; {xml_nodeset (1)}
-&gt; [1] &lt;div class="intro"&gt;\n      &lt;p&gt;Welcome!&lt;/p&gt;\n      &lt;p&gt;This is my first web ...</code></pre>
-</div>
-</div>
-</div>
-<p>Great. Now say we want to drill down and isolate the subordinate <code>&lt;p&gt;</code> nodes. We can add <code>p</code> to our node filter, as in <a href="#exm-ad-parse-html-toy-3">Example&nbsp;<span>5.31</span></a>.</p>
-<div id="exm-ad-parse-html-toy-3" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.31 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-parse-html-toy-3_ed581ead186123c3c5688b5fde051ec8">
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">"div.intro p"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; {xml_nodeset (2)}
-&gt; [1] &lt;p&gt;Welcome!&lt;/p&gt;
-&gt; [2] &lt;p&gt;This is my first website. &lt;/p&gt;</code></pre>
-</div>
-</div>
-</div>
-<p>To extract the text contained within a node we use the <code><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text()</a></code> function.</p>
-<div id="exm-ad-parse-html-toy-4" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.32 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-parse-html-toy-4_d312dd9f7044d0790a8f407bed248ee4">
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">"div.intro p"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] "Welcome!"                   "This is my first website. "</code></pre>
-</div>
-</div>
-</div>
-<p>The result of <a href="#exm-ad-parse-html-toy-4">Example&nbsp;<span>5.32</span></a> is a character vector with two elements corresponding to the text contained in each <code>&lt;p&gt;</code> tag. If you were paying close attention you might have noticed that the second element in our vector includes extra whitespace after the period. To trim leading and trailing whitespace from text we can add the <code>trim = TRUE</code> argument to <code><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text()</a></code>, as in <a href="#exm-ad-parse-html-toy-5">Example&nbsp;<span>5.33</span></a>.</p>
-<div id="exm-ad-parse-html-toy-5" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.33 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-parse-html-toy-5_c5548206448b6edb2cb2260df94b6227">
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">"div.intro p"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text</a></span><span class="op">(</span>trim <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] "Welcome!"                  "This is my first website."</code></pre>
-</div>
-</div>
-</div>
-<p>With this basic understanding of how to read and parse HTML, we can now turn to a more realistic example.</p>
-</section><section id="federalist-papers" class="level4"><h4 class="anchored" data-anchor-id="federalist-papers">Federalist Papers</h4>
-<p>Say we investigate the authorship question of the the Federalist Papers following in the footsteps of <span class="citation" data-cites="Mosteller1963">Mosteller and Wallace (<a href="references.html#ref-Mosteller1963" role="doc-biblioref">1963</a>)</span>. We want to scrape the text of the Federalist Papers from the Library of Congress website. The main page for the Federalist Papers is located at <em>https://guides.loc.gov/federalist-papers/full-text</em> and can be seen in <a href="#fig-ad-web-scrape-screenshot">Figure&nbsp;<span>5.4</span></a>.</p>
-<!-- screenshot of page to scrape -->
-<div class="cell" data-hash="acquire-data_cache/html/fig-ad-web-scrape-screenshot_3e3c7608192f2b5bd2063fad70d7c4f2">
-<div class="cell-output-display">
-<div id="fig-ad-web-scrape-screenshot" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="figures/acquire-data/ad-fed-papers-loc-main.png" class="img-fluid figure-img" style="width:100.0%"></p>
-<figcaption class="figure-caption">Figure&nbsp;5.4: Screenshot of the Library of Congress website for the Federalist Papers</figcaption></figure>
-</div>
-</div>
-</div>
-<p>The main page contains links to the text of each of the 85 papers. Our goal will be to scrape and archive the raw HTML for this page and then parse the HTML to extract the links to each of the papers. We will then scrape and archive the raw HTML for each of the 85 papers.</p>
-<p>The first step in any web scrape is to investigate the site and page(s) we want to scrape to ascertain if there any licensing restrictions. Many, but not all websites, will include a plain text file <a href="https://www.cloudflare.com/learning/bots/what-is-robots.txt/"><code>robots.txt</code></a> at the root of the main URL. This file is declares which webpages a ‘robot’ (including web scraping scripts) can and cannot access. We can use the <code>robotstxt</code> package to find out which URLs are accessible <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-<!-- check domain -->
-<div id="exm-ad-fed-permissions" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.34 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-web-permissions_4a14097b692e59a60145a347f986c751">
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Install and load package</span></span>
-<span><span class="fu">pacman</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/pacman/man/p_load.html">p_load</a></span><span class="op">(</span><span class="va">robotstxt</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># URL for the Federalist Papers (LOC)</span></span>
-<span><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"https://guides.loc.gov/federalist-papers/full-text"</span></span>
-<span></span>
-<span><span class="co"># Check permissions</span></span>
-<span><span class="fu">paths_allowed</span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] TRUE</code></pre>
-</div>
-</div>
-</div>
-<!-- rvest::read_html() -->
-<p>The next step is to read and parse the raw HTML. We can do this using the <code><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html()</a></code> function.</p>
-<div id="exm-ad-fed-read-html" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.35 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-read-html_e7cee2d917963241027352ab8be0d260">
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read raw html and parse</span></span>
-<span><span class="va">html</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Preview html</span></span>
-<span><span class="va">html</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-read-html-disk_1385f9176037d3b40e267e694088996e">
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; {html_document}
-&gt; &lt;html lang="en"&gt;
-&gt; [1] &lt;head&gt;\n&lt;meta http-equiv="X-UA-Compatible" content="IE=Edge"&gt;\n&lt;meta http ...
-&gt; [2] &lt;body class="s-lg-guide-body"&gt;\r\n&lt;a id="s-lg-public-skiplink" class="ale ...</code></pre>
-</div>
-</div>
-<p>At this point we have captured the raw HTML assigning it to the object named <code>html</code>. Let’s archive the raw HTML to a file in our project directory. We can do this using the <code>write_html()</code> function from the <code>xml2</code> package <span class="citation" data-cites="R-xml2">(<a href="references.html#ref-R-xml2" role="doc-biblioref">Wickham, Hester, and Ooms 2023</a>)</span>.</p>
-<div id="exm-ad-fed-write-html" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.36 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-write-html_7b72f4d6f5e150c2d2b77d41773ff97d">
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create directory for HTML files</span></span>
-<span><span class="fu"><a href="https://fs.r-lib.org/reference/create.html">dir_create</a></span><span class="op">(</span><span class="st">"../data/original/federalist_papers/"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Write raw html to file</span></span>
-<span><span class="fu">write_html</span><span class="op">(</span><span class="va">html</span>, <span class="st">"../data/original/federalist_papers/main.html"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Our update project directory structure can be seen in <a href="#exm-ad-fed-project-dir">Example&nbsp;<span>5.37</span></a>.</p>
-<div id="exm-ad-fed-project-dir" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.37 </strong></span>&nbsp;</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="ex">data/</span></span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">──</span> analysis/</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> derived/</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> original/</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> federalist_papers/</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> main.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<!-- Scraping URLs -->
-<p>Now, we also want to scrape the HTML that contains of the pages corresponding to the 85 Federalist Papers. Perusing the main page we can see that papers are organized into nine groups, <em>e.g.</em> “Federalist Nos. 1-10”. So our aim will be to scrape the HTML for each of these nine pages. We can do this using the <code>rvest</code> package, but we need to identify the HTML elements that contain the URLs first in the main webpage we have in <code>html</code>.</p>
-<!-- Inspect HTML -->
-<p>To do this it is helpful to use a browser to inspect specific elements of the webpage, much as we did in the toy example in <a href="#exm-ad-html-structure">Example&nbsp;<span>5.26</span></a>. To view the raw and displayed HTML, your browser will be equipped with a command that you can enable by hovering your mouse over the element of the page you want to target and using a right click to select “Inspect” (Chrome) or “Inspect Element” (Safari, Brave). This will split your browser window vertical or horizontally showing you the displayed and raw HTML underlying the webpage.</p>
-<p>We can see the HTML elements that contain the URLs in <a href="#fig-ad-fed-inspect">Figure&nbsp;<span>5.5</span></a>.</p>
-<!-- screenshot of inspecting HTML -->
-<div class="cell" data-hash="acquire-data_cache/html/fig-ad-fed-inspect_46fd4fd64ca3b1bc2ebbad064ca4e1d0">
-<div class="cell-output-display">
-<div id="fig-ad-fed-inspect" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="figures/acquire-data/ad-fed-papers-loc-inspect.png" class="img-fluid figure-img" style="width:100.0%"></p>
-<figcaption class="figure-caption">Figure&nbsp;5.5: Screenshot of the HTML elements containing the URLs for the Federalist Papers</figcaption></figure>
-</div>
-</div>
-</div>
-<p>Let’s take a closer look at the source HTML in <a href="#fig-ad-fed-inspect-source">Figure&nbsp;<span>5.6</span></a> so we can inspect the elements that contain the URLs and divise a strategy for isolating them to be extracted.</p>
-<!-- screenshot of inpecting source HTML -->
-<div class="cell" data-hash="acquire-data_cache/html/fig-ad-fed-inspect-source_aced91743bd5984e3dd8e2d1f7f4ead9">
-<div class="cell-output-display">
-<div id="fig-ad-fed-inspect-source" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="figures/acquire-data/ad-fed-papers-loc-inspect-source.png" class="img-fluid figure-img" style="width:100.0%"></p>
-<figcaption class="figure-caption">Figure&nbsp;5.6: Screenshot of the source HTML for the Federalist Papers</figcaption></figure>
-</div>
-</div>
-</div>
-<p>In <a href="#fig-ad-fed-inspect-source">Figure&nbsp;<span>5.6</span></a> we can see that the HTML elements that contain the URLs are nested within a <code>&lt;ul&gt;</code> element. The <code>&lt;ul&gt;</code> element has a set of class attributes (<code>.s-lg-subtab-ul</code>, <code>nav</code>, <code>nav-pills</code>, <code>nav-stacked</code>). If one of these is unique to this <code>&lt;ul&gt;</code> element we can use it to isolate the element. Let’s search the HTML for all the <code>&lt;ul&gt;</code> elements on the page.</p>
-<div id="exm-ad-fed-papers-loc-url-ul" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.38 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-papers-loc-url-ul_4f897dda2242844c40301d3359da238c">
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"ul"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; {xml_nodeset (4)}
-&gt; [1] &lt;ul class="nav nav-pills nav-stacked split-button-nav" role="menu"&gt;\n&lt;li  ...
-&gt; [2] &lt;ul class="s-lg-subtab-ul nav nav-pills nav-stacked"&gt;\n&lt;li class=""&gt;&lt;a ti ...
-&gt; [3] &lt;ul id="s-lg-page-prevnext" class="pager s-lib-hide"&gt;\n&lt;li class="previou ...
-&gt; [4] &lt;ul id="s-lg-guide-header-attributes" class=""&gt;\n&lt;li id="s-lg-guide-heade ...</code></pre>
-</div>
-</div>
-</div>
-<p>The output from <a href="#exm-ad-fed-papers-loc-url-ul">Example&nbsp;<span>5.38</span></a> shows that there are 4 <code>&lt;ul&gt;</code> elements on the page. It’s a little hard to see in the output, but the second <code>&lt;ul&gt;</code> element is the one we are targeting, as it contains the class attributes we identified in <a href="#fig-ad-fed-inspect-source">Figure&nbsp;<span>5.6</span></a>. We can use the <code><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr()</a></code> function to extract the <code>class</code> attribute from the <code>&lt;ul&gt;</code> elements to see if one of them is unique to the <code>&lt;ul&gt;</code> element we want to isolate.</p>
-<div id="exm-ad-fed-papers-loc-url-ul-class" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.39 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-papers-loc-url-ul-class_ae93a732f4bc881be1846ba3be773951">
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"ul"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"class"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] "nav nav-pills nav-stacked split-button-nav"
-&gt; [2] "s-lg-subtab-ul nav nav-pills nav-stacked"  
-&gt; [3] "pager s-lib-hide"                          
-&gt; [4] ""</code></pre>
-</div>
-</div>
-</div>
-<p>Effectively this is the case, as the second <code>&lt;ul&gt;</code> element in the output of <a href="#exm-ad-fed-papers-loc-url-ul-class">Example&nbsp;<span>5.39</span></a> has a unique class attribute, <code>.s-lg-subtab-ul</code>. We can use this to isolate the element using the <code><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes()</a></code> function. We then pipe this to another <code><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes()</a></code> function to isolate the <code>&lt;li&gt;</code> elements nested within the <code>&lt;ul&gt;</code> element. See <a href="#exm-ad-fed-papers-loc-url-ul-class-s-lg-subtab-ul">Example&nbsp;<span>5.40</span></a>.</p>
-<div id="exm-ad-fed-papers-loc-url-ul-class-s-lg-subtab-ul" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.40 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-papers-loc-url-ul-li_7c80202253e798a713567e339e3bc0fb">
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"ul.s-lg-subtab-ul"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"li"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; {xml_nodeset (9)}
-&gt; [1] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [2] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [3] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [4] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [5] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [6] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [7] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [8] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...
-&gt; [9] &lt;li class=""&gt;&lt;a title="" href="https://guides.loc.gov/federalist-papers/t ...</code></pre>
-</div>
-</div>
-</div>
-<p>Great. Now, to get the URLs we add another <code><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes()</a></code> function to <a href="#exm-ad-fed-papers-loc-url-ul-class-s-lg-subtab-ul">Example&nbsp;<span>5.40</span></a> to isolate the <code>&lt;a&gt;</code> elements nested within the <code>&lt;li&gt;</code> elements and then a function <code><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr()</a></code> to extract the value of an attribute. In this case, the attribute of the <code>&lt;a&gt;</code> elements we want is <code>href</code>. See <a href="#exm-ad-fed-papers-loc-url-ul-li-a">Example&nbsp;<span>5.41</span></a>.</p>
-<div id="exm-ad-fed-papers-loc-url-ul-li-a" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.41 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-papers-loc-url-ul-li-a_4785b50dd780a1deb0c05e437b244490">
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">html</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"ul.s-lg-subtab-ul"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"li"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"a"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"href"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] "https://guides.loc.gov/federalist-papers/text-1-10" 
-&gt; [2] "https://guides.loc.gov/federalist-papers/text-11-20"
-&gt; [3] "https://guides.loc.gov/federalist-papers/text-21-30"
-&gt; [4] "https://guides.loc.gov/federalist-papers/text-31-40"
-&gt; [5] "https://guides.loc.gov/federalist-papers/text-41-50"
-&gt; [6] "https://guides.loc.gov/federalist-papers/text-51-60"
-&gt; [7] "https://guides.loc.gov/federalist-papers/text-61-70"
-&gt; [8] "https://guides.loc.gov/federalist-papers/text-71-80"
-&gt; [9] "https://guides.loc.gov/federalist-papers/text-81-85"</code></pre>
-</div>
-</div>
-</div>
-<p>We can assign the URLs to a variable, <code>fed_urls</code>.</p>
-<p>With the URLs in hand, we can now retrieve the HTML for each of the nine pages. We can, of course, do this manually, as in <a href="#exm-ad-fed-papers-read-write-html-manual">Example&nbsp;<span>5.42</span></a>.</p>
-<div id="exm-ad-fed-papers-read-write-html-manual" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.42 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-papers-read-write-html-manual_2e202f38c41ea9e2bd22b8d8db5e49b6">
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read the HTML from the first URL in `fed_urls`</span></span>
-<span><span class="va">html</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="va">fed_urls</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="fu">write_html</span><span class="op">(</span><span class="va">html</span>, <span class="st">"../data/original/federalist_papers/fed1.html"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Read the HTML from the second URL in `fed_urls`</span></span>
-<span><span class="va">html</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="va">fed_urls</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="fu">write_html</span><span class="op">(</span><span class="va">html</span>, <span class="st">"../data/original/federalist_papers/fed2.html"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># ... and so on</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>But this is tedious and error prone, furthermore, it doesn’t scale well. If we had 1000 URLs to retrieve the HTML from, we would have to write 1000 lines of code. Instead, we can write a function to do this for us. See <a href="#exm-ad-fed-papers-read-write-function">Example&nbsp;<span>5.43</span></a>.</p>
-<div id="exm-ad-fed-papers-read-write-function" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.43 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-papers-read-write-function_f6a827ec7696f00c91b778567ea01787">
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Function to retrieve HTML from a URL and write to a file</span></span>
-<span><span class="va">read_write_html</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Create a file name and path from the URL</span></span>
-<span>  <span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://fs.r-lib.org/reference/path_file.html">path_file</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://fs.r-lib.org/reference/path_file.html">path_ext_set</a></span><span class="op">(</span><span class="st">".html"</span><span class="op">)</span></span>
-<span>  <span class="va">file_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://fs.r-lib.org/reference/path.html">path</a></span><span class="op">(</span><span class="st">"../data/original/federalist_papers/"</span>, <span class="va">file_name</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Read the HTML from the URL</span></span>
-<span>  <span class="va">html</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Write the HTML to the file</span></span>
-<span>  <span class="fu">write_xml</span><span class="op">(</span><span class="va">html</span>, <span class="va">file_path</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>The function in <a href="#exm-ad-fed-papers-read-write-function">Example&nbsp;<span>5.43</span></a> takes a URL as it’s only argument. It then creates a file name and path from the URL. The file name is the last part of the URL, with the extension <code>.html</code>. The file path is the path to the <code>federalist_papers</code> directory in the <code>data/original</code> directory. The function then reads the HTML from the URL and writes it to the file.</p>
-<p><a href="#exm-ad-fed-papers-read-write-function">Example&nbsp;<span>5.43</span></a> might not seem like a step up from <a href="#exm-ad-fed-papers-read-write-html-manual">Example&nbsp;<span>5.42</span></a>, but it is. We can now use the <code>walk()</code> function from <code>purrr</code> to iterate over the URLs in <code>fed_urls</code> and apply the <code>read_write_html()</code> function to each URL. See <a href="#exm-ad-fed-papers-read-write-map">Example&nbsp;<span>5.44</span></a>.</p>
-<div id="exm-ad-fed-papers-read-write-map" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.44 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="acquire-data_cache/html/ad-fed-papers-read-write-map_ed1ccd7a0a545076eedc26c6e4c17de6">
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Retrieve the HTML from each URL in `fed_urls` and write to a file</span></span>
-<span><span class="va">fed_urls</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">walk</span><span class="op">(</span><span class="va">read_write_html</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<div class="callout callout-style-simple callout-none no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
-<p>When processing multiple webpages, it’s often important to manage the load on the server. In R, we can use the <code><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep()</a></code> to introduce short delays between requests. This helps reduce server load when iterating over a list of webpages.</p>
-<p>For example, we can use <code>Sys.sleep(1)</code> in our function to introduce a 1 second delay between requests.</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">read_write_html</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="co"># 1 second delay</span></span>
-<span>  <span class="co"># ...</span></span>
-<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Another tip is to use the <code><a href="https://rdrr.io/r/base/message.html">message()</a></code> function to print a status message to the console. This can be helpful when processing a large number of webpages.</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">read_write_html</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="co"># 1 second delay</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span><span class="st">"Processing "</span>, <span class="va">url</span><span class="op">)</span> <span class="co"># Prints: "Processing https://www.example.com"</span></span>
-<span>  <span class="co"># ...</span></span>
-<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-<p>The result of <a href="#exm-ad-fed-papers-read-write-map">Example&nbsp;<span>5.44</span></a> can be seen in the project directory in <a href="#exm-ad-fed-papers-directory">Example&nbsp;<span>5.45</span></a>.</p>
-<div id="exm-ad-fed-papers-directory" class="theorem example">
-<p><span class="theorem-title"><strong>Example 5.45 </strong></span>&nbsp;</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="ex">data/</span></span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">--</span> analysis/</span>
-<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">--</span> derived/</span>
-<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> original/</span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> federalist_papers/</span>
-<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> main.html</span>
-<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-1-10.html</span>
-<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-11-20.html</span>
-<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-21-30.html</span>
-<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-31-40.html</span>
-<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-41-50.html</span>
-<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-51-60.html</span>
-<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-61-70.html</span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">|</span><span class="ex">--</span> text-71-80.html</span>
-<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> text-81-85.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>And of course, to finish the acquisition process, we need to ensure we have documented the code and created a data origin file. Since we have created this resource it much of the information will be up to use to document. Keep in mind that the data origin file should be written in a way that is transparent to the researcher and to would-be collaborators and the general research community.</p>
-<!-- Summary: tech and help -->
-<p>In this section, we have built on previously introduced R coding concepts and employed various others in the process of acquiring data from the web. We have also considered topics that are more general in nature and concern interacting with data found on the internet. As you likely appreciate, web scraping often requires more knowledge of and familiarity with R as well as other web technologies. Rest assured, however, practice will increase confidence in your abilities. I encourage you to practice on your own with other websites.</p>
-</section></section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
-<p>In this chapter we have covered a lot of ground. On the surface we have discussed three methods for acquiring corpus data for use in text analysis. In the process we have delved into various aspects of the R programming language. Some key concepts include writing custom functions, control statements, and applying functions iteratively. We have also considered topics that are more general in nature and concern interacting with data found on the internet.</p>
+</section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
+<p>In this chapter we have covered a lot of ground. On the surface we have discussed a few methods for acquiring corpus data for use in text analysis. In the process we have delved into various aspects of the R programming language. Some key concepts include writing custom functions, control statements, and applying functions iteratively. We have also considered topics that are more general in nature and concern interacting with data found on the internet.</p>
 <p>Each of these methods should be approached in a way that is transparent to the researcher and to would-be collaborators and the general research community. For this reason the documentation of the steps taken to acquire data are key both in the code and in human-facing documentation.</p>
 <p>At this point you have both a bird’s eye view of the data available on the web and strategies on how to access a great majority of it. It is now time to turn to the next step in our data analysis project: data curation. In the next chapter, I will cover how to wrangle your raw data into a tidy dataset.</p>
 </section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
@@ -1630,9 +1229,6 @@ Lozano, Cristóbal. 2009. <span>“CEDEL2: Corpus Escrito Del Español L2.”</s
 <div id="ref-R-lingtypology" class="csl-entry" role="listitem">
 Moroz, George. 2023. <em>Lingtypology: Linguistic Typology and Mapping</em>. <a href="https://CRAN.R-project.org/package=lingtypology">https://CRAN.R-project.org/package=lingtypology</a>.
 </div>
-<div id="ref-Mosteller1963" class="csl-entry" role="listitem">
-Mosteller, Frederick, and David L Wallace. 1963. <span>“Inference in an Authorship Problem.”</span> <em>Journal of the American Statistical Association</em> 58 (302): 275–309. <a href="https://www.jstor.org/stable/2283270">https://www.jstor.org/stable/2283270</a>.
-</div>
 <div id="ref-R-pacman" class="csl-entry" role="listitem">
 Rinker, Tyler, and Dason Kurkiewicz. 2019. <em>Pacman: Package Management Tool</em>. <a href="https://github.com/trinker/pacman">https://github.com/trinker/pacman</a>.
 </div>
@@ -1642,26 +1238,17 @@ Tottie, Gunnel. 2011. <span>“Uh and Um as Sociolinguistic Markers in British E
 <div id="ref-SWDA2008" class="csl-entry" role="listitem">
 University of Colorado Boulder. 2008. <span>“Switchboard Dialog Act Corpus. Web Download.”</span> Linguistic Data Consortium.
 </div>
-<div id="ref-R-rvest" class="csl-entry" role="listitem">
-Wickham, Hadley. 2022. <em>Rvest: Easily Harvest (Scrape) Web Pages</em>. <a href="https://CRAN.R-project.org/package=rvest">https://CRAN.R-project.org/package=rvest</a>.
-</div>
 <div id="ref-R-dplyr" class="csl-entry" role="listitem">
 Wickham, Hadley, Romain François, Lionel Henry, Kirill Müller, and Davis Vaughan. 2023. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.
 </div>
 <div id="ref-R-readr" class="csl-entry" role="listitem">
 Wickham, Hadley, Jim Hester, and Jennifer Bryan. 2023. <em>Readr: Read Rectangular Text Data</em>. <a href="https://CRAN.R-project.org/package=readr">https://CRAN.R-project.org/package=readr</a>.
 </div>
-<div id="ref-R-xml2" class="csl-entry" role="listitem">
-Wickham, Hadley, Jim Hester, and Jeroen Ooms. 2023. <em>Xml2: Parse XML</em>. <a href="https://CRAN.R-project.org/package=xml2">https://CRAN.R-project.org/package=xml2</a>.
-</div>
 <div id="ref-R-tidyr" class="csl-entry" role="listitem">
 Wickham, Hadley, Davis Vaughan, and Maximilian Girlich. 2023. <em>Tidyr: Tidy Messy Data</em>. <a href="https://CRAN.R-project.org/package=tidyr">https://CRAN.R-project.org/package=tidyr</a>.
 </div>
 </div>
-</section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>
-<ol>
-<li id="fn1"><p>It is important to check the paths of sub-domains as some website allow access in some areas and not in others<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");

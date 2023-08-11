@@ -1,7 +1,6 @@
 ---
 execute: 
   echo: true
-  cache: false
 ---
 
 # Curate datasets {#sec-curate-datasets}
@@ -12,8 +11,8 @@ execute:
 #| cache: false
 ```
 
-::: {.callout-caution title="Caution"}
-{{< fa route >}} In progress...
+::: {.callout-tip title="Draft"}
+Ready for review.
 :::
 
 <!-- 
@@ -35,8 +34,6 @@ Exercises:
 Formatting:
 
 - [ ] cite the packages used
-- [ ] cite the europarl Corpus 
-- [ ] correct the file names for Switchboard to reflect the dataset_curated.csv, and dataset_data_dictionary.csv format
 
 -->
 
@@ -67,8 +64,6 @@ Formatting:
 # Packages
 pacman::p_load(readtext)
 ```
-
-- [ ] Revise: to reflect the new structure/ content of the chapter
 
 In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. In this chapter we will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method(s) that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.  
 
@@ -157,32 +152,23 @@ get_compressed_data(
 
 Now let's get familiar with the corpus directory structure and the files. In @exm-cd-europarl-file-structure, we see that there are two corpus files, *europarl-v7.es-en.es* and *europarl-v7.es-en.en*, that contain the source and target language texts, respectively. The file names indicate that the files contain Spanish-English parallel texts. The *.es* and *.en* extensions indicate the language of the text.
 
-Looking at the beginning of the *.es* and *.en* files, in @exm-cd-europarl-sample-source and @exm-cd-europarl-sample-target, we see that the files contain a series of lines in either the source or target language. 
+Looking at the beginning of the *.es* and *.en* files, in @lst-cd-europarl-es and @lst-cd-europarl-en, we see that the files contain a series of lines in either the source or target language. 
 
-::: {layout="[50, -1, 50]" layout-valign="top" layout-align="left"}
-
-::: {#exm-cd-europarl-sample-source}
-*europarl-v7.es-en.es* sample
-```xml
+```{#lst-cd-europarl-es .txt filename="data/original/europarl/europarl-v7.es-en.es" lst-cap="Spanish source text"}
 Reanudación del período de sesiones
 Declaro reanudado el período de sesiones del Parlamento Europeo, interrumpido el viernes 17 de diciembre pasado, y reitero a Sus Señorías mi deseo de que hayan tenido unas buenas vacaciones.
 Como todos han podido comprobar, el gran "efecto del año 2000" no se ha producido. En cambio, los ciudadanos de varios de nuestros países han sido víctimas de catástrofes naturales verdaderamente terribles.
 Sus Señorías han solicitado un debate sobre el tema para los próximos días, en el curso de este período de sesiones.
 A la espera de que se produzca, de acuerdo con muchos colegas que me lo han pedido, pido que hagamos un minuto de silencio en memoria de todas las víctimas de las tormentas, en los distintos países de la Unión Europea afectados.
 ```
-:::
-
-::: {#exm-cd-europarl-sample-target}
-*europarl-v7.es-en.en* sample
-```xml
+  
+```{#lst-cd-europarl-en .txt filename="data/original/europarl/europarl-v7.es-en.en" lst-cap="English target text"}
 Resumption of the session
 I declare resumed the session of the European Parliament adjourned on Friday 17 December 1999, and I would like once again to wish you a happy new year in the hope that you enjoyed a pleasant festive period.
 Although, as you will have seen, the dreaded 'millennium bug' failed to materialise, still the people in a number of countries suffered a series of natural disasters that truly were dreadful.
 You have requested a debate on this subject in the course of the next few days, during this part-session.
 In the meantime, I should like to observe a minute' s silence, as a number of Members have requested, on behalf of all the victims concerned, particularly those of the terrible storms, in the various countries of the European Union.
 ```
-:::
-:::
 
 We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.
 
@@ -512,11 +498,6 @@ data/
 ```
 :::
 
-### Summary
-
-In this section we worked with unstructured data and looked at how to read the data into an R session and manipulate the data to form a tidy dataset with a few columns that we could derive based on the information we have about the corpus. 
-
-In our discussion we worked step by step to curate the europarl Corpus, adding in intermediate steps for illustration purposes. However, in a more realistic case the code would most likely make more extensive use of piping (`|>`) to reduce the number of intermediate objects and make the code more legible. The final code base is added to the *2-curate-data.qmd* file in the *code/* directory. 
 
 The final step, as always, is to document the dataset. For datasets the documentation is a data dictionary, as discussed in @sec-ud-data-dictionaries. As with data origin files, you can use spreadsheet software to create and/ or edit the data dictionary. 
 
@@ -872,10 +853,6 @@ cabnc_tbl |>
 ```
 :::
 
-### Summary
-
-In this section we covered the steps to curate a structured dataset. We started by loading the raw data into R using the `read_csv()` function. We then performed some exploratory data analysis to get a sense of the data. We then removed redundant variables and renamed the remaining variables to be more informative. Finally, we sorted the rows by `doc_id` and `utt_num` and wrote the dataset to disk.
-
 The final step is to create a data dictionary file for this dataset. We can do this using the `create_data_dictionary()` function, passing the data frame object name and a path to the directory where we want to store the data dictionary. The `create_data_dictionary()` function will create a CSV file with a data dictionary template in the specified directory. 
 
 ::: {#exm-cd-cabnc-create-data-dict}
@@ -973,21 +950,465 @@ Semi-structured data in TXT files can be read either as an entire file with `rea
 
 ### Orientation
 
+To provide an example of the curation process using semi-structured data, we will work with the ENNTT corpus, introduced in @sec-aa-predict. Let's look at the directory structure for the ENNTT corpus in @exm-cd-enntt-structure.
+
+::: {#exm-cd-enntt-structure}
+```bash
+data/
+├── analysis/
+├── derived/
+└── original/
+    ├── enntt_do.csv
+    └── enntt/
+        ├── natives.dat
+        ├── natives.tok
+        ├── nonnatives.dat
+        ├── nonnatives.tok
+        ├── translations.dat
+        └── translations.tok
+```
+:::
+
+We now inspect the data origin file for the ENNTT corpus, *enntt_do.csv*, in @tbl-cd-enntt-do.
+
+```{r}
+#| label: tbl-cd-enntt-do
+#| tbl-cap: "Data origin file for the ENNTT corpus."
+#| echo: false
+
+read_csv("data/curate-datasets/cd-enntt_do.csv") |> 
+  kable() |> 
+  kable_styling()
+```
+
+According to the data origin file, there are two important file types, *.dat* and *.tok*. The *.dat* files contain annotations and the *.tok* files contain the actual text. Let's inspect the first couple of lines in the *.dat* file for the native speakers, *nonnatives.dat*, in @lst-cd-enntt-nonnatives-dat.
+
+```{#lst-cd-enntt-nonnatives-dat .txt filename="../data/original/enntt/nonnatives.dat" lst-cap="Example *.dat* file for the non-native speakers."}
+<LINE STATE="Poland" MEPID="96779" LANGUAGE="EN" NAME="Danuta Hübner," SEQ_SPEAKER_ID="184" SESSION_ID="ep-05-11-17"/>
+<LINE STATE="Poland" MEPID="96779" LANGUAGE="EN" NAME="Danuta Hübner," SEQ_SPEAKER_ID="184" SESSION_ID="ep-05-11-17"/>
+```
+
+We see that the *.dat* file contains annotations for various session and speaker attributes. The format of the annotations is XML-like. XML is a form of markup language, such as YAML, JSON, *etc.* **Markup languages** are used to annotate text with additional information about the structure, meaning, and/ or presentation of text. In XML, structure is built up by nesting of nodes. The nodes are named with tags, which are enclosed in angle brackets, `<` and `>`. Nodes are opened with `<TAG>` and closed with `</TAG>`. In @exm-cd-xml we see an example of a simple XML file structure. 
+
+::: {#exm-cd-xml}
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<book category="fiction">
+  <title lang="en">The Catcher in the Rye</title>
+  <author>J.D. Salinger</author>
+  <year>1951</year>
+</book>
+```
+:::
+
+In @exm-cd-xml there are four nodes, three of which are nested inside of the `<book>` node. The `<book>` node in this example is the root node. XML files require a root node. Nodes can also have attributes, such as the `category` attribute in the `<book>` node, but they are not required. Furthermore, XML files also require a declaration, which is the first line in @exm-cd-xml. The declaration specifies the version of XML used and the encoding. 
+
+So the *.dat* file is not strict XML, but is similar in that it contains nodes and attributes. An XML variant you a likely familiar with, HTML, has more relaxed rules than XML. HTML is a markup language used to annotate text with information about the organization and presentation of text on the web that does not require a root node or a declaration --much like our *.dat* file. So suffice it to say that the *.dat* file can safely be treated as HTML.
+
+And the *.tok* file for the native speakers, *nonnatives.tok*, in @lst-cd-enntt-nonnatives-tok, shows the actual text for each line in the corpus.
+
+```{#lst-cd-enntt-nonnatives-tok .txt filename="../data/original/enntt/nonnatives.tok" lst-cap="Example *.tok* file for the non-native speakers."}
+The Commission is following with interest the planned construction of a nuclear power plant in Akkuyu , Turkey and recognises the importance of ensuring that the construction of the new plant follows the highest internationally accepted nuclear safety standards . 
+According to our information , the decision on the selection of a bidder has not been taken yet .
+```
+
+In a study in which we are interested in contrasting the language of natives and non-natives, we will want to combine the *.dat* and *.tok* files for these groups of speakers and then join these datasets into one. 
+
+The question is what attributes we want to include in the curated dataset. Given the research focus, we will not need the `LANGUAGE` or `NAME` attributes. We may want to modify the attribute names so they are a bit more descriptive.
+
+An idealized version of the dataset based on this criteria is shown in @tbl-cd-enntt-ideal.
+
+| session_id | speaker_id | state | type | session_seq | text |
+|:----------:|:----------:|:-----:|:----:|:-----------:|:----|
+| ep-05-11-17 | 96779 | Poland | non-native | 184 | The Commission is following with interest the planned construction of a nuclear power plant in Akkuyu , Turkey and recognises the importance of ensuring that the construction of the new plant follows the highest internationally accepted nuclear safety standards . |
+| ... | ... | ... | ... | ... | ... |
+
+: Idealized version of the ENNTT corpus. {#tbl-cd-enntt-ideal tbl-colwidths="[10, 10, 10, 10, 10, 50]" .sm .striped}
+
 ### Tidy the data
+
+Now that we have a better understanding of the corpus data and our target curated dataset structure, let's work to extract and organize the data from the native and non-native files into one dataset. 
+
+The general approach we will take is, for native and then non-natives, to read in the *.dat* file as an HTML file and then extract the line nodes and their attributes combining them into a data frame. Then we'll read in the *.tok* file as a text file and then combine the two into a single data frame. After producing a native and non-native data frame, we will combine them into one data frame to write and document as our curated dataset.
+
+Starting with the natives, we read in the *.dat* file as an XML file with the `read_html()` function and then extract the line nodes with the `html_elements()` function as in @exm-cd-enntt-read-xml.
+
+::: {#exm-cd-enntt-read-xml}
+```{r}
+#| label: cd-enntt-read-xml
+#| eval: false
+
+# Load packages
+library(rvest)
+
+# Read in *.dat* file as HTML
+ns_dat_lines <- 
+  read_html("../data/original/enntt/natives.dat") |> 
+  html_elements("line")
+
+# Inspect
+class(ns_dat_lines)
+typeof(ns_dat_lines)
+length(ns_dat_lines)
+```
+
+```{r}
+#| cache: false
+#| label: cd-enntt-read-xml-run
+#| results: hold
+#| echo: false
+
+# Load packages
+library(rvest)
+
+# Read in *.dat* file as HTML
+ns_dat_lines <- 
+  read_html("data/curate-datasets/enntt/natives.dat") |> 
+  html_elements("line")
+
+# Inspect
+class(ns_dat_lines)
+typeof(ns_dat_lines)
+length(ns_dat_lines)
+```
+:::
+
+When can see that the `ns_dat_lines` object is a special type of list, `xml_nodeset` which contains 116,341 line nodes. Let's now jump out of sequence and read in the *.tok* file as a text file, in @exm-cd-enntt-read-lines, again by lines using `read_lines()`, and compare the two to make sure that our approach will work. 
+
+::: {#exm-cd-enntt-read-lines}
+```{r}
+#| label: cd-enntt-read-lines
+#| results: hold
+
+# Read in *.tok* file by lines
+ns_tok_lines <- 
+  read_lines("data/curate-datasets/enntt/natives.tok")
+
+# Inspect
+class(ns_tok_lines)
+typeof(ns_tok_lines)
+length(ns_tok_lines)
+```
+:::
+
+We do, in fact, have the same number of lines in the *.dat* and *.tok* files. So we can proceed with extracting the attributes from the line nodes and combining them with the text from the *.tok* file. 
+
+Let's start by listing the attributes of the first line node in the `ns_dat_lines` object. We use the `html_attrs()` function to get the attribute names and the values, as in @exm-cd-enntt-list-attributes.
+
+::: {#exm-cd-enntt-list-attributes}
+```{r}
+#| cache: false
+#| label: cd-enntt-list-attributes
+
+# List attributes of first line node
+ns_dat_lines[[1]] |> 
+  html_attrs()
+```
+:::
+
+No surprise here, these are the same attributes we saw in the *.dat* file preview in @lst-cd-enntt-nonnatives-dat. At this point, it's good to make a plan on how to associate the attribute names with the column names in our curated dataset. 
+
+- `session_id` = `session_id`
+- `speaker_id` = `MEPID`
+- `state` = `state`
+- `session_seq` = `seq_speaker_id`
+
+We can do this one attribute at a time using the `html_attr()` function and then combine them into a data frame with the `tibble()` function as in @exm-cd-enntt-extract-attributes.
+
+::: {#exm-cd-enntt-extract-attributes}
+```{r}
+#| cache: false
+#| label: cd-enntt-extract-attributes
+
+# Extract attributes from first line node
+session_id <- ns_dat_lines[[1]] |> html_attr("session_id")
+speaker_id <- ns_dat_lines[[1]] |> html_attr("mepid")
+state <- ns_dat_lines[[1]] |> html_attr("state")
+session_seq <- ns_dat_lines[[1]] |> html_attr("seq_speaker_id")
+
+# Combine into data frame
+tibble(session_id, speaker_id, state, session_seq)
+```
+:::
+
+The results from @exm-cd-enntt-extract-attributes show that the attributes have been extracted and mapped to our idealized column names, but this would be tedious to do for each line node. A function to extract attributes and values from a line and add them to a data frame would help simplify this process. The function in @exm-cd-enntt-extract-attributes-function does just that.
+
+::: {#exm-cd-enntt-extract-attributes-function}
+```{r}
+#| label: cd-enntt-extract-attributes-function
+
+# Function to extract attributes from line node
+extract_dat_attrs <- function(line_node) {
+  session_id <- line_node |> html_attr("session_id")
+  speaker_id <- line_node |> html_attr("mepid")
+  state <- line_node |> html_attr("state")
+  session_seq <- line_node |> html_attr("seq_speaker_id")
+
+  tibble(session_id, speaker_id, state, session_seq)
+}
+```
+:::
+
+It's a good idea to test out the function to verify that it works as expected. We can do this by passing the various indices to the `ns_dat_lines` object to the function as in @exm-cd-enntt-test-extract-attributes-function.
+
+::: {#exm-cd-enntt-test-extract-attributes-function}
+```{r}
+#| label: cd-enntt-test-extract-attributes-function
+
+# Test function
+extract_dat_attrs(ns_dat_lines[[1]])
+extract_dat_attrs(ns_dat_lines[[20]])
+extract_dat_attrs(ns_dat_lines[[100]])
+```
+:::
+
+Looks like the `extract_dat_attrs()` function is ready for prime-time. Let's now apply it to all of the line nodes in the `ns_dat_lines` object using the `map_dfr()` function from the `purrr` package as in @exm-cd-enntt-extract-attributes-all.
+
+::: {#exm-cd-enntt-extract-attributes-all}
+```{r}
+#| label: cd-enntt-extract-attributes-all
+
+# Extract attributes from all line nodes
+ns_dat_attrs <- 
+  ns_dat_lines |> 
+  map_dfr(extract_dat_attrs)
+
+# Inspect
+glimpse(ns_dat_attrs)
+
+```
+:::
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+The `map*()` functions from the `purrr` package are a family of functions that apply a function to each element of a vector, list, or data frame. The `map_dfr()` function is a variant of the `map()` function that returns a data frame that is the result of row-binding the results, hence `_dfr`.
+:::
+
+We can see that the `ns_dat_attrs` object is a data frame with 116,341 rows and 4 columns, just has we expected. We can now combine the `ns_dat_attrs` data frame with the `ns_tok_lines` vector to create a single data frame with the attributes and the text. This is done with the `mutate()` function assigning the `ns_tok_lines` vector to a new column named `text` as in @exm-cd-enntt-combine-attributes-text.
+
+::: {#exm-cd-enntt-combine-attributes-text}
+```{r}
+#| label: cd-enntt-combine-attributes-text
+
+# Combine attributes and text
+ns_dat <- 
+  ns_dat_attrs |> 
+  mutate(text = ns_tok_lines)
+
+# Inspect
+glimpse(ns_dat)
+```
+:::
+
+This is the data for the native speakers. We can now repeat this process for the non-native speakers, *or* we can create a function to do it for us. Let's explore the later option.
+
+This is the data for the native speakers. We can now repeat this process for the non-native speakers, or we can create a function to do it for us. Let's explore the later option.
+
+I will name this function `combine_dat_tok()` and it will take two arguments: `dat_file` and `tok_file`. The `dat_file` argument will be the path to the *.dat* file and the `tok_file` argument will be the path to the *.tok* file. The function first reads both the files into R as lines. Then it extracts the attributes from the *.dat* file using the `extract_dat_attrs()` function we created earlier. Finally, it combines the attributes with the text from the *.tok* file and returns a data frame.
+
+Note that there is at least one tweak we need to make to our existing code base if we plan on combining the native and non-native data. As our function stands, it will return a data frame with the same column names for both the native and non-native data. We will need to add a column to which we will indicate what type of data it is (native or non-native). This is where the `type` column we planned earlier comes in. There are multiple ways to do this. We could add a column to the data frame before we return it, or we could add a column to the data frame after we return it. I will opt for the former and embed it inside of our function `combine_dat_tok()`.
+
+::: {#exm-cd-enntt-combine-dat-tok-function}
+```{r}
+#| label: cd-enntt-combine-dat-tok-function
+
+# Load packages
+library(rvest) # for reading/parsing HTML
+library(purrr) # for mapping functions
+library(fs) # for working with files
+
+# Function to combine *.dat* and *.tok* files
+combine_dat_tok <- function(dat_file, tok_file) {
+  # Read in files by lines
+  dat <-
+    read_html(dat_file) |>
+    html_nodes("line")
+  tok <- read_lines(tok_file)
+
+  # Create function to extract attributes
+  extract_dat_attrs <- function(line_node) {
+    session_id <- line_node |> html_attr("session_id")
+    speaker_id <- line_node |> html_attr("mepid")
+    state <- line_node |> html_attr("state")
+    session_seq <- line_node |> html_attr("seq_speaker_id")
+
+    tibble(session_id, speaker_id, state, session_seq)
+  }
+
+  # Apply function to all line nodes
+  dat_attrs <-
+    dat |>
+    map_dfr(extract_dat_attrs)
+
+  # Combine attrs and text into data frame
+  dataset <-
+    dat_attrs |>
+    bind_cols(text = tok)
+
+  # Add type column with value of file name (w/o extension)
+  dataset <- 
+    dataset |>
+    mutate(type = path_file(dat_file) |> path_ext_remove())
+
+  # Return data frame
+  return(dataset)
+}
+```
+:::
+
+Apply the `combine_dat_tok()` function to read in the data for the native speakers and the non-native speakers in a few lines of code, as in @exm-cd-enntt-combine-dat-tok.
+
+::: {#exm-cd-enntt-combine-dat-tok}
+```{r}
+#| label: cd-enntt-combine-dat-tok
+#| eval: false
+
+# Native speakers
+ns_dat <-
+  combine_dat_tok(
+    dat_file = "../data/original/enntt/natives.dat",
+    tok_file = "../data/original/enntt/natives.tok"
+  )
+# Preview
+glimpse(ns_dat)
+
+# Non-native speakers
+nns_dat <-
+  combine_dat_tok(
+    dat_file = "../data/original/enntt/nonnatives.dat",
+    tok_file = "../data/original/enntt/nonnatives.tok"
+  )
+# Preview
+glimpse(nns_dat)
+```
+
+```{r}
+#| label: cd-enntt-combine-dat-tok-run
+#| echo: false
+
+# Native speakers
+ns_dat <-
+  combine_dat_tok(
+    dat_file = "data/curate-datasets/enntt/natives.dat",
+    tok_file = "data/curate-datasets/enntt/natives.tok"
+  )
+# Preview
+glimpse(ns_dat)
+
+# Non-native speakers
+nns_dat <-
+  combine_dat_tok(
+    dat_file = "data/curate-datasets/enntt/nonnatives.dat",
+    tok_file = "data/curate-datasets/enntt/nonnatives.tok"
+  )
+# Preview
+glimpse(nns_dat)
+```
+:::
+
+The last step to curate the dataset is to combine the native and non-native data into a single data frame. We can do this using the `bind_rows()` function from the `dplyr` package, as essentially we are just stacking the rows from each data frame on top of each other. 
+
+```{r}
+#| label: combine-ns-dat-nns-dat
+
+# Combine native and non-native data
+enntt_tbl <- 
+  bind_rows(ns_dat, nns_dat)
+```
+
+The `ennnt_tbl` data frame is the curated dataset. We can perform some data checks to make everything looks good and then proceed to writing and documenting the dataset.
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+What data checks could we perform to ensure that the data is in the format we expect? What are some of the things we should be looking for?
+:::
 
 ### Write dataset
 
-### Summary
+As we have done for the other curated datasets, we will write our curated dataset to a *.csv* file. We will use the `write_csv()` function and name the file appropriately, as in @exm-cd-enntt-write-csv.
 
-In this section we looked at semi-structured data. This type of data often requires the most work to organize into a tidy dataset. We continued to work with many of the R programming strategies introduced to this point in the textbook. 
+::: {#exm-cd-enntt-write-csv}
+```{r}
+#| label: cd-enntt-write-csv
+#| eval: false
 
-...
+# Create directory
+dir_create("../data/derived/enntt")
+
+# Write dataset to *.csv* file
+write_csv(enntt_tbl, "../data/derived/enntt/enntt_curated.csv")
+```
+:::
+
+Document the dataset in a data dictionary using the `create_data_dictionary()` function from the `qtalrkit` package, as in @exm-cd-enntt-create-data-dictionary.
+
+::: {#exm-cd-enntt-create-data-dictionary}
+```{r}
+#| label: cd-enntt-create-data-dictionary
+#| eval: false
+
+# Load package
+library(qtalrkit)
+
+# Create data dictionary
+create_data_dictionary(
+  data = enntt_tbl,
+  file_path = "../data/derived/enntt_curated_dd.csv"
+)
+```
+:::
+
+After editing the data dictionary file to include the appropriate information, we will have something similar to @tbl-cd-enntt-data-dictionary.
+
+```{r}
+#| label: tbl-cd-enntt-data-dictionary
+#| tbl-cap: "Data dictionary for the curated ENNTT dataset"
+#| echo: false
+
+read_csv("data/curate-datasets/cd-enntt_curated_dd.csv") |> 
+  kable() |> 
+  kable_styling()
+```
+
+The final step is to clean up and comment the code added to the *2-curate-datasets.qmd* file. The final directory structure is seen in @exm-cd-enntt-final-directory-structure.
+
+::: {#exm-cd-enntt-final-directory-structure}
+```bash
+project/
+├── code/
+│   ├── 1-acquire-data.qmd
+│   ├── 2-curate-data.qmd
+│   └── ...
+├── data/
+│   ├── analysis/
+│   ├── derived/
+│       │── enntt_curated_dd.csv
+│   │   └── enntt/
+│   │       └── enntt_curated.csv
+│   └── original/
+│       │── enntt_do.csv
+│       └── enntt/
+│           ├── natives.dat
+│           ├── natives.tok
+│           ├── nonnatives.dat
+│           ├── nonnatives.tok
+│           ├── translations.dat
+│           └── translations.tok
+├── output/
+│   ├── figures/
+│   ├── reports/
+│   ├── results/
+│   └── tables/
+├── README.md
+└── _main.R
+```
+:::
 
 ## Summary {.unnumbered}
 
 In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data --unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of metadata included. The results from data curation results in a dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. In addition to the code we use to derived the curated dataset's structure, we also include a data dictionary which documents the curated dataset.
-
-- [ ] emphasize the importance of ahereing to the unit of analysis for the research, and how this is reflected in the curated dataset. And how unit of observation derived from the transformational steps in the next chapter.
 
 ## Activities {.unnumbered}
 

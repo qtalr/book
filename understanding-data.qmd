@@ -489,6 +489,15 @@ As we round out this section on data organization, it is important to stress tha
 
 ### Transformation {#sec-ud-transformation}
 
+<!-- 
+- [ ] Consider reordering: 
+  - Normalization
+  - *Recoding*
+  - *Tokenization* 
+  - Generation 
+  - Merging
+-->
+
 At this point have introduced the first step creating a dataset ready for analysis, data curation. However, a curated dataset is rarely the final organizational step before proceeding to statistical analysis. Many times, if not always, the curated dataset requires **data transformation** to derive or generate new data for the dataset. This process may incur row-wise (observation) or column-wise (variable) level changes, as illustrated in @fig-ud-transformations.
 
 ```{r}
@@ -528,6 +537,8 @@ text_tbl |>
 
 The types of transformations we apply will depend on the specific needs of the project, but can include those found in @tbl-ud-text-normalization.
 
+<!-- [ ] Consider moving 'stopword removal' to merging, in this case anti_joining -->
+
 | Task name                                     | Relevant example                                                 | Typical purpose                                                                                          |
 |-----------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
 | Lowercasing                                   | `"Text"` to `"text"`                                             | Minimizing case sensitivity in subsequent analysis                                                       |
@@ -537,10 +548,12 @@ The types of transformations we apply will depend on the specific needs of the p
 
 : Common text normalization tasks {#tbl-ud-text-normalization}{tbl-colwidths="[25, 30, 45]" .sm .striped}
 
-These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun). The same can be said for removing or adjusting particular characters and discarding stopwords.
+These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun). The same can be said for removing or adjusting particular characters and discarding //FIXME stopwords.
 
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
+
+//FIXME
 
 Stopwords are words that are so commonly used in a language that they tend not to contribute much to the meaning of a sentence. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about stopwords in @Kaur2018. 
 :::
@@ -771,12 +784,15 @@ A word of caution: automated linguistic annotation offers rapid access to abunda
 
 #### Observation/ variable merging {#sec-ud-obs-variable-merging}
 
-
 <!-- The process of merging aims to *join* a variable or set of variables with another variable or set of variables from another dataset. The option to merge two (or more) datasets requires that there is a shared variable that indexes and aligns the datasets. -->
 
 <!-- Merging is a fundamental operation in data integration that combines variables from different datasets based on a common key or identifier. This process enables researchers to enrich their data by incorporating additional information from external sources. Merging can be performed using various techniques, such as inner join, outer join, or cross join, depending on the desired outcome. When executed correctly, merging can provide a more comprehensive view of the data and facilitate more robust analyses. -->
 
-<!-- Merging involves the integration of different datasets or different sections of a dataset. Techniques used include joining metadata with original text data through stand-off annotation, or combining data from different sources by either concatenating datasets or joining them based on common keys. The merging process enhances the data's richness by creating a more comprehensive view, increasing the robustness of the subsequent analysis by leveraging complementary information from various sources. -->
+<!-- Merging involves the integration of different datasets or different sections of a dataset. Techniques used include joining metadata with original text data through stand-off annotation, or combining data from different sources by either concatenating datasets or joining them based on common keys. The merging process enhances the data's richness by creating a more comprehensive view, increasing the robustness of the subsequent analysis by leveraging complementary information from various sources. 
+
+2023-08-12: merging can also remove information, e.g. when merging two datasets with different variables, the merged dataset will only contain the variables that are shared by both datasets. This is often use to remove //TODO stopwords, for example.
+
+-->
 
 The processing of merging datasets is a transformation step which can be row-wise or column-wise. Row-wise merging is the process of combining datasets by appending observations from one dataset to another. Column-wise merging is the process of combining datasets by appending variables from one dataset to another. In either case, merging provides a way to enrich a dataset by incorporating additional information.
 

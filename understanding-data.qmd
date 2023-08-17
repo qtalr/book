@@ -54,7 +54,7 @@ In this chapter, the groundwork is laid for deriving insights from text analysis
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Objects, Packages and functions](https://github.com/qtalr/swirl)\
+**What**: [Objects, Packages and functions](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To introduce you to the main types of objects in R and to understand the role and use of functions and packages in R programming.
 :::
@@ -122,7 +122,7 @@ Given the sampling frame for this corpus visualized in @fig-ud-brown-distributio
 #| fig-cap: "Overview of the sampling frame of the Brown Corpus."
 #| fig-alt: "The Brown Corpus sampling frame is shown as a bar plot comprised of 15 main categories (strata) of text on the y-axis. The relative size of each category is shown as a percentage of the total number of words in the corpus on the x-axis. The largest categories are 'Fiction' (23%) and 'Press' (18%) and the smallest categories are 'Religion' (0.3%) and 'Learned' (0.2%)."
 
-brown <- read_csv("data/understanding-data/brown.csv")
+brown <- read_csv("data/ud-brown.csv")
 
 brown_categories_docs <-
   brown |>
@@ -457,7 +457,7 @@ Let's look at an example of a tidy dataset. Using the criteria just described, l
 #| label: tbl-ud-info-values-masc
 #| tbl-cap: "MASC dataset variables."
 
-masc_exm <- read_rds("data/understanding-data/formats_masc_df.rds") # read in MASC example dataset
+masc_exm <- read_rds("data/ud-formats_masc_df.rds") # read in MASC example dataset
 
 masc_exm |>
   slice_head(n = 10) |> # select first 10 rows
@@ -472,7 +472,7 @@ Now in relation to `date`, `ref_num`, and `num_letters`. All three are numerals,
 
 With this in mind, let's return to the question of whether `date`, `ref_num`, and `num_letters` are numeric or ordinal. Starting with the trickiest one, `date`, we can ask the question to identify numeric data: "how much or how many?". In the case of `date`, the answer is neither. A date is a point in time, not a quantity. So `date` is not numeric. But it does provide information about order. Hence, `date` is ordinal. `ref_num` is also ordinal because the question "what order?" can be asked of it. Finally, `num_letters` is numeric because it answers the question "how many?".
 
-Let's turn to the second semantic value of a tidy dataset. In a tidy dataset, each row is an observation. But an observation of what? This depends on what the unit of observation is. That sounds circular, but its not. The **unit of observation** is simply the primary entity that is being observed. Without context, it can it can be identified in a dataset by looking at the level of specificity of the variable values and asking what each variable describes. When one variable appears to be the most individualized and other variables appear to describe that variable, then the most individualized variable is likely the unit of observation of the dataset, *i.e.* the meaning of each observation.
+Let's turn to the second semantic value of a tidy dataset. In a tidy dataset, each row is an observation. But an observation of what? This depends on what the unit of observation is. That sounds circular, but its not. The **unit of observation** is simply the primary entity that is being observed or measured [@Sedgwick2015]. Even without context, it can often be identified in a dataset by looking at the level of specificity of the variable values and asking what each variable describes. When one variable appears to be the most individualized and other variables appear to describe that variable, then the most individualized variable is likely the unit of observation of the dataset, *i.e.* the meaning of each observation.
 
 Applying these strategies to the Table in [-@tbl-ud-info-values-masc], we can see that each observation at its core is a word. We see that the values of each observation are the attributes of each word. `word` is the most individualized variable and the `pos` (part-of-speech), `num_letters`, and `ref_num` all describe the word. 
 
@@ -553,7 +553,7 @@ These transformations are column-wise operations, meaning they preserve the numb
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
 
-//FIXME
+//FIXME: *Move stopwords to merging as we will use anti joining to remove them.*
 
 Stopwords are words that are so commonly used in a language that they tend not to contribute much to the meaning of a sentence. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about stopwords in @Kaur2018. 
 :::
@@ -576,6 +576,8 @@ text_tbl |>
 When text normalization steps are motivated and applied with foresight they serve to enhance the quality of the data and improves the reliability of subsequent transformation steps.
 
 #### Text tokenization {#sec-ud-text-tokenization}
+
+//FIXME: *Reorder: recoding and tokenization. Recoding/ text-normalization are column-wise operations, tokenization is row-wise. Then generation/merging are row- and colum-wise.*
 
 Another text-oriented transformation step is **text tokenization**. This process involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable. At its core, tokenization is the process which enables the quantitative analysis of text.
 
@@ -742,7 +744,7 @@ To illustrate the process of generating linguistic annotation with existing tool
 #| tbl-colwidths: [15, 15, 70]
 
 masc_generate_exm <-
-  readtext::readtext("data/understanding-data/formats_masc_txt.txt") |>
+  readtext::readtext("data/ud-formats_masc_txt.txt") |>
   dplyr::as_tibble() |>
   unnest_tokens(sentence, text, token = "sentences", to_lower = FALSE) |>
   mutate(sentence = str_squish(sentence)) |>

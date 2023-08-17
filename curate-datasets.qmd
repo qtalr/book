@@ -46,7 +46,7 @@ Formatting:
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-<!-- [ ] change to outcomes -->
+<!-- [x] change to outcomes -->
 
 - Describe the importance of data curation in text analysis
 - Recognize the different types of data formats
@@ -64,6 +64,13 @@ Formatting:
 # Packages
 pacman::p_load(readtext)
 ```
+
+<!--  
+- Curation: goals
+  - Maintain relationship with the original data
+  - Create a tidy dataset: one observation per row, one variable per column, one value per cell
+  - Maintain flexibility for analysis, i.e. do not remove information that may be useful for other analyses
+-->
 
 In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. In this chapter we will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method(s) that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.  
 
@@ -131,7 +138,7 @@ The *europarl_do.csv* file contains the data origin information documented as pa
 #| echo: false
 
 # Read in the data origin file and display it as a table
-read_csv("data/curate-datasets/cd-europarl_do.csv") |>
+read_csv("data/cd-europarl_do.csv") |>
   kable() |>
   kable_styling()
 ```
@@ -238,12 +245,12 @@ readtext_options(verbosity = 0) # no messages from readtext
 
 # Read Europarl files .es and .en
 europarl_docs_tbl <- 
-  readtext("data/curate-datasets/europarl/*") |> 
+  readtext("data/europarl/original/*") |> 
   tibble() 
 ```
 :::
 
-In @exm-cd-europarl-readtext, the `readtext()` function reads all the files in the *../data/curate-datasets/europarl/* directory and returns a tibble.
+In @exm-cd-europarl-readtext, the `readtext()` function reads all the files in the *../data/original/europarl/* directory and returns a tibble.
 
 ::: {.callout}
 **{{< fa exclamation-triangle >}} Warning**
@@ -529,7 +536,7 @@ An example of the data dictionary for the `europarl_curated_tbl` dataset is show
 #| tbl-cap: "Data dictionary for the `europarl_curated_tbl` dataset."
 #| echo: false
 
-read_csv("data/curate-datasets/cd-europarl_curated_dd.csv") |> 
+read_csv("data/cd-europarl_curated_dd.csv") |> 
   kable() |> 
   kable_styling() 
 ```
@@ -595,7 +602,7 @@ In addition to other important information, the data origin file *cabnc_do.csv* 
 #| tbl-cap: "Data origin: CABNC datasets"
 #| echo: false
 
-read_csv("data/curate-datasets/cd-cabnc_do.csv") |> 
+read_csv("data/cd-cabnc_do.csv") |> 
   kable() |> 
   kable_styling()
 ```
@@ -614,9 +621,9 @@ With our idealized dataset in mind, let's start the process of curation by readi
 
 # Read the relevant datasets
 cabnc_utterances <- 
-  read_csv("data/curate-datasets/cabnc/utterances.csv")
+  read_csv("data/cabnc/original/utterances.csv")
 cabnc_participants <- 
-  read_csv("data/curate-datasets/cabnc/participants.csv")
+  read_csv("data/cabnc/original/participants.csv")
 ```
 :::
 
@@ -875,7 +882,7 @@ After running the code in @exm-cd-cabnc-create-data-dict, we can open the *cabnc
 #| tbl-cap: "Data dictionary example for the curated CABNC dataset."
 #| echo: false
 
-read_csv("data/curate-datasets/cd-cabnc_curated_dd.csv") |> 
+read_csv("data/cd-cabnc_curated_dd.csv") |> 
   kable() |> 
   kable_styling()
 ```
@@ -976,7 +983,7 @@ We now inspect the data origin file for the ENNTT corpus, *enntt_do.csv*, in @tb
 #| tbl-cap: "Data origin file for the ENNTT corpus."
 #| echo: false
 
-read_csv("data/curate-datasets/cd-enntt_do.csv") |> 
+read_csv("data/cd-enntt_do.csv") |> 
   kable() |> 
   kable_styling()
 ```
@@ -1063,7 +1070,7 @@ library(rvest)
 
 # Read in *.dat* file as HTML
 ns_dat_lines <- 
-  read_html("data/curate-datasets/enntt/natives.dat") |> 
+  read_html("data/enntt/original/natives.dat") |> 
   html_elements("line")
 
 # Inspect
@@ -1082,7 +1089,7 @@ When can see that the `ns_dat_lines` object is a special type of list, `xml_node
 
 # Read in *.tok* file by lines
 ns_tok_lines <- 
-  read_lines("data/curate-datasets/enntt/natives.tok")
+  read_lines("data/enntt/original/natives.tok")
 
 # Inspect
 class(ns_tok_lines)
@@ -1290,8 +1297,8 @@ glimpse(nns_dat)
 # Native speakers
 ns_dat <-
   combine_dat_tok(
-    dat_file = "data/curate-datasets/enntt/natives.dat",
-    tok_file = "data/curate-datasets/enntt/natives.tok"
+    dat_file = "data/enntt/original/natives.dat",
+    tok_file = "data/enntt/original/natives.tok"
   )
 # Preview
 glimpse(ns_dat)
@@ -1299,8 +1306,8 @@ glimpse(ns_dat)
 # Non-native speakers
 nns_dat <-
   combine_dat_tok(
-    dat_file = "data/curate-datasets/enntt/nonnatives.dat",
-    tok_file = "data/curate-datasets/enntt/nonnatives.tok"
+    dat_file = "data/enntt/original/nonnatives.dat",
+    tok_file = "data/enntt/original/nonnatives.tok"
   )
 # Preview
 glimpse(nns_dat)
@@ -1367,7 +1374,7 @@ After editing the data dictionary file to include the appropriate information, w
 #| tbl-cap: "Data dictionary for the curated ENNTT dataset"
 #| echo: false
 
-read_csv("data/curate-datasets/cd-enntt_curated_dd.csv") |> 
+read_csv("data/cd-enntt_curated_dd.csv") |> 
   kable() |> 
   kable_styling()
 ```

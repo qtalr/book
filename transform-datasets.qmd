@@ -27,8 +27,10 @@ Exercises:
 
 Formatting:
 
-- [ ] Add a description of the importance of the unit of observation in the transformation process.
-    - Note: that some units of observation will require that the data have more textual context (e.g. syntactic parsing) than others (e.g. word frequencies). It is important that the presentation of the transformation steps are no necessarily in the order in which they are applied.
+- [ ] Add a description of the importance of the unit of analysis and unit of observation in the transformation process.
+  - In the curation process, the original data and utility of the dataset is priority. In the transformation process, the focus is on the analysis and the unit of analysis and unit of observation are the primary considerations.
+- [ ] Point out that some units of observation will require that the data have more textual context (e.g. syntactic parsing) than others (e.g. word frequencies). It is important that the presentation of the transformation steps are no necessarily in the order in which they are applied.
+
 -->
 
 > Nothing is lost. Everything is transformed.
@@ -57,7 +59,14 @@ Formatting:
 pacman::p_load(tidytext, cleanNLP) # load packages
 ```
 
-In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. The transformation process is divided into four categories: normalization, tokenization, recoding, generation, and merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
+<!-- 
+- Transformation: goals
+  - Prepare curated dataset for analysis
+  - Manipulate dataset row-wise and/ or column-wise
+  - Focus on particular analysis needs: unit of analysis, unit of observation, operationalization of variables, etc.
+-->
+
+In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. The transformation process is divided into four categories: text normalization, text tokenization, variable recoding, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
 
 It is sometimes necessary to create several transformed datasets from one curated dataset in cases where there are multiple analyses to be performed. This why we start with a curated dataset rather than directly deriving a transformed dataset from the original data. It allows for various transformation methods to produce different formats for different analyses.
 
@@ -71,7 +80,7 @@ It is sometimes necessary to create several transformed datasets from one curate
 - [ ] update lesson purpose
 -->
 
-**What**: [Reshaping datasets](https://github.com/qtalr/lessons)\
+**What**: [Reshape dataset rows, Reshape dataset columns](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: ...
 :::
@@ -79,11 +88,6 @@ It is sometimes necessary to create several transformed datasets from one curate
 <!-- 
 New outline: 2023-08-12
 
-- Swirl lesson
-  - Reshaping datasets (row-wise?)
-  - Reshaping datasets (column-wise?)
-
----
 
 (See 'Understanding data' chapter for background @sec-ud-transformation)
 
@@ -96,7 +100,7 @@ text normalization, text tokenization, variable recoding, variable generation, a
   - Derive
 - Tokenization (row-wise)
   - Words, n-grams, sentences
-- Generation (row-wise/ column-wise)
+- Generation (row-wise and column-wise)
   - Lexical annotation
   - Syntactic annotation
 - Merging (row-wise/ column-wise)
@@ -112,21 +116,37 @@ text normalization, text tokenization, variable recoding, variable generation, a
 
 ## Normalization {#sec-td-normalization}
 
-<!-- Consider: [2023-08-12]:
+<!--  
 
-- Curation: goals
-  - Maintain relationship with the original data
-  - Create a tidy dataset: one observation per row, one variable per column, one value per cell
-  - Maintain flexibility for analysis, i.e. do not remove information that may be useful for other analyses
-- Transformation: goals
-  - Prepare curated dataset for analysis
-  - Manipulate dataset row-wise and/ or column-wise
-  - Focus on particular analysis needs: unit of analysis, unit of observation, operationalization of variables, etc.
+column-wise
+
 -->
 
 The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis. 
 
 **Europarl Corpus**
+
+The data dictionary for the Europarl Corpus appears in @tbl-td-europarl-dd.
+
+```{r}
+#| label: tbl-td-europarl-dd
+#| tbl-cap: "Data dictionary for the Europarl Corpus."
+#| message: false
+
+read_csv(file = "data/cd-europarl_curated_dd.csv") |> 
+  kable() |> 
+  kable_styling()
+```
+
+```{r}
+#| label: td-europarl-read-run
+#| message: false
+
+europarl_curated_tbl <- 
+  read_csv(file = "data/europarl_curated.csv")
+```
+
+
 
 Consider the curated Europarl Corpus dataset. I will read in the dataset. Since the dataset is quite large, I have also subsetted the dataset keeping only the first 1,000 observations for each of value of `type` for demonstration purposes.
 
@@ -226,6 +246,17 @@ Now we have normalized text in the `sentence` column in the europarl dataset.
 
 ## Recoding {#sec-td-recoding}
 
+<!--  
+
+column-wise
+
+Data:
+  - SWDA
+    - education (classify)
+    - birth_year (derive)
+    - utterance_text (extract, disfluencies)
+-->
+
 <!-- Consider:
 
 The process of recoding aims to _recast_ the values of a variable or set of variables to a new variable or set of variables to enable more direct access. This may include extracting values from a variable, stemming or lemmatization of words, tokenization of linguistic forms (words, ngrams, sentences, etc.), calculating the lengths of linguistic units, calculating type-token ratios, syntactic complexity, and/ or removing variables that will not be used in the analysis, etc.
@@ -234,6 +265,78 @@ The process of recoding aims to _recast_ the values of a variable or set of vari
 Normalizing text can be seen as an extension of dataset curation to some extent in that the structure of the dataset is maintained. In the Europarl case, we saw this to be true. In the case of recoding, and other transformational steps, the aim will be to modify the dataset structure either by rows, columns, or both. Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.
 
 **Switchboard Dialogue Act Corpus**
+
+<!--  
+
+Recode: 
+
+- education (classify)
+- birth_year (derive)
+- utterance_text (extract, disfluencies) (derive)
+
+-->
+
+```{r}
+#| label: tr-swda-dataset-read-run
+#| include: false
+
+swda_curated_tbl <- 
+  read_csv("data/swda_curated.csv") |> 
+  select(
+    doc_id,
+    speaker_id,
+    sex,
+    education,
+    birth_year,
+    utterance_id,
+    damsl_tag,
+    utterance_text
+  )
+
+
+swda_curated_dd <- 
+  create_data_dictionary(
+  data = swda_curated_tbl,
+  file_path = "data/tr-swda_curated_dd.csv",
+  model = "gpt-3.5-turbo"
+)
+```
+
+Data dictionary. 
+
+```{r}
+#| label: tbl-tr-swda-curated-dd
+#| tbl-cap: "Data dictionary for the Switchboard Dialogue Act Corpus."
+#| message: false
+#| echo: false
+
+# SWDA data dictionary ----
+read_csv("data/tr-swda_curated_dd.csv") |>
+  kable() |>
+  kable_styling()
+```
+
+Read in the curated dataset. 
+
+```{r}
+#| label: tr-swda-dataset-read-show
+#| eval: false
+
+swda_curated_tbl <- 
+  read_csv("data/derived/swda/swda_curated.csv")
+```
+
+Preview the first 10 lines of the dataset. 
+
+```{r}
+#| label: tr-swda-curated-preview
+
+swda_curated_tbl |>
+  slice_head(n = 10)
+```
+
+---
+
 
 The Switchboard Dialogue Act Corpus dataset that was //FIXME curated in the previous chapter contains a number of variables describing conversations between speakers of American English. 
 
@@ -345,27 +448,76 @@ sdac_disfluencies |> # dataset
 
 ## Tokenization {#sec-td-tokenization}
 
-<!-- 2023-08-12: added -->
-
 <!--  
 
-Data: ???
+row-wise
 
-- `tidytext` package
-  - `unnest_tokens()` function
-- `tokenizers` package
-  - `tokenize_words()` function
+Data: 
+
+- CABNC (expand)
+  - tidytext::unnest_tokens()
+- PELIC tokens (contract)
+  - stringr::str_c() [w/ collapse = " "]
 
 -->
+
+
+The CABNC Corpus data dictionary. 
+
+```{r}
+#| label: tbl-td-cabnc-dd
+#| tbl-cap: "Data dictionary for the CABNC Corpus."
+#| message: false
+
+# [ ] filter the data dictionary to only include the variables of interest
+
+read_csv(file = "data/cd-cabnc_curated_dd.csv") |> 
+  kable() |> 
+  kable_styling()
+```
+
+
+Read the dataset. 
+```{r}
+#| label: td-cabnc-read-run
+#| include: false
+#| message: false
+
+cabnc_curated_tbl <- 
+  read_csv(file = "data/cabnc_curated.csv")
+```
+
+```{r}
+#| label: td-cabnc-read-show
+#| eval: false
+
+cabnc_curated_tbl <- 
+  read_csv(file = "../data/derived/cabnc_curated.csv")
+```
+
+
+<!-- [ ] Add PELIC data dictionary and read dataset. -->
+
+
 
 ## Generatation {#sec-td-generation}
 
 <!--  
 
+row- and column-wise
+
+Data: 
+
+- Europarl
+  - English
+  - Spanish
+
 - Lexical annotation
   - POS, lemma, etc.
 - Syntax annotation
   - Dependency parsing
+
+Mention `rsyntax` package for extracting/ recoding patterns from syntactic annotations.
 
 -->
 
@@ -497,6 +649,17 @@ The process of generation aims to _augment_ a variable or set of variables. In e
 ## Merging {#sec-td-merging}
 
 <!--
+
+Data: 
+
+- CEDEL2 (row-wise)
+  - Natives
+  - Learners
+
+- PEDC (column-wise)
+  - Wordbank: word-level `category`` and `item_kind`
+  - eLexicon: word-level word frequency measures
+
 Consider: 
 
 - Linguistic information:
@@ -511,11 +674,6 @@ Consider:
   - Geographic information
   - Time information
   - ...
-
-- Change dataset: 
-  - SOTU
-  - Written (Brown? Other better matched for register/ time-period) vs. Spoken (Switchboard)
-
 
 ---
 

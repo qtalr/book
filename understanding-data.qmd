@@ -120,6 +120,7 @@ Given the sampling frame for this corpus visualized in @fig-ud-brown-distributio
 ```{r}
 #| label: fig-ud-brown-distribution
 #| fig-cap: "Overview of the sampling frame of the Brown Corpus."
+#| fig-height: 3
 #| fig-alt: "The Brown Corpus sampling frame is shown as a bar plot comprised of 15 main categories (strata) of text on the y-axis. The relative size of each category is shown as a percentage of the total number of words in the corpus on the x-axis. The largest categories are 'Fiction' (23%) and 'Press' (18%) and the smallest categories are 'Religion' (0.3%) and 'Learned' (0.2%)."
 
 brown <- read_csv("data/ud-brown.csv")
@@ -201,7 +202,7 @@ The [Santa Barbara Corpus of Spoken American English (SBCSAE)](https://www.lingu
 #| out-width: '80%'
 #| echo: false
 
-include_graphics("figures/understanding-data/word-mapper.png")
+include_graphics("figures/ud-word-mapper.png")
 ```
 :::
 
@@ -444,7 +445,7 @@ In this work, a **tidy dataset** refers both to the structural (physical) and in
 #| label: fig-ud-tidy-format-image
 #| fig-cap: 'Visual summary of the tidy format.'
 
-knitr::include_graphics("figures/understanding-data/ud-tidy.drawio.png")
+knitr::include_graphics("figures/ud-tidy.drawio.png")
 ```
 
 In terms of semantics, columns and rows both contribute to the informational value of the dataset. Let's start with columns. In a tidy dataset, each column is a variable, an attribute that can take on a number of values. Although variables vary in terms of values, they do not in type. A variable is of one and only one informational type. Statistically speaking, informational types are defined as **levels of measurement**, a classification system used to semantically distiguish between types of variables. There are four levels (or types) in this system: nominal, ordinal, interval, and ratio. 
@@ -544,19 +545,10 @@ The types of transformations we apply will depend on the specific needs of the p
 | Lowercasing                                   | `"Text"` to `"text"`                                             | Minimizing case sensitivity in subsequent analysis                                                       |
 | Removal of Punctuation and Special Characters | `"Hello, World!"` to `"Hello World"`                             | Removing non-alphanumeric characters that may not carry semantic value                                   |
 | Adjustment of Forms                           | `"colour"` to `"color"`, `"it's"` to `"it is"`, `"1"` to `"one"` | Standardizing variations in spelling, contractions, and numeric forms to a common format                 |
-| Stopword Removal                              | `"This is a sentence"` to `"This sentence"`                      | Discarding common words that usually do not contain meaningful semantic information |
 
 : Common text normalization tasks {#tbl-ud-text-normalization}{tbl-colwidths="[25, 30, 45]" .sm .striped}
 
-These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun). The same can be said for removing or adjusting particular characters and discarding //FIXME stopwords.
-
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
-
-//FIXME: *Move stopwords to merging as we will use anti joining to remove them.*
-
-Stopwords are words that are so commonly used in a language that they tend not to contribute much to the meaning of a sentence. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about stopwords in @Kaur2018. 
-:::
+These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun).
 
 Let's be conservative and only apply lowercasing to our toy dataset as seen in @tbl-ud-text-dataset-lowercase.
 
@@ -794,6 +786,11 @@ A word of caution: automated linguistic annotation offers rapid access to abunda
 
 2023-08-12: merging can also remove information, e.g. when merging two datasets with different variables, the merged dataset will only contain the variables that are shared by both datasets. This is often use to remove //TODO stopwords, for example.
 
+Stopwords: 
+
+| Stopword Removal                              | `"This is a sentence"` to `"This sentence"`                      | Discarding common words that usually do not contain meaningful semantic information |
+
+
 -->
 
 The processing of merging datasets is a transformation step which can be row-wise or column-wise. Row-wise merging is the process of combining datasets by appending observations from one dataset to another. Column-wise merging is the process of combining datasets by appending variables from one dataset to another. In either case, merging provides a way to enrich a dataset by incorporating additional information.
@@ -900,7 +897,15 @@ text_participant_tbl |>
   kable(booktabs = TRUE)
 ```
 
-Another common case where joining datasets is useful is when there are external resources that can be used to enrich the dataset. For example, a dataset of text data may include a variable that identifies the language of each document. This variable can be used to join the dataset with a dataset of language metadata, such as the number of speakers of each language, as long as the language metadata dataset includes a variable that identifies the language of each document in the same format as the language variable in the text dataset.
+Joining datasets is a powerful tool for enriching a dataset with additional column-wise information. It is important to note that merging datasets can also remove information in a row-wise manner. For example, when merging two datasets with a shared variable, it is possible to remove observations that do not have a match one of the two datasets. This process effectively filters out observations not shared between the two datasets. On the other hand, an anti-join explicitly removes observations that are shared between the two datasets. 
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+In some analyses, it may be useful to remove words with little semantic value, such as articles, prepositions, and conjunctions or words that are very common in the language. These are known as stopwords. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. Anti-joining a stopword list with a dataset of word tokens is often used to remove stopwords from the dataset.
+
+However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about approaches to identifying stopwords in @Kaur2018. 
+:::
 
 ---
 
@@ -971,7 +976,7 @@ In this chapter we have focused on data and information --the first two componen
 #| fig-cap: 'Understanding data: visual summary'
 #| out.width: 75%
 
-knitr::include_graphics("figures/understanding-data/ud-diki.drawio.png")
+knitr::include_graphics("figures/ud-diki.drawio.png")
 ```
 
 First a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.

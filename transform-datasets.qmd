@@ -66,7 +66,7 @@ pacman::p_load(tidytext, cleanNLP) # load packages
   - Focus on particular analysis needs: unit of analysis, unit of observation, operationalization of variables, etc.
 -->
 
-In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. The transformation process is divided into four categories: text normalization, text tokenization, variable recoding, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
+In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. The transformation process is divided into four categories: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
 
 It is sometimes necessary to create several transformed datasets from one curated dataset in cases where there are multiple analyses to be performed. This why we start with a curated dataset rather than directly deriving a transformed dataset from the original data. It allows for various transformation methods to produce different formats for different analyses.
 
@@ -86,19 +86,13 @@ It is sometimes necessary to create several transformed datasets from one curate
 :::
 
 <!-- 
-New outline: 2023-08-12
 
-
-(See 'Understanding data' chapter for background @sec-ud-transformation)
-
-text normalization, text tokenization, variable recoding, variable generation, and observation/ variable merging.
-
-- Normalization (column-wise)
+- Normalization (column-wise):  to standardize or simplify the text to reduce variability
   - Artifact removal
 - Recoding (column-wise)
   - Classify
   - Derive
-- Tokenization (row-wise)
+- Tokenization (row-wise): to segment the text into meaningful components
   - Words, n-grams, sentences
 - Generation (row-wise and column-wise)
   - Lexical annotation
@@ -118,19 +112,46 @@ text normalization, text tokenization, variable recoding, variable generation, a
 
 <!--  
 
-column-wise
+column-wise: 
 
+- Standardize text and remove unwanted variation
+  - Artifact removal
+  - Case conversion (lowercasing)
+  - Punctuation and extraneous character removal
+  - Adjustment of forms (e.g. contractions, numbers, abbreviations,  )
+
+- Data:
+  - Europarl
+
+- R: 
+  - stringr::str_replace_all()
+  - stringr::str_remove_all()
 -->
 
 The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis. 
 
-**Europarl Corpus**
+### Orientation {#sec-td-normalization-orientation}
 
-The data dictionary for the Europarl Corpus appears in @tbl-td-europarl-dd.
+To explore some of the strategies of normalization, we will look at the Europarl Corpus. As we are working working towards transforming a curated dataset, we will start by getting oriented to the dataset. Following the reproducible research principles, I will assume that the curated dataset and its associated data dictionary are in the *data/derived/* directory, as seen in @exm-td-europarl-curated-structure. 
+
+::: {#exm-td-europarl-curated-structure}
+```bash
+data/
+├── analysis/
+├── derived/
+│   ├── europarl_curated_dd.csv
+│   └── europarl/
+│       └── europarl_curated.csv
+└── original/
+```
+:::
+
+The contents of the data dictionary for this dataset appears in @tbl-td-europarl-dd.
 
 ```{r}
 #| label: tbl-td-europarl-dd
 #| tbl-cap: "Data dictionary for the Europarl Corpus."
+#| echo: false
 #| message: false
 
 read_csv(file = "data/cd-europarl_curated_dd.csv") |> 
@@ -138,111 +159,277 @@ read_csv(file = "data/cd-europarl_curated_dd.csv") |>
   kable_styling()
 ```
 
+This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation is the `lines` variable whose values are are lines of dialogue. 
+
+Let's read in the dataset CSV file with `read_csv()` and inspect the first lines of the dataset with `slice_head()` in @exm-tb-europarl-preview.
+
+::: {#exm-tb-europarl-preview}
+```{r}
+#| label: td-europarl-read-show
+#| eval: false
+
+# Read in the dataset
+europarl_curated_tbl <- 
+  read_csv(file = "../data/derived/europarl_curated.csv")
+
+# Preview the first 10 lines
+europarl_curated_tbl |>
+  slice_head(n = 10)
+```
+
 ```{r}
 #| label: td-europarl-read-run
-#| message: false
+#| echo: false
 
+# Read in the dataset
 europarl_curated_tbl <- 
   read_csv(file = "data/europarl_curated.csv")
+
+# Preview the first 10 lines
+europarl_curated_tbl |>
+  slice_head(n = 10)
 ```
+:::
 
-
-
-Consider the curated Europarl Corpus dataset. I will read in the dataset. Since the dataset is quite large, I have also subsetted the dataset keeping only the first 1,000 observations for each of value of `type` for demonstration purposes.
+Simply looking at the first 10 lines of this dataset gives us a clearer sense of the dataset structure, but, in terms of normalization procedures we might apply, it is likely not sufficient. We want to get a sense of any potential inconsistencies in the dataset, in particular in the `lines` variable. Since this is a large dataset with `r nrow(europarl_curated_tbl)` observations, we will need to explore the dataset in manageable chunks. The `slice_sample()` function will allow us to randomly sample a subset of the dataset of a certain number of observations specified by the `n = ` argument, as seen in @exm-td-europarl-sample-1.
 
 ```{r}
-#| eval: false
-#| label: td-europarl-normalize-read-subset-show
-
-europarl <- read_csv(file = "../data/derived/europarl/europarl_curated.csv") |> # read curated dataset
-  filter(sentence_id < 1001) # keep first 1000 observations for each type
-
-glimpse(europarl)
-```
-
-```{r}
-#| eval: false
-#| label: td-europarl-normalize-read-subset-run
+#| label: set-seed-sample-1
 #| echo: false
+#| cache: false
 
-europarl <- read_csv(file = "data/transform-datasets/data/derived/europarl/europarl_curated.csv") |> # read curated dataset
-  filter(sentence_id < 1001) # keep first 1000 observations for each type
-
-glimpse(europarl)
+set.seed(124)
 ```
 
-Simply looking at the first 14 lines of this dataset, we can see that if our goal is to work with the transcribed ('Source') and translated ('Target') language, there are lines which do not appear to be of interest.
+::: {#exm-td-europarl-sample-1}
+```{r}
+#| label: td-europarl-sample-1
+#| cache: false
+
+# Randomly sample 5 observations
+europarl_curated_tbl |>
+  slice_sample(n = 5)
+```
+:::
+
+We should run the code in @exm-td-europarl-sample-1 multiple times to get a sense of the variation in the dataset. 
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
+R functions which return samples (*e.g.* `slice_sample()`) are generated using pseudo-random number generators. These generators are initialized with a seed value. You can control the seed value R uses to generate the random numbers by using the `set.seed()` function and setting the seed value to a number of your choice. It is important to note that setting a seed only affects the subsequent random number generation.
+
+Using `set.seed()` is useful when you want to ensure that the same random numbers are generated each time you run the code. This is particularly helpful when you want to reproduce results in a report or other document.
+:::
+
+In the case of the Europarl corpus dataset, it may be useful to see the source and target lines in the same sample. Do do this, we can first sample from the `line_id` variable and then filter the `europarl_curated_tbl` wit the `filter()` function and the `%in%` operator to select the lines that match the sampled `line_id` values, as seen in @exm-td-europarl-sample-2.
 
 ```{r}
-#| eval: false
-#| label: tbl-td-europarl-preview-1
-#| tbl-cap: "europarl Corpus curated dataset preview."
+#| label: set-seed-sample-2
 #| echo: false
+#| cache: false
 
-europarl |>
-  slice_head(n = 14) |>
-  knitr::kable(booktabs = TRUE)
+set.seed(124)
 ```
 
-`sentence_id` 1 appears to be title and `sentence_id` 7 reflects description of the parliamentary session. Both of these are artifacts that we would like to remove from the dataset. 
-
-To remove these lines we can turn to the programming strategies we've previously worked with. Namely we will use `filter()` to filter observations in combination with `str_detect()` to detect matches for some pattern that is indicative of these lines that we want to remove and not of the other lines that we want to keep. 
-
-Before we remove any lines, let's try craft a search pattern to identify these lines, and exclude the lines we will want to keep. Condition one is lines which start with an opening parenthesis `(`. Condition two is lines that do not end in standard sentence punctuation (`.`, `!`, or `?`). I've added both conditions to one `filter()` using the logical *OR* operator (`|`)  to ensure that either condition is matched in the output. 
-
+::: {#exm-td-europarl-sample-2}
 ```{r}
-#| eval: false
-#| label: tbl-td-europarl-search-non-speech
-#| tbl-cap: "Non-speech lines in the europarl dataset."
+#| label: td-europarl-sample-2
+#| cache: false
+
+# Randomly sample 5 line_id values
+line_id_sample_vec <- 
+  europarl_curated_tbl |>
+  distinct(line_id) |> 
+  slice_sample(n = 5) |> 
+  pull(line_id)
+
+# Select the lines that match the sampled line_id values
+europarl_curated_tbl |>
+  filter(line_id %in% line_id_sample_vec)
+```
+:::
+
+After running the code in @exm-td-europarl-sample-1 and @exm-td-europarl-sample-2 multiple times, I identified a number of artifacts that we will want to consider addressing. These are included in @tbl-td-europarl-normalization.
+
+| Description | Examples | Concern |
+|:---|:---|:---|
+| Non-speech annotations | `(Abucheos)`, `(A4-0247/98)`, `(The sitting was opened at 09:00)` | Not of interest for our analysis |
+| Inconsistent whitespace | `5 % ,`, <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>, `Palacio' s` | May be problematic for tokenization |
+| Non-sentence punctuation | ` - ` | May be problematic for tokenization |
+| Abbreviations | `Mr.`, `Sr.`, `Mme.`, `Mr`, `Sr`, `Mme`, `Mister`, `Señor`, `Madam` | May be problematic for tokenization |
+| Text case | `The`, `the`, `White`, `white` | May be problematic for tokenization |
+
+: Characteristics of the Europarl Corpus dataset that may require normalization. {#tbl-td-europarl-normalization tbl-colwidths="[33, 33, 33]" .sm .striped}
+
+The first three items in @tbl-td-europarl-normalization are relatively straightforward. Non-speech annotations most likely are not relevant for our research. Inconsistent whitespace and non-sentence punctuation may be problematic for tokenization that depends on whitespace and punctuation regularities. 
+
+The other two considerations are more contingent on our research aims. The existence of various forms for the same word, abbreviated and unabreviated, introduces variability may not be of interest for our analysis. Secondly, common conventions for capitalization in prose can introduce unwanted variability. If we leave the text as is, the tokens `The` and `the` will be treated as distinct. If we convert the text to lowercase, the tokens `White` and `white` will be treated as the same, even if `White` corresponds to a proper noun (*e.g.* `White House`). 
+
+These observations provide us a roadmap for the normalization process. For demonstration, let's focus only on a couple of these cases: removing parlimentary session descriptions and extra whitespace.
+
+### Application {#sec-td-normalization-application}
+
+Identifying our normalization goals is an important first step. The next step is to identify the procedures that will accomplish these goals. The majority of text normalization procedures can be accomplished with the `stringr` package [@R-stringr]. This package provides a number of functions for manipulating text. The workhorse functions we will use for our tasks are the `str_remove()` and `str_replace()` functions. As the these functions give us the ability to remove or replace text. Our task is to identify the patterns we want to remove or replace.
+
+Before we modify any lines, let's try craft a search pattern to identify the text of interest. This is done to avoid over- or under-generalizing the search pattern. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.
+
+<!-- non-speech -->
+
+Let's start by identifying non-parlimentary speech. Two functions from the `stringr` package come in handy here: `str_detect()` and `str_extract()`. `str_detect()` detects a pattern in a character vector and returns a logical vector, `TRUE` if the pattern is detected and `FALSE` if it is not. `str_extract()` extracts the text in a character vector that matches a pattern. 
+
+`str_detect()` pairs well with the `filter()` function to return observations that match a pattern in a character vector. `str_extract()` pairs well with the `mutate()` function to create a new variable which contains character vector that match a pattern.
+
+Let's start with the `str_detect()` function. We will use this function to identify the lines that contain the parliamentary session descriptions. From the examples above, we can see that these instances are wrapped with parentheses `(` and `)`. The text within the parentheses can vary, so we need a Regular Expression to do the heavy lifting. To start out we can match any one or multiple characters with `.+`. But it is important to recognize the `+` (and also the `*`) operators are 'greedy', meaning that if there are multiple matches, the longest match will be returned. In this case, we want to match the shortest match. To do this we can use the `?` operator to make the `+` operator 'lazy'. This will match the shortest match.
+
+Our test code appears in @exm-td-europarl-search-non-speech.
+
+::: {#exm-td-europarl-search-non-speech}
+```{r}
+#| label: td-europarl-search-non-speech
+#| cache: false
+
+# set seed
+set.seed(111)
 
 # Identify non-speech lines
-europarl |>
-  filter(str_detect(sentence, "^\\(") | str_detect(sentence, "[^.!?]$")) |> # filter lines that detect a match for either condition 1 or 2
-  slice_sample(n = 10) |> # random sample of 10 observations
-  knitr::kable(booktabs = TRUE)
+europarl_curated_tbl |>
+  filter(str_detect(lines, "\\(.+?\\)")) |>
+  slice_sample(n = 10) 
 ```
+:::
 
-Since this search appears to match lines that we do not want to preserve, let's move now to eliminate these lines from the dataset. To do this we will use the same regular expression patterns, but now each condition will have it's own `filter()` call and the `str_detect()` will be negated with a prefixed `!`.
+The results from @exm-td-europarl-search-non-speech show that we have identified the lines that contain at least one of the parliamentary session description annotations. A more targeted search to identify specific instances of the parliamentary session descriptions can be accomplished adding the `str_extract()` function as seen in @exm-td-europarl-search-non-speech-2.
 
+::: {#exm-td-europarl-search-non-speech-2}
 ```{r}
-#| eval: false
-#| label: td-europarl-filter-non-speech
+#| label: td-europarl-search-non-speech-2
+#| cache: false
 
-europarl <-
-  europarl |> # dataset
-  filter(!str_detect(sentence, pattern = "^\\(")) |> # remove lines starting with (
-  filter(!str_detect(sentence, pattern = "[^.!?]$")) # remove lines not ending in ., !, or ?
+# set seed
+set.seed(111)
+
+# Extract non-speech fragments
+europarl_curated_tbl |>
+  filter(str_detect(lines, "\\(.+?\\)")) |>
+  mutate(non_speech = str_extract(lines, "\\(.+?\\)")) |>
+  slice_sample(n = 10) 
 ```
+:::
 
-Let's look at the first 14 lines again, now that we have eliminated these artifacts. 
+The results from @exm-td-europarl-search-non-speech-2 show that we have identified the lines that contain parliamentary session description annotations and extracted this text --or have we? What if a given line contains more than one parliamentary session description annotation? It turns out that `str_extract()` only returns the first match. To return all matches we can use the `str_extract_all()` function. Let's try again, in @exm-td-europarl-search-non-speech-3.
 
+::: {#exm-td-europarl-search-non-speech-3}
 ```{r}
-#| eval: false
-#| label: tbl-td-europarl-preview-2
-#| tbl-cap: "europarl Corpus non-speech lines removed."
-#| echo: false
+#| label: td-europarl-search-non-speech-3
+#| cache: false
 
-europarl |>
-  slice_head(n = 14) |>
-  knitr::kable(booktabs = TRUE)
+# set seed
+set.seed(111)
+
+# Extract non-speech fragments
+europarl_curated_tbl |>
+  filter(str_detect(lines, "\\(.+?\\)")) |>
+  mutate(non_speech = str_extract_all(lines, "\\(.+?\\)")) |> 
+  slice_sample(n = 10)
 ```
+:::
 
-One further issue that we may want to resolve concerns the fact that there are whitespaces between possessive forms (i.e. "minute’ s silence"). In this case we can employ `str_replace_all()` inside the `mutate()` function to overwrite the `sentence` values that match an apostrophe `'` with whitespace (`\\s`) before `s`.
+OK, that might not be what you expected. The `str_extract_all()` function returns a list of character vectors. This is because for any given line in `lines` there may be a different number of matches. To maintain the data frame as rectangular, a list is returned for each value of `non_speech`. We could expand the list into a data frame with the `unnest()` function from the `tidyr` package if our goal were to work with these matches. But that is not our aim. Rather, we want to know if we have multiple matches per line. Note that the information provided for the `non_speech` column by the tibble object tells use that we have some lines with muliple matches, as we can see in line 6 of our small sample. So good thing we checked!
 
+Let's now remove these parliamentary session description annotations from each line in the `lines` column. We turn to `str_remove_all()`, a variant of `str_remove()`, that, as you expect, will remove multiple matches in a single line. We will use the `mutate()` function to overwrite the `lines` column with the modified text. The code is seen in @exm-td-europarl-remove-non-speech.
+
+::: {#exm-td-europarl-remove-non-speech}
 ```{r}
-#| eval: false
-#| label: td-europarl-remove-whitespace
+#| label: td-europarl-remove-non-speech
 
-europarl <-
-  europarl |> # dataset
-  mutate(sentence = str_replace_all(
-    string = sentence,
-    pattern = "'\\ss",
-    replacement = "'s"
-  )) # replace ' s with `s
+# Remove non-speech fragments
+europarl_curated_tbl <- 
+  europarl_curated_tbl |>
+  mutate(lines = str_remove_all(lines, "\\(.+?\\)"))
 ```
+:::
 
-Now we have normalized text in the `sentence` column in the europarl dataset. 
+I recommend spot checking the results of this normalization step by running the code in @exm-td-europarl-search-non-speech again, if nothing appears we've done our job. 
+
+<!-- extra whitespace -->
+
+The second item of business to address is the extra whitespace we observed in @tbl-td-europarl-normalization. If we consider the extra whitespace cases, we can categorize them into two types: multiple spaces that should be a single space (*e.g.* <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>) and single spaces that occur within a word (*e.g.* `5 % ,` or `Palacio' s`). 
+
+To deal with muliple spaces, we can turn to the `str_replace_all()` function. This function will replace a pattern with a replacement string for every pattern match. In this case, we want to replace multiple spaces with a single space. We can use the `\\s+` pattern to match one or more spaces and then replace it with `\\s` or a single whitespace character `" "`. 
+
+Before we apply this normalization step, let's assess how many instances of multiple spaces we have in the dataset. We can use the `str_count()` function to count the number of matches for a pattern. The pattern we want needs to be a bit more precise than `\\s+`, because this matches one or more. We want to match *two* or more. Using the regular expression operator `{,}` we can specify our pattern to be `\\s{2,}`, *i.e.* two or more continguous whitespaces. Let's count and sum all these matches. The code is seen in @exm-td-europarl-count-whitespace.
+
+::: {#exm-td-europarl-count-whitespace}
+```{r}
+#| label: td-europarl-count-whitespace
+
+# Count multiple spaces
+europarl_curated_tbl |>
+  mutate(multiple_spaces = str_count(lines, "\\s{2,}")) |>
+  summarize(total_multiple_spaces = sum(multiple_spaces, na.rm = TRUE))
+```
+:::
+
+::: {.callout}
+**{{< fa exclamation-triangle >}} Warning**
+
+You may be wondering what the extra parameter `na.rm = TRUE` is doing in the `sum()` function. This parameter tells R to ignore values that are `NA` (not available). This is important because if we don't ignore `NA` values, the `sum()` function will return `NA` if there are any `NA` values in the vector. The code in @exm-td-europarl-count-whitespace will return `NA` when the `\\s{2,}` doesn't match for a given line. This is because the `str_count()` function returns `NA` when there are no matches. If we don't ignore these `NA` values, the `sum()` function will return `NA` for the entire dataset.
+:::
+
+The results from @exm-td-europarl-count-whitespace show that we have over 130k instances of multiple spaces. Let's replace these with a single space. The code is seen in @exm-td-europarl-remove-multiple-whitespace.
+
+::: {#exm-td-europarl-remove-multiple-whitespace}
+```{r}
+#| label: td-europarl-remove-multiple-whitespace
+
+# Remove multiple spaces
+europarl_curated_tbl <- 
+  europarl_curated_tbl |>
+  mutate(lines = str_replace_all(lines, "\\s{2,}", "\\s"))
+```
+:::
+
+To check our work, we can run the code in @exm-td-europarl-count-whitespace again. We should see that there are no more instances of multiple spaces.
+
+Now let's turn to the single spaces that occur within a word. We can use the `str_replace_all()` function again to replace these single spaces with no space --but is that what we want? Probably not, we want *most* of the single spaces to remain, otherwise we would have one very, very long string on each line. 
+
+Instead, we want to narrow our scope and focus in on whitespace that occurs in particular contexts. One context we can focus on is the single quote `'`, as in `Palacio' s`. In this use, the single quote is an apostrophe in a possessive form, but we might want to see if other forms, such as contractions, that also may have this extra whitespace. Let's check using a regular expression that matches a character string `\\w+` with single quote `'` at the end followed by whitespace `\\s`. To give some more context I will add a character string `\\w+` after the whitespace. Using the `str_extract_all()` function we can extract all the matches for this pattern. It returns a list, so we `unnest()` the list. Then we can pull the vector of matches and list the unique matches to get a sense of the context we are working with. The code is seen in @exm-td-europarl-search-apostrophe.
+
+::: {#exm-td-europarl-search-apostrophe}
+```{r}
+#| label: td-europarl-search-apostrophe
+
+# set seed
+set.seed(111)
+
+# Match apostrophe followed by whitespace
+europarl_curated_tbl |>
+  slice_sample(n = 10000) |> 
+  mutate(quote_whitespace = str_extract_all(lines, "\\w+'\\s\\w+")) |> 
+  unnest(quote_whitespace) |>
+  pull(quote_whitespace) |>
+  unique()
+```
+:::
+
+In @exm-td-europarl-search-apostrophe we can see that we have many singular possessive forms we want to ammend and other forms that we may want to keep --in particular when the single quote is part of a quote or a plural or irregular singular possessive. From various runs of this code, it looks safe to remove whitespace between the single quote and the `s` in the possessive form  We need to be careful not to remove whitespace in other contexts where the single quote is followed by ` s`. To do this we can use the word boundary pattern `\\b` after the `s` in our pattern to ensure that the `s` is not part of a following word. The code is seen in @exm-td-europarl-remove-apostrophe.
+
+::: {#exm-td-europarl-remove-apostrophe}
+```{r}
+#| label: td-europarl-remove-apostrophe
+
+# Remove whitespace after apostrophe
+europarl_curated_tbl <- 
+  europarl_curated_tbl |>
+  mutate(lines = str_replace_all(lines, "'\\ss\\b", "'s"))
+```
+:::
+
+To check our work, we can run the code in @exm-td-europarl-search-apostrophe again. We should see that there are no more instances of whitespace after the single quote in possessive forms.
+
+Other normalization procedures often follow a similar line of attack. There are cases, however, in which normalization procedures are more easily accomplished after subsequent transformation steps or need to be post-poned to further the goals of other transformation steps. For example, standardizing abbreviated forms may be more easily accomplished after tokenization when each token is a word. Another example is the case of case conversion. Even if we are not directly interested in the case differences between words, certain generation procedures, Named Entity Recognition for example, may use case information to identify proper nouns. In these cases, it may be better to leave the case as is until after the generation step.
+
 
 ## Recoding {#sec-td-recoding}
 
@@ -258,8 +445,7 @@ Data:
 -->
 
 <!-- Consider:
-
-The process of recoding aims to _recast_ the values of a variable or set of variables to a new variable or set of variables to enable more direct access. This may include extracting values from a variable, stemming or lemmatization of words, tokenization of linguistic forms (words, ngrams, sentences, etc.), calculating the lengths of linguistic units, calculating type-token ratios, syntactic complexity, and/ or removing variables that will not be used in the analysis, etc.
+The process of recoding aims to _recast_ the values of a variable or set of variables to a new variable or set of variables to enable more direct access. This may include extracting values from a variable, classifying values, deriving values (e.g. measures of lexical diversity, unit length, syntactic complexity, etc.), or some combination of these.
 -->
 
 Normalizing text can be seen as an extension of dataset curation to some extent in that the structure of the dataset is maintained. In the Europarl case, we saw this to be true. In the case of recoding, and other transformational steps, the aim will be to modify the dataset structure either by rows, columns, or both. Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.
@@ -452,12 +638,23 @@ sdac_disfluencies |> # dataset
 
 row-wise
 
+The goal is to segment units of language into relevant components given the research question. This may include breaking text into smaller units, such as words, n-grams, sentences, etc. or combining text into larger units.
+
 Data: 
 
 - CABNC (expand)
   - tidytext::unnest_tokens()
 - PELIC tokens (contract)
   - stringr::str_c() [w/ collapse = " "]
+
+R: 
+- start with `tokenizers` package for tokenization types (character, word, n-gram, sentence, etc.)
+- introduce `tidytext` package, for tokenization and unnesting
+- show how to collapse tokens with `stringr::str_c()`
+
+Consider: 
+
+- Adding lemmatization, stemming to this section but to make sure that it is clear that these are 'recoding' processes, they just happen to be more accessible to use after tokenization.
 
 -->
 
@@ -495,16 +692,15 @@ cabnc_curated_tbl <-
   read_csv(file = "../data/derived/cabnc_curated.csv")
 ```
 
-
 <!-- [ ] Add PELIC data dictionary and read dataset. -->
-
-
 
 ## Generatation {#sec-td-generation}
 
 <!--  
 
 row- and column-wise
+
+The goal is to augment the dataset with additional information based on the existing information, but not necessarily explicit in the dataset. This may include adding linguistic annotations, sentiment analysis, etc.
 
 Data: 
 
@@ -517,7 +713,10 @@ Data:
 - Syntax annotation
   - Dependency parsing
 
-Mention `rsyntax` package for extracting/ recoding patterns from syntactic annotations.
+Consider:
+
+- UD models: note that there are different models for different languages and language varieties, some may be more in line with the language variety of interest than others.
+- Mention `rsyntax` package for extracting/ recoding patterns from syntactic annotations.
 
 -->
 
@@ -631,34 +830,29 @@ For the Spanish version of this sentence, we see the same variables. However, th
 The `rsyntax` package [@R-rsyntax] can be used to recode and extract patterns from the output from automatic linguistic annotations using cleanNLP. [See the documentation for more information](https://github.com/vanatteveldt/rsyntax).
 :::
 
-<!-- Consider:
-
-
-- europarl Corpus, syntactic annotation
-
-- Syntactic parsing for last.fm music lyrics, phrasal verbs (compound:prt) a la [@Akbary2018], with automated approach
-- SOTU Corpus, frequency weighting and scaling for clustering algorithm?
-- ...
-
-
-The process of generation aims to _augment_ a variable or set of variables. In essence this aims to make implicit attributes explicit to that they are directly accessible. This often targeted at the automatic generation of linguistic annotations such as grammatical category (part-of-speech) or syntactic structure. 
-
-
--->
 
 ## Merging {#sec-td-merging}
 
 <!--
 
+Row-wise and column-wise
+
+The goal to combine two or more datasets to create a new dataset. This may include concatenating datasets row-wise or joining datasets column-wise. The goal is to create a dataset that is more informative for the research question. In most cases this will involve the addition of information from one dataset to another. But in some cases it may be the case that the goal is to filter one dataset based on the information in another dataset.
+
+The datasets to be merged must share attributes. In the case of concatenation, the datasets must share the same attributes. In the case of joining, the datasets must share at least one attribute, or key, to join on.
+
 Data: 
 
-- CEDEL2 (row-wise)
+- CEDEL2 (row-wise) "Concatenating"
   - Natives
   - Learners
 
-- PEDC (column-wise)
+- PEDC (column-wise) "Joining"
   - Wordbank: word-level `category`` and `item_kind`
-  - eLexicon: word-level word frequency measures
+  - eLexicon: word-level word frequency measures (https://elexicon.wustl.edu/index.html)
+
+- PEDIC (column-wise) "Joining"
+  - `lingtypology` package: ENNTT country/ language properties (?)
 
 Consider: 
 
@@ -666,14 +860,6 @@ Consider:
   - Sentiment lexicons
   - Stopword lists
   - MRC word information to merge
-  - English Lexicon project RT times: https://elexicon.wustl.edu/index.html
-  - `lingtypology` package: ENNTT country/ language properties (?)
-
-- Non-linguistic information:
-  - Demographic information
-  - Geographic information
-  - Time information
-  - ...
 
 ---
 
@@ -775,10 +961,24 @@ write_csv(
   file = "data/transform-datasets/data/derived/sdac/sdac_disfluencies.csv")
 ```
 
+
 ## Summary {-}
 
 In this chapter we covered the process of transforming datasets. The goal is to manipulate the curated dataset to make it align better for analysis. 
-There are four general types of transformation steps: normalization, recoding, tokenization, generation, and merging. In any given research project some or all of these steps will be employed --but not necessarily in the order presented in this chapter. Furthermore, there may also be various datasets generated in at this stage each with a distinct analysis focus in mind. In any case, it is important to write these datasets to disk and to document them according to reproducible research principles. 
+There are four general types of transformation steps: normalization, recoding, tokenization, generation, and merging. In any given research project some or all of these steps will be employed --but not necessarily in the order presented in this chapter. Furthermore, there may also be various datasets generated in at this stage each with a distinct analysis focus in mind. 
+
+<!--  
+
+?? Add at the end of the chapter?
+
+[x] Add data checks
+[ ] Reminder on writing the dataset and data dictionary to *data/derived/* directory
+  [ ] There may be multiple transformed datasets, so it is important to di  stinguish them from one another and document them separately.
+[ ] Reminder to review and document code added to the *code/* directory, within the *3-transform-dataset.qmd* file.
+
+-->
+
+In any case, it is important to write these datasets to disk and to document them according to reproducible research principles. 
 
 This chapter concludes the section on data/ dataset preparation. The next section we turn to analyzing datasets. This is the stage where we interrogate the datasets to derive knowledge and insight either through exploratory, predictive, or inferential methods.
 

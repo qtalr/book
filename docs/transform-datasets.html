@@ -326,7 +326,13 @@ div.csl-indent {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#sec-td-normalization" id="toc-sec-td-normalization" class="nav-link active" data-scroll-target="#sec-td-normalization"><span class="header-section-number">7.1</span> Normalization</a></li>
+<li>
+<a href="#sec-td-normalization" id="toc-sec-td-normalization" class="nav-link active" data-scroll-target="#sec-td-normalization"><span class="header-section-number">7.1</span> Normalization</a>
+  <ul class="collapse">
+<li><a href="#sec-td-normalization-orientation" id="toc-sec-td-normalization-orientation" class="nav-link" data-scroll-target="#sec-td-normalization-orientation"><span class="header-section-number">7.1.1</span> Orientation</a></li>
+  <li><a href="#sec-td-normalization-application" id="toc-sec-td-normalization-application" class="nav-link" data-scroll-target="#sec-td-normalization-application"><span class="header-section-number">7.1.2</span> Application</a></li>
+  </ul>
+</li>
   <li><a href="#sec-td-recoding" id="toc-sec-td-recoding" class="nav-link" data-scroll-target="#sec-td-recoding"><span class="header-section-number">7.2</span> Recoding</a></li>
   <li><a href="#sec-td-tokenization" id="toc-sec-td-tokenization" class="nav-link" data-scroll-target="#sec-td-tokenization"><span class="header-section-number">7.3</span> Tokenization</a></li>
   <li><a href="#sec-td-generation" id="toc-sec-td-generation" class="nav-link" data-scroll-target="#sec-td-generation"><span class="header-section-number">7.4</span> Generatation</a></li>
@@ -408,7 +414,7 @@ Formatting:
   - Manipulate dataset row-wise and/ or column-wise
   - Focus on particular analysis needs: unit of analysis, unit of observation, operationalization of variables, etc.
 -->
-<p>In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. The transformation process is divided into four categories: text normalization, text tokenization, variable recoding, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher’s evaluation of the dataset characteristics and the desired outcome.</p>
+<p>In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. The transformation process is divided into four categories: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher’s evaluation of the dataset characteristics and the desired outcome.</p>
 <p>It is sometimes necessary to create several transformed datasets from one curated dataset in cases where there are multiple analyses to be performed. This why we start with a curated dataset rather than directly deriving a transformed dataset from the original data. It allows for various transformation methods to produce different formats for different analyses.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
@@ -427,19 +433,13 @@ Formatting:
 </div>
 </div>
 <!-- 
-New outline: 2023-08-12
 
-
-(See 'Understanding data' chapter for background @sec-ud-transformation)
-
-text normalization, text tokenization, variable recoding, variable generation, and observation/ variable merging.
-
-- Normalization (column-wise)
+- Normalization (column-wise):  to standardize or simplify the text to reduce variability
   - Artifact removal
 - Recoding (column-wise)
   - Classify
   - Derive
-- Tokenization (row-wise)
+- Tokenization (row-wise): to segment the text into meaningful components
   - Words, n-grams, sentences
 - Generation (row-wise and column-wise)
   - Lexical annotation
@@ -457,16 +457,37 @@ text normalization, text tokenization, variable recoding, variable generation, a
 <span class="header-section-number">7.1</span> Normalization</h2>
 <!--  
 
-column-wise
+column-wise: 
 
+- Standardize text and remove unwanted variation
+  - Artifact removal
+  - Case conversion (lowercasing)
+  - Punctuation and extraneous character removal
+  - Adjustment of forms (e.g. contractions, numbers, abbreviations,  )
+
+- Data:
+  - Europarl
+
+- R: 
+  - stringr::str_replace_all()
+  - stringr::str_remove_all()
 -->
 <p>The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis.</p>
-<p><strong>Europarl Corpus</strong></p>
-<p>The data dictionary for the Europarl Corpus appears in <a href="#tbl-td-europarl-dd">Table&nbsp;<span>7.1</span></a>.</p>
-<div class="cell" data-hash="transform-datasets_cache/html/tbl-td-europarl-dd_1c6dc03d6ab17fce6031408736f6172e">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data/cd-europarl_curated_dd.csv"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">kable</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">kable_styling</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="sec-td-normalization-orientation" class="level3" data-number="7.1.1"><h3 data-number="7.1.1" class="anchored" data-anchor-id="sec-td-normalization-orientation">
+<span class="header-section-number">7.1.1</span> Orientation</h3>
+<p>To explore some of the strategies of normalization, we will look at the Europarl Corpus. As we are working working towards transforming a curated dataset, we will start by getting oriented to the dataset. Following the reproducible research principles, I will assume that the curated dataset and its associated data dictionary are in the <em>data/derived/</em> directory, as seen in <a href="#exm-td-europarl-curated-structure">Example&nbsp;<span>7.1</span></a>.</p>
+<div id="exm-td-europarl-curated-structure" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.1 </strong></span>&nbsp;</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">data/</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> analysis/</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> derived/</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── europarl_curated_dd.csv</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── europarl/</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>       └── europarl_curated.csv</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> original/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The contents of the data dictionary for this dataset appears in <a href="#tbl-td-europarl-dd">Table&nbsp;<span>7.1</span></a>.</p>
+<div class="cell" data-hash="transform-datasets_cache/html/tbl-td-europarl-dd_66ca6d31e460957fff5a508d638eb29d">
 <div class="cell-output-display">
 <div id="tbl-td-europarl-dd" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -488,7 +509,7 @@ column-wise
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">Document Type</td>
 <td style="text-align: left;">categorical</td>
-<td style="text-align: left;">Type of document; either 'Source' or 'Target'</td>
+<td style="text-align: left;">Type of document; either 'Source' (Spanish) or 'Target' (English)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">line_id</td>
@@ -509,59 +530,400 @@ column-wise
 
 </div>
 </div>
-<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-read-run_59f2e701170227135499cea0b8550d40">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">europarl_curated_tbl</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data/europarl_curated.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Consider the curated Europarl Corpus dataset. I will read in the dataset. Since the dataset is quite large, I have also subsetted the dataset keeping only the first 1,000 observations for each of value of <code>type</code> for demonstration purposes.</p>
-<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-normalize-read-subset-show_e77d57b58bd4bc1d25647a65cc1742c6">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">europarl</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"../data/derived/europarl/europarl_curated.csv"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># read curated dataset</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">sentence_id</span> <span class="op">&lt;</span> <span class="fl">1001</span><span class="op">)</span> <span class="co"># keep first 1000 observations for each type</span></span>
+<p>This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation is the <code>lines</code> variable whose values are are lines of dialogue.</p>
+<p>Let’s read in the dataset CSV file with <code>read_csv()</code> and inspect the first lines of the dataset with <code>slice_head()</code> in <a href="#exm-tb-europarl-preview">Example&nbsp;<span>7.2</span></a>.</p>
+<div id="exm-tb-europarl-preview" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.2 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-read-show_5a96f218afd73c3a507f4ffb4cd54f45">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in the dataset</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"../data/derived/europarl_curated.csv"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">glimpse</span><span class="op">(</span><span class="va">europarl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co"># Preview the first 10 lines</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Simply looking at the first 14 lines of this dataset, we can see that if our goal is to work with the transcribed (‘Source’) and translated (‘Target’) language, there are lines which do not appear to be of interest.</p>
-<div id="tbl-td-europarl-preview-1" class="cell tbl-parent quarto-layout-panel anchored" data-tbl-cap="europarl Corpus curated dataset preview." data-hash="transform-datasets_cache/html/tbl-td-europarl-preview-1_77b31aa53ff8d70c601f91cac5f1e630">
-
-</div>
-<p><code>sentence_id</code> 1 appears to be title and <code>sentence_id</code> 7 reflects description of the parliamentary session. Both of these are artifacts that we would like to remove from the dataset.</p>
-<p>To remove these lines we can turn to the programming strategies we’ve previously worked with. Namely we will use <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> to filter observations in combination with <code>str_detect()</code> to detect matches for some pattern that is indicative of these lines that we want to remove and not of the other lines that we want to keep.</p>
-<p>Before we remove any lines, let’s try craft a search pattern to identify these lines, and exclude the lines we will want to keep. Condition one is lines which start with an opening parenthesis <code>(</code>. Condition two is lines that do not end in standard sentence punctuation (<code>.</code>, <code>!</code>, or <code>?</code>). I’ve added both conditions to one <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> using the logical <em>OR</em> operator (<code>|</code>) to ensure that either condition is matched in the output.</p>
-<div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Identify non-speech lines</span></span>
-<span><span class="va">europarl</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">sentence</span>, <span class="st">"^\\("</span><span class="op">)</span> <span class="op">|</span> <span class="fu">str_detect</span><span class="op">(</span><span class="va">sentence</span>, <span class="st">"[^.!?]$"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># filter lines that detect a match for either condition 1 or 2</span></span>
-<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># random sample of 10 observations</span></span>
-<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span>booktabs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="tbl-td-europarl-search-non-speech" class="cell tbl-parent quarto-layout-panel anchored" data-tbl-cap="Non-speech lines in the europarl dataset." data-hash="transform-datasets_cache/html/tbl-td-europarl-search-non-speech_4ba410d296139753f49a1bbad72ad834">
-<div class="panel-caption table-caption">
-<p><strong>?(caption)</strong></p>
-</div>
+<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-read-run_9c9ce96fff502b287c97fb1bcb18f0ed">
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 10 × 4
+&gt;     doc_id type   line_id lines                                                 
+&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                 
+&gt;  1 1965735 Source       1 "Reanudación del período de sesiones"                 
+&gt;  2       1 Target       1 "Resumption of the session"                           
+&gt;  3 1965736 Source       2 "Declaro reanudado el período de sesiones del Parlame…
+&gt;  4       2 Target       2 "I declare resumed the session of the European Parlia…
+&gt;  5 1965737 Source       3 "Como todos han podido comprobar, el gran \"efecto de…
+&gt;  6       3 Target       3 "Although, as you will have seen, the dreaded 'millen…
+&gt;  7 1965738 Source       4 "Sus Señorías han solicitado un debate sobre el tema …
+&gt;  8       4 Target       4 "You have requested a debate on this subject in the c…
+&gt;  9 1965739 Source       5 "A la espera de que se produzca, de acuerdo con mucho…
+&gt; 10       5 Target       5 "In the meantime, I should like to observe a minute' …</code></pre>
 </div>
 </div>
-<p>Since this search appears to match lines that we do not want to preserve, let’s move now to eliminate these lines from the dataset. To do this we will use the same regular expression patterns, but now each condition will have it’s own <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> call and the <code>str_detect()</code> will be negated with a prefixed <code>!</code>.</p>
-<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-filter-non-speech_6a62ad2218616b5f223544f99d1390b2">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">europarl</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">europarl</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">sentence</span>, pattern <span class="op">=</span> <span class="st">"^\\("</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># remove lines starting with (</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">sentence</span>, pattern <span class="op">=</span> <span class="st">"[^.!?]$"</span><span class="op">)</span><span class="op">)</span> <span class="co"># remove lines not ending in ., !, or ?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Let’s look at the first 14 lines again, now that we have eliminated these artifacts.</p>
-<div id="tbl-td-europarl-preview-2" class="cell tbl-parent quarto-layout-panel anchored" data-tbl-cap="europarl Corpus non-speech lines removed." data-hash="transform-datasets_cache/html/tbl-td-europarl-preview-2_f5911e889d85ff4350f544b85c2ad4b4">
-
+<p>Simply looking at the first 10 lines of this dataset gives us a clearer sense of the dataset structure, but, in terms of normalization procedures we might apply, it is likely not sufficient. We want to get a sense of any potential inconsistencies in the dataset, in particular in the <code>lines</code> variable. Since this is a large dataset with 3931468 observations, we will need to explore the dataset in manageable chunks. The <code>slice_sample()</code> function will allow us to randomly sample a subset of the dataset of a certain number of observations specified by the <code>n =</code> argument, as seen in <a href="#exm-td-europarl-sample-1">Example&nbsp;<span>7.3</span></a>.</p>
+<div id="exm-td-europarl-sample-1" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.3 </strong></span>&nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Randomly sample 5 observations</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 5 × 4
+&gt;    doc_id type   line_id lines                                                  
+&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                  
+&gt; 1 1979130 Source   13396 Nosotros no apostamos aquí, en este Parlamento, por lo…
+&gt; 2 3322228 Source 1356494 (SK) Señor Presidente, me he abstenido de votar porque…
+&gt; 3  140652 Target  140652 It is these last two, however, together with Finland, …
+&gt; 4 2145661 Source  179927 Son las mujeres de esos mismos países: Egipto, Somalia…
+&gt; 5 2269815 Source  304081 Permítanme añadir que, en nuestro último llamamiento p…</code></pre>
 </div>
-<p>One further issue that we may want to resolve concerns the fact that there are whitespaces between possessive forms (i.e.&nbsp;“minute’ s silence”). In this case we can employ <code>str_replace_all()</code> inside the <code>mutate()</code> function to overwrite the <code>sentence</code> values that match an apostrophe <code>'</code> with whitespace (<code>\\s</code>) before <code>s</code>.</p>
-<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-remove-whitespace_d4d208e5eea325ce2a67838f57f18c8a">
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">europarl</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">europarl</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>sentence <span class="op">=</span> <span class="fu">str_replace_all</span><span class="op">(</span></span>
-<span>    string <span class="op">=</span> <span class="va">sentence</span>,</span>
-<span>    pattern <span class="op">=</span> <span class="st">"'\\ss"</span>,</span>
-<span>    replacement <span class="op">=</span> <span class="st">"'s"</span></span>
-<span>  <span class="op">)</span><span class="op">)</span> <span class="co"># replace ' s with `s</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now we have normalized text in the <code>sentence</code> column in the europarl dataset.</p>
-</section><section id="sec-td-recoding" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-td-recoding">
+</div>
+<p>We should run the code in <a href="#exm-td-europarl-sample-1">Example&nbsp;<span>7.3</span></a> multiple times to get a sense of the variation in the dataset.</p>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
+<p>R functions which return samples (<em>e.g.</em> <code>slice_sample()</code>) are generated using pseudo-random number generators. These generators are initialized with a seed value. You can control the seed value R uses to generate the random numbers by using the <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code> function and setting the seed value to a number of your choice. It is important to note that setting a seed only affects the subsequent random number generation.</p>
+<p>Using <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code> is useful when you want to ensure that the same random numbers are generated each time you run the code. This is particularly helpful when you want to reproduce results in a report or other document.</p>
+</div>
+</div>
+</div>
+<p>In the case of the Europarl corpus dataset, it may be useful to see the source and target lines in the same sample. Do do this, we can first sample from the <code>line_id</code> variable and then filter the <code>europarl_curated_tbl</code> wit the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function and the <code>%in%</code> operator to select the lines that match the sampled <code>line_id</code> values, as seen in <a href="#exm-td-europarl-sample-2">Example&nbsp;<span>7.4</span></a>.</p>
+<div id="exm-td-europarl-sample-2" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.4 </strong></span>&nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Randomly sample 5 line_id values</span></span>
+<span><span class="va">line_id_sample_vec</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">distinct</span><span class="op">(</span><span class="va">line_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">line_id</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select the lines that match the sampled line_id values</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">line_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">line_id_sample_vec</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 10 × 4
+&gt;     doc_id type   line_id lines                                                 
+&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                 
+&gt;  1 1992525 Source   26791 La sociedad del conocimiento es algo más, y también p…
+&gt;  2   26791 Target   26791 The knowledge society is more than that, and it may a…
+&gt;  3 2247038 Source  281304 Especialmente en la industria de alta tecnología pued…
+&gt;  4  281304 Target  281304 Particularly in the technical and hi-tech industry, t…
+&gt;  5 2325587 Source  359853 - (IT) Señora Presidenta, Comisario, Señorías, quiero…
+&gt;  6  359853 Target  359853 . (IT) Madam President, Commissioner, ladies and gent…
+&gt;  7 2573895 Source  608161 En consecuencia, nuestro Grupo ha votado en contra.   
+&gt;  8  608161 Target  608161 Consequently, our group voted against.                
+&gt;  9 2581569 Source  615835 Al margen de ello, es todo el club de los seis, esos …
+&gt; 10  615835 Target  615835 Beyond that, it is the whole club of six, these count…</code></pre>
+</div>
+</div>
+</div>
+<p>After running the code in <a href="#exm-td-europarl-sample-1">Example&nbsp;<span>7.3</span></a> and <a href="#exm-td-europarl-sample-2">Example&nbsp;<span>7.4</span></a> multiple times, I identified a number of artifacts that we will want to consider addressing. These are included in <a href="#tbl-td-europarl-normalization">Table&nbsp;<span>7.2</span></a>.</p>
+<div id="tbl-td-europarl-normalization" class="anchored">
+<table class="table-sm table-striped small table">
+<caption>Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require normalization.</caption>
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Examples</th>
+<th style="text-align: left;">Concern</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Non-speech annotations</td>
+<td style="text-align: left;">
+<code>(Abucheos)</code>, <code>(A4-0247/98)</code>, <code>(The sitting was opened at 09:00)</code>
+</td>
+<td style="text-align: left;">Not of interest for our analysis</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Inconsistent whitespace</td>
+<td style="text-align: left;">
+<code>5 % ,</code>, <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>, <code>Palacio' s</code>
+</td>
+<td style="text-align: left;">May be problematic for tokenization</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Non-sentence punctuation</td>
+<td style="text-align: left;"><code>-</code></td>
+<td style="text-align: left;">May be problematic for tokenization</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Abbreviations</td>
+<td style="text-align: left;">
+<code>Mr.</code>, <code>Sr.</code>, <code>Mme.</code>, <code>Mr</code>, <code>Sr</code>, <code>Mme</code>, <code>Mister</code>, <code>Señor</code>, <code>Madam</code>
+</td>
+<td style="text-align: left;">May be problematic for tokenization</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Text case</td>
+<td style="text-align: left;">
+<code>The</code>, <code>the</code>, <code>White</code>, <code>white</code>
+</td>
+<td style="text-align: left;">May be problematic for tokenization</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The first three items in <a href="#tbl-td-europarl-normalization">Table&nbsp;<span>7.2</span></a> are relatively straightforward. Non-speech annotations most likely are not relevant for our research. Inconsistent whitespace and non-sentence punctuation may be problematic for tokenization that depends on whitespace and punctuation regularities.</p>
+<p>The other two considerations are more contingent on our research aims. The existence of various forms for the same word, abbreviated and unabreviated, introduces variability may not be of interest for our analysis. Secondly, common conventions for capitalization in prose can introduce unwanted variability. If we leave the text as is, the tokens <code>The</code> and <code>the</code> will be treated as distinct. If we convert the text to lowercase, the tokens <code>White</code> and <code>white</code> will be treated as the same, even if <code>White</code> corresponds to a proper noun (<em>e.g.</em> <code>White House</code>).</p>
+<p>These observations provide us a roadmap for the normalization process. For demonstration, let’s focus only on a couple of these cases: removing parlimentary session descriptions and extra whitespace.</p>
+</section><section id="sec-td-normalization-application" class="level3" data-number="7.1.2"><h3 data-number="7.1.2" class="anchored" data-anchor-id="sec-td-normalization-application">
+<span class="header-section-number">7.1.2</span> Application</h3>
+<p>Identifying our normalization goals is an important first step. The next step is to identify the procedures that will accomplish these goals. The majority of text normalization procedures can be accomplished with the <code>stringr</code> package <span class="citation" data-cites="R-stringr">(<a href="references.html#ref-R-stringr" role="doc-biblioref">Wickham 2022</a>)</span>. This package provides a number of functions for manipulating text. The workhorse functions we will use for our tasks are the <code>str_remove()</code> and <code>str_replace()</code> functions. As the these functions give us the ability to remove or replace text. Our task is to identify the patterns we want to remove or replace.</p>
+<p>Before we modify any lines, let’s try craft a search pattern to identify the text of interest. This is done to avoid over- or under-generalizing the search pattern. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.</p>
+<!-- non-speech -->
+<p>Let’s start by identifying non-parlimentary speech. Two functions from the <code>stringr</code> package come in handy here: <code>str_detect()</code> and <code>str_extract()</code>. <code>str_detect()</code> detects a pattern in a character vector and returns a logical vector, <code>TRUE</code> if the pattern is detected and <code>FALSE</code> if it is not. <code>str_extract()</code> extracts the text in a character vector that matches a pattern.</p>
+<p><code>str_detect()</code> pairs well with the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function to return observations that match a pattern in a character vector. <code>str_extract()</code> pairs well with the <code>mutate()</code> function to create a new variable which contains character vector that match a pattern.</p>
+<p>Let’s start with the <code>str_detect()</code> function. We will use this function to identify the lines that contain the parliamentary session descriptions. From the examples above, we can see that these instances are wrapped with parentheses <code>(</code> and <code>)</code>. The text within the parentheses can vary, so we need a Regular Expression to do the heavy lifting. To start out we can match any one or multiple characters with <code>.+</code>. But it is important to recognize the <code>+</code> (and also the <code>*</code>) operators are ‘greedy’, meaning that if there are multiple matches, the longest match will be returned. In this case, we want to match the shortest match. To do this we can use the <code>?</code> operator to make the <code>+</code> operator ‘lazy’. This will match the shortest match.</p>
+<p>Our test code appears in <a href="#exm-td-europarl-search-non-speech">Example&nbsp;<span>7.5</span></a>.</p>
+<div id="exm-td-europarl-search-non-speech" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.5 </strong></span>&nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set seed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Identify non-speech lines</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 10 × 4
+&gt;     doc_id type   line_id lines                                                 
+&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                 
+&gt;  1 3225772 Source 1260038 (PT) Señor Presidente, quisiera plantear dos pregunta…
+&gt;  2 3715842 Source 1750108 (El Parlamento decide la devolución a la Comisión)    
+&gt;  3 1961715 Target 1961715 (Parliament adopted the resolution)                   
+&gt;  4 1429470 Target 1429470 27, originally Greens/EFA amendment in FEMM); binding…
+&gt;  5   51632 Target   51632 Question No 8 by (H-0376/00):                         
+&gt;  6 2482671 Source  516937 La Comisión propone proporcionar a las Agencias nacio…
+&gt;  7 1059628 Target 1059628 (The President cut off the speaker)                   
+&gt;  8 1507254 Target 1507254 in writing. - (LT) I welcomed this document, because …
+&gt;  9 2765325 Source  799591 (Aplausos)                                            
+&gt; 10 2668536 Source  702802 &nbsp;&nbsp; Las preguntas que, por falta de tiempo, no han rec…</code></pre>
+</div>
+</div>
+</div>
+<p>The results from <a href="#exm-td-europarl-search-non-speech">Example&nbsp;<span>7.5</span></a> show that we have identified the lines that contain at least one of the parliamentary session description annotations. A more targeted search to identify specific instances of the parliamentary session descriptions can be accomplished adding the <code>str_extract()</code> function as seen in <a href="#exm-td-europarl-search-non-speech-2">Example&nbsp;<span>7.6</span></a>.</p>
+<div id="exm-td-europarl-search-non-speech-2" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.6 </strong></span>&nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set seed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Extract non-speech fragments</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>non_speech <span class="op">=</span> <span class="fu">str_extract</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 10 × 5
+&gt;     doc_id type   line_id lines                                       non_speech
+&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                       &lt;chr&gt;     
+&gt;  1 3225772 Source 1260038 (PT) Señor Presidente, quisiera plantear d… (PT)      
+&gt;  2 3715842 Source 1750108 (El Parlamento decide la devolución a la C… (El Parla…
+&gt;  3 1961715 Target 1961715 (Parliament adopted the resolution)         (Parliame…
+&gt;  4 1429470 Target 1429470 27, originally Greens/EFA amendment in FEM… (para. 53)
+&gt;  5   51632 Target   51632 Question No 8 by (H-0376/00):               (H-0376/0…
+&gt;  6 2482671 Source  516937 La Comisión propone proporcionar a las Age… (correspo…
+&gt;  7 1059628 Target 1059628 (The President cut off the speaker)         (The Pres…
+&gt;  8 1507254 Target 1507254 in writing. - (LT) I welcomed this documen… (LT)      
+&gt;  9 2765325 Source  799591 (Aplausos)                                  (Aplausos)
+&gt; 10 2668536 Source  702802 &nbsp;&nbsp; Las preguntas que, por falta de tiempo,… (Véase el…</code></pre>
+</div>
+</div>
+</div>
+<p>The results from <a href="#exm-td-europarl-search-non-speech-2">Example&nbsp;<span>7.6</span></a> show that we have identified the lines that contain parliamentary session description annotations and extracted this text –or have we? What if a given line contains more than one parliamentary session description annotation? It turns out that <code>str_extract()</code> only returns the first match. To return all matches we can use the <code>str_extract_all()</code> function. Let’s try again, in <a href="#exm-td-europarl-search-non-speech-3">Example&nbsp;<span>7.7</span></a>.</p>
+<div id="exm-td-europarl-search-non-speech-3" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.7 </strong></span>&nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set seed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Extract non-speech fragments</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>non_speech <span class="op">=</span> <span class="fu">str_extract_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 10 × 5
+&gt;     doc_id type   line_id lines                                       non_speech
+&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                       &lt;list&gt;    
+&gt;  1 3225772 Source 1260038 (PT) Señor Presidente, quisiera plantear d… &lt;chr [1]&gt; 
+&gt;  2 3715842 Source 1750108 (El Parlamento decide la devolución a la C… &lt;chr [1]&gt; 
+&gt;  3 1961715 Target 1961715 (Parliament adopted the resolution)         &lt;chr [1]&gt; 
+&gt;  4 1429470 Target 1429470 27, originally Greens/EFA amendment in FEM… &lt;chr [1]&gt; 
+&gt;  5   51632 Target   51632 Question No 8 by (H-0376/00):               &lt;chr [1]&gt; 
+&gt;  6 2482671 Source  516937 La Comisión propone proporcionar a las Age… &lt;chr [2]&gt; 
+&gt;  7 1059628 Target 1059628 (The President cut off the speaker)         &lt;chr [1]&gt; 
+&gt;  8 1507254 Target 1507254 in writing. - (LT) I welcomed this documen… &lt;chr [1]&gt; 
+&gt;  9 2765325 Source  799591 (Aplausos)                                  &lt;chr [1]&gt; 
+&gt; 10 2668536 Source  702802 &nbsp;&nbsp; Las preguntas que, por falta de tiempo,… &lt;chr [1]&gt;</code></pre>
+</div>
+</div>
+</div>
+<p>OK, that might not be what you expected. The <code>str_extract_all()</code> function returns a list of character vectors. This is because for any given line in <code>lines</code> there may be a different number of matches. To maintain the data frame as rectangular, a list is returned for each value of <code>non_speech</code>. We could expand the list into a data frame with the <code>unnest()</code> function from the <code>tidyr</code> package if our goal were to work with these matches. But that is not our aim. Rather, we want to know if we have multiple matches per line. Note that the information provided for the <code>non_speech</code> column by the tibble object tells use that we have some lines with muliple matches, as we can see in line 6 of our small sample. So good thing we checked!</p>
+<p>Let’s now remove these parliamentary session description annotations from each line in the <code>lines</code> column. We turn to <code>str_remove_all()</code>, a variant of <code>str_remove()</code>, that, as you expect, will remove multiple matches in a single line. We will use the <code>mutate()</code> function to overwrite the <code>lines</code> column with the modified text. The code is seen in <a href="#exm-td-europarl-remove-non-speech">Example&nbsp;<span>7.8</span></a>.</p>
+<div id="exm-td-europarl-remove-non-speech" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.8 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-remove-non-speech_c2d6c1185e0bded241bef985c7383ead">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Remove non-speech fragments</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>lines <span class="op">=</span> <span class="fu">str_remove_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>I recommend spot checking the results of this normalization step by running the code in <a href="#exm-td-europarl-search-non-speech">Example&nbsp;<span>7.5</span></a> again, if nothing appears we’ve done our job.</p>
+<!-- extra whitespace -->
+<p>The second item of business to address is the extra whitespace we observed in <a href="#tbl-td-europarl-normalization">Table&nbsp;<span>7.2</span></a>. If we consider the extra whitespace cases, we can categorize them into two types: multiple spaces that should be a single space (<em>e.g.</em> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>) and single spaces that occur within a word (<em>e.g.</em> <code>5 % ,</code> or <code>Palacio' s</code>).</p>
+<p>To deal with muliple spaces, we can turn to the <code>str_replace_all()</code> function. This function will replace a pattern with a replacement string for every pattern match. In this case, we want to replace multiple spaces with a single space. We can use the <code>\\s+</code> pattern to match one or more spaces and then replace it with <code>\\s</code> or a single whitespace character <code>" "</code>.</p>
+<p>Before we apply this normalization step, let’s assess how many instances of multiple spaces we have in the dataset. We can use the <code>str_count()</code> function to count the number of matches for a pattern. The pattern we want needs to be a bit more precise than <code>\\s+</code>, because this matches one or more. We want to match <em>two</em> or more. Using the regular expression operator <code>{,}</code> we can specify our pattern to be <code>\\s{2,}</code>, <em>i.e.</em> two or more continguous whitespaces. Let’s count and sum all these matches. The code is seen in <a href="#exm-td-europarl-count-whitespace">Example&nbsp;<span>7.9</span></a>.</p>
+<div id="exm-td-europarl-count-whitespace" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.9 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-count-whitespace_f4b5f844a9fcb8b82952a75df115ede6">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Count multiple spaces</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>multiple_spaces <span class="op">=</span> <span class="fu">str_count</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\s{2,}"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarize</span><span class="op">(</span>total_multiple_spaces <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">multiple_spaces</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 1 × 1
+&gt;   total_multiple_spaces
+&gt;                   &lt;int&gt;
+&gt; 1                130628</code></pre>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-solid fa-exclamation-triangle" aria-label="exclamation-triangle"></i> Warning</strong></p>
+<p>You may be wondering what the extra parameter <code>na.rm = TRUE</code> is doing in the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function. This parameter tells R to ignore values that are <code>NA</code> (not available). This is important because if we don’t ignore <code>NA</code> values, the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function will return <code>NA</code> if there are any <code>NA</code> values in the vector. The code in <a href="#exm-td-europarl-count-whitespace">Example&nbsp;<span>7.9</span></a> will return <code>NA</code> when the <code>\\s{2,}</code> doesn’t match for a given line. This is because the <code>str_count()</code> function returns <code>NA</code> when there are no matches. If we don’t ignore these <code>NA</code> values, the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function will return <code>NA</code> for the entire dataset.</p>
+</div>
+</div>
+</div>
+<p>The results from <a href="#exm-td-europarl-count-whitespace">Example&nbsp;<span>7.9</span></a> show that we have over 130k instances of multiple spaces. Let’s replace these with a single space. The code is seen in <a href="#exm-td-europarl-remove-multiple-whitespace">Example&nbsp;<span>7.10</span></a>.</p>
+<div id="exm-td-europarl-remove-multiple-whitespace" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.10 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-remove-multiple-whitespace_5a81e47beee2d941134ee746ccabf74d">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Remove multiple spaces</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>lines <span class="op">=</span> <span class="fu">str_replace_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\s{2,}"</span>, <span class="st">"\\s"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>To check our work, we can run the code in <a href="#exm-td-europarl-count-whitespace">Example&nbsp;<span>7.9</span></a> again. We should see that there are no more instances of multiple spaces.</p>
+<p>Now let’s turn to the single spaces that occur within a word. We can use the <code>str_replace_all()</code> function again to replace these single spaces with no space –but is that what we want? Probably not, we want <em>most</em> of the single spaces to remain, otherwise we would have one very, very long string on each line.</p>
+<p>Instead, we want to narrow our scope and focus in on whitespace that occurs in particular contexts. One context we can focus on is the single quote <code>'</code>, as in <code>Palacio' s</code>. In this use, the single quote is an apostrophe in a possessive form, but we might want to see if other forms, such as contractions, that also may have this extra whitespace. Let’s check using a regular expression that matches a character string <code>\\w+</code> with single quote <code>'</code> at the end followed by whitespace <code>\\s</code>. To give some more context I will add a character string <code>\\w+</code> after the whitespace. Using the <code>str_extract_all()</code> function we can extract all the matches for this pattern. It returns a list, so we <code>unnest()</code> the list. Then we can pull the vector of matches and list the unique matches to get a sense of the context we are working with. The code is seen in <a href="#exm-td-europarl-search-apostrophe">Example&nbsp;<span>7.11</span></a>.</p>
+<div id="exm-td-europarl-search-apostrophe" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.11 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-search-apostrophe_ec102572d0bdd5c22649ca65133c37c6">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set seed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Match apostrophe followed by whitespace</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>quote_whitespace <span class="op">=</span> <span class="fu">str_extract_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\w+'\\s\\w+"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">unnest</span><span class="op">(</span><span class="va">quote_whitespace</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">quote_whitespace</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt;   [1] "States' neo"              "nobody' s"               
+&gt;   [3] "Citizens' Freedoms"       "people' s"               
+&gt;   [5] "States' ministers"        "Commission' s"           
+&gt;   [7] "patients' rights"         "Pensioners' Party"       
+&gt;   [9] "ministers' meetings"      "Ireland' s"              
+&gt;  [11] "America' s"               "representatives' report" 
+&gt;  [13] "raptaglang' culture"      "workers' rights"         
+&gt;  [15] "citizens' needs"          "Bowis' suggestion"       
+&gt;  [17] NA                         "citizens' rights"        
+&gt;  [19] "Union' s"                 "Picasso' s"              
+&gt;  [21] "children' s"              "representatives' choice" 
+&gt;  [23] "act' by"                  "beings' submitted"       
+&gt;  [25] "Women' s"                 "person' s"               
+&gt;  [27] "loin' fillets"            "shop' register"          
+&gt;  [29] "doesn' t"                 "woman' and"              
+&gt;  [31] "Haug' s"                  "speakers' list"          
+&gt;  [33] "economists' figures"      "Members' assistants"     
+&gt;  [35] "outreach' meeting"        "corridor' in"            
+&gt;  [37] "Passengers' Charter"      "Abbas' indictment"       
+&gt;  [39] "atypical' forms"          "innovations' within"     
+&gt;  [41] "Government' s"            "one' s"                  
+&gt;  [43] "Patten' s"                "Citizens' Rights"        
+&gt;  [45] "communication' s"         "governments' development"
+&gt;  [47] "Flexicurity' is"          "countries' markets"      
+&gt;  [49] "Cornillet' s"             "industries' interests"   
+&gt;  [51] "Prostitution' campaign"   "presidency' s"           
+&gt;  [53] "Beekeepers' Association"  "in' label"               
+&gt;  [55] "Italy' s"                 "citizens' own"           
+&gt;  [57] "prudent' and"             "days' time"              
+&gt;  [59] "Putin' s"                 "terrorist' operation"    
+&gt;  [61] "companies' sophisticated" "Europeans' diet"         
+&gt;  [63] "Move' scheme"             "hopping' of"             
+&gt;  [65] "States' unanimity"        "taxpayers' money"        
+&gt;  [67] "club' should"             "Parliament' s"           
+&gt;  [69] "Cyprus' Greek"            "Council' s"              
+&gt;  [71] "politicians' role"        "style' drugs"            
+&gt;  [73] "Europe' s"                "king' held"              
+&gt;  [75] "VAT' in"                  "coalitions' in"          
+&gt;  [77] "Workers' Mobility"        "Prüm' Council"           
+&gt;  [79] "citizens' side"           "citizens' and"           
+&gt;  [81] "consumers' confidence"    "years' which"            
+&gt;  [83] "year' s"                  "Members' comments"       
+&gt;  [85] "countries' economies"     "appears' as"             
+&gt;  [87] "States' concerns"         "carry' obligation"       
+&gt;  [89] "captain' s"               "employability' and"      
+&gt;  [91] "check' are"               "citizens' pension"       
+&gt;  [93] "Macao' s"                 "shop' proposed"          
+&gt;  [95] "others' mistakes"         "Committee' s"            
+&gt;  [97] "EU' s"                    "prosecutor' and"         
+&gt;  [99] "States' public"           "Partnership' expressly"  
+&gt; [101] "doctors' rights"          "downwards' and"          
+&gt; [103] "workers' insurance"       "model' s"                
+&gt; [105] "pays' principle"          "Unions' commitment"      
+&gt; [107] "People' s"                "Lipponen' s"             
+&gt; [109] "Russia' s"                "procedure' inserted"     
+&gt; [111] "policy' chapters"         "States' citizens"        
+&gt; [113] "markets' can"             "lawyer' in"              
+&gt; [115] "States' contributions"    "small' when"             
+&gt; [117] "States' contract"         "citizens' initiative"    
+&gt; [119] "Ruffolo' s"               "States' capacity"        
+&gt; [121] "ties' between"            "values' of"              
+&gt; [123] "citizens' shared"         "position' only"          
+&gt; [125] "mindedness' in"           "countries' European"     
+&gt; [127] "Player' but"              "institutions' knowledge" 
+&gt; [129] "Bowles' proposal"         "China' policy"           
+&gt; [131] "Conference' s"            "Agenda' and"             
+&gt; [133] "Congress' foreign"</code></pre>
+</div>
+</div>
+</div>
+<p>In <a href="#exm-td-europarl-search-apostrophe">Example&nbsp;<span>7.11</span></a> we can see that we have many singular possessive forms we want to ammend and other forms that we may want to keep –in particular when the single quote is part of a quote or a plural or irregular singular possessive. From various runs of this code, it looks safe to remove whitespace between the single quote and the <code>s</code> in the possessive form We need to be careful not to remove whitespace in other contexts where the single quote is followed by <code>s</code>. To do this we can use the word boundary pattern <code>\\b</code> after the <code>s</code> in our pattern to ensure that the <code>s</code> is not part of a following word. The code is seen in <a href="#exm-td-europarl-remove-apostrophe">Example&nbsp;<span>7.12</span></a>.</p>
+<div id="exm-td-europarl-remove-apostrophe" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.12 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="transform-datasets_cache/html/td-europarl-remove-apostrophe_8431ba3de35569bf5f4cdeedf5226586">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Remove whitespace after apostrophe</span></span>
+<span><span class="va">europarl_curated_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">europarl_curated_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>lines <span class="op">=</span> <span class="fu">str_replace_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"'\\ss\\b"</span>, <span class="st">"'s"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>To check our work, we can run the code in <a href="#exm-td-europarl-search-apostrophe">Example&nbsp;<span>7.11</span></a> again. We should see that there are no more instances of whitespace after the single quote in possessive forms.</p>
+<p>Other normalization procedures often follow a similar line of attack. There are cases, however, in which normalization procedures are more easily accomplished after subsequent transformation steps or need to be post-poned to further the goals of other transformation steps. For example, standardizing abbreviated forms may be more easily accomplished after tokenization when each token is a word. Another example is the case of case conversion. Even if we are not directly interested in the case differences between words, certain generation procedures, Named Entity Recognition for example, may use case information to identify proper nouns. In these cases, it may be better to leave the case as is until after the generation step.</p>
+</section></section><section id="sec-td-recoding" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-td-recoding">
 <span class="header-section-number">7.2</span> Recoding</h2>
 <!--  
 
@@ -574,8 +936,7 @@ Data:
     - utterance_text (extract, disfluencies)
 -->
 <!-- Consider:
-
-The process of recoding aims to _recast_ the values of a variable or set of variables to a new variable or set of variables to enable more direct access. This may include extracting values from a variable, stemming or lemmatization of words, tokenization of linguistic forms (words, ngrams, sentences, etc.), calculating the lengths of linguistic units, calculating type-token ratios, syntactic complexity, and/ or removing variables that will not be used in the analysis, etc.
+The process of recoding aims to _recast_ the values of a variable or set of variables to a new variable or set of variables to enable more direct access. This may include extracting values from a variable, classifying values, deriving values (e.g. measures of lexical diversity, unit length, syntactic complexity, etc.), or some combination of these.
 -->
 <p>Normalizing text can be seen as an extension of dataset curation to some extent in that the structure of the dataset is maintained. In the Europarl case, we saw this to be true. In the case of recoding, and other transformational steps, the aim will be to modify the dataset structure either by rows, columns, or both. Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.</p>
 <p><strong>Switchboard Dialogue Act Corpus</strong></p>
@@ -593,7 +954,7 @@ Recode:
 <div class="cell-output-display">
 <div id="tbl-tr-swda-curated-dd" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<caption>Table&nbsp;7.2: Data dictionary for the Switchboard Dialogue Act Corpus.</caption>
+<caption>Table&nbsp;7.3: Data dictionary for the Switchboard Dialogue Act Corpus.</caption>
 <thead><tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">name</th>
@@ -658,12 +1019,12 @@ Recode:
 </div>
 <p>Read in the curated dataset.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/tr-swda-dataset-read-show_fff763084b6dd27236578b1b69510093">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">swda_curated_tbl</span> <span class="op">&lt;-</span> </span>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">swda_curated_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/derived/swda/swda_curated.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Preview the first 10 lines of the dataset.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/tr-swda-curated-preview_69a6f2ef590d8a22c38d4d8c1469e105">
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">swda_curated_tbl</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">swda_curated_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 10 × 8
@@ -686,7 +1047,7 @@ Recode:
 <p>The Switchboard Dialogue Act Corpus dataset that was //FIXME curated in the previous chapter contains a number of variables describing conversations between speakers of American English.</p>
 <p>Let’s read in this dataset and take a closer look.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-read-show_a6cd12b528e7facd3b7db975390558ad">
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"../data/derived/sdac/sdac_curated.csv"</span><span class="op">)</span> <span class="co"># read curated dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"../data/derived/sdac/sdac_curated.csv"</span><span class="op">)</span> <span class="co"># read curated dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Among a number of metadata variables, curated dataset includes the <code>utterance_text</code> column which contains dialogue from the conversations interleaved with a <a href="https://staff.fnwi.uva.nl/r.fernandezrovira/teaching/DM-materials/DFL-book.pdf">disfluency annotation scheme</a>.</p>
 <div id="tbl-td-sdac-preview-curated-dataset" class="cell tbl-parent quarto-layout-panel anchored" data-tbl-cap="20 randomly sampled lines of the SDAC curated dataset." data-hash="transform-datasets_cache/html/tbl-td-sdac-preview-curated-dataset_d72a2a2a7202ba19dbc4884d41b46a35">
@@ -694,7 +1055,7 @@ Recode:
 </div>
 <p>Let’s drop a few variables from our dataset to rein in our focus. I will keep the <code>doc_id</code>, <code>speaker_id</code>, and <code>utterance_text</code>.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-simplified_15ee220b7a543ec0950db6ba24cd23c1">
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_simplified</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_simplified</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">sdac</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">speaker_id</span>, <span class="va">utterance_text</span><span class="op">)</span> <span class="co"># columns to retain</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -704,7 +1065,7 @@ Recode:
 <p>In this disfluency annotation system, there are various conventions used for non-sentence elements. If say, for example, a researcher were to be interested in understanding the use of filled pauses (‘uh’ or ‘uh’), the aim would be to identify those lines where the <code>{F ...}</code> annotation is used around the utterances ‘uh’ and ‘um’.</p>
 <p>To do this we turn to the <code>str_count()</code> function. This function will count the number of matches found for a pattern. We can use a regular expression to identify the pattern of interest which is all the instances of <code>{F</code> followed by either <code>uh</code> or <code>um</code>. Since the disfluencies may start an utterance, and therefore be capitalized we need to formulate a regular expression which allows for either <code>U</code> or <code>u</code> for each disfluency type. The result from each disfluency match will be added to a new column. To create a new column we will wrap each <code>str_count()</code> with <code>mutate()</code> and give the new column a meaningful name. In this case I’ve opted for <code>uh</code> and <code>um</code>.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-count-disfluencies_dead463cc0100b024a834f8af6a5514b">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">sdac_simplified</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>uh <span class="op">=</span> <span class="fu">str_count</span><span class="op">(</span><span class="va">utterance_text</span>, <span class="st">"\\{F [Uu]h"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># match {F Uh or {F uh}</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>um <span class="op">=</span> <span class="fu">str_count</span><span class="op">(</span><span class="va">utterance_text</span>, <span class="st">"\\{F [Uu]m"</span><span class="op">)</span><span class="op">)</span> <span class="co"># match {F Um or {F um}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -715,7 +1076,7 @@ Recode:
 <p>Now we have two new columns, <code>uh</code> and <code>um</code> which indicate how many times the relevant pattern was matched for a given utterance. By choosing to focus on disfluencies, however, we have made a decision to change the unit of observation from the utterance to the use of filled pauses (<code>uh</code> and <code>um</code>). This means that as the dataset stands, it is not in tidy format –where each observation corresponds to the observational unit. When datasets are misaligned in this particular way, there are in what is known as ‘wide’ format. What we want to do, then, is to restructure our dataset such that each row corresponds to the unit of observation –in this case each filled pause type.</p>
 <p>To convert our current (wide) dataset to one where each filler type is listed and the counts are measured for each utterance we turn to the <code>pivot_longer()</code> function. This function creates two new columns, one in which the column names are listed and one for the values for each of the column names.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-disfluencies-longer_ed6880f4a33fda2a25f66f48f3ce44da">
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">sdac_disfluencies</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
 <span>  <span class="fu">pivot_longer</span><span class="op">(</span></span>
 <span>    cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"uh"</span>, <span class="st">"um"</span><span class="op">)</span>, <span class="co"># columns to convert</span></span>
@@ -732,6 +1093,8 @@ Recode:
 
 row-wise
 
+The goal is to segment units of language into relevant components given the research question. This may include breaking text into smaller units, such as words, n-grams, sentences, etc. or combining text into larger units.
+
 Data: 
 
 - CABNC (expand)
@@ -739,10 +1102,19 @@ Data:
 - PELIC tokens (contract)
   - stringr::str_c() [w/ collapse = " "]
 
+R: 
+- start with `tokenizers` package for tokenization types (character, word, n-gram, sentence, etc.)
+- introduce `tidytext` package, for tokenization and unnesting
+- show how to collapse tokens with `stringr::str_c()`
+
+Consider: 
+
+- Adding lemmatization, stemming to this section but to make sure that it is clear that these are 'recoding' processes, they just happen to be more accessible to use after tokenization.
+
 -->
 <p>The CABNC Corpus data dictionary.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/tbl-td-cabnc-dd_19590253f86dc4081797fe672eaea4c3">
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># [ ] filter the data dictionary to only include the variables of interest</span></span>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># [ ] filter the data dictionary to only include the variables of interest</span></span>
 <span></span>
 <span><span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data/cd-cabnc_curated_dd.csv"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">kable</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -750,7 +1122,7 @@ Data:
 <div class="cell-output-display">
 <div id="tbl-td-cabnc-dd" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<caption>Table&nbsp;7.3: Data dictionary for the CABNC Corpus.</caption>
+<caption>Table&nbsp;7.4: Data dictionary for the CABNC Corpus.</caption>
 <thead><tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">name</th>
@@ -839,7 +1211,7 @@ Data:
 </div>
 <p>Read the dataset.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-cabnc-read-show_4981e6193c1f395a4470b4de17b8291f">
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cabnc_curated_tbl</span> <span class="op">&lt;-</span> </span>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cabnc_curated_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"../data/derived/cabnc_curated.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <!-- [ ] Add PELIC data dictionary and read dataset. -->
@@ -848,6 +1220,8 @@ Data:
 <!--  
 
 row- and column-wise
+
+The goal is to augment the dataset with additional information based on the existing information, but not necessarily explicit in the dataset. This may include adding linguistic annotations, sentiment analysis, etc.
 
 Data: 
 
@@ -860,7 +1234,10 @@ Data:
 - Syntax annotation
   - Dependency parsing
 
-Mention `rsyntax` package for extracting/ recoding patterns from syntactic annotations.
+Consider:
+
+- UD models: note that there are different models for different languages and language varieties, some may be more in line with the language variety of interest than others.
+- Mention `rsyntax` package for extracting/ recoding patterns from syntactic annotations.
 
 -->
 <p>The process of generating a dataset involves the addition of information to a dataset. Whereas recoding involves the transformation of information that is already explicit in a dataset, generation involves the transformation of information that is implicit in a dataset.</p>
@@ -868,7 +1245,7 @@ Mention `rsyntax` package for extracting/ recoding patterns from syntactic annot
 <p>There are important considerations, however, that need to be taken into account when choosing whether linguistic annotation can be conducted automatically. First and foremost has to do with the type of annotation desired. Information such as part of speech (grammatical category) and morpho-syntactic information are the the most common types of linguistic annotation that can be conducted automatically. Second the degree to which the resource that will be used to annotate the linguistic information is aligned with the language variety and/or register is also a key consideration. As noted, automatic linguistic annotation methods are contingent on pre-trained resources. The language and language variety used to develop these resources may not be available for the language under investigation, or if it does, the language variety and/ or register may not align. The degree to which a resource does not align with the linguistic information targeted for annotation is directly related to the quality of the final annotations. To be clear, no annotation method, whether manual or automatic is guaranteed to be perfectly accurate.</p>
 <p>Let’s take a look at annotation some of the language from the Europarl dataset we normalized.</p>
 <div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">europarl</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">europarl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"Target"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">kable</span><span class="op">(</span>booktabs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -880,7 +1257,7 @@ Mention `rsyntax` package for extracting/ recoding patterns from syntactic annot
 </div>
 <p>We will use the cleanNLP package to do our linguistic annotation. The annotation process depends on the pre-trained language models. There is <a href="https://github.com/bnosac/udpipe#pre-trained-models">a list of the models available to access</a>. The <code>load_model_udpipe()</code> custom function below downloads the specified language model and initialized the <code>udpipe</code> engine (<code>cnlp_init_udpipe()</code>) for conducting annotations.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-functions-load-udpipe-model_ff5f23572c0a2b39e3de3a65c53b5141">
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">load_model_udpipe</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model_lang</span><span class="op">)</span> <span class="op">{</span></span>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">load_model_udpipe</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model_lang</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Function</span></span>
 <span>  <span class="co"># Download and load the specified udpipe language model</span></span>
 <span>  </span>
@@ -897,7 +1274,7 @@ Mention `rsyntax` package for extracting/ recoding patterns from syntactic annot
 </div>
 <p>In a test case, let’s load the ‘english’ model to annotate a sentence line from the europarl dataset to illustrate the basic workflow.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-generation-europarl-en-example_6b035e53eee84cee04353d27d76852ce">
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">eng_model</span> <span class="op">&lt;-</span> <span class="fu">load_model_udpipe</span><span class="op">(</span><span class="st">"english"</span><span class="op">)</span> <span class="co"># load and initialize the language model, 'english' in this case.</span></span>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">eng_model</span> <span class="op">&lt;-</span> <span class="fu">load_model_udpipe</span><span class="op">(</span><span class="st">"english"</span><span class="op">)</span> <span class="co"># load and initialize the language model, 'english' in this case.</span></span>
 <span></span>
 <span><span class="va">eng_annotation</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">europarl</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
@@ -916,7 +1293,7 @@ Mention `rsyntax` package for extracting/ recoding patterns from syntactic annot
 <p>There is quite a bit of information which is returned from <code>cnlp_annotate()</code>. First note that the input sentence has been tokenized by word. Each token includes the token, lemma, part of speech (<code>upos</code> and <code>xpos</code>), morphological features (<code>feats</code>), and syntactic relationships (<code>tid_source</code> and <code>relation</code>). It is also key to note that the <code>doc_id</code>, <code>sid</code> and <code>tid</code> maintain the relational attributes from the original dataset –and therefore maintains our annotated dataset in tidy format.</p>
 <p>Let’s now annotate the same sentence from the europarl corpus for the Source (‘Spanish’) and note the similarities and differences.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-generation-europarl-es-example_a29ab659394fd79cbcff557e6569b3c9">
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">spa_model</span> <span class="op">&lt;-</span> <span class="fu">load_model_udpipe</span><span class="op">(</span><span class="st">"spanish"</span><span class="op">)</span> <span class="co"># load and initialize the language model, 'spanish' in this case.</span></span>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">spa_model</span> <span class="op">&lt;-</span> <span class="fu">load_model_udpipe</span><span class="op">(</span><span class="st">"spanish"</span><span class="op">)</span> <span class="co"># load and initialize the language model, 'spanish' in this case.</span></span>
 <span></span>
 <span><span class="va">spa_annotation</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">europarl</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
@@ -941,33 +1318,28 @@ Mention `rsyntax` package for extracting/ recoding patterns from syntactic annot
 </div>
 </div>
 </div>
-<!-- Consider:
-
-
-- europarl Corpus, syntactic annotation
-
-- Syntactic parsing for last.fm music lyrics, phrasal verbs (compound:prt) a la [@Akbary2018], with automated approach
-- SOTU Corpus, frequency weighting and scaling for clustering algorithm?
-- ...
-
-
-The process of generation aims to _augment_ a variable or set of variables. In essence this aims to make implicit attributes explicit to that they are directly accessible. This often targeted at the automatic generation of linguistic annotations such as grammatical category (part-of-speech) or syntactic structure. 
-
-
--->
 </section><section id="sec-td-merging" class="level2" data-number="7.5"><h2 data-number="7.5" class="anchored" data-anchor-id="sec-td-merging">
 <span class="header-section-number">7.5</span> Merging</h2>
 <!--
 
+Row-wise and column-wise
+
+The goal to combine two or more datasets to create a new dataset. This may include concatenating datasets row-wise or joining datasets column-wise. The goal is to create a dataset that is more informative for the research question. In most cases this will involve the addition of information from one dataset to another. But in some cases it may be the case that the goal is to filter one dataset based on the information in another dataset.
+
+The datasets to be merged must share attributes. In the case of concatenation, the datasets must share the same attributes. In the case of joining, the datasets must share at least one attribute, or key, to join on.
+
 Data: 
 
-- CEDEL2 (row-wise)
+- CEDEL2 (row-wise) "Concatenating"
   - Natives
   - Learners
 
-- PEDC (column-wise)
+- PEDC (column-wise) "Joining"
   - Wordbank: word-level `category`` and `item_kind`
-  - eLexicon: word-level word frequency measures
+  - eLexicon: word-level word frequency measures (https://elexicon.wustl.edu/index.html)
+
+- PEDIC (column-wise) "Joining"
+  - `lingtypology` package: ENNTT country/ language properties (?)
 
 Consider: 
 
@@ -975,14 +1347,6 @@ Consider:
   - Sentiment lexicons
   - Stopword lists
   - MRC word information to merge
-  - English Lexicon project RT times: https://elexicon.wustl.edu/index.html
-  - `lingtypology` package: ENNTT country/ language properties (?)
-
-- Non-linguistic information:
-  - Demographic information
-  - Geographic information
-  - Time information
-  - ...
 
 ---
 
@@ -997,12 +1361,12 @@ Consider the `get_sentiments()` function which returns words which have been cla
 <p>We can also merge datasets that we generate in our analysis or that we import from other sources. This can be useful when there are cases in which a corpus has associated metadata that is contained in files separate from the corpus itself. This is the case for the Switchboard Dialogue Act Corpus.</p>
 <p>Our existing, disfluency recoded, version includes the following variables.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-disfluencies_43f8a008dd8b4178feeb054d7efaa793">
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="co"># preview first 10 observations</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <a href="https://catalog.ldc.upenn.edu/docs/LDC97S62/">online documentation page</a> provides a key file <code>caller_tab.csv</code> which contains speaker metadata information. Included in this <code>.csv</code> file is a column <code>caller_no</code> which contains the <code>speaker_id</code> we currently have in the <code>sdac_disfluencies</code> dataset. Let’s read this file into our R session renaming <code>caller_no</code> to <code>speaker_id</code> to prepare to join these datasets.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-meta-read_4557ea371eef3a1f192417fbe1edcb45">
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_speaker_meta</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_speaker_meta</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">read_csv</span><span class="op">(</span></span>
 <span>    file <span class="op">=</span> <span class="st">"https://catalog.ldc.upenn.edu/docs/LDC97S62/caller_tab.csv"</span>,</span>
 <span>    col_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
@@ -1027,14 +1391,14 @@ Consider the `get_sentiments()` function which returns words which have been cla
 </div>
 <p>Now to join the <code>sdac_disfluencies</code> and <code>sdac_speaker_meta</code>. Let’s turn to <code>left_join()</code> again as we want to retain all the observations (rows) from <code>sdac_disfluencies</code> and add the columns for <code>sdac_speaker_meta</code> where the <code>speaker_id</code> column values match.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-join-metadata_c6ec8b2c761cd4bf60fdcf9a81327a43">
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">left_join</span><span class="op">(</span><span class="va">sdac_disfluencies</span>, <span class="va">sdac_speaker_meta</span><span class="op">)</span> <span class="co"># join by ``speaker_id`</span></span>
 <span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">sdac_disfluencies</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now there are some metadata columns we may want to keep and others we may want to drop as they may not be of importance for our analysis. I’m going to assume that we want to keep <code>sex</code>, <code>birth_year</code>, <code>dialect_area</code>, and <code>education</code> and drop the rest.</p>
 <div class="cell" data-hash="transform-datasets_cache/html/td-sdac-disfluencies-subset-cols_a5aad792170ac0cb2b4e456dc3d646a6">
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sdac_disfluencies</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">sdac_disfluencies</span> <span class="op">|&gt;</span> <span class="co"># dataset</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">doc_id</span><span class="op">:</span><span class="va">count</span>, <span class="va">sex</span><span class="op">:</span><span class="va">education</span><span class="op">)</span> <span class="co"># subset key columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1042,7 +1406,18 @@ Consider the `get_sentiments()` function which returns words which have been cla
 
 </div>
 </section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
-<p>In this chapter we covered the process of transforming datasets. The goal is to manipulate the curated dataset to make it align better for analysis. There are four general types of transformation steps: normalization, recoding, tokenization, generation, and merging. In any given research project some or all of these steps will be employed –but not necessarily in the order presented in this chapter. Furthermore, there may also be various datasets generated in at this stage each with a distinct analysis focus in mind. In any case, it is important to write these datasets to disk and to document them according to reproducible research principles.</p>
+<p>In this chapter we covered the process of transforming datasets. The goal is to manipulate the curated dataset to make it align better for analysis. There are four general types of transformation steps: normalization, recoding, tokenization, generation, and merging. In any given research project some or all of these steps will be employed –but not necessarily in the order presented in this chapter. Furthermore, there may also be various datasets generated in at this stage each with a distinct analysis focus in mind.</p>
+<!--  
+
+?? Add at the end of the chapter?
+
+[x] Add data checks
+[ ] Reminder on writing the dataset and data dictionary to *data/derived/* directory
+  [ ] There may be multiple transformed datasets, so it is important to di  stinguish them from one another and document them separately.
+[ ] Reminder to review and document code added to the *code/* directory, within the *3-transform-dataset.qmd* file.
+
+-->
+<p>In any case, it is important to write these datasets to disk and to document them according to reproducible research principles.</p>
 <p>This chapter concludes the section on data/ dataset preparation. The next section we turn to analyzing datasets. This is the stage where we interrogate the datasets to derive knowledge and insight either through exploratory, predictive, or inferential methods.</p>
 </section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
 <div class="callout callout-style-simple callout-none no-icon">
@@ -1105,6 +1480,9 @@ Consider the `get_sentiments()` function which returns words which have been cla
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-R-rsyntax" class="csl-entry" role="listitem">
 Welbers, Kasper, and Wouter van Atteveldt. 2022. <em>Rsyntax: Extract Semantic Relations from Text by Querying and Reshaping Syntax</em>. <a href="https://CRAN.R-project.org/package=rsyntax">https://CRAN.R-project.org/package=rsyntax</a>.
+</div>
+<div id="ref-R-stringr" class="csl-entry" role="listitem">
+Wickham, Hadley. 2022. <em>Stringr: Simple, Consistent Wrappers for Common String Operations</em>. <a href="https://CRAN.R-project.org/package=stringr">https://CRAN.R-project.org/package=stringr</a>.
 </div>
 </div>
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">

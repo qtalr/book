@@ -141,8 +141,7 @@ brown_categories_docs |>
   scale_x_continuous(labels = scales::percent) +
   labs(
     x = "Percentage of the corpus (balance)",
-    y = "Main category (strata)",
-    title = "Brown Corpus Sampling Frame"
+    y = "Main category (strata)"
   )
 ```
 :::
@@ -510,13 +509,9 @@ knitr::include_graphics("figures/understanding-data/ud-transformations.drawio.pn
 
 The results build on and manipulate the curated dataset to produce a *derived dataset*. While there is typically one curated dataset that serves as the base organizational dataset, there may be multiple derived datasets, each aligning with the informational needs of specific analyses in the research project.
 
-In what follows, we will discuss the most common types of data transformation: text normalization, text tokenization, variable recoding, variable generation, and observation/ variable merging. Note, however, that the order in which these transformations are applied in a given research project is not fixed and will vary depending on the dataset and the research question(s) to be addressed.  
+In what follows, we will discuss the most common types of data transformation: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. Note, however, that the order in which these transformations are applied in a given research project is not fixed and will vary depending on the dataset and the research question(s) to be addressed.  
 
 #### Text normalization {#sec-ud-text-normalization}
-
-<!-- Text normalization is a crucial step in preparing textual data for analysis. This process involves cleaning and standardizing the text to ensure consistency and reduce noise. Common tasks include converting text to lowercase, removing punctuation, correcting spelling errors, and tokenization. By normalizing the text, we can enhance the quality of the data and improve the performance of various natural language processing tasks. -->
-
-<!-- Text normalization is a preliminary yet essential step in text analysis where the aim is to convert the text into a uniform format to reduce the complexity of the data. It involves lowercasing, removing punctuation and special characters, adjusting forms, and removing stopwords. This process is undertaken to reduce variations in the representation of words and phrases and to discard non-informative elements, facilitating more accurate text analysis downstream. -->
 
 The process of text normalization aims to prepare and standardize text. It is often a preliminary step in data transformation processes which include variables with text. The aim is to convert the text into a uniform format to reduce unwanted variation and noise.
 
@@ -566,64 +561,6 @@ text_tbl |>
 ```
 
 When text normalization steps are motivated and applied with foresight they serve to enhance the quality of the data and improves the reliability of subsequent transformation steps.
-
-#### Text tokenization {#sec-ud-text-tokenization}
-
-//FIXME: *Reorder: recoding and tokenization. Recoding/ text-normalization are column-wise operations, tokenization is row-wise. Then generation/merging are row- and colum-wise.*
-
-Another text-oriented transformation step is **text tokenization**. This process involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable. At its core, tokenization is the process which enables the quantitative analysis of text.
-
-Text variables can be tokenized at any linguistic level. To illustrate, consider our toy dataset from @tbl-ud-text-dataset-lowercase. We can tokenize the text at the sentence level, in @tbl-ud-text-dataset-tokenization-sentence, by splitting the text at the period followed by a space. This results in a dataset with four observations, one for each sentence in the original text.
-
-```{r}
-#| label: tbl-ud-text-dataset-tokenization-sentence
-#| tbl-cap: "A toy dataset with two variables, `text_id` and `sentence`, where the text has been tokenized at the sentence level."
-#| tbl-colwidths: [10, 90]
-
-library(tidytext)
-
-text_tbl |>
-  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+") |>
-  kable(booktabs = TRUE)
-```
-
-It is important to make explicit what the operationalization of our linguistic unit is as common terms such as sentence, word, *etc.* can be defined in different ways. For example, the sentence tokenization above is based on the assumption that sentences are separated by a period followed by a space. This is a suitable definition for this text, but likely will not be for other English text or for other languages/ writing scripts. For words, a very simple operationalization is to use whitespace separation (*e.g.* "I cannot believe it." -- ["I", "cannot", "believe", "it."]). However, this approach does not handle puntuation marks (*e.g.* ["it."]) or contractions (*e.g.* ["can't"]). A more sophisticated operationalization will be necessary for these, and possibly other, cases.
-
-Another important token unit is the $n$-gram. Words or characters can be grouped into contiguous sequences with a moving window of a certain size $n$. Single unit windows are referred to as unigrams, two units as bigrams, three units as trigrams, and so on. Let's tokenize our toy dataset at the bigram level for words using a simple whitespace separation for words, as seen in @tbl-ud-text-dataset-bigram.
-
-```{r}
-#| label: tbl-ud-text-dataset-bigram
-#| tbl-cap: "A toy dataset with two variables, `text_id` and `bigram`, where the text has been tokenized at the bigram word level."
-
-text_tbl |>
-  unnest_tokens(word, text, token = "ngrams", n = 2) |>
-  slice_head(n = 10) |>
-  kable(booktabs = TRUE)
-```
-
-In @tbl-ud-text-dataset-bigram we see that the first bigram is "it's a" --the first two words (based on whitespace separation) in the text. The second bigram is "a toy" --the second and third words in the text. This continues to the end of the text. $N$-gram tokenization can be useful to capture context that would otherwise would be lost from tokenizing words or characters at the unigram level. 
-
-Up to this point our tokens have been surface forms. That is, they are the actual words or characters as they appear in the text. However, we may want to reduce the tokens to their base form, removing their inflectional forms. This is known as **lemmatization**. For example, the word "run" is the lemma of the words "running", "runs", and "ran". Let's lemmatize the third sentence in our toy dataset. For comparison, `word` and `lemma` are shown side-by-side in @tbl-ud-text-dataset-lemmatization.
-
-```{r}
-#| label: tbl-ud-text-dataset-lemmatization
-#| tbl-cap: "A toy dataset with two variables, `text_id` and `word`, where the text has been tokenized at the unigram word level and lemmatized."
-
-text_tbl |>
-  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s") |>
-  slice(3) |>
-  unnest_tokens(word, sentence) |>
-  mutate(lemma = textstem::lemmatize_words(word)) |>
-  kable(booktabs = TRUE)
-```
-
-::: {.callout}
-**{{< fa regular file-alt >}} Case study**
-
-Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus [@Kostic2003]. @Baayen2006 found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.
-:::
-
-Together tokenization and lemmatization are powerful tools for transforming text. If our dataset contains more robust linguistic annotation or that annotation can be generated (see @sec-ud-variable-generation), this information can also be leveraged to tokenize language into a format that is easier to explore and quantify in an analysis. 
 
 #### Variable recoding {#sec-ud-variable-recoding}
 
@@ -700,9 +637,66 @@ In @tbl-ud-recode-numeric the variable `word_length` appears with the values `sh
 
 In sum, recoding is a useful data transformation technique that can be used to simplify complex variables, making it easier to identify patterns and trends relevant for the research question.
 
+
+#### Text tokenization {#sec-ud-text-tokenization}
+
+A text-oriented transformation step is **text tokenization**. This process involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable. At its core, tokenization is the process which enables the quantitative analysis of text.
+
+Text variables can be tokenized at any linguistic level. To illustrate, consider our toy dataset from @tbl-ud-text-dataset-lowercase. We can tokenize the text at the sentence level, in @tbl-ud-text-dataset-tokenization-sentence, by splitting the text at the period followed by a space. This results in a dataset with four observations, one for each sentence in the original text.
+
+```{r}
+#| label: tbl-ud-text-dataset-tokenization-sentence
+#| tbl-cap: "A toy dataset with two variables, `text_id` and `sentence`, where the text has been tokenized at the sentence level."
+#| tbl-colwidths: [10, 90]
+
+library(tidytext)
+
+text_tbl |>
+  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+") |>
+  kable(booktabs = TRUE)
+```
+
+It is important to make explicit what the operationalization of our linguistic unit is as common terms such as sentence, word, *etc.* can be defined in different ways. For example, the sentence tokenization above is based on the assumption that sentences are separated by a period followed by a space. This is a suitable definition for this text, but likely will not be for other English text or for other languages/ writing scripts. For words, a very simple operationalization is to use whitespace separation (*e.g.* "I cannot believe it." -- ["I", "cannot", "believe", "it."]). However, this approach does not handle puntuation marks (*e.g.* ["it."]) or contractions (*e.g.* ["can't"]). A more sophisticated operationalization will be necessary for these, and possibly other, cases.
+
+Another important token unit is the $n$-gram. Words or characters can be grouped into contiguous sequences with a moving window of a certain size $n$. Single unit windows are referred to as unigrams, two units as bigrams, three units as trigrams, and so on. Let's tokenize our toy dataset at the bigram level for words using a simple whitespace separation for words, as seen in @tbl-ud-text-dataset-bigram.
+
+```{r}
+#| label: tbl-ud-text-dataset-bigram
+#| tbl-cap: "A toy dataset with two variables, `text_id` and `bigram`, where the text has been tokenized at the bigram word level."
+
+text_tbl |>
+  unnest_tokens(word, text, token = "ngrams", n = 2) |>
+  slice_head(n = 10) |>
+  kable(booktabs = TRUE)
+```
+
+In @tbl-ud-text-dataset-bigram we see that the first bigram is "it's a" --the first two words (based on whitespace separation) in the text. The second bigram is "a toy" --the second and third words in the text. This continues to the end of the text. $N$-gram tokenization can be useful to capture context that would otherwise would be lost from tokenizing words or characters at the unigram level. 
+
+Up to this point our tokens have been surface forms. That is, they are the actual words or characters as they appear in the text. However, we may want to reduce the tokens to their base form, removing their inflectional forms. This is known as **lemmatization**. For example, the word "run" is the lemma of the words "running", "runs", and "ran". Let's lemmatize the third sentence in our toy dataset. For comparison, `word` and `lemma` are shown side-by-side in @tbl-ud-text-dataset-lemmatization.
+
+```{r}
+#| label: tbl-ud-text-dataset-lemmatization
+#| tbl-cap: "A toy dataset with two variables, `text_id` and `word`, where the text has been tokenized at the unigram word level and lemmatized."
+
+text_tbl |>
+  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s") |>
+  slice(3) |>
+  unnest_tokens(word, sentence) |>
+  mutate(lemma = textstem::lemmatize_words(word)) |>
+  kable(booktabs = TRUE)
+```
+
+::: {.callout}
+**{{< fa regular file-alt >}} Case study**
+
+Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus [@Kostic2003]. @Baayen2006 found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.
+:::
+
+Together tokenization and lemmatization are powerful tools for transforming text. If our dataset contains more robust linguistic annotation or that annotation can be generated (see @sec-ud-variable-generation), this information can also be leveraged to tokenize language into a format that is easier to explore and quantify in an analysis. 
+
 #### Variable generation {#sec-ud-variable-generation}
 
-The process of variable generation aims to augment existing variables or create new ones, and as such is a column-wise operation. Generation can include applying calculations or extracting relevant information from existing variables or enhancing text variables with linguistic annotation. Simplifying a bit, generation helps make implicit attributes explicit. The results of this process enables direct access during analysis to features that were otherwise hidden or difficult to access.
+The process of variable generation aims to augment existing variables or create new ones, and as such it is a column-wise operation. Generation can include applying calculations or extracting relevant information from existing variables or enhancing text variables with linguistic annotation. Simplifying a bit, generation helps make implicit attributes explicit. The results of this process enables direct access during analysis to features that were otherwise hidden or difficult to access.
 
 Let's highlight a some common calculation and extraction examples that generate variables. First, let's look at the calculation of measures. In text analysis, measures are often used to describe the properties of a document or linguistic unit. For example, the number of words in a corpus document, the lengths of sentences, the number of clauses in a sentence, *etc.*. In turn, these measures can be used to calculate other measures, such as lexical diversity or syntactic complexity measures. 
 
@@ -817,7 +811,7 @@ spoken_tbl <-
   dplyr::filter(modality == "Spoken")
 ```
 
-To merge in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as **concatenating datasets**. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the sample variables and variable types is not the same has having the same values. 
+To merge in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as **concatenating datasets**. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the same variables and variable types is not the same has having the same values. 
 
 Take, for example, a case when a corpus resource contains data for two populations. In the course of curating and transforming the datasets it may make more sense to work with the datasets separately. However, when it comes time to analyze the data, it may be more convenient to work with the datasets as a single dataset. In this case, the datasets can be concatenated to create a single dataset. 
 

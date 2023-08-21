@@ -19,6 +19,12 @@ execute:
 
 Content:
 
+- [x] Add normalization section
+- [x] Add recoding section
+- [ ] Add tokenization section
+- [ ] Add generation section
+- [ ] Add merging section
+
 Exercises:
 
 - [ ] add concept questions to Activities
@@ -154,12 +160,12 @@ The contents of the data dictionary for this dataset appears in @tbl-td-europarl
 #| echo: false
 #| message: false
 
-read_csv(file = "data/cd-europarl_curated_dd.csv") |> 
-  kable() |> 
+read_csv(file = "data/cd-europarl_curated_dd.csv") |>
+  kable() |>
   kable_styling()
 ```
 
-This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation is the `lines` variable whose values are are lines of dialogue. 
+This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation is the `lines` variable whose values are are lines of dialog. 
 
 Let's read in the dataset CSV file with `read_csv()` and inspect the first lines of the dataset with `slice_head()` in @exm-tb-europarl-preview.
 
@@ -169,7 +175,7 @@ Let's read in the dataset CSV file with `read_csv()` and inspect the first lines
 #| eval: false
 
 # Read in the dataset
-europarl_curated_tbl <- 
+europarl_curated_tbl <-
   read_csv(file = "../data/derived/europarl_curated.csv")
 
 # Preview the first 10 lines
@@ -430,7 +436,6 @@ To check our work, we can run the code in @exm-td-europarl-search-apostrophe aga
 
 Other normalization procedures often follow a similar line of attack. There are cases, however, in which normalization procedures are more easily accomplished after subsequent transformation steps or need to be post-poned to further the goals of other transformation steps. For example, standardizing abbreviated forms may be more easily accomplished after tokenization when each token is a word. Another example is the case of case conversion. Even if we are not directly interested in the case differences between words, certain generation procedures, Named Entity Recognition for example, may use case information to identify proper nouns. In these cases, it may be better to leave the case as is until after the generation step.
 
-
 ## Recoding {#sec-td-recoding}
 
 <!--  
@@ -441,29 +446,23 @@ Data:
   - SWDA
     - education (classify)
     - birth_year (derive)
-    - utterance_text (extract, disfluencies)
--->
+    - utt_text (extract, disfluencies)
 
-<!-- Consider:
-The process of recoding aims to _recast_ the values of a variable or set of variables to a new variable or set of variables to enable more direct access. This may include extracting values from a variable, classifying values, deriving values (e.g. measures of lexical diversity, unit length, syntactic complexity, etc.), or some combination of these.
+- R: 
+  - mutate() # create new variables
+  - case_when() # classify
+  - str_count() # count matches
+  - pivot_longer() # change wide to long
+
 -->
 
 Normalizing text can be seen as an extension of dataset curation to some extent in that the structure of the dataset is maintained. In the Europarl case, we saw this to be true. In the case of recoding, and other transformational steps, the aim will be to modify the dataset structure either by rows, columns, or both. Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.
 
-**Switchboard Dialogue Act Corpus**
+### Orientation {#sec-td-recoding-orientation}
 
-<!--  
-
-Recode: 
-
-- education (classify)
-- birth_year (derive)
-- utterance_text (extract, disfluencies) (derive)
-
--->
 
 ```{r}
-#| label: tr-swda-dataset-read-run
+#| label: tr-swda-dataset-curate-run
 #| include: false
 
 swda_curated_tbl <- 
@@ -474,11 +473,10 @@ swda_curated_tbl <-
     sex,
     education,
     birth_year,
-    utterance_id,
-    damsl_tag,
-    utterance_text
+    utt_id = utterance_id,
+    utt_text = utterance_text,
+    damsl_tag
   )
-
 
 swda_curated_dd <- 
   create_data_dictionary(
@@ -488,149 +486,204 @@ swda_curated_dd <-
 )
 ```
 
-Data dictionary. 
+<!--  
+Recode: 
+- education (classify)
+- birth_year (derive)
+- utt_text (extract, disfluencies) (derive)
+-->
+
+The Switchboard dialog Act Corpus corpus contains a number of variables describing conversations between speakers of American English. A subset of this dataset provides a good example of the recoding process. The data dictionary for this dataset appears in @tbl-tr-swda-curated-dd.
 
 ```{r}
 #| label: tbl-tr-swda-curated-dd
-#| tbl-cap: "Data dictionary for the Switchboard Dialogue Act Corpus."
+#| tbl-cap: "Data dictionary for the Switchboard dialog Act Corpus."
 #| message: false
 #| echo: false
 
 # SWDA data dictionary ----
 read_csv("data/tr-swda_curated_dd.csv") |>
-  kable() |>
+  kable() |> 
   kable_styling()
 ```
 
-Read in the curated dataset. 
+The data dictionary gives us a sense of the variables in the dataset. Let's read in the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-tr-swda-dataset-read-show.
 
+::: {#exm-tr-swda-dataset-read-show}
 ```{r}
 #| label: tr-swda-dataset-read-show
 #| eval: false
 
-swda_curated_tbl <- 
+# Read in the dataset
+swda_curated_tbl <-
   read_csv("data/derived/swda/swda_curated.csv")
-```
 
-Preview the first 10 lines of the dataset. 
-
-```{r}
-#| label: tr-swda-curated-preview
-
+# Preview the first 10 lines
 swda_curated_tbl |>
   slice_head(n = 10)
 ```
 
----
-
-
-The Switchboard Dialogue Act Corpus dataset that was //FIXME curated in the previous chapter contains a number of variables describing conversations between speakers of American English. 
-
-Let's read in this dataset and take a closer look.
-
 ```{r}
-#| eval: false
-#| label: td-sdac-read-show
-
-sdac <- read_csv(file = "../data/derived/sdac/sdac_curated.csv") # read curated dataset
-```
-
-```{r}
-#| eval: false
-#| label: td-sdac-read-run
+#| label: tr-swda-dataset-read-run
 #| echo: false
 
-sdac <- read_csv(file = "data/transform-datasets/data/derived/sdac/sdac_curated.csv") # read curated dataset
+swda_curated_tbl |> 
+  slice_head(n = 10)
 ```
+:::
 
-Among a number of metadata variables, curated dataset includes the `utterance_text` column which contains dialogue from the conversations interleaved with a [disfluency annotation scheme](https://staff.fnwi.uva.nl/r.fernandezrovira/teaching/DM-materials/DFL-book.pdf). 
+Considering the data dictionary and the preview of the `swda_curated_tbl` dataset, we observe a number of metadata variables, such as `doc_id`, `speaker_id`, `sex`, `education`, `birth_year`, `utt_id`, `utt_text`, and `damsl_tag`. 
 
+Most of these variables and their values are readily interpretable. However, the `damsl_tag` variable and the annotation scheme that appears interleaved with the dialog in `utt_text` may require a bit more explanation. If we consult the data origin file and/ or the corpus website, we seee that the `damsl_tag` is a utterance-level annotation which indicates the dialog act type (*e.g.* statement, question, backchannel, *etc.*). The annotation interleaved with the dialog in `utt_text` is a [disfluency annotation scheme](https://staff.fnwi.uva.nl/r.fernandezrovira/teaching/DM-materials/DFL-book.pdf). This scheme includes annotation for non-sentence elements such as filled pauses (*e.g.* `{F uh}`), discourse markers (*e.g.* `{D well}`), repetitions/ restarts (*e.g.* `[I think + I believe]`), among others.
+
+Let's assume that we are interested in understanding the use of filled pauses in the Switchboard dialog. @Tottie2011 investigates the relationship between speakers' use of filled pauses `uh` and `um` and their socio-demographic background (sex, socio-economic status, and age) in British English. An American English comparison would be insightful. To do this, however, we will need to recode some of the variables in the dataset.
+
+In this case, we will use `education` as a proxy for socio-economic status. As is, the values are numeric and are not maximally transparent. We can recode these values to be more interpretable. In the corpus documentation, the values for `education` are described in @tbl-tr-swda-education.
+
+| Value | Description                 |
+|-----------|-------------------------|
+| 0         | Less Than High School   |
+| 1         | Less Than College       |
+| 2         | College                 |
+| 3         | More Than College       |
+| 9         | Unknown                 |
+
+: Values for the `education` variable in the Switchboard dialog Act Corpus. {#tbl-tr-swda-education .sm .striped}
+
+To derive a variable which reflects the age of each speaker, we will use the `birth_year` variable. This variable is a numeric value which indicates the year of birth for each speaker. We can derive a new variable `age` by subtracting the `birth_year` from the year of recordings, 1992.
+
+Together `sex`, `education`, and `age` will provide us with the socio-demographic information we need to investigate the relationship between speakers' use of filled pauses and their socio-demographic background. The last component we need to derive is the use of filled pauses. To do this we will need to extract the filled pauses from the `utt_text` variable. We also need to consider what we mean by 'use'. In this case, we will operationalize the use of filled pauses as the number of times a filled pause is used per utterance.
+
+### Application {#sec-td-recoding-application}
+
+The plan to transform the `swda_curated_tbl` dataset is established. Now we need to implement the plan. We will start by recoding the `education` variable. Specifically, we want to map the numeric values to the descriptions in @tbl-tr-swda-education.
+
+To do this we will use the `case_when()` function from the `dplyr` package. This function allows us to specify a series of conditions and the values to return if the condition is met. `case_when()` evaluates the conditions and `mutate()` writes the variable, in this case overwrites it, as seen in @exm-tr-swda-recoding-education.
+
+::: {#exm-tr-swda-recoding-education}
 ```{r}
-#| eval: false
-#| label: tbl-td-sdac-preview-curated-dataset
-#| tbl-cap: "20 randomly sampled lines of the SDAC curated dataset."
-#| echo: false
+#| label: tr-swda-recoding-education
 
-sdac |>
-  slice_sample(n = 20) |>
-  kable(booktabs = TRUE)
+# Recode education
+swda_curated_tbl <- 
+  swda_curated_tbl |>
+  mutate(
+    education = case_when(
+      education == 0 ~ "Less Than High School",
+      education == 1 ~ "Less Than College",
+      education == 2 ~ "College",
+      education == 3 ~ "More Than College",
+      education == 9 ~ "Unknown"
+    )
+  )
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
 ```
+:::
 
-Let's drop a few variables from our dataset to rein in our focus. I will keep the `doc_id`, `speaker_id`, and `utterance_text`. 
+To create the `age` variable, all we need to do is subtract the `birth_year` from the year of recording, 1992. Again we will use `mutate()` to create the `age` variable. The values are created by a subtraction operation. Since we will not need the `birth_year` variable afterwards, we will drop it from the dataset. The code is seen in @exm-tr-swda-recoding-age.
 
+::: {#exm-tr-swda-recoding-age}
 ```{r}
-#| eval: false
-#| label: td-sdac-simplified
+#| label: tr-swda-recoding-age
 
-sdac_simplified <-
-  sdac |> # dataset
-  select(doc_id, speaker_id, utterance_text) # columns to retain
+# Recode age
+swda_curated_tbl <- 
+  swda_curated_tbl |>
+  mutate(age = 1992 - birth_year) |>
+  select(-birth_year)
+
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
 ```
+:::
 
+Our final recoding step is to derive the frequency of filled pauses per utterance. In other words, we want to match the 'uh' and 'um' and return the number of matches for each utterance. There are a number of ways to do this. We could use an approach which applies the `str_extract_all()` function, which returns a list of matches, and then `unnest()` the list and count the number of matches. An alternative approach is to use the `str_count()` function to count the number of matches for a pattern. The later approach is more efficient for our purposes. 
+
+In either case, a pattern to match these annotations is needed. As always with pattern matching, we need to craft an expression that is as specific as possible to avoid over- or under-matching. We know from our observation and the corpus documentation that all filled pauses are wrapped by the `{F ...}` annotation. We can use this to our advantage. Before we jump into counting the filled pauses, let's test a regular expression that matches the entire `{F ...}` annotation. An expression like `{F.*}` might be tempting, but this will be problematic for two reasons. First, since the `{` and `}` are regular expression operators we will need to escape them with the `\\` convention. Second, the `*` operator is greedy, meaning that it will match the longest possible string. So if in a given utterance there are multiple filled pauses, the `*` operator will match all of them at once, not individually. To avoid this, we can use the `?` operator to make the `*` operator lazy. With these considerations in mind, we can move forward with `\\{F.*?\\}` as our expression.
+
+We will send each utterance to the `str_extract_all()` function to match the filled pauses. This function returns a list of matches, so we will need to `unnest()` the list to get a vector of matches. Afterwards we will apply the ` count()` function to summarize the number of matches for each match variation. The code is seen in @exm-tr-swda-recoding-filled-pauses-test.
+
+::: {#exm-tr-swda-recoding-filled-pauses-test}
 ```{r}
-#| eval: false
-#| label: tbl-td-sdac-simple-preview
-#| tbl-cap: "First 10 lines of the simplified SDAC curated dataset."
-#| echo: false
+#| label: tr-swda-recoding-filled-pauses-test
 
-sdac_simplified |>
-  slice_head(n = 10) |>
-  kable(booktabs = TRUE)
+# Test filled pause pattern
+swda_curated_tbl |>
+  mutate(
+    matches = str_extract_all(
+      utt_text, 
+      "\\{F.*?\\}")
+  ) |>
+  unnest(matches) |> 
+  count(matches)
 ```
+:::
 
-In this disfluency annotation system, there are various conventions used for non-sentence elements. If say, for example, a researcher were to be interested in understanding the use of filled pauses ('uh' or 'uh'), the aim would be to identify those lines where the `{F ...}` annotation is used around the utterances 'uh' and 'um'.  
+The result from our test indicates that the `\\{F .*?\\}` pattern matches a wide variety of filled pause annotations, 120 to be exact! We can see that there are a number of filled pause annotations that we are not be interested in, *e.g.* `{F Oh}`. Furthermore, the 'uh' and 'um' we are interested in sometimes include more annotation structure, *e.g.* `{F + ] Um, }`. 
 
-To do this we turn to the `str_count()` function. This function will count the number of matches found for a pattern. We can use a regular expression to identify the pattern of interest which is all the instances of `{F` followed by either `uh` or `um`. Since the disfluencies may start an utterance, and therefore be capitalized we need to formulate a regular expression which allows for either `U` or `u` for each disfluency type. The result from each disfluency match will be added to a new column. To create a new column we will wrap each `str_count()` with `mutate()` and give the new column a meaningful name. In this case I've opted for `uh` and `um`. 
+A more sophisticated pattern is needed. When faced with a pattern matching task such as this, I find it helpful to start with a simple pattern and then add complexity as needed. This is an iterative process. To speed up the process, I often extract the matches and use an online tool for developing regular expressions, such as [regex101.com](https://regex101.com/).
 
+With a (monster) regular expression that matches the filled pauses we are interested in, and only those filled pauses, we can move forward with counting the number of matches for each utterance. 
+
+To do this we will use the `str_count()` function from the `stringr` package. This function counts the number of matches for a pattern in a character vector. We will use `mutate()` to create new variabled `uh` and `um` which will contain the counts for the filled pauses `uh` and `um`, respectively. The code is seen in @exm-tr-swda-recoding-filled-pauses.
+
+::: {#exm-tr-swda-recoding-filled-pauses}
 ```{r}
-#| eval: false
-#| label: td-sdac-count-disfluencies
+#| label: tr-swda-recoding-filled-pauses
 
-sdac_disfluencies <-
-  sdac_simplified |> # dataset
-  mutate(uh = str_count(utterance_text, "\\{F [Uu]h")) |> # match {F Uh or {F uh}
-  mutate(um = str_count(utterance_text, "\\{F [Uu]m")) # match {F Um or {F um}
+# Recode filled pauses
+swda_curated_tbl <- 
+  swda_curated_tbl |>
+  mutate(
+    uh = str_count(
+      utt_text, 
+      "\\{F\\s+[\\(+\\s\\]]*(u|U)h[\\)\\s,\\.\\?-]*\\}"
+    ),
+    um = str_count(
+      utt_text, 
+      "\\{F\\s+[\\(+\\s\\]]*(u|U)m[\\)\\s,\\.\\?-]*\\}"
+    )
+  )
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
 ```
-
-```{r}
-#| eval: false
-#| label: tbl-td-sdac-count-disfluencies-show
-#| tbl-cap: "First 20 lines of SDAC dataset with counts for the disfluencies 'uh' and 'um'."
-#| echo: false
-
-sdac_disfluencies |> # dataset
-  slice_head(n = 20) |>
-  kable(booktabs = TRUE)
-```
+:::
 
 Now we have two new columns, `uh` and `um` which indicate how many times the relevant pattern was matched for a given utterance. By choosing to focus on disfluencies, however, we have made a decision to change the unit of observation from the utterance to the use of filled pauses (`uh` and `um`). This means that as the dataset stands, it is not in tidy format --where each observation corresponds to the observational unit. When datasets are misaligned in this particular way, there are in what is known as 'wide' format. What we want to do, then, is to restructure our dataset such that each row corresponds to the unit of observation --in this case each filled pause type. 
 
-To convert our current (wide) dataset to one where each filler type is listed and the counts are measured for each utterance we turn to the `pivot_longer()` function. This function creates two new columns, one in which the column names are listed and one for the values for each of the column names.  
+To convert our current (wide) dataset to one where each filler type is listed and the counts are measured for each utterance we turn to the `pivot_longer()` function. This function creates two new columns, one in which the column names are listed and one for the values for each of the column names. The code is seen in @exm-tr-swda-recoding-filled-pauses-longer.
 
+::: {#exm-tr-swda-recoding-filled-pauses-longer}
 ```{r}
-#| eval: false
-#| label: td-sdac-disfluencies-longer
+#| label: tr-swda-recoding-filled-pauses-longer
 
-sdac_disfluencies <-
-  sdac_disfluencies |> # dataset
+# Tidy filled pauses
+swda_curated_tbl <- 
+  swda_curated_tbl |>
   pivot_longer(
-    cols = c("uh", "um"), # columns to convert
-    names_to = "filler", # column for the column names (i.e. filler types)
+    cols = c("uh", "um"), 
+    names_to = "filler", 
     values_to = "count"
-  ) # column for the column values (i.e. counts)
+  )
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
 ```
+:::
 
-```{r}
-#| eval: false
-#| label: tbl-td-sdac-count-disfluencies-longer-show
-#| tbl-cap: "First 20 lines of SDAC dataset with tidy format for `fillers` as the unit of observation."
-#| echo: false
+Now we have a transformed dataset that is in tidy format. Each row corresponds to a filled pause type and the number of times it was used in a given utterance. It also includes the key socio-demographic variables we are interested in.
 
-sdac_disfluencies |> # dataset
-  slice_head(n = 20) |>
-  kable(booktabs = TRUE)
-```
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
+As confident as we may be in our recoding process, it is always a good idea to perform some data checks to ensure that the recoding process was successful. In the process, we can also gain some insight into the data. Considering the structure in the transformed Switchboard dialog Act Corpus dataset, what are some data checks we might want to perform? What are some insights we might gain from these data checks?
+:::
+
+Finalize the transformation process by writing the dataset to a CSV file, create a data dictionary, and review and comment your code in the transformation script.
 
 ## Tokenization {#sec-td-tokenization}
 
@@ -644,7 +697,8 @@ Data:
 
 - CABNC (expand)
   - tidytext::unnest_tokens()
-- PELIC tokens (contract)
+
+- ?PELIC tokens (contract)
   - stringr::str_c() [w/ collapse = " "]
 
 R: 
@@ -658,6 +712,48 @@ Consider:
 
 -->
 
+Another common transformation process that is particularly relevant for text analysis is tokenization. Tokenization is the process of segmenting units of language into components relevant for the research question. This may include breaking text in curated datasets into smaller units, such as words, $n$-grams, sentences, *etc.* or combining text into larger units. 
+
+The process of tokenization is fundamentally row-wise. By scaling the text units up or down, we change the unit of observation. In turn, it is much easier to perform subsequent processing and/ or analysis. For example, if we are interested in the use of particular words, we may want to segment the text into words. If we are interested in the use of particular phrases, we may want to segment the text into $n$-grams. If we are interested in the use of particular sentences, we may want to segment the text into sentences. Each of these levels, then, are more directly accessible than the original text units.
+
+A key consideration in tokenization is the criteria for segmentation. While it may appear obvious to a human what 'word' or 'sentence' means, a computer needs a definition. This can prove tricker than it seems. For example, in English, we can segment text into words by splitting on whitespace. This works fairly well but there are some cases where this is not ideal. For example, in the case of contractions, such as `don't`, `won't`, `can't`, *etc.* the apostrophe is not a whitespace character. If we want to consider these contractions as separate words, then we need to consider a different tokenization strategy.
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+Consider the following paragraph: 
+
+"As the sun dipped below the horizon, the sky was set ablaze with shades of orange-red, illuminating the landscape. It's a sight Mr. Johnson, a long-time observer, never tired of. On the lakeside, he'd watch with friends, enjoying the ever-changing hues—especially those around 6:30 p.m.—and reflecting on nature's grand display. Even in the half-light, the water's glimmer, coupled with the echo of distant laughter, created a timeless scene. The so-called 'magic hour' was indeed magical, yet fleeting, like a well-crafted poem; it was the essence of life itself."
+
+What text conventions would prove insufficient for word tokenization based on a whitespace critieron?
+:::
+
+Furthermore, tokenization strategies can vary between languages. For German words are often compounded together, meaning many 'words' will not be captured by the whitespace convention. Whitespace may not even be relevant for word tokenization in written languages, such as Chinese. The take home message is there is no one-size-fits-all tokenization strategy.
+
+### Orientation {#sec-td-tokenization-orientation}
+
+```{r}
+#| label: tr-cabnc-dataset-curate-run
+#| include: false
+
+cabnc_curated_tbl <- 
+  read_csv("data/cabnc_curated.csv") |> 
+  select(
+    doc_id,
+    part_id,
+    sex = part_sex,
+    age = part_age,
+    utt_id = utt_num,
+    utt_text = utterance
+  )
+
+cabnc_curated_dd <- 
+  create_data_dictionary(
+  data = cabnc_curated_tbl,
+  file_path = "data/tr-cabnc_curated_dd.csv",
+  model = "gpt-3.5-turbo"
+)
+```
 
 The CABNC Corpus data dictionary. 
 
@@ -666,33 +762,48 @@ The CABNC Corpus data dictionary.
 #| tbl-cap: "Data dictionary for the CABNC Corpus."
 #| message: false
 
-# [ ] filter the data dictionary to only include the variables of interest
-
-read_csv(file = "data/cd-cabnc_curated_dd.csv") |> 
-  kable() |> 
+read_csv(file = "data/tr-cabnc_curated_dd.csv") |>
+  kable() |>
   kable_styling()
 ```
 
 
 Read the dataset. 
-```{r}
-#| label: td-cabnc-read-run
-#| include: false
-#| message: false
 
-cabnc_curated_tbl <- 
-  read_csv(file = "data/cabnc_curated.csv")
-```
-
+::: {#exm-tr-swda-dataset-read-show}
 ```{r}
-#| label: td-cabnc-read-show
+#| label: tr-cabnc-dataset-read-show
 #| eval: false
 
-cabnc_curated_tbl <- 
-  read_csv(file = "../data/derived/cabnc_curated.csv")
+# Read in the dataset
+cabnc_curated_tbl <-
+  read_csv("data/derived/cabnc/cabnc_curated.csv")
+
+# Preview the first 10 lines
+cabnc_curated_tbl |>
+  slice_head(n = 10)
 ```
 
-<!-- [ ] Add PELIC data dictionary and read dataset. -->
+```{r}
+#| label: tr-cabnc-dataset-read-run
+#| echo: false
+
+cabnc_curated_tbl |> 
+  slice_head(n = 10)
+```
+:::
+
+### Application {#sec-td-tokenization-application}
+
+...
+
+
+<!-- 
+
+- [ ] Add PELIC data dictionary and read dataset. 
+  - [ ] ? I may just make reference to the fact that rows can be collapsed into a single string using `stringr::str_c()`. 
+
+-->
 
 ## Generatation {#sec-td-generation}
 
@@ -875,7 +986,7 @@ Let's see this in practice.
 
 <!-- ADD.... -->
 
-We can also merge datasets that we generate in our analysis or that we import from other sources. This can be useful when there are cases in which a corpus has associated metadata that is contained in files separate from the corpus itself. This is the case for the Switchboard Dialogue Act Corpus. 
+We can also merge datasets that we generate in our analysis or that we import from other sources. This can be useful when there are cases in which a corpus has associated metadata that is contained in files separate from the corpus itself. This is the case for the Switchboard dialog Act Corpus. 
 
 Our existing, disfluency recoded, version includes the following variables. 
 
@@ -957,8 +1068,9 @@ sdac_disfluencies |> # dataset
 #| include: false
 
 write_csv(
-  sdac_disfluencies, 
-  file = "data/transform-datasets/data/derived/sdac/sdac_disfluencies.csv")
+  sdac_disfluencies,
+  file = "data/transform-datasets/data/derived/sdac/sdac_disfluencies.csv"
+)
 ```
 
 

@@ -60,9 +60,6 @@ Formatting:
 #| echo: false
 #| message: false
 
-# [ ] Load packages as part of the chapter
-
-pacman::p_load(tidytext, cleanNLP) # load packages
 ```
 
 <!-- 
@@ -290,13 +287,18 @@ Let's start with the `str_detect()` function. We will use this function to ident
 
 Our test code appears in @exm-td-europarl-search-non-speech.
 
+```{r}
+#| label: set-seed-sample-3
+#| echo: false
+#| cache: false
+
+set.seed(111)
+```
+
 ::: {#exm-td-europarl-search-non-speech}
 ```{r}
 #| label: td-europarl-search-non-speech
 #| cache: false
-
-# set seed
-set.seed(111)
 
 # Identify non-speech lines
 europarl_curated_tbl |>
@@ -307,13 +309,18 @@ europarl_curated_tbl |>
 
 The results from @exm-td-europarl-search-non-speech show that we have identified the lines that contain at least one of the parliamentary session description annotations. A more targeted search to identify specific instances of the parliamentary session descriptions can be accomplished adding the `str_extract()` function as seen in @exm-td-europarl-search-non-speech-2.
 
+```{r}
+#| label: set-seed-sample-4
+#| echo: false
+#| cache: false
+
+set.seed(111)
+```
+
 ::: {#exm-td-europarl-search-non-speech-2}
 ```{r}
 #| label: td-europarl-search-non-speech-2
 #| cache: false
-
-# set seed
-set.seed(111)
 
 # Extract non-speech fragments
 europarl_curated_tbl |>
@@ -325,13 +332,20 @@ europarl_curated_tbl |>
 
 The results from @exm-td-europarl-search-non-speech-2 show that we have identified the lines that contain parliamentary session description annotations and extracted this text --or have we? What if a given line contains more than one parliamentary session description annotation? It turns out that `str_extract()` only returns the first match. To return all matches we can use the `str_extract_all()` function. Let's try again, in @exm-td-europarl-search-non-speech-3.
 
+
+```{r}
+#| label: set-seed-sample-5
+#| echo: false
+#| cache: false
+
+set.seed(111)
+```
+
+
 ::: {#exm-td-europarl-search-non-speech-3}
 ```{r}
 #| label: td-europarl-search-non-speech-3
 #| cache: false
-
-# set seed
-set.seed(111)
 
 # Extract non-speech fragments
 europarl_curated_tbl |>
@@ -402,12 +416,17 @@ Now let's turn to the single spaces that occur within a word. We can use the `st
 
 Instead, we want to narrow our scope and focus in on whitespace that occurs in particular contexts. One context we can focus on is the single quote `'`, as in `Palacio' s`. In this use, the single quote is an apostrophe in a possessive form, but we might want to see if other forms, such as contractions, that also may have this extra whitespace. Let's check using a regular expression that matches a character string `\\w+` with single quote `'` at the end followed by whitespace `\\s`. To give some more context I will add a character string `\\w+` after the whitespace. Using the `str_extract_all()` function we can extract all the matches for this pattern. It returns a list, so we `unnest()` the list. Then we can pull the vector of matches and list the unique matches to get a sense of the context we are working with. The code is seen in @exm-td-europarl-search-apostrophe.
 
+```{r}
+#| label: set-seed-sample-6
+#| echo: false
+#| cache: false
+
+set.seed(111)
+```
+
 ::: {#exm-td-europarl-search-apostrophe}
 ```{r}
 #| label: td-europarl-search-apostrophe
-
-# set seed
-set.seed(111)
 
 # Match apostrophe followed by whitespace
 europarl_curated_tbl |>
@@ -438,28 +457,9 @@ Other normalization procedures often follow a similar line of attack. There are 
 
 ## Recoding {#sec-td-recoding}
 
-<!--  
-
-column-wise
-
-Data:
-  - SWDA
-    - education (classify)
-    - birth_year (derive)
-    - utt_text (extract, disfluencies)
-
-- R: 
-  - mutate() # create new variables
-  - case_when() # classify
-  - str_count() # count matches
-  - pivot_longer() # change wide to long
-
--->
-
 Normalizing text can be seen as an extension of dataset curation to some extent in that the structure of the dataset is maintained. In the Europarl case, we saw this to be true. In the case of recoding, and other transformational steps, the aim will be to modify the dataset structure either by rows, columns, or both. Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.
 
 ### Orientation {#sec-td-recoding-orientation}
-
 
 ```{r}
 #| label: tr-swda-dataset-curate-run
@@ -486,13 +486,6 @@ swda_curated_dd <-
 )
 ```
 
-<!--  
-Recode: 
-- education (classify)
-- birth_year (derive)
-- utt_text (extract, disfluencies) (derive)
--->
-
 The Switchboard dialog Act Corpus corpus contains a number of variables describing conversations between speakers of American English. A subset of this dataset provides a good example of the recoding process. The data dictionary for this dataset appears in @tbl-tr-swda-curated-dd.
 
 ```{r}
@@ -503,7 +496,7 @@ The Switchboard dialog Act Corpus corpus contains a number of variables describi
 
 # SWDA data dictionary ----
 read_csv("data/tr-swda_curated_dd.csv") |>
-  kable() |> 
+  kable() |>
   kable_styling()
 ```
 
@@ -626,15 +619,15 @@ The result from our test indicates that the `\\{F .*?\\}` pattern matches a wide
 
 A more sophisticated pattern is needed. When faced with a pattern matching task such as this, I find it helpful to start with a simple pattern and then add complexity as needed. This is an iterative process. To speed up the process, I often extract the matches and use an online tool for developing regular expressions, such as [regex101.com](https://regex101.com/).
 
-With a (monster) regular expression that matches the filled pauses we are interested in, and only those filled pauses, we can move forward with counting the number of matches for each utterance. 
+With a (monster) regular expression that matches each of the filled pauses we are interested in, and only those filled pauses, we can move forward with counting the number of matches for each utterance. 
 
-To do this we will use the `str_count()` function from the `stringr` package. This function counts the number of matches for a pattern in a character vector. We will use `mutate()` to create new variabled `uh` and `um` which will contain the counts for the filled pauses `uh` and `um`, respectively. The code is seen in @exm-tr-swda-recoding-filled-pauses.
+To do this we will use the `str_count()` function from the `stringr` package. This function counts the number of matches for a pattern in a character vector. We will use `mutate()` to create new variables `uh` and `um` which will contain the counts for the filled pauses `uh` and `um`, respectively. The code is seen in @exm-tr-swda-recoding-filled-pauses.
 
 ::: {#exm-tr-swda-recoding-filled-pauses}
 ```{r}
 #| label: tr-swda-recoding-filled-pauses
 
-# Recode filled pauses
+# Recode filled pauses 
 swda_curated_tbl <- 
   swda_curated_tbl |>
   mutate(
@@ -647,13 +640,15 @@ swda_curated_tbl <-
       "\\{F\\s+[\\(+\\s\\]]*(u|U)m[\\)\\s,\\.\\?-]*\\}"
     )
   )
-# Preview the first 10 lines
+# Preview the first 10 lines 
 swda_curated_tbl |>
   slice_head(n = 10)
 ```
 :::
 
 Now we have two new columns, `uh` and `um` which indicate how many times the relevant pattern was matched for a given utterance. By choosing to focus on disfluencies, however, we have made a decision to change the unit of observation from the utterance to the use of filled pauses (`uh` and `um`). This means that as the dataset stands, it is not in tidy format --where each observation corresponds to the observational unit. When datasets are misaligned in this particular way, there are in what is known as 'wide' format. What we want to do, then, is to restructure our dataset such that each row corresponds to the unit of observation --in this case each filled pause type. 
+
+<!-- [ ] may need a graphic or more explanation here (pivot_longer) -->
 
 To convert our current (wide) dataset to one where each filler type is listed and the counts are measured for each utterance we turn to the `pivot_longer()` function. This function creates two new columns, one in which the column names are listed and one for the values for each of the column names. The code is seen in @exm-tr-swda-recoding-filled-pauses-longer.
 
@@ -732,6 +727,7 @@ Furthermore, tokenization strategies can vary between languages. For German word
 
 ### Orientation {#sec-td-tokenization-orientation}
 
+
 ```{r}
 #| label: tr-cabnc-dataset-curate-run
 #| include: false
@@ -755,7 +751,7 @@ cabnc_curated_dd <-
 )
 ```
 
-The CABNC Corpus data dictionary. 
+Let's look at a curated dataset from the CABNC Corpus to explore tokenization. The data dictionary for this dataset appears in @tbl-td-cabnc-dd.
 
 ```{r}
 #| label: tbl-td-cabnc-dd
@@ -767,8 +763,7 @@ read_csv(file = "data/tr-cabnc_curated_dd.csv") |>
   kable_styling()
 ```
 
-
-Read the dataset. 
+The CABNC dataset contains a number of variables describing conversations between speakers of British English. Now let's look at the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-tr-cabnc-dataset-read-show.
 
 ::: {#exm-tr-swda-dataset-read-show}
 ```{r}
@@ -793,10 +788,61 @@ cabnc_curated_tbl |>
 ```
 :::
 
+Considering the data dictionary and the preview of the `cabnc_curated_tbl` dataset, we observe a number of metadata variables, such as `doc_id`, `part_id`, `sex`, `age`, and `utt_id` and the utterances in `utt_text`.
+
+Let's assume that we are performing an exploratory analysis with this dataset and would like to consider the use of words and word sequences ($n$-grams). In this case we will be deriving multiple datasets with different units of observation.   
+
 ### Application {#sec-td-tokenization-application}
 
-...
+In the `cabnc_curated_tbl` the `utt_text` variable contains the text we want to tokenize. We will start by tokenizing the text into words. Abstracting away from some of the metadata variables, if we envision what this should look like we might imagine something like @tbl-td-cabnc-tokenization-words-example.
 
+|  doc_id   | utt_id | utt_word |
+|----------|--------|----------|
+| KB0RE000 |      0 |      You |
+| KB0RE000 |      0 |  enjoyed |
+| KB0RE000 |      0 | yourself |
+| KB0RE000 |      0 |       in |
+| KB0RE000 |      0 |  America |
+
+: Example of tokenizing the `utt_text` variable into words. {#tbl-td-cabnc-tokenization-words-example .sm .striped}
+
+Comparing @tbl-td-cabnc-tokenization-words-example to the first line of the output of @exm-tr-swda-dataset-read-show, we can see that we want to segment the words in the `utt_text` and then have each segment appear as a separate observation, retaining the relevant metadata variables.
+
+Before we work with tokenizing text in a data frame, let's start with a character vector to get a sense of how tokenization works and what we will need to do to achieve the output in @tbl-td-cabnc-tokenization-words-example. Let's start with a character vector which contains the first three utterances from the `cabnc_curated_tbl` dataset. The code is seen in @exm-tr-cabnc-tokenization-words.
+
+::: {#exm-tr-cabnc-tokenization-words-vector}
+```{r}
+#| label: tr-cabnc-tokenization-words-vector
+
+# Pull a character vector
+cabnc_utts_chr <- 
+  cabnc_curated_tbl |>
+  slice_head(n = 3) |>
+  pull(utt_text)
+
+# Preview the character vector
+cabnc_utts_chr
+```
+:::
+
+We have the first three utterances in `cbanc_utts_chr`. Now we can tokenize the utterances into words using the `tokenize_words()` function from the  `tokenizers` package [@R-tokenizers]. It's only required argument is a character vector, as seen in @exm-tr-cabnc-tokenization-words-tokenize.
+
+::: {#exm-tr-cabnc-tokenization-words-tokenize}
+```{r}
+#| label: tr-cabnc-tokenization-words-tokenize
+
+# Load package
+library(tokenizers)
+
+# Tokenize the utterances into words
+cabnc_utts_chr |> 
+  tokenize_words()
+```
+:::
+
+
+
+To do this we will use the `unnest_tokens()` function from the `tidytext` package. This function takes a character vector and a tokenization type and returns a dataset with the tokenized text. The tokenization types available are `character`, `word`, `ngram`, `sentence`, `regex`, and `skip_ngram`. We will use the `word` tokenization type. The code is seen in @exm-tr-cabnc-tokenization-words.
 
 <!-- 
 
@@ -872,6 +918,31 @@ base_path <- system.file("extdata", package = "cleanNLP") # get the base path
 }
 ```
 
+
+---
+A test of `udpipe` annotation for English.
+
+```{r}
+#| eval: false
+#| label: td-generation-udpipe-english-test
+
+library(cleanNLP)
+
+cnlp_init_udpipe("english") # initialize the udpipe engine for English
+
+text_sample <- "As the sun dipped below the horizon, the sky was set ablaze with shades of orange-red, illuminating the landscape. It's a sight Mr. Johnson, a long-time observer, never tired of. On the lakeside, he'd watch with friends, enjoying the ever-changing hues—especially those around 6:30 p.m.—and reflecting on nature's grand display. Even in the half-light, the water's glimmer, coupled with the echo of distant laughter created a timeless scene. The so-called 'magic hour' was indeed magical, yet fleeting, like a well-crafted poem; it was the essence of life itself."
+
+text_tbl <- tibble(doc_id = 1, text = text_sample) # create a tibble with the text to be annotated
+
+text_anno <-
+  text_tbl |> # specify the text to be annotated
+  cnlp_annotate() # specify the name of the text column
+
+text_anno$token |>
+  print(n = Inf)
+```
+
+---
 
 In a test case, let's load the 'english' model to annotate a sentence line from the europarl dataset to illustrate the basic workflow. 
 

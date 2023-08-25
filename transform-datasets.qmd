@@ -11,8 +11,8 @@ execute:
 #| cache: false
 ```
 
-::: {.callout-caution title="Caution"}
-{{< fa route >}} In progress...
+::: {.callout-tip title="Draft"}
+Ready for review.
 :::
 
 <!--
@@ -21,9 +21,9 @@ Content:
 
 - [x] Add normalization section
 - [x] Add recoding section
-- [ ] Add tokenization section
-- [ ] Add generation section
-- [ ] Add merging section
+- [x] Add tokenization section
+- [x] Add generation section
+- [x] Add merging section
 
 Exercises:
 
@@ -50,9 +50,11 @@ Formatting:
 
 <!-- [ ] update to outcomes -->
 
-- What is the role of data transformation in a text analysis project?
-- What are the general processes for preparing datasets for analysis?
-- How do each of these general processes transform datasets?
+{{< fa wrench >}} to update the learning outcomes
+
+- Understand the role of data transformation in a text analysis project.
+- Identify the main types of transformations used to prepare datasets for analysis.
+- Recognize the importance of planning and documenting the transformation process.
 :::
 
 ```{r}
@@ -62,16 +64,7 @@ Formatting:
 
 ```
 
-<!-- 
-- Transformation: goals
-  - Prepare curated dataset for analysis
-  - Manipulate dataset row-wise and/ or column-wise
-  - Focus on particular analysis needs: unit of analysis, unit of observation, operationalization of variables, etc.
--->
-
-In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. The transformation process is divided into four categories: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
-
-It is sometimes necessary to create several transformed datasets from one curated dataset in cases where there are multiple analyses to be performed. This why we start with a curated dataset rather than directly deriving a transformed dataset from the original data. It allows for various transformation methods to produce different formats for different analyses.
+In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. I will approach the transformation process by breaking it down into five subcategories: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
 
 ::: {.callout}
 **{{< fa terminal >}} Swirl lesson**
@@ -88,48 +81,7 @@ It is sometimes necessary to create several transformed datasets from one curate
 **Why**: ...
 :::
 
-<!-- 
-
-- Normalization (column-wise):  to standardize or simplify the text to reduce variability
-  - Artifact removal
-- Recoding (column-wise)
-  - Classify
-  - Derive
-- Tokenization (row-wise): to segment the text into meaningful components
-  - Words, n-grams, sentences
-- Generation (row-wise and column-wise)
-  - Lexical annotation
-  - Syntactic annotation
-- Merging (row-wise/ column-wise)
-  - Joining datasets
-
----
-
-- Summary
-- Activities
-
--->
-
-
 ## Normalization {#sec-td-normalization}
-
-<!--  
-
-column-wise: 
-
-- Standardize text and remove unwanted variation
-  - Artifact removal
-  - Case conversion (lowercasing)
-  - Punctuation and extraneous character removal
-  - Adjustment of forms (e.g. contractions, numbers, abbreviations,  )
-
-- Data:
-  - Europarl
-
-- R: 
-  - stringr::str_replace_all()
-  - stringr::str_remove_all()
--->
 
 The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis. 
 
@@ -1099,7 +1051,7 @@ model_dir <- "../data/"
 enntt_natives_prepped_tbl <- 
   enntt_natives_tbl |>
   mutate(doc_id = row_number()) |>
-  select(doc_id, text, type)
+  select(doc_id, text)
 
 # Annotate the dataset
 enntt_natives_ann <- 
@@ -1107,7 +1059,8 @@ enntt_natives_ann <-
     x = enntt_natives_prepped_tbl, 
     object = model, 
     model_dir = model_dir
-  )
+  ) |> 
+  tibble()
 
 # Preview 
 glimpse(enntt_natives_anno)
@@ -1129,7 +1082,7 @@ model_dir <- "data/"
 enntt_natives_prepped_tbl <- 
   enntt_natives_tbl |>
   mutate(doc_id = row_number()) |>
-  select(doc_id, text, type)
+  select(doc_id, text)
 
 # Annotate the dataset
 enntt_natives_ann <- 
@@ -1138,7 +1091,8 @@ enntt_natives_ann <-
     object = model, 
     model_dir = model_dir,
     parallel.cores = 4
-  )
+  ) |> 
+  tibble()
 
 # Preview 
 glimpse(enntt_natives_ann)
@@ -1160,7 +1114,7 @@ model_dir <- "data/"
 enntt_translations_prepped_tbl <- 
   enntt_translations_tbl |>
   mutate(doc_id = row_number()) |>
-  select(doc_id, text, type)
+  select(doc_id, text)
 
 # Annotate the dataset
 enntt_translations_ann <- 
@@ -1169,7 +1123,8 @@ enntt_translations_ann <-
     object = model, 
     model_dir = model_dir,
     parallel.cores = 4
-  )
+  ) |> 
+  tibble()
 
 # Preview 
 glimpse(enntt_translations_ann)
@@ -1258,16 +1213,16 @@ enntt_natives_ann |>
   plot_tree(token, use_color = FALSE, viewer_mode = FALSE, textsize = 0.8)
 ```
 
-Now we can drop the columns that we don't need by using the `select()` function. I will assign the result to `enntt_natives_syn_comp` as we will be working with translated texts, as seen in @exm-td-generation-udpipe-natives-tunits-words-select.
+Now we can drop the intermediate columns we created to calculate our key syntactic complexity measures using `select()` to indicate those that we do want to keep. I will assign the result to `enntt_natives_syn_comp` as we will be working with syntactic complexity measures for the native texts, as seen in @exm-td-generation-udpipe-natives-tunits-words-select.
 
 ::: {#exm-td-generation-udpipe-natives-tunits-words-select}
 ```{r}
 #| label: td-generation-udpipe-natives-tunits-words-select
 
-# Drop columns
+# Select columns
 enntt_natives_syn_comp <- 
   enntt_natives_ann_tunits_words_tbl |>
-  select(doc_id, t_units, word_len)
+  select(doc_id, sentence_id, t_units, word_len)
 ```
 :::
 
@@ -1275,14 +1230,14 @@ enntt_natives_syn_comp <-
 #| label: td-generation-udpipe-translations-tunits-words-select
 #| include: false
 
-# Drop columns
+# Select columns
 enntt_translations_syn_comp <- 
   enntt_translations_ann_tunits_words_tbl |>
-  select(doc_id, t_units, word_len)
+  select(doc_id, sentence_id, t_units, word_len)
 ```
 
 
-Now we can repeat the process for the ENNTT translated dataset. I will assign the result to `enntt_translations_syn_comp` as we will be working with native texts from this corpus. The next step is to join the `sentences` from the Europarl, and ENNTT, into our dataset so that we have the information we set out to generate for both datasets. Then we will concatenate both the `enntt_natives_syn_comp` and `enntt_translations_syn_comp` datasets into a single dataset. Both the join and the contactenation will be covered in the next section.
+Now we can repeat the process for the ENNTT translated dataset. I will assign the result to `enntt_translations_syn_comp`. The next step is to join the `sentences` from the annotated data frames into our datasets so that we have the information we set out to generate for both datasets. Then we will concatenate both the `enntt_natives_syn_comp` and `enntt_translations_syn_comp` datasets into a single dataset. Both the join and the contactenation will be covered in the next section.
 
 ## Merging {#sec-td-merging}
 
@@ -1296,7 +1251,7 @@ There are a number of join types. The most common are left, full, semi, and anti
 
 ::: {layout="[50, 50]" layout-valign="top"}
 
-::: {#exm-td-merging-join-a-df}
+::: {#first}
 ```{r}
 #| label: td-merging-join-a-df
 
@@ -1424,12 +1379,11 @@ lexicon::key_contractions |>
 
 :::
 
-
 ### Orientation {#sec-td-merging-orientation}
 
-With this in mind, let's return to our syntactic simplification investigation. Recall that we started with two curated ENNTT datasets: the natives and translations. We manipulated these datasets subsetting them to 10,000 randomly selected lines, prepped them for annotation by adding a `doc_id` column and dropping all columns except `doc_id`, `text`, and `type`, and then annotated them using the `udpipe` package. We then calculated the number of T-units and words per sentence.
+With this in mind, let's return to our syntactic simplification investigation. Recall that we started with two curated ENNTT datasets: the natives and translations. We manipulated these datasets subsetting them to 10,000 randomly selected lines, prepped them for annotation by adding a `doc_id` column and dropping all columns except `text`, and then annotated them using the `udpipe` package. We then calculated the number of T-units and words per sentence.
 
-These steps produced four datasets that we will want to compile together into one ahead of analysis, two datasets for the natives and two datasets for the translations. The first dataset for each is the prepped dataset with the `doc_id`, `text`, and `type` columns. The second datasets are the datasets with the `doc_id`, `t_units`, and `word_len` columns.
+These steps produced two datasets for both the natives and for the translations. The first dataset for each is the annotated data frame. The second is the data frame with the sytactic complexity measures we calculated. The annotated data frames are named `enntt_natives_ann` and `enntt_translations_ann`. The data frames with the syntactic complexity measures are named `enntt_natives_syn_comp` and `enntt_translations_syn_comp`.
 
 In the end, we want a dataset that looks something like @tbl-td-merging-idealized.
 
@@ -1444,25 +1398,172 @@ To create this unified dataset, we will need to apply joins and concatenation. F
 
 ### Application {#sec-td-merging-application}
 
-...
+Let's start by joining the annotated datasets (`enntt_natives_ann` and `enntt_translations_ann`) with the datasets with the syntactic complexity calculations (`enntt_natives_syn_comp` and `enntt_translations_syn_comp`). In these joins, we can see that the prepped and calculated datasets share a couple variables, `doc_id` and `sentence_id`, in @exm-td-merging-join-prepped-syn-comp.
+
+::: {#exm-td-merging-join-prepped-syn-comp}
+```{r}
+#| label: td-merging-join-prepped-syn-comp
+
+# Preview datasets to join
+enntt_natives_ann |> 
+  slice_head(n = 3)
+
+enntt_natives_syn_comp |> 
+  slice_head(n = 3)
+```
+:::
+
+The `doc_id` and `sentence_id` variables are both keys that we will use to join the datasets. The reason being that if we only use one of the two we will not align the two datasets at the sentence level. Only the combination of `doc_id` and `sentence_id` isolates the sentences for which we have syntactic complexity measures. Beyond a having common variable (or variables in our case), we must also ensure that join key variables are of the same vector type in both data frames and that we are aware of any differences in the values. From the output in @exm-td-merging-join-prepped-syn-comp, we can see that the `doc_id` and `sentence_id` variables aligned in terms of vector type; `doc_id` is character and `sentence_id` is integer in both data frames. If they happened not to be, there types would need to be adjusted. 
+
+Now, we need to check for differences in the values. We can do this by using the `setequal()` function. This function returns `TRUE` if the two vectors are equal and `FALSE` if they are not. If the two vectors are not equal, the function will return the values that are in one vector but not the other. So if one has `10001` and the other doesn't we will get `FALSE`. Let's see this in practice, as seen in @exm-td-merging-join-prepped-syn-comp-check.
+
+::: {#exm-td-merging-join-prepped-syn-comp-check}
+```{r}
+#| label: td-merging-join-prepped-syn-comp-check
+
+# Check for differences in the values
+setequal(
+  enntt_natives_ann$doc_id, 
+  enntt_natives_syn_comp$doc_id
+)
+
+setequal(
+  enntt_natives_ann$sentence_id, 
+  enntt_natives_syn_comp$sentence_id
+)
+```
+:::
+
+So the values are the same. The final check is to see if the vectors are of the same length. We know the values are the same, but we don't know if the values are repeated. We do this by simply comparing the length of the vectors, as seen in @exm-td-merging-join-prepped-syn-comp-length.
+
+::: {#exm-td-merging-join-prepped-syn-comp-length}
+```{r}
+#| label: td-merging-join-prepped-syn-comp-length
+
+# Check for differences in the length
+length(enntt_natives_ann$doc_id) == 
+  length(enntt_natives_syn_comp$doc_id)
+
+length(enntt_natives_ann$sentence_id) == 
+  length(enntt_natives_syn_comp$sentence_id)
+```
+:::
+
+So they are not the same length. Using the `nrow()` function, I can see that the annotated dataset has `r nrow(enntt_natives_ann)` observations and the calculated dataset has `r nrow(enntt_natives_syn_comp)` observations. The annotation data frames will have many more observations due to the fact that the unit of observations is word tokens. The calculated data frames' unit of observation is the sentence. 
+
+To appreciate the difference in the number of observations, let's look at the first 10 observations of the natives annotated frame for just the columns of interest, as seen in @exm-td-merging-join-prepped-syn-comp-ann.
+
+::: {#exm-td-merging-join-prepped-syn-comp-ann}
+```{r}
+#| label: td-merging-join-prepped-syn-comp-ann
+
+# Preview the annotated dataset
+enntt_natives_ann |> 
+  select(doc_id, sentence_id, sentence, token) |>
+  slice_head(n = 10)
+```
+:::
+
+The annotated data frames have a lot of redundancy in for the join variables and the `sentence` variable that we want to add to the calculated data frames. We can reduce the redundancy by using the `distinct()` function from the `dplyr` package. In this case we want all observations where `doc_id`, `sentence_id` and `sentence` are distinct. We then select these variables with `distinct()`, as seen in @exm-td-merging-annotation-distinct.
+
+::: {#exm-td-merging-annotation-distinct}
+```{r}
+#| label: td-merging-annotation-distinct
+
+# Reduce annotated data frames to unique sentences
+enntt_natives_ann_distinct <- 
+  enntt_natives_ann |> 
+  distinct(doc_id, sentence_id, sentence)
+
+enntt_translations_ann_distinct <- 
+  enntt_translations_ann |> 
+  distinct(doc_id, sentence_id, sentence)
+```
+:::
+
+We now have two datasets that are ready to be joined with the calculated datasets. The next step is to join the two. We will employ a left join where the syntactic complexity data frames are on the left and the join variables will be both the `doc_id` and `sentence_id` variables. The code is seen in @exm-td-merging-join-left-syn-comp.
+
+::: {#exm-td-merging-join-left-syn-comp}
+```{r}
+#| label: td-merging-join-left-syn-comp
+
+# Join the native datasets
+enntt_natives_transformed_tbl <- 
+  left_join(
+    x = enntt_natives_syn_comp, 
+    y = enntt_natives_ann_distinct, 
+    by = c("doc_id", "sentence_id")
+  )
+
+# Preview 
+glimpse(enntt_natives_transformed_tbl)
+
+# Join the translations datasets 
+enntt_translations_transformed_tbl <- 
+  left_join(
+    x = enntt_translations_syn_comp,
+    y = enntt_translations_ann_distinct,
+    by = c("doc_id", "sentence_id")
+  )
+
+# Preview
+glimpse(enntt_translations_transformed_tbl)
+```
+:::
+
+<!-- Concatenation -->
+
+The two data frames now have the same columns and we are closer to our final dataset. The next step is to move toward concatenating the two datasets. Before we do that, we need to do some preparation. First, and most important, we need to add a `type` column to each dataset. This column will indicate whether the sentence is a native or a translation. The second is that our `doc_id` does not serve as a unique identifier for the sentences. Only in combination with `sentence_id` can we uniquely identify a sentence. 
+
+So our plan will be to add a `type` column to each dataset specifying the values for all the observations in the respective dataset. Then we will concatenate the two datasets. Note, if we combine them before, distiguishing the type will be more difficult. After we concatenate the two datasets, we will add a `doc_id` column that will serve as a unique identifier for the sentences and drop the `sentence_id` column. OK, that's the plan. Let's execute it in @exm-td-merging-concatenation.
+
+::: {#exm-td-merging-concatenation}
+```{r}
+#| label: td-merging-concatenation
+
+# Add a type column
+enntt_natives_transformed_tbl <- 
+  enntt_natives_transformed_tbl |> 
+  mutate(type = "natives")
+
+enntt_translations_transformed_tbl <- 
+  enntt_translations_transformed_tbl |> 
+  mutate(type = "translations")
+
+# Concatenate the datasets
+enntt_transformed_tbl <- 
+  bind_rows(
+    enntt_natives_transformed_tbl,
+    enntt_translations_transformed_tbl
+  )
+
+# Overwrite the doc_id column with a unique identifier
+enntt_transformed_tbl <- 
+  enntt_transformed_tbl |> 
+  mutate(doc_id = row_number()) |> 
+  select(doc_id, type, t_units, word_len, text = sentence)
+
+# Preview
+glimpse(enntt_transformed_tbl)
+```
+:::
+
+The output of @exm-td-merging-concatenation now looks like @tbl-td-merging-idealized. We have a dataset that has the syntactic complexity measures for both the natives and the translations. We can now write this dataset to disk and document it in the data dictionary.
 
 ## Summary {-}
 
 In this chapter we covered the process of transforming datasets. The goal is to manipulate the curated dataset to make it align better for analysis. 
-There are four general types of transformation steps: normalization, recoding, tokenization, generation, and merging. In any given research project some or all of these steps will be employed --but not necessarily in the order presented in this chapter. Furthermore, there may also be various datasets generated in at this stage each with a distinct analysis focus in mind. 
+We covered various types of transformation procedures from text normalization to data frame merges. In any given research project some or all of these steps will be employed --but not necessarily in the order presented in this chapter. It is not uncommon to mix procedures as well. The etiology of the transformation is as unique as the data that you are working with. 
 
-<!--  
+Since you are applying techniques that have a significant factor on the shape and contents of your dataset(s) it is important to perform data checks to ensure that the transformations are working as expected. You may not catch everything, and some things may not be caught until later in the analysis process, but it is important to do as much as you can as early as you can. 
 
-?? Add at the end of the chapter?
+In line with the reproducible research principles, it is important to write the transformed dataset to disk and to document it in the data dictionary. This is especially important if you are working with multiple datasets. Good naming conventions als come into play. Choosing descriptive names is so easily overlooked by your present self but so welcomed by your future self.
 
-[x] Add data checks
-[ ] Reminder on writing the dataset and data dictionary to *data/derived/* directory
-  [ ] There may be multiple transformed datasets, so it is important to di  stinguish them from one another and document them separately.
-[ ] Reminder to review and document code added to the *code/* directory, within the *3-transform-dataset.qmd* file.
+---
 
--->
+<!-- [ ] Add something about the directory structure/ code files? -->
 
-In any case, it is important to write these datasets to disk and to document them according to reproducible research principles. 
+{{< fa wrench >}} more on concluding this part and moving to the next part
 
 This chapter concludes the section on data/ dataset preparation. The next section we turn to analyzing datasets. This is the stage where we interrogate the datasets to derive knowledge and insight either through exploratory, predictive, or inferential methods.
 

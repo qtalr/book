@@ -11,6 +11,1601 @@ execute:
 #| cache: false
 ```
 
-::: {.callout-caution title="Caution"}
-{{< fa route >}} In progress...
+::: {.callout-tip title="Draft"}
+Ready for review.
+:::
+
+<!--
+
+Content:
+
+- [x] Add normalization section
+- [x] Add recoding section
+- [x] Add tokenization section
+- [x] Add generation section
+- [x] Add merging section
+
+Exercises:
+
+- [ ] add concept questions to Activities
+- [ ] add exercises to Activities
+- [ ] add thought questions/ case studies to prose sections
+
+Formatting:
+
+- [ ] Add a description of the importance of the unit of analysis and unit of observation in the transformation process.
+  - In the curation process, the original data and utility of the dataset is priority. In the transformation process, the focus is on the analysis and the unit of analysis and unit of observation are the primary considerations.
+- [ ] Point out that some units of observation will require that the data have more textual context (e.g. syntactic parsing) than others (e.g. word frequencies). It is important that the presentation of the transformation steps are no necessarily in the order in which they are applied.
+
+-->
+
+> Nothing is lost. Everything is transformed.
+>
+> --- Michael Ende, The Neverending Story
+
+::: {.callout}
+**{{< fa regular list-alt >}} Outcomes**
+
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] update to outcomes -->
+
+{{< fa wrench >}} to update the learning outcomes
+
+- Understand the role of data transformation in a text analysis project.
+- Identify the main types of transformations used to prepare datasets for analysis.
+- Recognize the importance of planning and documenting the transformation process.
+:::
+
+```{r}
+#| label: transform-data-packages
+#| echo: false
+#| message: false
+
+```
+
+In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. I will approach the transformation process by breaking it down into five subcategories: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
+
+::: {.callout}
+**{{< fa terminal >}} Swirl lesson**
+
+<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- 
+- [ ] Update lesson name, 
+- [ ] update lesson purpose
+-->
+
+**What**: [Reshape dataset rows, Reshape dataset columns](https://github.com/qtalr/lessons)\
+**How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
+**Why**: ...
+:::
+
+## Normalization {#sec-td-normalization}
+
+The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis. 
+
+### Orientation {#sec-td-normalization-orientation}
+
+To explore some of the strategies of normalization, we will look at the Europarl Corpus. As we are working working towards transforming a curated dataset, we will start by getting oriented to the dataset. Following the reproducible research principles, I will assume that the curated dataset and its associated data dictionary are in the *data/derived/* directory, as seen in @exm-td-europarl-curated-structure. 
+
+::: {#exm-td-europarl-curated-structure}
+```bash
+data/
+├── analysis/
+├── derived/
+│   ├── europarl_curated_dd.csv
+│   └── europarl/
+│       └── europarl_curated.csv
+└── original/
+```
+:::
+
+The contents of the data dictionary for this dataset appears in @tbl-td-europarl-dd.
+
+```{r}
+#| label: tbl-td-europarl-dd
+#| tbl-cap: "Data dictionary for the Europarl Corpus."
+#| echo: false
+#| message: false
+
+read_csv(file = "data/cd-europarl_curated_dd.csv") |>
+  kable() |>
+  kable_styling()
+```
+
+This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation is the `lines` variable whose values are are lines of dialog. 
+
+Let's read in the dataset CSV file with `read_csv()` and inspect the first lines of the dataset with `slice_head()` in @exm-tb-europarl-preview.
+
+::: {#exm-tb-europarl-preview}
+```{r}
+#| label: td-europarl-read-show
+#| eval: false
+
+# Read in the dataset
+europarl_curated_tbl <-
+  read_csv(file = "../data/derived/europarl_curated.csv")
+
+# Preview the first 10 lines
+europarl_curated_tbl |>
+  slice_head(n = 10)
+```
+
+```{r}
+#| label: td-europarl-read-run
+#| echo: false
+
+# Read in the dataset
+europarl_curated_tbl <- 
+  read_csv(file = "data/europarl_curated.csv")
+
+# Preview the first 10 lines
+europarl_curated_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+Simply looking at the first 10 lines of this dataset gives us a clearer sense of the dataset structure, but, in terms of normalization procedures we might apply, it is likely not sufficient. We want to get a sense of any potential inconsistencies in the dataset, in particular in the `lines` variable. Since this is a large dataset with `r nrow(europarl_curated_tbl)` observations, we will need to explore the dataset in manageable chunks. The `slice_sample()` function will allow us to randomly sample a subset of the dataset of a certain number of observations specified by the `n = ` argument, as seen in @exm-td-europarl-sample-1.
+
+```{r}
+#| label: set-seed-sample-1
+#| echo: false
+
+
+set.seed(124)
+```
+
+::: {#exm-td-europarl-sample-1}
+```{r}
+#| label: td-europarl-sample-1
+
+
+# Randomly sample 5 observations
+europarl_curated_tbl |>
+  slice_sample(n = 5)
+```
+:::
+
+We should run the code in @exm-td-europarl-sample-1 multiple times to get a sense of the variation in the dataset. 
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
+R functions which return samples (*e.g.* `slice_sample()`) are generated using pseudo-random number generators. These generators are initialized with a seed value. You can control the seed value R uses to generate the random numbers by using the `set.seed()` function and setting the seed value to a number of your choice. It is important to note that setting a seed only affects the subsequent random number generation.
+
+Using `set.seed()` is useful when you want to ensure that the same random numbers are generated each time you run the code. This is particularly helpful when you want to reproduce results in a report or other document.
+:::
+
+In the case of the Europarl corpus dataset, it may be useful to see the source and target lines in the same sample. Do do this, we can first sample from the `line_id` variable and then filter the `europarl_curated_tbl` wit the `filter()` function and the `%in%` operator to select the lines that match the sampled `line_id` values, as seen in @exm-td-europarl-sample-2.
+
+```{r}
+#| label: set-seed-sample-2
+#| echo: false
+
+
+set.seed(124)
+```
+
+::: {#exm-td-europarl-sample-2}
+```{r}
+#| label: td-europarl-sample-2
+
+
+# Randomly sample 5 line_id values
+line_id_sample_vec <- 
+  europarl_curated_tbl |>
+  distinct(line_id) |> 
+  slice_sample(n = 5) |> 
+  pull(line_id)
+
+# Select the lines that match the sampled line_id values
+europarl_curated_tbl |>
+  filter(line_id %in% line_id_sample_vec)
+```
+:::
+
+After running the code in @exm-td-europarl-sample-1 and @exm-td-europarl-sample-2 multiple times, I identified a number of artifacts that we will want to consider addressing. These are included in @tbl-td-europarl-normalization.
+
+| Description | Examples | Concern |
+|:---|:---|:---|
+| Non-speech annotations | `(Abucheos)`, `(A4-0247/98)`, `(The sitting was opened at 09:00)` | Not of interest for our analysis |
+| Inconsistent whitespace | `5 % ,`, <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>, `Palacio' s` | May be problematic for tokenization |
+| Non-sentence punctuation | ` - ` | May be problematic for tokenization |
+| Abbreviations | `Mr.`, `Sr.`, `Mme.`, `Mr`, `Sr`, `Mme`, `Mister`, `Señor`, `Madam` | May be problematic for tokenization |
+| Text case | `The`, `the`, `White`, `white` | May be problematic for tokenization |
+
+: Characteristics of the Europarl Corpus dataset that may require normalization. {#tbl-td-europarl-normalization tbl-colwidths="[33, 33, 33]" .sm .striped}
+
+The first three items in @tbl-td-europarl-normalization are relatively straightforward. Non-speech annotations most likely are not relevant for our research. Inconsistent whitespace and non-sentence punctuation may be problematic for tokenization that depends on whitespace and punctuation regularities. 
+
+The other two considerations are more contingent on our research aims. The existence of various forms for the same word, abbreviated and unabreviated, introduces variability may not be of interest for our analysis. Secondly, common conventions for capitalization in prose can introduce unwanted variability. If we leave the text as is, the tokens `The` and `the` will be treated as distinct. If we convert the text to lowercase, the tokens `White` and `white` will be treated as the same, even if `White` corresponds to a proper noun (*e.g.* `White House`). 
+
+These observations provide us a roadmap for the normalization process. For demonstration, let's focus only on a couple of these cases: removing parlimentary session descriptions and extra whitespace.
+
+### Application {#sec-td-normalization-application}
+
+Identifying our normalization goals is an important first step. The next step is to identify the procedures that will accomplish these goals. The majority of text normalization procedures can be accomplished with the `stringr` package [@R-stringr]. This package provides a number of functions for manipulating text. The workhorse functions we will use for our tasks are the `str_remove()` and `str_replace()` functions. As the these functions give us the ability to remove or replace text. Our task is to identify the patterns we want to remove or replace.
+
+Before we modify any lines, let's try craft a search pattern to identify the text of interest. This is done to avoid over- or under-generalizing the search pattern. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.
+
+<!-- non-speech -->
+
+Let's start by identifying non-parlimentary speech. Two functions from the `stringr` package come in handy here: `str_detect()` and `str_extract()`. `str_detect()` detects a pattern in a character vector and returns a logical vector, `TRUE` if the pattern is detected and `FALSE` if it is not. `str_extract()` extracts the text in a character vector that matches a pattern. 
+
+`str_detect()` pairs well with the `filter()` function to return observations that match a pattern in a character vector. `str_extract()` pairs well with the `mutate()` function to create a new variable which contains character vector that match a pattern.
+
+Let's start with the `str_detect()` function. We will use this function to identify the lines that contain the parliamentary session descriptions. From the examples above, we can see that these instances are wrapped with parentheses `(` and `)`. The text within the parentheses can vary, so we need a Regular Expression to do the heavy lifting. To start out we can match any one or multiple characters with `.+`. But it is important to recognize the `+` (and also the `*`) operators are 'greedy', meaning that if there are multiple matches, the longest match will be returned. In this case, we want to match the shortest match. To do this we can use the `?` operator to make the `+` operator 'lazy'. This will match the shortest match.
+
+Our test code appears in @exm-td-europarl-search-non-speech.
+
+```{r}
+#| label: set-seed-sample-3
+#| echo: false
+
+
+set.seed(111)
+```
+
+::: {#exm-td-europarl-search-non-speech}
+```{r}
+#| label: td-europarl-search-non-speech
+
+
+# Identify non-speech lines
+europarl_curated_tbl |>
+  filter(str_detect(lines, "\\(.+?\\)")) |>
+  slice_sample(n = 10) 
+```
+:::
+
+The results from @exm-td-europarl-search-non-speech show that we have identified the lines that contain at least one of the parliamentary session description annotations. A more targeted search to identify specific instances of the parliamentary session descriptions can be accomplished adding the `str_extract()` function as seen in @exm-td-europarl-search-non-speech-2.
+
+```{r}
+#| label: set-seed-sample-4
+#| echo: false
+
+
+set.seed(111)
+```
+
+::: {#exm-td-europarl-search-non-speech-2}
+```{r}
+#| label: td-europarl-search-non-speech-2
+
+
+# Extract non-speech fragments
+europarl_curated_tbl |>
+  filter(str_detect(lines, "\\(.+?\\)")) |>
+  mutate(non_speech = str_extract(lines, "\\(.+?\\)")) |>
+  slice_sample(n = 10) 
+```
+:::
+
+The results from @exm-td-europarl-search-non-speech-2 show that we have identified the lines that contain parliamentary session description annotations and extracted this text --or have we? What if a given line contains more than one parliamentary session description annotation? It turns out that `str_extract()` only returns the first match. To return all matches we can use the `str_extract_all()` function. Let's try again, in @exm-td-europarl-search-non-speech-3.
+
+
+```{r}
+#| label: set-seed-sample-5
+#| echo: false
+
+
+set.seed(111)
+```
+
+
+::: {#exm-td-europarl-search-non-speech-3}
+```{r}
+#| label: td-europarl-search-non-speech-3
+
+
+# Extract non-speech fragments
+europarl_curated_tbl |>
+  filter(str_detect(lines, "\\(.+?\\)")) |>
+  mutate(non_speech = str_extract_all(lines, "\\(.+?\\)")) |> 
+  slice_sample(n = 10)
+```
+:::
+
+OK, that might not be what you expected. The `str_extract_all()` function returns a list of character vectors. This is because for any given line in `lines` there may be a different number of matches. To maintain the data frame as rectangular, a list is returned for each value of `non_speech`. We could expand the list into a data frame with the `unnest()` function from the `tidyr` package if our goal were to work with these matches. But that is not our aim. Rather, we want to know if we have multiple matches per line. Note that the information provided for the `non_speech` column by the tibble object tells use that we have some lines with muliple matches, as we can see in line 6 of our small sample. So good thing we checked!
+
+Let's now remove these parliamentary session description annotations from each line in the `lines` column. We turn to `str_remove_all()`, a variant of `str_remove()`, that, as you expect, will remove multiple matches in a single line. We will use the `mutate()` function to overwrite the `lines` column with the modified text. The code is seen in @exm-td-europarl-remove-non-speech.
+
+::: {#exm-td-europarl-remove-non-speech}
+```{r}
+#| label: td-europarl-remove-non-speech
+
+# Remove non-speech fragments
+europarl_curated_tbl <- 
+  europarl_curated_tbl |>
+  mutate(lines = str_remove_all(lines, "\\(.+?\\)"))
+```
+:::
+
+I recommend spot checking the results of this normalization step by running the code in @exm-td-europarl-search-non-speech again, if nothing appears we've done our job. 
+
+When you are content with the results, drop the observations that have no text in the `lines` column given the entire line was non-speech. This can be done with the `is.na()` function and the `filter()` function as seen in @exm-td-europarl-drop-empty-lines.
+
+::: {#exm-td-europarl-drop-empty-lines}
+```{r}
+#| label: td-europarl-drop-empty-lines
+
+# Drop empty lines
+europarl_curated_tbl <- 
+  europarl_curated_tbl |>
+  filter(!is.na(lines))
+```
+:::
+
+<!-- extra whitespace -->
+
+The second item of business to address is the extra whitespace we observed in @tbl-td-europarl-normalization. If we consider the extra whitespace cases, we can categorize them into two types: multiple spaces that should be a single space (*e.g.* <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>) and single spaces that occur within a word (*e.g.* `5 % ,` or `Palacio' s`). 
+
+To deal with muliple spaces, we can turn to the `str_replace_all()` function. This function will replace a pattern with a replacement string for every pattern match. In this case, we want to replace multiple spaces with a single space. We can use the `\\s+` pattern to match one or more spaces and then replace it with `\\s` or a single whitespace character `" "`. 
+
+Before we apply this normalization step, let's assess how many instances of multiple spaces we have in the dataset. We can use the `str_count()` function to count the number of matches for a pattern. The pattern we want needs to be a bit more precise than `\\s+`, because this matches one or more. We want to match *two* or more. Using the regular expression operator `{,}` we can specify our pattern to be `\\s{2,}`, *i.e.* two or more continguous whitespaces. Let's count and sum all these matches. The code is seen in @exm-td-europarl-count-whitespace.
+
+::: {#exm-td-europarl-count-whitespace}
+```{r}
+#| label: td-europarl-count-whitespace
+
+# Count multiple spaces
+europarl_curated_tbl |>
+  mutate(multiple_spaces = str_count(lines, "\\s{2,}")) |>
+  summarize(total_multiple_spaces = sum(multiple_spaces, na.rm = TRUE))
+```
+:::
+
+::: {.callout}
+**{{< fa exclamation-triangle >}} Warning**
+
+You may be wondering what the extra parameter `na.rm = TRUE` is doing in the `sum()` function. This parameter tells R to ignore values that are `NA` (not available). This is important because if we don't ignore `NA` values, the `sum()` function will return `NA` if there are any `NA` values in the vector. The code in @exm-td-europarl-count-whitespace will return `NA` when the `\\s{2,}` doesn't match for a given line. This is because the `str_count()` function returns `NA` when there are no matches. If we don't ignore these `NA` values, the `sum()` function will return `NA` for the entire dataset.
+:::
+
+The results from @exm-td-europarl-count-whitespace show that we have over 130k instances of multiple spaces. Let's replace these with a single space. The code is seen in @exm-td-europarl-remove-multiple-whitespace.
+
+::: {#exm-td-europarl-remove-multiple-whitespace}
+```{r}
+#| label: td-europarl-remove-multiple-whitespace
+
+# Remove multiple spaces
+europarl_curated_tbl <- 
+  europarl_curated_tbl |>
+  mutate(lines = str_replace_all(lines, "\\s{2,}", "\\s"))
+```
+:::
+
+To check our work, we can run the code in @exm-td-europarl-count-whitespace again. We should see that there are no more instances of multiple spaces.
+
+Now let's turn to the single spaces that occur within a word. We can use the `str_replace_all()` function again to replace these single spaces with no space --but is that what we want? Probably not, we want *most* of the single spaces to remain, otherwise we would have one very, very long string on each line. 
+
+Instead, we want to narrow our scope and focus in on whitespace that occurs in particular contexts. One context we can focus on is the single quote `'`, as in `Palacio' s`. In this use, the single quote is an apostrophe in a possessive form, but we might want to see if other forms, such as contractions, that also may have this extra whitespace. Let's check using a regular expression that matches a character string `\\w+` with single quote `'` at the end followed by whitespace `\\s`. To give some more context I will add a character string `\\w+` after the whitespace. Using the `str_extract_all()` function we can extract all the matches for this pattern. It returns a list, so we `unnest()` the list. Then we can pull the vector of matches and list the unique matches to get a sense of the context we are working with. The code is seen in @exm-td-europarl-search-apostrophe.
+
+```{r}
+#| label: set-seed-sample-6
+#| echo: false
+
+set.seed(111)
+```
+
+::: {#exm-td-europarl-search-apostrophe}
+```{r}
+#| label: td-europarl-search-apostrophe
+
+# Match apostrophe followed by whitespace
+europarl_curated_tbl |>
+  slice_sample(n = 1000) |> 
+  mutate(quote_whitespace = str_extract_all(lines, "\\w+'\\s\\w+")) |> 
+  unnest(quote_whitespace) |>
+  pull(quote_whitespace) |>
+  unique()
+```
+:::
+
+In @exm-td-europarl-search-apostrophe we can see that we have many singular possessive forms we want to ammend and other forms that we may want to keep --in particular when the single quote is part of a quote or a plural or irregular singular possessive. From various runs of this code, it looks safe to remove whitespace between the single quote and the `s` in the possessive form  We need to be careful not to remove whitespace in other contexts where the single quote is followed by ` s`. To do this we can use the word boundary pattern `\\b` after the `s` in our pattern to ensure that the `s` is not part of a following word. The code is seen in @exm-td-europarl-remove-apostrophe.
+
+::: {#exm-td-europarl-remove-apostrophe}
+```{r}
+#| label: td-europarl-remove-apostrophe
+
+# Remove whitespace after apostrophe
+europarl_transformed_tbl <- 
+  europarl_curated_tbl |>
+  mutate(lines = str_replace_all(lines, "'\\ss\\b", "'s"))
+```
+:::
+
+To check our work, we can run the code in @exm-td-europarl-search-apostrophe again. We should see that there are no more instances of whitespace after the single quote in possessive forms. Once we are satisfied with our work, we can continue with subsequent transformation procedures using the `europarl_transformed_tbl` data, or save it to a CSV file, create a data dictionary, and move on to the next transformation procedure.
+
+Normalization goals will vary from dataset to dataset but the procedures often follow a similar line of attack to those outlined in this section. There are cases, however, in which normalization procedures are more easily accomplished after subsequent transformation steps or need to be post-poned to further the goals of other transformation steps. For example, standardizing abbreviated forms may be more easily accomplished after tokenization when each token is a word. Another example is the case of case conversion. Even if we are not directly interested in the case differences between words, certain generation procedures, Named Entity Recognition (NER) for example, may use case information to identify the names of people, locations, organizations, *etc.*. In these cases, it may be better to leave the case as is until after the generation step.
+
+## Recoding {#sec-td-recoding}
+
+Normalizing text can be seen as an extension of dataset curation to some extent in that the structure of the dataset is maintained. In the Europarl case, we saw this to be true. In the case of recoding, and other transformational steps, the aim will be to modify the dataset structure either by rows, columns, or both. Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.
+
+### Orientation {#sec-td-recoding-orientation}
+
+```{r}
+#| label: td-swda-dataset-curate-run
+#| include: false
+
+swda_curated_tbl <- 
+  read_csv("data/swda_curated.csv") |> 
+  select(
+    doc_id,
+    speaker_id,
+    sex,
+    education,
+    birth_year,
+    utt_id = utterance_id,
+    utt_text = utterance_text,
+    damsl_tag
+  )
+
+swda_curated_dd <- 
+  create_data_dictionary(
+  data = swda_curated_tbl,
+  file_path = "data/td-swda_curated_dd.csv",
+  model = "gpt-3.5-turbo"
+)
+```
+
+The Switchboard dialog Act Corpus corpus contains a number of variables describing conversations between speakers of American English. A subset of this dataset provides a good example of the recoding process. The data dictionary for this dataset appears in @tbl-td-swda-curated-dd.
+
+```{r}
+#| label: tbl-td-swda-curated-dd
+#| tbl-cap: "Data dictionary for the Switchboard dialog Act Corpus."
+#| message: false
+#| echo: false
+
+# SWDA data dictionary ----
+read_csv("data/td-swda_curated_dd.csv") |>
+  kable() |>
+  kable_styling()
+```
+
+The data dictionary gives us a sense of the variables in the dataset. Let's read in the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-td-swda-dataset-read-show.
+
+::: {#exm-td-swda-dataset-read-show}
+```{r}
+#| label: td-swda-dataset-read-show
+#| eval: false
+
+# Read in the dataset
+swda_curated_tbl <-
+  read_csv("data/derived/swda/swda_curated.csv")
+
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
+```
+
+```{r}
+#| label: td-swda-dataset-read-run
+#| echo: false
+
+swda_curated_tbl |> 
+  slice_head(n = 10)
+```
+:::
+
+Considering the data dictionary and the preview of the `swda_curated_tbl` dataset, we observe a number of metadata variables, such as `doc_id`, `speaker_id`, `sex`, `education`, `birth_year`, `utt_id`, `utt_text`, and `damsl_tag`. 
+
+Most of these variables and their values are readily interpretable. However, the `damsl_tag` variable and the annotation scheme that appears interleaved with the dialog in `utt_text` may require a bit more explanation. If we consult the data origin file and/ or the corpus website, we seee that the `damsl_tag` is a utterance-level annotation which indicates the dialog act type (*e.g.* statement, question, backchannel, *etc.*). The annotation interleaved with the dialog in `utt_text` is a [disfluency annotation scheme](https://staff.fnwi.uva.nl/r.fernandezrovira/teaching/DM-materials/DFL-book.pdf). This scheme includes annotation for non-sentence elements such as filled pauses (*e.g.* `{F uh}`), discourse markers (*e.g.* `{D well}`), repetitions/ restarts (*e.g.* `[I think + I believe]`), among others.
+
+Let's assume that we are interested in understanding the use of filled pauses in the Switchboard dialog. @Tottie2011 investigates the relationship between speakers' use of filled pauses `uh` and `um` and their socio-demographic background (sex, socio-economic status, and age) in British English. An American English comparison would be insightful. To do this, however, we will need to recode some of the variables in the dataset.
+
+In this case, we will use `education` as a proxy for socio-economic status. As is, the values are numeric and are not maximally transparent. We can recode these values to be more interpretable. In the corpus documentation, the values for `education` are described in @tbl-td-swda-education.
+
+| Value | Description                 |
+|-----------|-------------------------|
+| 0         | Less Than High School   |
+| 1         | Less Than College       |
+| 2         | College                 |
+| 3         | More Than College       |
+| 9         | Unknown                 |
+
+: Values for the `education` variable in the Switchboard dialog Act Corpus. {#tbl-td-swda-education .sm .striped}
+
+To derive a variable which reflects the age of each speaker, we will use the `birth_year` variable. This variable is a numeric value which indicates the year of birth for each speaker. We can derive a new variable `age` by subtracting the `birth_year` from the year of recordings, 1992.
+
+Together `sex`, `education`, and `age` will provide us with the socio-demographic information we need to investigate the relationship between speakers' use of filled pauses and their socio-demographic background. The last component we need to derive is the use of filled pauses. To do this we will need to extract the filled pauses from the `utt_text` variable. We also need to consider what we mean by 'use'. In this case, we will operationalize the use of filled pauses as the number of times a filled pause is used per utterance.
+
+### Application {#sec-td-recoding-application}
+
+The plan to transform the `swda_curated_tbl` dataset is established. Now we need to implement the plan. We will start by recoding the `education` variable. Specifically, we want to map the numeric values to the descriptions in @tbl-td-swda-education.
+
+To do this we will use the `case_when()` function from the `dplyr` package. This function allows us to specify a series of conditions and the values to return if the condition is met. `case_when()` evaluates the conditions and `mutate()` writes the variable, in this case overwrites it, as seen in @exm-td-swda-recoding-education.
+
+::: {#exm-td-swda-recoding-education}
+```{r}
+#| label: td-swda-recoding-education
+
+# Recode education
+swda_curated_tbl <- 
+  swda_curated_tbl |>
+  mutate(
+    education = case_when(
+      education == 0 ~ "Less Than High School",
+      education == 1 ~ "Less Than College",
+      education == 2 ~ "College",
+      education == 3 ~ "More Than College",
+      education == 9 ~ "Unknown"
+    )
+  )
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+To create the `age` variable, all we need to do is subtract the `birth_year` from the year of recording, 1992. Again we will use `mutate()` to create the `age` variable. The values are created by a subtraction operation. Since we will not need the `birth_year` variable afterwards, we will drop it from the dataset. The code is seen in @exm-td-swda-recoding-age.
+
+::: {#exm-td-swda-recoding-age}
+```{r}
+#| label: td-swda-recoding-age
+
+# Recode age
+swda_curated_tbl <- 
+  swda_curated_tbl |>
+  mutate(age = 1992 - birth_year) |>
+  select(-birth_year)
+
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+Our final recoding step is to derive the frequency of filled pauses per utterance. In other words, we want to match the 'uh' and 'um' and return the number of matches for each utterance. There are a number of ways to do this. We could use an approach which applies the `str_extract_all()` function, which returns a list of matches, and then `unnest()` the list and count the number of matches. An alternative approach is to use the `str_count()` function to count the number of matches for a pattern. The later approach is more efficient for our purposes. 
+
+In either case, a pattern to match these annotations is needed. As always with pattern matching, we need to craft an expression that is as specific as possible to avoid over- or under-matching. We know from our observation and the corpus documentation that all filled pauses are wrapped by the `{F ...}` annotation. We can use this to our advantage. Before we jump into counting the filled pauses, let's test a regular expression that matches the entire `{F ...}` annotation. An expression like `{F.*}` might be tempting, but this will be problematic for two reasons. First, since the `{` and `}` are regular expression operators we will need to escape them with the `\\` convention. Second, the `*` operator is greedy, meaning that it will match the longest possible string. So if in a given utterance there are multiple filled pauses, the `*` operator will match all of them at once, not individually. To avoid this, we can use the `?` operator to make the `*` operator lazy. With these considerations in mind, we can move forward with `\\{F.*?\\}` as our expression.
+
+We will send each utterance to the `str_extract_all()` function to match the filled pauses. This function returns a list of matches, so we will need to `unnest()` the list to get a vector of matches. Afterwards we will apply the ` count()` function to summarize the number of matches for each match variation. The code is seen in @exm-td-swda-recoding-filled-pauses-test.
+
+::: {#exm-td-swda-recoding-filled-pauses-test}
+```{r}
+#| label: td-swda-recoding-filled-pauses-test
+
+# Test filled pause pattern
+swda_curated_tbl |>
+  mutate(
+    matches = str_extract_all(
+      utt_text, 
+      "\\{F.*?\\}")
+  ) |>
+  unnest(matches) |> 
+  count(matches)
+```
+:::
+
+The result from our test indicates that the `\\{F .*?\\}` pattern matches a wide variety of filled pause annotations, 120 to be exact! We can see that there are a number of filled pause annotations that we are not be interested in, *e.g.* `{F Oh}`. Furthermore, the 'uh' and 'um' we are interested in sometimes include more annotation structure, *e.g.* `{F + ] Um, }`. 
+
+A more sophisticated pattern is needed. When faced with a pattern matching task such as this, I find it helpful to start with a simple pattern and then add complexity as needed. This is an iterative process. To speed up the process, I often extract the matches and use an online tool for developing regular expressions, such as [regex101.com](https://regex101.com/).
+
+With a (monster) regular expression that matches each of the filled pauses we are interested in, and only those filled pauses, we can move forward with counting the number of matches for each utterance. 
+
+To do this we will use the `str_count()` function from the `stringr` package. This function counts the number of matches for a pattern in a character vector. We will use `mutate()` to create new variables `uh` and `um` which will contain the counts for the filled pauses `uh` and `um`, respectively. The code is seen in @exm-td-swda-recoding-filled-pauses.
+
+::: {#exm-td-swda-recoding-filled-pauses}
+```{r}
+#| label: td-swda-recoding-filled-pauses
+
+# Recode filled pauses 
+swda_curated_tbl <- 
+  swda_curated_tbl |>
+  mutate(
+    uh = str_count(
+      utt_text, 
+      "\\{F\\s+[\\(+\\s\\]]*(u|U)h[\\)\\s,\\.\\?-]*\\}"
+    ),
+    um = str_count(
+      utt_text, 
+      "\\{F\\s+[\\(+\\s\\]]*(u|U)m[\\)\\s,\\.\\?-]*\\}"
+    )
+  )
+# Preview the first 10 lines 
+swda_curated_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+Now we have two new columns, `uh` and `um` which indicate how many times the relevant pattern was matched for a given utterance. By choosing to focus on disfluencies, however, we have made a decision to change the unit of observation from the utterance to the use of filled pauses (`uh` and `um`). This means that as the dataset stands, it is not in tidy format --where each observation corresponds to the observational unit. When datasets are misaligned in this particular way, there are in what is known as 'wide' format. What we want to do, then, is to restructure our dataset such that each row corresponds to the unit of observation --in this case each filled pause type. 
+
+<!-- [ ] may need a graphic or more explanation here (pivot_longer) -->
+
+To convert our current (wide) dataset to one where each filler type is listed and the counts are measured for each utterance we turn to the `pivot_longer()` function. This function creates two new columns, one in which the column names are listed and one for the values for each of the column names. The code is seen in @exm-td-swda-recoding-filled-pauses-longer.
+
+::: {#exm-td-swda-recoding-filled-pauses-longer}
+```{r}
+#| label: td-swda-recoding-filled-pauses-longer
+
+# Tidy filled pauses
+swda_curated_tbl <- 
+  swda_curated_tbl |>
+  pivot_longer(
+    cols = c("uh", "um"), 
+    names_to = "filler", 
+    values_to = "count"
+  )
+# Preview the first 10 lines
+swda_curated_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+Now we have a transformed dataset that is in tidy format. Each row corresponds to a filled pause type and the number of times it was used in a given utterance. It also includes the key socio-demographic variables we are interested in.
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+As confident as we may be in our recoding process, it is always a good idea to perform some data checks to ensure that the recoding process was successful. In the process, we can also gain some insight into the data. Considering the structure in the transformed Switchboard dialog Act Corpus dataset, what are some data checks we might want to perform? What are some insights we might gain from these data checks?
+:::
+
+Finalize the transformation process by writing the dataset to a CSV file, create a data dictionary, and review and comment your code in the transformation script.
+
+## Tokenization {#sec-td-tokenization}
+
+Another common transformation process that is particularly relevant for text analysis is tokenization. Tokenization is the process of segmenting units of language into components relevant for the research question. This includes breaking text in curated datasets into smaller units, such as words, $n$-grams, sentences, *etc.* or combining text into larger units relative to the original text. 
+
+<!-- [ ] Have I defined n-grams somewhere before this? If not, I need to figure out where to add it so it is not an opaque term to readers -->
+
+The process of tokenization is fundamentally row-wise. By scaling the text units up or down, we change the unit of observation. It is important both for the research and the text processing to operationalize our language units. For example, while it may appear obvious to you what 'word' or 'sentence' means, a computer, and your reproducible research, needs a definition. This can prove tricker than it seems. For example, in English, we can segment text into words by splitting on whitespace. This works fairly well but there are some cases where this is not ideal. For example, in the case of contractions, such as `don't`, `won't`, `can't`, *etc.* the apostrophe is not a whitespace character. If we want to consider these contractions as separate words, then we need to consider a different tokenization strategy.
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+Consider the following paragraph: 
+
+> "As the sun dipped below the horizon, the sky was set ablaze with shades of orange-red, illuminating the landscape. It's a sight Mr. Johnson, a long-time observer, never tired of. On the lakeside, he'd watch with friends, enjoying the ever-changing hues—especially those around 6:30 p.m.—and reflecting on nature's grand display. Even in the half-light, the water's glimmer, coupled with the echo of distant laughter, created a timeless scene. The so-called 'magic hour' was indeed magical, yet fleeting, like a well-crafted poem; it was the essence of life itself."
+
+What text conventions would pose issues for word tokenization based on a whitespace critieron?
+:::
+
+Furthermore, tokenization strategies can vary between languages. For German words are often compounded together, meaning many 'words' will not be captured by the whitespace convention. Whitespace may not even be relevant for word tokenization in written languages, such as Chinese. The take home message is there is no one-size-fits-all tokenization strategy.
+
+### Orientation {#sec-td-tokenization-orientation}
+
+```{r}
+#| label: td-cabnc-dataset-curate-run
+#| include: false
+
+cabnc_curated_tbl <- 
+  read_csv("data/cabnc_curated.csv") |> 
+  select(
+    doc_id,
+    part_id,
+    sex = part_sex,
+    age = part_age,
+    utt_id = utt_num,
+    utt_text = utterance
+  )
+
+cabnc_curated_dd <- 
+  create_data_dictionary(
+  data = cabnc_curated_tbl,
+  file_path = "data/td-cabnc_curated_dd.csv",
+  model = "gpt-3.5-turbo"
+)
+```
+
+Let's look at a curated dataset from the CABNC Corpus to explore tokenization. The data dictionary for this dataset appears in @tbl-td-cabnc-dd.
+
+```{r}
+#| label: tbl-td-cabnc-dd
+#| tbl-cap: "Data dictionary for the CABNC Corpus."
+#| echo: false
+#| message: false
+
+read_csv(file = "data/td-cabnc_curated_dd.csv") |>
+  kable() |>
+  kable_styling()
+```
+
+The CABNC dataset contains a number of variables describing conversations between speakers of British English. Now let's look at the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-td-cabnc-dataset-read-show.
+
+::: {#exm-td-cabnc-dataset-read-show}
+```{r}
+#| label: td-cabnc-dataset-read-show
+#| eval: false
+
+# Read in the dataset
+cabnc_curated_tbl <-
+  read_csv("data/derived/cabnc/cabnc_curated.csv")
+
+# Preview the first 10 lines
+cabnc_curated_tbl |>
+  slice_head(n = 10)
+```
+```{r}
+#| label: td-cabnc-dataset-read-run
+#| echo: false
+
+cabnc_curated_tbl |> 
+  slice_head(n = 10)
+```
+:::
+
+
+Considering the data dictionary and the preview of the `cabnc_curated_tbl` dataset, we observe a number of metadata variables, such as `doc_id`, `part_id`, `sex`, `age`, and `utt_id` and the utterances in `utt_text`.
+
+Let's assume that we are performing an exploratory analysis with this dataset and would like to consider the use of words and word sequences ($n$-grams). In this case we will be deriving multiple datasets with different units of observation. 
+
+### Application {#sec-td-tokenization-application}
+
+In the `cabnc_curated_tbl` data frame the `utt_text` variable contains the text we want to tokenize. We will start by tokenizing the text into words. Abstracting away from some of the metadata variables, if we envision what this should look like we might imagine something like @tbl-td-cabnc-tokenization-words-example.
+
+|  doc_id   | utt_id | utt_word |
+|----------|--------|----------|
+| KB0RE000 |      0 |      You |
+| KB0RE000 |      0 |  enjoyed |
+| KB0RE000 |      0 | yourself |
+| KB0RE000 |      0 |       in |
+| KB0RE000 |      0 |  America |
+
+: Example of tokenizing the `utt_text` variable into words. {#tbl-td-cabnc-tokenization-words-example .sm .striped}
+
+Comparing @tbl-td-cabnc-tokenization-words-example to the first line of the output of @exm-td-swda-dataset-read-show, we can see that we want to segment the words in the `utt_text` and then have each segment appear as a separate observation, retaining the relevant metadata variables.
+
+Before we work with tokenizing text in a data frame, let's start with a character vector to get a sense of how tokenization works and what we will need to do to achieve the output in @tbl-td-cabnc-tokenization-words-example. Let's start with a character vector which contains the first three utterances from `cabnc_curated_tbl`. I will use `slice_head(n = 3)` and then `pull()` to extract the `utt_text` character vector in @exm-td-cabnc-tokenization-words-vector.
+
+::: {#exm-td-cabnc-tokenization-words-vector}
+```{r}
+#| label: td-cabnc-tokenization-words-vector
+
+# Pull a character vector
+cabnc_utts_chr <- 
+  cabnc_curated_tbl |>
+  slice_head(n = 3) |>
+  pull(utt_text)
+
+# Preview the character vector
+cabnc_utts_chr
+```
+:::
+
+
+We have the first three utterances in `cbanc_utts_chr`. Now we can tokenize the utterances into words using the `tokenize_words()` function from the  `tokenizers` package [@R-tokenizers]. It's only required argument is a character vector, as seen in @exm-td-cabnc-tokenization-words-tokenize.
+
+::: {#exm-td-cabnc-tokenization-words-tokenize}
+```{r}
+#| label: td-cabnc-tokenization-words-tokenize
+
+# Load package
+library(tokenizers)
+
+# Tokenize the utterances into words
+cabnc_utts_chr |> 
+  tokenize_words()
+```
+:::
+
+The output shows that we get a list of length 3, one for each utterance. Each list element contains a character vector with different lengths based on the number of tokens created from the original utterance. 
+
+Now if we add the `tokenize_words()` function to a `mutate()` call, we can create a new variable with the tokenized utterances. However, the value for each observation will be a list. To expand the character vectors within each list into separate observations, we can use the `unnest()` function on the new variable. I will assign the result to `cabnc_unigrams_tbl` as we will have one-word tokens, as seen in @exm-td-cabnc-tokenization-words.
+
+::: {#exm-td-cabnc-tokenization-words}
+```{r}
+#| label: td-cabnc-tokenization-words
+
+# Tokenize the utterances into words
+cabnc_unigrams_tbl <- 
+  cabnc_curated_tbl |>
+  mutate(utt_words = tokenize_words(utt_text)) |>
+  unnest(cols = utt_words)
+
+# Preview the first 10 lines
+cabnc_unigrams_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+The `cabnc_unigrams_tbl` dataset is in the format we want, each row corresponds to a word token and each column contains the relevant metadata. The `tokenizers` package includes a variety of tokenization functions. For example, we can use the `tokenize_ngrams()` function to create $n$-grams. The `tokenize_ngrams()` function takes a character vector and a value for $n$ and returns a list of $n$-grams. Other functions can tokenize character $n$-grams, sentences, paragraphs, lines, or even allow you to specify a custom tokenization function with a regular expression. 
+
+As we have seen the `tokenize_*()` set of functions take a character vector and return a list of tokens. And if we are working with a data frame, we can then work to expand the list into separate observations. This is a common pattern in text analysis. So common, in fact, that the `tidytext` package [@R-tidytext] includes a function, `unnest_tokens()` that wraps the `tokenize_*` functions and expand the list of tokens into separate observations in one step. The tokenization types available are `character`, `word`, `ngram`, `sentence`, `regex`, and `skip_ngram`. We will use the `word` tokenization type to recreate the `cabnc_unigrams_tbl` dataset, as seen in @exm-td-cabnc-tokenization-words-tidytext.
+
+::: {#exm-td-cabnc-tokenization-words-tidytext}
+```{r}
+#| label: td-cabnc-tokenization-words-tidytext
+
+# Load package
+library(tidytext)
+
+# Tokenize the utterances into words
+cabnc_unigrams_tbl <- 
+  cabnc_curated_tbl |>
+  unnest_tokens(
+    output = utt_word, 
+    input = utt_text, 
+    token = "words"
+  )
+# Preview the first 10 lines
+cabnc_unigrams_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+The `utt_word` column in the outputs from both @exm-td-cabnc-tokenization-words and @exm-td-cabnc-tokenization-words-tidytext are identical. One thing to note, however, is that the original `utt_text` variable is dropped in the `unnest_tokens()` approach. This one of a few default values for parameters which inlcude `drop = TRUE` (dropping the original text variable) and `to_lower = TRUE`. In fact the `token = "words"` parameter is not needed as it is the default. We can change these defaults as we see fit. 
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+The approach using either `tokenize_*()` or `unnest_tokens()` approaches tokenization from a segmentation point of view. That is, the context separating our tokens is tarted and is removed. In some cases it may be more feasible to turn the approach around and instead target the tokens to extract. The `str_extract_all()` can be used for this purpose. Note, however, the former approach is often more effective and effecient. The later requires a regular expression, or set of, which can be tricky to develop for some tokenization tasks.
+:::
+
+As we create derived datasets to explore, let's also create bigram tokens. We can do this by changing the `token` parameter to `"ngrams"` and specifying the value for $n$ with the `n` parameter. I will assign the result to `cabnc_bigrams_tbl` as we will have two-word tokens, as seen in @exm-td-cabnc-tokenization-bigrams-tidytext.
+
+::: {#exm-td-cabnc-tokenization-bigrams-tidytext}
+```{r}
+#| label: td-cabnc-tokenization-bigrams-tidytext
+
+# Tokenize the utterances into bigrams
+cabnc_bigrams_tbl <- 
+  cabnc_curated_tbl |>
+  unnest_tokens(
+    output = utt_bigram, 
+    input = utt_text, 
+    token = "ngrams",
+    n = 2
+  )
+# Preview the first 10 lines
+cabnc_bigrams_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+The two-word token sequences for each uttterance appear as observations in the `cabnc_bigrams_tbl` dataset. You may notice that in row 5 the value for `utt_bigram` is `NA`. This is because the utterance only contains one word. The `unnest_tokens()` function will not create a token for a sequence that does not exist.
+
+If we don't want to loose this information, we can modify the original `utt_text` variable to include a placeholder, some symbol that we will use to denote that a single word utterance is present. Another strategy which accomplishes the first goal and may enrich the bigram dataset is to add a start and end token to each utterance. This will allow us to identify the first and last word in each utterance. In either case we can turn to the `str_c()` function which will allow us to concatenate strings. In @exm-td-cabnc-tokenization-bigrams-tidytext-start-end, I will add a start and end token to each utterance and then tokenize the utterances into bigrams.
+
+::: {#exm-td-cabnc-tokenization-bigrams-tidytext-start-end}
+```{r}
+#| label: td-cabnc-tokenization-bigrams-tidytext-start-end
+
+# Prepend and append (x) char to `utt_text`
+cabnc_derived_tbl <- 
+  cabnc_curated_tbl |>
+  mutate(utt_text = str_c("x", utt_text, "x", sep = " ")
+  )
+# Tokenize the utterances into bigrams
+cabnc_bigrams_tbl <- 
+  cabnc_derived_tbl |>
+  unnest_tokens(
+    output = utt_bigram, 
+    input = utt_text, 
+    token = "ngrams",
+    n = 2
+  )
+# Preview the first 10 lines
+cabnc_bigrams_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+::: {.callout}
+**{{< fa exclamation-triangle >}} Warning**
+
+In @exm-td-cabnc-tokenization-bigrams-tidytext-start-end I used `x` as the start and end token. My though process was that `x` will be a unique token that will not be present in the utterances. This is a good strategy, but it is not foolproof. Another, more meaningful strategy may be to encode the start and end with `#` and `$`, respectively. In this case, however, this option is not ideal as the `unnest_tokens()` and `tokenize_ngrams()` functions strip punctuation by default. This means that the `#` and `$` will be removed. 
+:::
+
+The most common tokenization strategy is to segment text into smaller units, often words. However, there are times when we may want to segment text into larger units, effectively collapsing over rows. For example, if we are working with a curated dataset which is tokenized by words, we may want to segment the text into sentences. A couple considerations are in order, however. First, we need to be clear about what we mean by 'sentence' and how we will segment the text into sentences. In some cases key cues for sentence boundaries, such as sentencial punctuation have been stripped from the text, making a simple defnition of a sentence difficult or impossible to be performed computationally. Second, we also need to be clear how we will handle the metadata variables. In other words, when we collapse over rows, we need to be aware and intentional about how we group these new units of observation. For example, if we collapse the `cabnc_unigrams_tbl` dataset into sentences, will we group the sentences by `doc_id` or `part_id` or some other combination of metadata variables? 
+
+Let's see how we might collapse text rows into larger units using the original curated CABNC data frame `cabnc_curated_tbl`. Refer back to the output in @exm-td-cabnc-dataset-read-show. The values in `utt_text` are utterances, which may map to sentences in some cases, but often not. Regardless, there is no sentential punctuation to help identify sentences, even across utterance observations. Furthermore, it may not even make sense to dicuss sentences in the context of spoken language. 
+
+A unit that may make more sense is utterances per speaker per document. Note this context 'per speaker per document'. In effect this is a grouping parameter for our approach to collapsing the text in `utt_text`. With a goal in mind we can turn to the `group_by()` function to group our dataset and then `summarize()` to collapse the text in `utt_text` with the `str_c()` and the parameter `collapse = " "`. The code is seen in @exm-td-cabnc-tokenization-utterances.
+
+::: {#exm-td-cabnc-tokenization-utterances}
+```{r}
+#| label: td-cabnc-tokenization-utterances
+
+# Collapse utterances by speaker by document
+cabnc_utterances_tbl <- 
+  cabnc_curated_tbl |>
+  group_by(doc_id, part_id) |>
+  summarize(utt_text = str_c(utt_text, collapse = " ")) |> 
+  ungroup()
+
+# Preview the first 10 lines
+cabnc_utterances_tbl |>
+  slice_head(n = 10)
+```
+:::
+
+Now we have a data frame where the utterances for each speaker for each document are collapsed into a single observation. Yet by collapsing the utterances in this way, we have lost the speaker metadata `sex` and `age`. We can add this information by one of two approaches. The first is to simply add `sex` and `age` to the grouping parameter in `group_by()`. Since these variables are descriptors of `part_id` they will not change the result of our collapsing the text, but will be retained in the resulting output. The second approach is to use a join operation to add the metadata back to the collapsed dataset. I won't go into this approach here as we will cover joins head-on in @sec-td-merging. 
+
+## Generation {#sec-td-generation}
+
+The process of generation involves the addition of information to a dataset. This differs from the previous transformation procedures in that normalization, recoding, and tokenization involve manipulating, classifiying, and/ or deriving information based on characteristics explicit in a dataset. Instead, generation involves deriving new information based on characteristics implicit in a dataset.
+
+The most common type of operation involved in the generation process is the addition of linguistic annotation. This process can be accomplished manually by a researcher or research team or automatically through the use of pre-trained linguistic resources and/ or software. Ideally the annotation of linguistic information can be conducted automatically. 
+
+There are important considerations, however, that need to be taken into account when choosing whether linguistic annotation can be conducted automatically. First and foremost has to do with the type of annotation desired. Information such as part of speech (grammatical category) and morpho-syntactic information are the the most common types of linguistic annotation that can be conducted automatically. 
+
+Second, the degree to which the resource that will be used to annotate the linguistic information is aligned with the language variety and/or register is also a key consideration. As noted, automatic linguistic annotation methods are contingent on pre-trained resources. The language and language variety used to develop these resources may not be available for the language under investigation, or if it does, the language variety and/ or register may not align. The degree to which a resource does not align with the linguistic information targeted for annotation is directly related to the quality of the final annotations. To be clear, no annotation method, whether manual or automatic is guaranteed to be perfectly accurate. 
+
+### Orientation {#sec-td-generation-orientation}
+
+```{r}
+#| label: td-enntt-dataset-read-run
+#| include: false
+
+enntt_natives_curated_tbl <- 
+  read_csv("data/enntt_natives_curated.csv")
+
+enntt_translations_curated_tbl <- 
+  read_csv("data/enntt_translations_curated.csv")
+```
+
+As an example, we'll posit that we are conducting translation research. Specifically, we will set up an investigation into the effect of translation on the syntactic simplification of text. The basic notion is that when translators translate text from one language to another, they subconsciously simplify the text, compared to native texts [@Liu2021]. 
+
+To assess this hypothesis, we will need to identify comparable translated and native texts. The ENNTT corpus contains native and translated English. The texts are drawn from European Parliament proceedings ensuring that the texts are comparable in terms of register. 
+
+The data dictionary for the curated native dataset appears in @tbl-td-enntt-native-dd.
+
+```{r}
+#| label: tbl-td-enntt-native-dd
+#| tbl-cap: "Data dictionary for the curated native ENNTT dataset."
+#| message: false
+#| echo: false
+
+read_csv(file = "data/enntt_natives_curated_dd.csv") |>
+  kable() |>
+  kable_styling()
+```
+
+Both the natives and translations datasets have the same variables. For the purposes of this investigation, the `text` and `type` variables are the most relevant. A variable to index the text, such as `doc_id`, will be useful as we move forward and will be added to the dataset.
+
+The next step is to operationalize what we mean by syntactic simplification. There are many measures of syntactic complexity [@Szmrecsanyi2004]. For our purposes, let's focus on two: number of T-units and sentence length (in words). Length is straightforward to calculate after word tokenization but a T-unit is a bit more involved. A T-unit is a main clause and all of its subordinate clauses. To calculate the number of T-units, we will need to identify the main clauses and their subordinate clauses. 
+
+An idealized transformed dataset for this investigation would look something like @tbl-td-generation-idealized.
+
+| doc_id | type       | t_units | word_len | text                                                                                                          |
+| ------ | ---------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| 1      | translated | 1       | 5        | I am happy right now.                                                                                         |
+| 2      | translated | 3       | 11       | I think that John believes that Mary is a good person.                                                        |
+| 3      | native     | 2       | 8        | She thinks I am not happy right now.                                                                          |
+| 4      | native     | 4       | 21       | Although she knew that the weather was bad, Mary decided to go for a walk, hoping that she would feel better. |
+
+: Idealized transformed dataset for the syntactic simplification investigation. {#tbl-td-generation-idealized .sm .striped}
+
+To identify the main clauses and their subordinate clauses, we will need to annotate the ENNTT texts with syntactic information. Specifically, we will need to identify and count the main clauses and their subordinate clauses. 
+
+### Application {#sec-td-generation-application}
+
+As fun as it would be to hand-annotate the ENNTT corpus, we will instead turn to automatic linguistic annotation. Specifically, we will use the `udpipe` package [@R-udpipe] which provides an interface for annotating text using pre-trained models from the [Universal Dependencies](https://universaldependencies.org/) (UD) project [@Nivre2020]. The UD project is an effort to develop cross-linguistically consistent treebank annotation for a variety of languages. 
+
+Our first step, then, is to peruse the available pre-trained models for the languages we are interested in and selected the most register-aligned models. The models, model names, and licensing information are documented in the `udpipe` package and can be accessed by running `?udpipe::udpipe_download_model()` in the R console. For illustrative purposes, the `english` treebank model from the *https://github.com/bnosac/udpipe.models.ud* repository which is released under the [CC-BY-SA license](https://creativecommons.org/licenses/by-sa/4.0/). This model is trained on various sources including news, Wikipedia, and web data of various genres.
+
+Let's set the stage by providing an overview of the annotation process.
+
+1. Load the `udpipe` package. 
+2. Select the pre-trained model to use and the directory where the model will be stored in your local environment.
+3. Prepare the dataset to be annotated (if necessary). This includes ensuring that the dataset has a column of text to be annotated and a grouping column. By default, the names of these columns are expected to be `text` and `doc_id`, respectively. The `text` column needs to be a character vector and the `doc_id` column needs to be a unique index for each text to be annotated.
+4. Annotate the dataset. The result returns a data frame.
+
+Steps 3 and 4 are repeated for the `enntt_natives_curated` and the `enntt_translations_curated` datasets. For brevity, I will only show the code for the dataset for the natives. Additionally, I will subset the dataset to 10,000 randomly selected lines for both dataset, as in @exm-td-generation-subset-natives for the natives. Syntactic annotation is a computationally expensive operation and the natives and translations datasets contain 116,341 and 738,597 observations, respectively.
+
+```{r}
+#| label: set-seed-sample-7
+#| include: false
+
+set.seed(1234)
+```
+
+::: {#exm-td-generation-subset-natives}
+```{r}
+#| label: td-generation-subset-natives
+
+# Subset the natives ENNTT dataset
+enntt_natives_tbl <- 
+  enntt_natives_curated_tbl |> 
+  slice_sample(n = 10000)
+```
+:::
+
+```{r}
+#| label: set-seed-sample-8
+#| include: false
+
+set.seed(1234)
+```
+
+
+```{r}
+#| label: td-generation-subset-translations
+#| include: false
+
+# Subset the translations ENNTT dataset
+enntt_translations_tbl <- 
+  enntt_translations_curated_tbl |> 
+  slice_sample(n = 10000)
+```
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+Computational Performance
+
+In your own research computationally expensive cannot be avoided, but it can be managed. One strategy is to work with a subset of the data until your code is working as expected. Once you are confident that your code is working as expected, then you can scale up to the full dataset. 
+
+If you are using Quarto, you can use the `cache: true` metadata field in your code blocks to cache the results of computationally expensive code blocks. This will allow you to run your code once and then use the cached results for subsequent runs.
+
+Parallel processing is another strategy for managing computationally expensive code. Some packages, such as `udpipe`, have built-in support for parallel processing. Other packages, such as `tidytext`, do not. In these cases, you can use the `future` package [@R-future] to parallelize your code.
+:::
+
+With the `enntt_natives_tbl` object, let's execute steps 1-4, as seen in @exm-td-generation-udpipe-natives.
+
+::: {#exm-td-generation-udpipe-natives}
+```{r}
+#| label: td-generation-udpipe-natives-show
+#| eval: false
+#| message: false
+
+# Load package
+library(udpipe)
+
+# Model and directory
+model <- "english"
+model_dir <- "../data/"
+
+# Prepare the dataset to be annotated
+enntt_natives_prepped_tbl <- 
+  enntt_natives_tbl |>
+  mutate(doc_id = row_number()) |>
+  select(doc_id, text)
+
+# Annotate the dataset
+enntt_natives_ann <- 
+  udpipe(
+    x = enntt_natives_prepped_tbl, 
+    object = model, 
+    model_dir = model_dir
+  ) |> 
+  tibble()
+
+# Preview 
+glimpse(enntt_natives_anno)
+```
+
+```{r}
+#| label: td-generation-udpipe-natives-run
+#| echo: false
+#| message: false
+
+# Load package
+library(udpipe)
+
+# Model and directory
+model <- "english"
+model_dir <- "data/"
+
+# Prepare the dataset to be annotated
+enntt_natives_prepped_tbl <- 
+  enntt_natives_tbl |>
+  mutate(doc_id = row_number()) |>
+  select(doc_id, text)
+
+# Annotate the dataset
+enntt_natives_ann <- 
+  udpipe(
+    x = enntt_natives_prepped_tbl, 
+    object = model, 
+    model_dir = model_dir,
+    parallel.cores = 4
+  ) |> 
+  tibble()
+
+# Preview 
+glimpse(enntt_natives_ann)
+```
+:::
+
+```{r}
+#| label: td-generation-udpipe-translations-run
+#| include: false
+
+# Load package
+library(udpipe)
+
+# Model and directory
+model <- "english"
+model_dir <- "data/"
+
+# Prepare the dataset to be annotated
+enntt_translations_prepped_tbl <- 
+  enntt_translations_tbl |>
+  mutate(doc_id = row_number()) |>
+  select(doc_id, text)
+
+# Annotate the dataset
+enntt_translations_ann <- 
+  udpipe(
+    x = enntt_translations_prepped_tbl, 
+    object = model, 
+    model_dir = model_dir,
+    parallel.cores = 4
+  ) |> 
+  tibble()
+
+# Preview 
+glimpse(enntt_translations_ann)
+```
+
+There is quite a bit of information which is returned from `udpipe()`. Note that the input lines have been tokenized by word. Each token includes the `token`, `lemma`, part of speech (`upos` and `xpos`), morphological features (`feats`), and syntactic relationships (`head_token_id` and `dep_rel`). The `token_id` keeps track of the token's position in the sentence and the `sentence_id` keeps track of the sentence's position in the original text. In the case of the Europarl dataset, most values of `lines` are just one sentence, but there are some cases where the `lines` variable contains multiple sentences in which the `sid` will be incremented. Finally, the `doc_id` column and its values correspond to the `doc_id` in the `enntt_natives_tbl` dataset.
+
+The number of variables in the `udpipe()` annotation output is quite overwhelming. However, these attributes come in handy for manipulating, extracting, and plotting information based on lexical and syntactic patterns. See the dependency tree in @fig-td-generation-udpipe-english-plot-tree for an example of the syntactic information that can be extracted from the `udpipe()` annotation output.
+
+```{r}
+#| label: fig-td-generation-udpipe-english-plot-tree
+#| fig-cap: "Plot of the syntactic tree for a sentence in the ENNTT natives dataset."
+#| echo: false
+#| fig-width: 8
+
+# Load package
+library(rsyntax)
+
+# Plot the syntactic tree
+enntt_natives_ann |> 
+  filter(doc_id == 165) |> 
+  plot_tree(token, upos, use_color = FALSE, viewer_mode = FALSE, textsize = 0.8)
+```
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+The plot in @fig-td-generation-udpipe-english-plot-tree was created using the `rsyntax` package [@R-rsyntax]. In addition to creating dependency tree plots, the `rsyntax` package can be used to extract syntactic patterns from the `udpipe()` annotation output. [See the documentation for more information](https://github.com/vanatteveldt/rsyntax).
+:::
+
+In @fig-td-generation-udpipe-english-plot-tree we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the `token_id` which provides the linear ordering of the sentence. Above the nodes the `dep_relation`, or dependency relationship label is provided. These labels are based on the UD project's [dependency relations](https://universaldependencies.org/u/dep/index.html). We can see that the 'ROOT' relation is at the top of the tree and corresponds to the verb 'brought'. 'ROOT' relations mark predicates in the sentence. Not seen in the example tree, 'cop' relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units. Now we need to identify the subordinate clauses. In the UD project's listings, the relations 'ccomp' (clausal complement), 'xcomp' (open clausal complement), and 'acl:relcl' (relative clause), as seen in @fig-td-generation-udpipe-english-plot-tree) are subordinate clauses. 
+
+To calculate the number of T-units and words per sentence we turn to the `dplyr` package. We will use the `group_by()` function to group the dataset by `doc_id` and `sentence_id` and then use the `summarize()` function to calculate the number of T-units and words per sentence, where a T-unit is the combination of the sum of main clauses and sum of subordinante clauses. The code is seen in @exm-td-generation-udpipe-natives-tunits-words.
+
+::: {#exm-td-generation-udpipe-natives-tunits-words}
+```{r}
+#| label: td-generation-udpipe-natives-tunits-words
+#| message: false
+
+# Calculate the number of T-units and words per sentence
+enntt_natives_ann_tunits_words_tbl <- 
+  enntt_natives_ann |>
+  group_by(doc_id, sentence_id) |>
+  summarize(
+    main_clauses = sum(dep_rel %in% c("ROOT", "cop")),
+    subord_clauses = sum(dep_rel %in% c("ccomp", "xcomp", "acl:relcl")),
+    t_units = main_clauses + subord_clauses,
+    word_len = n()
+  ) |>
+  ungroup()
+
+# Preview
+glimpse(enntt_natives_ann_tunits_words_tbl)
+```
+:::
+
+```{r}
+#| label: td-generation-udpipe-translations-tunits-words
+#| include: false
+
+# Calculate the number of T-units and words per sentence
+enntt_translations_ann_tunits_words_tbl <- 
+  enntt_translations_ann |>
+  group_by(doc_id, sentence_id) |>
+  summarize(
+    main_clauses = sum(dep_rel %in% c("ROOT", "cop")),
+    subord_clauses = sum(dep_rel %in% c("ccomp", "xcomp", "acl:relcl")),
+    t_units = main_clauses + subord_clauses,
+    word_len = n()
+  ) |>
+  ungroup()
+```
+
+
+A quick spot check of some sentences calculations `enntt_natives_ann_tunits_words_tbl` dataset against the `enntt_natives_ann` is good to ensure that the calculation is working as expected. In @fig-td-generation-udpipe-natives-tunits we see a sentence that has a word length of 13 and a T-unit value of 5. 
+
+```{r}
+#| label: fig-td-generation-udpipe-natives-tunits
+#| fig-cap: "Sentence with a word length of 13 and a T-unit value of 5."
+#| fig-width: 8
+#| echo: false
+
+# Preview
+enntt_natives_ann |> 
+  filter(doc_id == 1468) |> 
+  plot_tree(token, use_color = FALSE, viewer_mode = FALSE, textsize = 0.8)
+```
+
+Now we can drop the intermediate columns we created to calculate our key syntactic complexity measures using `select()` to indicate those that we do want to keep. I will assign the result to `enntt_natives_syn_comp` as we will be working with syntactic complexity measures for the native texts, as seen in @exm-td-generation-udpipe-natives-tunits-words-select.
+
+::: {#exm-td-generation-udpipe-natives-tunits-words-select}
+```{r}
+#| label: td-generation-udpipe-natives-tunits-words-select
+
+# Select columns
+enntt_natives_syn_comp <- 
+  enntt_natives_ann_tunits_words_tbl |>
+  select(doc_id, sentence_id, t_units, word_len)
+```
+:::
+
+```{r}
+#| label: td-generation-udpipe-translations-tunits-words-select
+#| include: false
+
+# Select columns
+enntt_translations_syn_comp <- 
+  enntt_translations_ann_tunits_words_tbl |>
+  select(doc_id, sentence_id, t_units, word_len)
+```
+
+
+Now we can repeat the process for the ENNTT translated dataset. I will assign the result to `enntt_translations_syn_comp`. The next step is to join the `sentences` from the annotated data frames into our datasets so that we have the information we set out to generate for both datasets. Then we will concatenate both the `enntt_natives_syn_comp` and `enntt_translations_syn_comp` datasets into a single dataset. Both the join and the contactenation will be covered in the next section.
+
+## Merging {#sec-td-merging}
+
+One final class of transformations that can be applied to curated datasets to enhance their informativeness for a research project is the process of merging two or more datasets. There are two primary types of merging: joins and concatenation. **Joins** can be row- or column-wise operations that combine datasets based on a common attribute or set of attributes. **Concatenation** is exclusively a row-wise operation that combines datasets that share the same attributes.
+
+Of the two types of merges, joins are the most powerful and sometimes more difficult to understand. When two datasets are joined at least one common variable must be shared between the two datasets. The common variable(s) are referred to as **keys**. The keys are used to match observations in one dataset with observations in another dataset by serving as an index. 
+
+There are a number of join types. The most common are left, full, semi, and anti. The type of join determines which observations are retained in the resulting dataset. Let's see this in practice. First, let's create two datasets to join with a common variable `key`, as seen in @exm-td-merging-join-dfs.
+
+::: {#exm-td-merging-join-dfs}
+
+::: {layout="[50, 50]" layout-valign="top"}
+
+::: {#first}
+```{r}
+#| label: td-merging-join-a-df
+
+a_tbl <- 
+  tibble(
+    key = c(1, 2, 3, 5, 8),
+    a = letters[1:5]
+  )
+
+a_tbl
+```
+:::
+
+
+::: {#second}
+```{r}
+#| label: td-merging-join-b-df
+
+b_tbl <-
+  tibble(
+    key = c(1, 2, 4, 6, 8),
+    b = letters[6:10]
+  )
+
+b_tbl
+```
+:::
+
+:::
+:::
+
+The `a_tbl` and the `b_tbl` datasets share the `key` variable, but the values in the `key` variable are not identical. The two datasets share values `1`, `2`, and `8`. The `a_tbl` dataset has values `3` and `5` in the `key` variable and the `b_tbl` dataset has values `4` and `6` in the `key` variable.
+
+If we apply a left join to the `a_tbl` and `b_tbl` datasets, the result will be a dataset that retains all of the observations in the `a_tbl` dataset and only those observations in the `b_tbl` dataset that have a match in the `a_tbl` dataset. The result is seen in @exm-td-merging-join-left.
+
+::: {#exm-td-merging-join-left}
+```{r}
+#| label: td-merging-join-left
+
+left_join(x = a_tbl, y = b_tbl, by = "key")
+```
+::: 
+
+Now, if the key variable has the same name, R will recognize and assume that this is the variable to join on and we don't need the `by = ` argument, but if there are multiple potential key variables, we use `by = ` to specify which one to use. 
+
+A full join retains all observations in both datasets, as seen in @exm-td-merging-join-full.
+
+::: {#exm-td-merging-join-full}
+```{r}
+#| label: td-merging-join-full
+
+full_join(x = a_tbl, y = b_tbl)
+```
+:::
+
+Left and full joins maintain or increase the number of observations. On the other hand, semi and anti joins aim to decrease the number of observations. A semi join retains only those observations in the left dataset that have a match in the right dataset, as seen in @exm-td-merging-join-semi.
+
+::: {#exm-td-merging-join-semi}
+```{r}
+#| label: td-merging-join-semi
+
+semi_join(x = a_tbl, y = b_tbl)
+```
+::: 
+
+And an anti join retains only those observations in the left dataset that do not have a match in the right dataset, as seen in @exm-td-merging-join-anti.
+
+::: {#exm-td-merging-join-anti}
+```{r}
+#| label: td-merging-join-anti
+
+anti_join(x = a_tbl, y = b_tbl)
+```
+:::
+
+Of these join types, the left join and the anti join are some of the most common to encounter in research projects. 
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+In addition to datasets that are part of an acquired resource or derived from a corpus resource, there are also a number of datasets that are included in R packages that are particularly relevant for text analysis. For example, the `tidytext` package includes `sentiments` and `stop_words` datasets. The `lexicon` package [@R-lexicon] includes large number of datasets that include sentiment lexicons, stopword lists, contractions, and more. 
+
+Consider the `lexicon::key_contractions` dataset. This dataset includes a list of common contractions and their expanded forms.  
+
+What needs to be done to join these two datasets? What are the keys? What type of join should be used? What is the resulting dataset? 
+
+::: {layout="[50, 50]" layout-valign="top"}
+
+::: {#first}
+```{r}
+#| label: tbl-td-merging-join-lexicon-contractions-list
+#| tbl-cap: "Common contractions and expanded forms."
+#| echo: false
+
+it_is <- 
+  lexicon::key_contractions |>
+  filter(contraction == "it's")
+
+lexicon::key_contractions |> 
+  slice_head(n = 7) |> 
+  bind_rows(it_is) |>
+  kable() |> 
+  kable_styling()
+```
+:::
+
+::: {#second}
+
+| doc_id | sent_id | token_id | token   |
+| ------ | ------- | -------- | ------- |
+| 1      | 1       | 1        | I       |
+| 1      | 1       | 2        | can't   | 
+| 1      | 1       | 3        | believe |
+| 1      | 1       | 4        | that    |
+| 1      | 1       | 5        | it's    |
+| 1      | 1       | 6        | not     |
+| 1      | 1       | 7        | butter  |
+| 1      | 1       | 8        | !       |
+
+: Example tokenized dataset with contractions. {#tbl-td-merging-join-lexicon-contractions .sm .striped}
+
+:::
+
+:::
+
+:::
+
+### Orientation {#sec-td-merging-orientation}
+
+With this in mind, let's return to our syntactic simplification investigation. Recall that we started with two curated ENNTT datasets: the natives and translations. We manipulated these datasets subsetting them to 10,000 randomly selected lines, prepped them for annotation by adding a `doc_id` column and dropping all columns except `text`, and then annotated them using the `udpipe` package. We then calculated the number of T-units and words per sentence.
+
+These steps produced two datasets for both the natives and for the translations. The first dataset for each is the annotated data frame. The second is the data frame with the sytactic complexity measures we calculated. The annotated data frames are named `enntt_natives_ann` and `enntt_translations_ann`. The data frames with the syntactic complexity measures are named `enntt_natives_syn_comp` and `enntt_translations_syn_comp`.
+
+In the end, we want a dataset that looks something like @tbl-td-merging-idealized.
+
+| doc_id | type        | t_units | word_len | text                                                   |
+| ------ | ----------- | ------- | -------- | ------------------------------------------------------ |
+| 1      | natives     | 1       | 5        | I am happy right now.                                  |
+| 2      | translation | 3       | 11       | I think that John believes that Mary is a good person. |
+
+: Idealized merged dataset for the syntactic simplification investigation. {#tbl-td-merging-idealized .sm .striped}
+
+To create this unified dataset, we will need to apply joins and concatenation. First, we will join the prepped datasets with the annotated datasets. Then we will concatenate the two resulting datasets.
+
+### Application {#sec-td-merging-application}
+
+Let's start by joining the annotated datasets (`enntt_natives_ann` and `enntt_translations_ann`) with the datasets with the syntactic complexity calculations (`enntt_natives_syn_comp` and `enntt_translations_syn_comp`). In these joins, we can see that the prepped and calculated datasets share a couple variables, `doc_id` and `sentence_id`, in @exm-td-merging-join-prepped-syn-comp.
+
+::: {#exm-td-merging-join-prepped-syn-comp}
+```{r}
+#| label: td-merging-join-prepped-syn-comp
+
+# Preview datasets to join
+enntt_natives_ann |> 
+  slice_head(n = 3)
+
+enntt_natives_syn_comp |> 
+  slice_head(n = 3)
+```
+:::
+
+The `doc_id` and `sentence_id` variables are both keys that we will use to join the datasets. The reason being that if we only use one of the two we will not align the two datasets at the sentence level. Only the combination of `doc_id` and `sentence_id` isolates the sentences for which we have syntactic complexity measures. Beyond a having common variable (or variables in our case), we must also ensure that join key variables are of the same vector type in both data frames and that we are aware of any differences in the values. From the output in @exm-td-merging-join-prepped-syn-comp, we can see that the `doc_id` and `sentence_id` variables aligned in terms of vector type; `doc_id` is character and `sentence_id` is integer in both data frames. If they happened not to be, there types would need to be adjusted. 
+
+Now, we need to check for differences in the values. We can do this by using the `setequal()` function. This function returns `TRUE` if the two vectors are equal and `FALSE` if they are not. If the two vectors are not equal, the function will return the values that are in one vector but not the other. So if one has `10001` and the other doesn't we will get `FALSE`. Let's see this in practice, as seen in @exm-td-merging-join-prepped-syn-comp-check.
+
+::: {#exm-td-merging-join-prepped-syn-comp-check}
+```{r}
+#| label: td-merging-join-prepped-syn-comp-check
+
+# Check for differences in the values
+setequal(
+  enntt_natives_ann$doc_id, 
+  enntt_natives_syn_comp$doc_id
+)
+
+setequal(
+  enntt_natives_ann$sentence_id, 
+  enntt_natives_syn_comp$sentence_id
+)
+```
+:::
+
+So the values are the same. The final check is to see if the vectors are of the same length. We know the values are the same, but we don't know if the values are repeated. We do this by simply comparing the length of the vectors, as seen in @exm-td-merging-join-prepped-syn-comp-length.
+
+::: {#exm-td-merging-join-prepped-syn-comp-length}
+```{r}
+#| label: td-merging-join-prepped-syn-comp-length
+
+# Check for differences in the length
+length(enntt_natives_ann$doc_id) == 
+  length(enntt_natives_syn_comp$doc_id)
+
+length(enntt_natives_ann$sentence_id) == 
+  length(enntt_natives_syn_comp$sentence_id)
+```
+:::
+
+So they are not the same length. Using the `nrow()` function, I can see that the annotated dataset has `r nrow(enntt_natives_ann)` observations and the calculated dataset has `r nrow(enntt_natives_syn_comp)` observations. The annotation data frames will have many more observations due to the fact that the unit of observations is word tokens. The calculated data frames' unit of observation is the sentence. 
+
+To appreciate the difference in the number of observations, let's look at the first 10 observations of the natives annotated frame for just the columns of interest, as seen in @exm-td-merging-join-prepped-syn-comp-ann.
+
+::: {#exm-td-merging-join-prepped-syn-comp-ann}
+```{r}
+#| label: td-merging-join-prepped-syn-comp-ann
+
+# Preview the annotated dataset
+enntt_natives_ann |> 
+  select(doc_id, sentence_id, sentence, token) |>
+  slice_head(n = 10)
+```
+:::
+
+The annotated data frames have a lot of redundancy in for the join variables and the `sentence` variable that we want to add to the calculated data frames. We can reduce the redundancy by using the `distinct()` function from the `dplyr` package. In this case we want all observations where `doc_id`, `sentence_id` and `sentence` are distinct. We then select these variables with `distinct()`, as seen in @exm-td-merging-annotation-distinct.
+
+::: {#exm-td-merging-annotation-distinct}
+```{r}
+#| label: td-merging-annotation-distinct
+
+# Reduce annotated data frames to unique sentences
+enntt_natives_ann_distinct <- 
+  enntt_natives_ann |> 
+  distinct(doc_id, sentence_id, sentence)
+
+enntt_translations_ann_distinct <- 
+  enntt_translations_ann |> 
+  distinct(doc_id, sentence_id, sentence)
+```
+:::
+
+We now have two datasets that are ready to be joined with the calculated datasets. The next step is to join the two. We will employ a left join where the syntactic complexity data frames are on the left and the join variables will be both the `doc_id` and `sentence_id` variables. The code is seen in @exm-td-merging-join-left-syn-comp.
+
+::: {#exm-td-merging-join-left-syn-comp}
+```{r}
+#| label: td-merging-join-left-syn-comp
+
+# Join the native datasets
+enntt_natives_transformed_tbl <- 
+  left_join(
+    x = enntt_natives_syn_comp, 
+    y = enntt_natives_ann_distinct, 
+    by = c("doc_id", "sentence_id")
+  )
+
+# Preview 
+glimpse(enntt_natives_transformed_tbl)
+
+# Join the translations datasets 
+enntt_translations_transformed_tbl <- 
+  left_join(
+    x = enntt_translations_syn_comp,
+    y = enntt_translations_ann_distinct,
+    by = c("doc_id", "sentence_id")
+  )
+
+# Preview
+glimpse(enntt_translations_transformed_tbl)
+```
+:::
+
+<!-- Concatenation -->
+
+The two data frames now have the same columns and we are closer to our final dataset. The next step is to move toward concatenating the two datasets. Before we do that, we need to do some preparation. First, and most important, we need to add a `type` column to each dataset. This column will indicate whether the sentence is a native or a translation. The second is that our `doc_id` does not serve as a unique identifier for the sentences. Only in combination with `sentence_id` can we uniquely identify a sentence. 
+
+So our plan will be to add a `type` column to each dataset specifying the values for all the observations in the respective dataset. Then we will concatenate the two datasets. Note, if we combine them before, distiguishing the type will be more difficult. After we concatenate the two datasets, we will add a `doc_id` column that will serve as a unique identifier for the sentences and drop the `sentence_id` column. OK, that's the plan. Let's execute it in @exm-td-merging-concatenation.
+
+::: {#exm-td-merging-concatenation}
+```{r}
+#| label: td-merging-concatenation
+
+# Add a type column
+enntt_natives_transformed_tbl <- 
+  enntt_natives_transformed_tbl |> 
+  mutate(type = "natives")
+
+enntt_translations_transformed_tbl <- 
+  enntt_translations_transformed_tbl |> 
+  mutate(type = "translations")
+
+# Concatenate the datasets
+enntt_transformed_tbl <- 
+  bind_rows(
+    enntt_natives_transformed_tbl,
+    enntt_translations_transformed_tbl
+  )
+
+# Overwrite the doc_id column with a unique identifier
+enntt_transformed_tbl <- 
+  enntt_transformed_tbl |> 
+  mutate(doc_id = row_number()) |> 
+  select(doc_id, type, t_units, word_len, text = sentence)
+
+# Preview
+glimpse(enntt_transformed_tbl)
+```
+:::
+
+The output of @exm-td-merging-concatenation now looks like @tbl-td-merging-idealized. We have a dataset that has the syntactic complexity measures for both the natives and the translations. We can now write this dataset to disk and document it in the data dictionary.
+
+## Summary {-}
+
+In this chapter we covered the process of transforming datasets. The goal is to manipulate the curated dataset to make it align better for analysis. 
+We covered various types of transformation procedures from text normalization to data frame merges. In any given research project some or all of these steps will be employed --but not necessarily in the order presented in this chapter. It is not uncommon to mix procedures as well. The etiology of the transformation is as unique as the data that you are working with. 
+
+Since you are applying techniques that have a significant factor on the shape and contents of your dataset(s) it is important to perform data checks to ensure that the transformations are working as expected. You may not catch everything, and some things may not be caught until later in the analysis process, but it is important to do as much as you can as early as you can. 
+
+In line with the reproducible research principles, it is important to write the transformed dataset to disk and to document it in the data dictionary. This is especially important if you are working with multiple datasets. Good naming conventions als come into play. Choosing descriptive names is so easily overlooked by your present self but so welcomed by your future self.
+
+---
+
+<!-- [ ] Add something about the directory structure/ code files? -->
+
+{{< fa wrench >}} more on concluding this part and moving to the next part
+
+This chapter concludes the section on data/ dataset preparation. The next section we turn to analyzing datasets. This is the stage where we interrogate the datasets to derive knowledge and insight either through exploratory, predictive, or inferential methods.
+
+## Activities {.unnumbered}
+
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
+
+<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] update recipe -->
+
+**What**: [Dataset manipulation: tokenization and joining datasets](https://lin380.github.io/tadr/articles/recipe_8.html)\
+**How**: Read Recipe 8 and participate in the Hypothes.is online social annotation.\
+**Why**: To work with to primary types of transformations, tokenization and joins. Tokenization is the process of recasting textual units as smaller textual units. The process of joining datasets aims to incorporate other datasets to augment or filter the dataset of interest.
+:::
+
+::: {.callout}
+**{{< fa flask >}} Lab**
+
+<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] update lab -->
+
+**What**: [Dataset manipulation: tokenization and joining datasets](https://github.com/lin380/lab_8)\
+**How**: Clone, fork, and complete the steps in Lab 8.\
+**Why**: To gain experience working with coding strategies for transforming datasets using tidyverse functions and regular expressions, practice reading/ writing data from/ to disk, and implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
+:::
+
+## Questions {.unnumbered}
+
+::: {.callout}
+{{< fa wrench >}} **Conceptual questions**
+
+1. ...
+2. ...
+
+:::
+
+::: {.callout}
+{{< fa wrench >}} **Technical questions**
+
+1. ...
+2. ...
 :::

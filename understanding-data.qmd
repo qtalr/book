@@ -54,7 +54,7 @@ In this chapter, the groundwork is laid for deriving insights from text analysis
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Objects, Packages and functions](https://github.com/qtalr/swirl)\
+**What**: [Objects, Packages and functions](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To introduce you to the main types of objects in R and to understand the role and use of functions and packages in R programming.
 :::
@@ -120,9 +120,10 @@ Given the sampling frame for this corpus visualized in @fig-ud-brown-distributio
 ```{r}
 #| label: fig-ud-brown-distribution
 #| fig-cap: "Overview of the sampling frame of the Brown Corpus."
+#| fig-height: 3
 #| fig-alt: "The Brown Corpus sampling frame is shown as a bar plot comprised of 15 main categories (strata) of text on the y-axis. The relative size of each category is shown as a percentage of the total number of words in the corpus on the x-axis. The largest categories are 'Fiction' (23%) and 'Press' (18%) and the smallest categories are 'Religion' (0.3%) and 'Learned' (0.2%)."
 
-brown <- read_csv("data/understanding-data/brown.csv")
+brown <- read_csv("data/ud-brown.csv")
 
 brown_categories_docs <-
   brown |>
@@ -140,8 +141,7 @@ brown_categories_docs |>
   scale_x_continuous(labels = scales::percent) +
   labs(
     x = "Percentage of the corpus (balance)",
-    y = "Main category (strata)",
-    title = "Brown Corpus Sampling Frame"
+    y = "Main category (strata)"
   )
 ```
 :::
@@ -181,9 +181,7 @@ Visit the [Clarin overview](https://www.clarin.eu/resource-families/reference-co
 
 The [Santa Barbara Corpus of Spoken American English (SBCSAE)](https://www.linguistics.ucsb.edu/research/santa-barbara-corpus), as you can imagine from the name of the resource, aims to model spoken American English. No claim to written English is included. There are even more specific types of corpora which attempt to model other types of sub-populations such as [academic writing](https://www.coventry.ac.uk/research/research-directories/current-projects/2015/british-academic-written-english-corpus-bawe/), [computer-mediated communication (CMC)](https://www.clarin.eu/resource-families/cmc-corpora), language use in specific [regions of the world](http://ice-corpora.net/ice/index.html), a [country](https://www.wgtn.ac.nz/lals/resources/corpora-default/corpora-wsc), a [region of a country](https://cesa.arizona.edu), *etc*.
 
-<!-- <img src="figures/understanding-data/word-mapper.png" width="200" align="right"/>  -->
-
-
+<!-- <img src="figures/word-mapper.png" width="200" align="right"/>  -->
 
 ::: {.callout}
 **{{< fa lightbulb >}} Consider this**
@@ -201,7 +199,7 @@ The [Santa Barbara Corpus of Spoken American English (SBCSAE)](https://www.lingu
 #| out-width: '80%'
 #| echo: false
 
-include_graphics("figures/understanding-data/word-mapper.png")
+include_graphics("figures/ud-word-mapper.png")
 ```
 :::
 
@@ -444,7 +442,7 @@ In this work, a **tidy dataset** refers both to the structural (physical) and in
 #| label: fig-ud-tidy-format-image
 #| fig-cap: 'Visual summary of the tidy format.'
 
-knitr::include_graphics("figures/understanding-data/ud-tidy.drawio.png")
+knitr::include_graphics("figures/ud-tidy.drawio.png")
 ```
 
 In terms of semantics, columns and rows both contribute to the informational value of the dataset. Let's start with columns. In a tidy dataset, each column is a variable, an attribute that can take on a number of values. Although variables vary in terms of values, they do not in type. A variable is of one and only one informational type. Statistically speaking, informational types are defined as **levels of measurement**, a classification system used to semantically distiguish between types of variables. There are four levels (or types) in this system: nominal, ordinal, interval, and ratio. 
@@ -457,7 +455,7 @@ Let's look at an example of a tidy dataset. Using the criteria just described, l
 #| label: tbl-ud-info-values-masc
 #| tbl-cap: "MASC dataset variables."
 
-masc_exm <- read_rds("data/understanding-data/formats_masc_df.rds") # read in MASC example dataset
+masc_exm <- read_rds("data/ud-formats_masc_df.rds") # read in MASC example dataset
 
 masc_exm |>
   slice_head(n = 10) |> # select first 10 rows
@@ -472,7 +470,7 @@ Now in relation to `date`, `ref_num`, and `num_letters`. All three are numerals,
 
 With this in mind, let's return to the question of whether `date`, `ref_num`, and `num_letters` are numeric or ordinal. Starting with the trickiest one, `date`, we can ask the question to identify numeric data: "how much or how many?". In the case of `date`, the answer is neither. A date is a point in time, not a quantity. So `date` is not numeric. But it does provide information about order. Hence, `date` is ordinal. `ref_num` is also ordinal because the question "what order?" can be asked of it. Finally, `num_letters` is numeric because it answers the question "how many?".
 
-Let's turn to the second semantic value of a tidy dataset. In a tidy dataset, each row is an observation. But an observation of what? This depends on what the unit of observation is. That sounds circular, but its not. The **unit of observation** is simply the primary entity that is being observed. Without context, it can it can be identified in a dataset by looking at the level of specificity of the variable values and asking what each variable describes. When one variable appears to be the most individualized and other variables appear to describe that variable, then the most individualized variable is likely the unit of observation of the dataset, *i.e.* the meaning of each observation.
+Let's turn to the second semantic value of a tidy dataset. In a tidy dataset, each row is an observation. But an observation of what? This depends on what the unit of observation is. That sounds circular, but its not. The **unit of observation** is simply the primary entity that is being observed or measured [@Sedgwick2015]. Even without context, it can often be identified in a dataset by looking at the level of specificity of the variable values and asking what each variable describes. When one variable appears to be the most individualized and other variables appear to describe that variable, then the most individualized variable is likely the unit of observation of the dataset, *i.e.* the meaning of each observation.
 
 Applying these strategies to the Table in [-@tbl-ud-info-values-masc], we can see that each observation at its core is a word. We see that the values of each observation are the attributes of each word. `word` is the most individualized variable and the `pos` (part-of-speech), `num_letters`, and `ref_num` all describe the word. 
 
@@ -495,18 +493,14 @@ At this point have introduced the first step creating a dataset ready for analys
 #| label: fig-ud-transformations
 #| fig-cap: "Visualization of row-wise and column-wise transformation operations on a dataset."
 
-knitr::include_graphics("figures/understanding-data/ud-transformations.drawio.png")
+knitr::include_graphics("figures/ud-transformations.drawio.png")
 ```
 
 The results build on and manipulate the curated dataset to produce a *derived dataset*. While there is typically one curated dataset that serves as the base organizational dataset, there may be multiple derived datasets, each aligning with the informational needs of specific analyses in the research project.
 
-In what follows, we will discuss the most common types of data transformation: text normalization, text tokenization, variable recoding, variable generation, and observation/ variable merging. Note, however, that the order in which these transformations are applied in a given research project is not fixed and will vary depending on the dataset and the research question(s) to be addressed.  
+In what follows, we will discuss the most common types of data transformation: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. Note, however, that the order in which these transformations are applied in a given research project is not fixed and will vary depending on the dataset and the research question(s) to be addressed.  
 
 #### Text normalization {#sec-ud-text-normalization}
-
-<!-- Text normalization is a crucial step in preparing textual data for analysis. This process involves cleaning and standardizing the text to ensure consistency and reduce noise. Common tasks include converting text to lowercase, removing punctuation, correcting spelling errors, and tokenization. By normalizing the text, we can enhance the quality of the data and improve the performance of various natural language processing tasks. -->
-
-<!-- Text normalization is a preliminary yet essential step in text analysis where the aim is to convert the text into a uniform format to reduce the complexity of the data. It involves lowercasing, removing punctuation and special characters, adjusting forms, and removing stopwords. This process is undertaken to reduce variations in the representation of words and phrases and to discard non-informative elements, facilitating more accurate text analysis downstream. -->
 
 The process of text normalization aims to prepare and standardize text. It is often a preliminary step in data transformation processes which include variables with text. The aim is to convert the text into a uniform format to reduce unwanted variation and noise.
 
@@ -533,17 +527,10 @@ The types of transformations we apply will depend on the specific needs of the p
 | Lowercasing                                   | `"Text"` to `"text"`                                             | Minimizing case sensitivity in subsequent analysis                                                       |
 | Removal of Punctuation and Special Characters | `"Hello, World!"` to `"Hello World"`                             | Removing non-alphanumeric characters that may not carry semantic value                                   |
 | Adjustment of Forms                           | `"colour"` to `"color"`, `"it's"` to `"it is"`, `"1"` to `"one"` | Standardizing variations in spelling, contractions, and numeric forms to a common format                 |
-| Stopword Removal                              | `"This is a sentence"` to `"This sentence"`                      | Discarding common words that usually do not contain meaningful semantic information |
 
 : Common text normalization tasks {#tbl-ud-text-normalization}{tbl-colwidths="[25, 30, 45]" .sm .striped}
 
-These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun). The same can be said for removing or adjusting particular characters and discarding stopwords.
-
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
-
-Stopwords are words that are so commonly used in a language that they tend not to contribute much to the meaning of a sentence. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about stopwords in @Kaur2018. 
-:::
+These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun).
 
 Let's be conservative and only apply lowercasing to our toy dataset as seen in @tbl-ud-text-dataset-lowercase.
 
@@ -561,62 +548,6 @@ text_tbl |>
 ```
 
 When text normalization steps are motivated and applied with foresight they serve to enhance the quality of the data and improves the reliability of subsequent transformation steps.
-
-#### Text tokenization {#sec-ud-text-tokenization}
-
-Another text-oriented transformation step is **text tokenization**. This process involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable. At its core, tokenization is the process which enables the quantitative analysis of text.
-
-Text variables can be tokenized at any linguistic level. To illustrate, consider our toy dataset from @tbl-ud-text-dataset-lowercase. We can tokenize the text at the sentence level, in @tbl-ud-text-dataset-tokenization-sentence, by splitting the text at the period followed by a space. This results in a dataset with four observations, one for each sentence in the original text.
-
-```{r}
-#| label: tbl-ud-text-dataset-tokenization-sentence
-#| tbl-cap: "A toy dataset with two variables, `text_id` and `sentence`, where the text has been tokenized at the sentence level."
-#| tbl-colwidths: [10, 90]
-
-library(tidytext)
-
-text_tbl |>
-  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+") |>
-  kable(booktabs = TRUE)
-```
-
-It is important to make explicit what the operationalization of our linguistic unit is as common terms such as sentence, word, *etc.* can be defined in different ways. For example, the sentence tokenization above is based on the assumption that sentences are separated by a period followed by a space. This is a suitable definition for this text, but likely will not be for other English text or for other languages/ writing scripts. For words, a very simple operationalization is to use whitespace separation (*e.g.* "I cannot believe it." -- ["I", "cannot", "believe", "it."]). However, this approach does not handle puntuation marks (*e.g.* ["it."]) or contractions (*e.g.* ["can't"]). A more sophisticated operationalization will be necessary for these, and possibly other, cases.
-
-Another important token unit is the $n$-gram. Words or characters can be grouped into contiguous sequences with a moving window of a certain size $n$. Single unit windows are referred to as unigrams, two units as bigrams, three units as trigrams, and so on. Let's tokenize our toy dataset at the bigram level for words using a simple whitespace separation for words, as seen in @tbl-ud-text-dataset-bigram.
-
-```{r}
-#| label: tbl-ud-text-dataset-bigram
-#| tbl-cap: "A toy dataset with two variables, `text_id` and `bigram`, where the text has been tokenized at the bigram word level."
-
-text_tbl |>
-  unnest_tokens(word, text, token = "ngrams", n = 2) |>
-  slice_head(n = 10) |>
-  kable(booktabs = TRUE)
-```
-
-In @tbl-ud-text-dataset-bigram we see that the first bigram is "it's a" --the first two words (based on whitespace separation) in the text. The second bigram is "a toy" --the second and third words in the text. This continues to the end of the text. $N$-gram tokenization can be useful to capture context that would otherwise would be lost from tokenizing words or characters at the unigram level. 
-
-Up to this point our tokens have been surface forms. That is, they are the actual words or characters as they appear in the text. However, we may want to reduce the tokens to their base form, removing their inflectional forms. This is known as **lemmatization**. For example, the word "run" is the lemma of the words "running", "runs", and "ran". Let's lemmatize the third sentence in our toy dataset. For comparison, `word` and `lemma` are shown side-by-side in @tbl-ud-text-dataset-lemmatization.
-
-```{r}
-#| label: tbl-ud-text-dataset-lemmatization
-#| tbl-cap: "A toy dataset with two variables, `text_id` and `word`, where the text has been tokenized at the unigram word level and lemmatized."
-
-text_tbl |>
-  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s") |>
-  slice(3) |>
-  unnest_tokens(word, sentence) |>
-  mutate(lemma = textstem::lemmatize_words(word)) |>
-  kable(booktabs = TRUE)
-```
-
-::: {.callout}
-**{{< fa regular file-alt >}} Case study**
-
-Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus [@Kostic2003]. @Baayen2006 found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.
-:::
-
-Together tokenization and lemmatization are powerful tools for transforming text. If our dataset contains more robust linguistic annotation or that annotation can be generated (see @sec-ud-variable-generation), this information can also be leveraged to tokenize language into a format that is easier to explore and quantify in an analysis. 
 
 #### Variable recoding {#sec-ud-variable-recoding}
 
@@ -693,9 +624,66 @@ In @tbl-ud-recode-numeric the variable `word_length` appears with the values `sh
 
 In sum, recoding is a useful data transformation technique that can be used to simplify complex variables, making it easier to identify patterns and trends relevant for the research question.
 
+
+#### Text tokenization {#sec-ud-text-tokenization}
+
+A text-oriented transformation step is **text tokenization**. This process involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable. At its core, tokenization is the process which enables the quantitative analysis of text.
+
+Text variables can be tokenized at any linguistic level. To illustrate, consider our toy dataset from @tbl-ud-text-dataset-lowercase. We can tokenize the text at the sentence level, in @tbl-ud-text-dataset-tokenization-sentence, by splitting the text at the period followed by a space. This results in a dataset with four observations, one for each sentence in the original text.
+
+```{r}
+#| label: tbl-ud-text-dataset-tokenization-sentence
+#| tbl-cap: "A toy dataset with two variables, `text_id` and `sentence`, where the text has been tokenized at the sentence level."
+#| tbl-colwidths: [10, 90]
+
+library(tidytext)
+
+text_tbl |>
+  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+") |>
+  kable(booktabs = TRUE)
+```
+
+It is important to make explicit what the operationalization of our linguistic unit is as common terms such as sentence, word, *etc.* can be defined in different ways. For example, the sentence tokenization above is based on the assumption that sentences are separated by a period followed by a space. This is a suitable definition for this text, but likely will not be for other English text or for other languages/ writing scripts. For words, a very simple operationalization is to use whitespace separation (*e.g.* "I cannot believe it." -- ["I", "cannot", "believe", "it."]). However, this approach does not handle puntuation marks (*e.g.* ["it."]) or contractions (*e.g.* ["can't"]). A more sophisticated operationalization will be necessary for these, and possibly other, cases.
+
+Another important token unit is the $n$-gram. Words or characters can be grouped into contiguous sequences with a moving window of a certain size $n$. Single unit windows are referred to as unigrams, two units as bigrams, three units as trigrams, and so on. Let's tokenize our toy dataset at the bigram level for words using a simple whitespace separation for words, as seen in @tbl-ud-text-dataset-bigram.
+
+```{r}
+#| label: tbl-ud-text-dataset-bigram
+#| tbl-cap: "A toy dataset with two variables, `text_id` and `bigram`, where the text has been tokenized at the bigram word level."
+
+text_tbl |>
+  unnest_tokens(word, text, token = "ngrams", n = 2) |>
+  slice_head(n = 10) |>
+  kable(booktabs = TRUE)
+```
+
+In @tbl-ud-text-dataset-bigram we see that the first bigram is "it's a" --the first two words (based on whitespace separation) in the text. The second bigram is "a toy" --the second and third words in the text. This continues to the end of the text. $N$-gram tokenization can be useful to capture context that would otherwise would be lost from tokenizing words or characters at the unigram level. 
+
+Up to this point our tokens have been surface forms. That is, they are the actual words or characters as they appear in the text. However, we may want to reduce the tokens to their base form, removing their inflectional forms. This is known as **lemmatization**. For example, the word "run" is the lemma of the words "running", "runs", and "ran". Let's lemmatize the third sentence in our toy dataset. For comparison, `word` and `lemma` are shown side-by-side in @tbl-ud-text-dataset-lemmatization.
+
+```{r}
+#| label: tbl-ud-text-dataset-lemmatization
+#| tbl-cap: "A toy dataset with two variables, `text_id` and `word`, where the text has been tokenized at the unigram word level and lemmatized."
+
+text_tbl |>
+  unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s") |>
+  slice(3) |>
+  unnest_tokens(word, sentence) |>
+  mutate(lemma = textstem::lemmatize_words(word)) |>
+  kable(booktabs = TRUE)
+```
+
+::: {.callout}
+**{{< fa regular file-alt >}} Case study**
+
+Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus [@Kostic2003]. @Baayen2006 found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.
+:::
+
+Together tokenization and lemmatization are powerful tools for transforming text. If our dataset contains more robust linguistic annotation or that annotation can be generated (see @sec-ud-variable-generation), this information can also be leveraged to tokenize language into a format that is easier to explore and quantify in an analysis. 
+
 #### Variable generation {#sec-ud-variable-generation}
 
-The process of variable generation aims to augment existing variables or create new ones, and as such is a column-wise operation. Generation can include applying calculations or extracting relevant information from existing variables or enhancing text variables with linguistic annotation. Simplifying a bit, generation helps make implicit attributes explicit. The results of this process enables direct access during analysis to features that were otherwise hidden or difficult to access.
+The process of variable generation aims to augment existing variables or create new ones, and as such it is a column-wise operation. Generation can include applying calculations or extracting relevant information from existing variables or enhancing text variables with linguistic annotation. Simplifying a bit, generation helps make implicit attributes explicit. The results of this process enables direct access during analysis to features that were otherwise hidden or difficult to access.
 
 Let's highlight a some common calculation and extraction examples that generate variables. First, let's look at the calculation of measures. In text analysis, measures are often used to describe the properties of a document or linguistic unit. For example, the number of words in a corpus document, the lengths of sentences, the number of clauses in a sentence, *etc.*. In turn, these measures can be used to calculate other measures, such as lexical diversity or syntactic complexity measures. 
 
@@ -729,7 +717,7 @@ To illustrate the process of generating linguistic annotation with existing tool
 #| tbl-colwidths: [15, 15, 70]
 
 masc_generate_exm <-
-  readtext::readtext("data/understanding-data/formats_masc_txt.txt") |>
+  readtext::readtext("data/ud-formats_masc_txt.txt") |>
   dplyr::as_tibble() |>
   unnest_tokens(sentence, text, token = "sentences", to_lower = FALSE) |>
   mutate(sentence = str_squish(sentence)) |>
@@ -771,12 +759,20 @@ A word of caution: automated linguistic annotation offers rapid access to abunda
 
 #### Observation/ variable merging {#sec-ud-obs-variable-merging}
 
-
 <!-- The process of merging aims to *join* a variable or set of variables with another variable or set of variables from another dataset. The option to merge two (or more) datasets requires that there is a shared variable that indexes and aligns the datasets. -->
 
 <!-- Merging is a fundamental operation in data integration that combines variables from different datasets based on a common key or identifier. This process enables researchers to enrich their data by incorporating additional information from external sources. Merging can be performed using various techniques, such as inner join, outer join, or cross join, depending on the desired outcome. When executed correctly, merging can provide a more comprehensive view of the data and facilitate more robust analyses. -->
 
-<!-- Merging involves the integration of different datasets or different sections of a dataset. Techniques used include joining metadata with original text data through stand-off annotation, or combining data from different sources by either concatenating datasets or joining them based on common keys. The merging process enhances the data's richness by creating a more comprehensive view, increasing the robustness of the subsequent analysis by leveraging complementary information from various sources. -->
+<!-- Merging involves the integration of different datasets or different sections of a dataset. Techniques used include joining metadata with original text data through stand-off annotation, or combining data from different sources by either concatenating datasets or joining them based on common keys. The merging process enhances the data's richness by creating a more comprehensive view, increasing the robustness of the subsequent analysis by leveraging complementary information from various sources. 
+
+2023-08-12: merging can also remove information, e.g. when merging two datasets with different variables, the merged dataset will only contain the variables that are shared by both datasets. This is often use to remove //TODO stopwords, for example.
+
+Stopwords: 
+
+| Stopword Removal                              | `"This is a sentence"` to `"This sentence"`                      | Discarding common words that usually do not contain meaningful semantic information |
+
+
+-->
 
 The processing of merging datasets is a transformation step which can be row-wise or column-wise. Row-wise merging is the process of combining datasets by appending observations from one dataset to another. Column-wise merging is the process of combining datasets by appending variables from one dataset to another. In either case, merging provides a way to enrich a dataset by incorporating additional information.
 
@@ -802,7 +798,7 @@ spoken_tbl <-
   dplyr::filter(modality == "Spoken")
 ```
 
-To merge in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as **concatenating datasets**. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the sample variables and variable types is not the same has having the same values. 
+To merge in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as **concatenating datasets**. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the same variables and variable types is not the same has having the same values. 
 
 Take, for example, a case when a corpus resource contains data for two populations. In the course of curating and transforming the datasets it may make more sense to work with the datasets separately. However, when it comes time to analyze the data, it may be more convenient to work with the datasets as a single dataset. In this case, the datasets can be concatenated to create a single dataset. 
 
@@ -882,7 +878,15 @@ text_participant_tbl |>
   kable(booktabs = TRUE)
 ```
 
-Another common case where joining datasets is useful is when there are external resources that can be used to enrich the dataset. For example, a dataset of text data may include a variable that identifies the language of each document. This variable can be used to join the dataset with a dataset of language metadata, such as the number of speakers of each language, as long as the language metadata dataset includes a variable that identifies the language of each document in the same format as the language variable in the text dataset.
+Joining datasets is a powerful tool for enriching a dataset with additional column-wise information. It is important to note that merging datasets can also remove information in a row-wise manner. For example, when merging two datasets with a shared variable, it is possible to remove observations that do not have a match one of the two datasets. This process effectively filters out observations not shared between the two datasets. On the other hand, an anti-join explicitly removes observations that are shared between the two datasets. 
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+In some analyses, it may be useful to remove words with little semantic value, such as articles, prepositions, and conjunctions or words that are very common in the language. These are known as stopwords. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. Anti-joining a stopword list with a dataset of word tokens is often used to remove stopwords from the dataset.
+
+However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about approaches to identifying stopwords in @Kaur2018. 
+:::
 
 ---
 
@@ -953,7 +957,7 @@ In this chapter we have focused on data and information --the first two componen
 #| fig-cap: 'Understanding data: visual summary'
 #| out.width: 75%
 
-knitr::include_graphics("figures/understanding-data/ud-diki.drawio.png")
+knitr::include_graphics("figures/ud-diki.drawio.png")
 ```
 
 First a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.

@@ -110,7 +110,7 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script async="" src="https://hypothes.is/embed.js"></script><script src="site_libs/kePrint-0.0.1/kePrint.js"></script><link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+}</script><script src="site_libs/kePrint-0.0.1/kePrint.js"></script><link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/mini.css">
 </head>
 <body class="nav-sidebar docked">
@@ -419,15 +419,21 @@ Formatting:
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-list-alt" aria-label="list-alt"></i> Outcomes</strong></p>
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<!-- [ ] change to outcomes -->
+<!-- [x] change to outcomes -->
 <ul>
-<li>what are some of the formats that data can take?</li>
-<li>what R programming strategies are used to read these formats into tabular, tidy dataset structures?</li>
-<li>what is the importance of maintaining modularity between data and data processing in a reproducible research project?</li>
+<li>Describe the importance of data curation in text analysis</li>
+<li>Recognize the different types of data formats</li>
+<li>Associate the types data formats with the appropriate R programming techniques to curate the data</li>
 </ul>
 </div>
 </div>
 </div>
+<!--  
+- Curation: goals
+  - Maintain relationship with the original data
+  - Create a tidy dataset: one observation per row, one variable per column, one value per cell
+  - Maintain flexibility for analysis, i.e. do not remove information that may be useful for other analyses
+-->
 <p>In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. In this chapter we will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method(s) that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
@@ -437,7 +443,7 @@ Formatting:
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-terminal" aria-label="terminal"></i> Swirl lesson</strong></p>
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<!-- Learn how to use regular expressions to match patterns in text using the *stringr* package. Learn how to manipulate data using the `dplyr` package. -->
+<!-- Learn how to use regular expressions to match patterns in text using the `stringr` package. Learn how to manipulate data using the `dplyr` package. -->
 <p><strong>What</strong>: <a href="https://github.com/qtalr/lessons">Pattern Matching and Manipulate Datasets</a><br><strong>How</strong>: In the R Console pane load <code>swirl</code>, run <code>swirl()</code>, and follow prompts to select the lesson.<br><strong>Why</strong>: To familiarize yourself with the basics of using the pattern matching syntax Regular Expressions and the <code>dplyr</code> package to manipulate datasets.</p>
 </div>
 </div>
@@ -479,7 +485,7 @@ Formatting:
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> _main.R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <em>europarl_do.csv</em> file contains the data origin information documented as part of the acquisition process. The contents are seen in <a href="#tbl-cd-europarl-data-origin">Table&nbsp;<span>6.1</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-data-origin_8fff548e6c15d9f8bf6eaa7551f13ddd">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-data-origin_b047ffe89e23933352ede90fa0944dec">
 <div class="cell-output-display">
 <div id="tbl-cd-europarl-data-origin" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -554,7 +560,7 @@ Formatting:
 <span id="lst-cd-europarl-en-5"><a href="#lst-cd-europarl-en-5" aria-hidden="true" tabindex="-1"></a>In the meantime, I should like to observe a minute' s silence, as a number of Members have requested, on behalf of all the victims concerned, particularly those of the terrible storms, in the various countries of the European Union.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.</p>
-<p>Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the “idealized structure” of the data. For a curated dataset there are two considerations. First, we want to maintain the original structure of the data as much as possible. This provides a link to the original data and gives us a default dataset structure from which we can derive other structures that fit our analysis needs. Second, we want to add structure to the data that makes it easier to work with. This is the ‘tidy’ part of the data curation process. The aim is to embue the dataset with as much of the metadata the data resource makes available.</p>
+<p>Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the “idealized structure” of the data. For a curated dataset there are two considerations. First, we want to maintain the original structure of the data as much as possible. This provides a link to the original data and gives us a default dataset structure from which we can derive other structures that fit our analysis needs. Second, we want to add structure to the data that makes it easier to work with. This is the ‘tidy’ part of the data curation process. The aim is to imbue the dataset with as much of the metadata the data resource makes available.</p>
 <p>Given what we know about the data, we can define the idealized structure of the data as seen in <a href="#tbl-cd-europarl-structure-example">Table&nbsp;<span>6.2</span></a>.</p>
 <div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-structure-example_663e30a624b24975b654d9ed015a7e3b">
 <div class="cell-output-display">
@@ -632,7 +638,7 @@ Formatting:
 <div id="exm-cd-europarl-readtext" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.2 </strong></span>&nbsp;</p>
 </div>
-<p>In <a href="#exm-cd-europarl-readtext">Example&nbsp;<span>6.2</span></a>, the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function reads all the files in the <em>../data/curate-datasets/europarl/</em> directory and returns a tibble.</p>
+<p>In <a href="#exm-cd-europarl-readtext">Example&nbsp;<span>6.2</span></a>, the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function reads all the files in the <em>../data/original/europarl/</em> directory and returns a tibble.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -941,7 +947,7 @@ Formatting:
 </div>
 </div>
 <p>An example of the data dictionary for the <code>europarl_curated_tbl</code> dataset is shown in <a href="#tbl-cd-unstructured-data-dictionary-example">Table&nbsp;<span>6.3</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-unstructured-data-dictionary-example_0b0310e24cd856825ad0fe9caa3c1eb2">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-unstructured-data-dictionary-example_df0e47a0fc8749433bf73ea33c33224f">
 <div class="cell-output-display">
 <div id="tbl-cd-unstructured-data-dictionary-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -963,7 +969,7 @@ Formatting:
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">Document Type</td>
 <td style="text-align: left;">categorical</td>
-<td style="text-align: left;">Type of document; either 'Source' or 'Target'</td>
+<td style="text-align: left;">Type of document; either 'Source' (Spanish) or 'Target' (English)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">line_id</td>
@@ -1031,7 +1037,7 @@ Formatting:
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> utterances.csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>In addition to other important information, the data origin file <em>cabnc_do.csv</em> shown in <a href="#tbl-cd-cabnc-do">Table&nbsp;<span>6.4</span></a> informs us the the datasets are related by a common variable.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-do_8d09142578a867f1a3d68e411c0172d1">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-do_b8c20a762c65e7a292c1e175696f7c9b">
 <div class="cell-output-display">
 <div id="tbl-cd-cabnc-do" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1087,12 +1093,12 @@ Formatting:
 <p>With our idealized dataset in mind, let’s start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the <code>read_csv()</code> function, as seen in <a href="#exm-cd-cabnc-read">Example&nbsp;<span>6.19</span></a>.</p>
 <div id="exm-cd-cabnc-read" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.19 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-read_6791f6579316b4108464bffb516a4a13">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-read_c8e3db943fc5134b06bdbad6f5a20f56">
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read the relevant datasets</span></span>
 <span><span class="va">cabnc_utterances</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/curate-datasets/cabnc/utterances.csv"</span><span class="op">)</span></span>
+<span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/cabnc/original/utterances.csv"</span><span class="op">)</span></span>
 <span><span class="va">cabnc_participants</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/curate-datasets/cabnc/participants.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/cabnc/original/participants.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>The next step is to inspect the structure of the datasets. We can use the <code>glimpse()</code> function for this task.</p>
@@ -1510,7 +1516,7 @@ Formatting:
 </div>
 </div>
 <p>After running the code in <a href="#exm-cd-cabnc-create-data-dict">Example&nbsp;<span>6.29</span></a>, we can open the <em>cabnc_curated_dd.csv</em> file in the <em>data/derived/cabnc/</em> directory and fill in the data dictionary template. An example of an edited data dictionary is shown in <a href="#tbl-cd-cabnc-dd-example">Table&nbsp;<span>6.6</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-dd-example_ba6d3f191f1bc7004e22811f059efed3">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-dd-example_0387e62d7e8e843d1933df5afff002ba">
 <div class="cell-output-display">
 <div id="tbl-cd-cabnc-dd-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1684,7 +1690,7 @@ Formatting:
 <span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> translations.tok</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We now inspect the data origin file for the ENNTT corpus, <em>enntt_do.csv</em>, in <a href="#tbl-cd-enntt-do">Table&nbsp;<span>6.7</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-do_f2256f1748cbc7b20be9fca9468cfc1d">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-do_5d22dfc9d9d716a64627769a625bf5c7">
 <div class="cell-output-display">
 <div id="tbl-cd-enntt-do" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1704,7 +1710,7 @@ Formatting:
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Data sampling frame</td>
-<td style="text-align: left;">English, European Parliament texts, written modality, political genre</td>
+<td style="text-align: left;">English, European Parliament texts, transcribed discourse, political genre</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Data collection date(s)</td>
@@ -1812,13 +1818,13 @@ Formatting:
 <p>Starting with the natives, we read in the <em>.dat</em> file as an XML file with the <code><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html()</a></code> function and then extract the line nodes with the <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements()</a></code> function as in <a href="#exm-cd-enntt-read-xml">Example&nbsp;<span>6.33</span></a>.</p>
 <div id="exm-cd-enntt-read-xml" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.33 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-xml_f52ccc2f165a585880596578fd17d1ab">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-xml_7c98d42b42afab087933facf5da63b24">
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rvest.tidyverse.org/">rvest</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Read in *.dat* file as HTML</span></span>
-<span><span class="va">ns_dat_lines</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="st">"../data/original/enntt/natives.dat"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">ns_dat_lines</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="st">"../data/original/enntt/natives.dat"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">"line"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect</span></span>
@@ -1837,10 +1843,10 @@ Formatting:
 <p>When can see that the <code>ns_dat_lines</code> object is a special type of list, <code>xml_nodeset</code> which contains 116,341 line nodes. Let’s now jump out of sequence and read in the <em>.tok</em> file as a text file, in <a href="#exm-cd-enntt-read-lines">Example&nbsp;<span>6.34</span></a>, again by lines using <code>read_lines()</code>, and compare the two to make sure that our approach will work.</p>
 <div id="exm-cd-enntt-read-lines" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.34 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-lines_e48402f326bf705bb0bd28f667151bf2">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-lines_ee1aad311722ff6487a3f19742a7e0ce">
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in *.tok* file by lines</span></span>
 <span><span class="va">ns_tok_lines</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu">read_lines</span><span class="op">(</span><span class="st">"data/curate-datasets/enntt/natives.tok"</span><span class="op">)</span></span>
+<span>  <span class="fu">read_lines</span><span class="op">(</span><span class="st">"data/enntt/original/natives.tok"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">ns_tok_lines</span><span class="op">)</span></span>
@@ -2073,7 +2079,7 @@ Formatting:
 <span><span class="co"># Preview</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">nns_dat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok-run_96fe7ea7e9f99b0321a97e58d3d036fa">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok-run_6ae974200b4a342e4274ea5a7dc20ce4">
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; Rows: 116,341
 &gt; Columns: 6
@@ -2097,9 +2103,9 @@ Formatting:
 </div>
 </div>
 <p>The last step to curate the dataset is to combine the native and non-native data into a single data frame. We can do this using the <code>bind_rows()</code> function from the <code>dplyr</code> package, as essentially we are just stacking the rows from each data frame on top of each other.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/combine-ns-dat-nns-dat_a4f1029efd8292005dbd5e628dd7d2dc">
+<div class="cell" data-hash="curate-datasets_cache/html/combine-ns-dat-nns-dat_b3ebb032115e04d21d82c87d02c09056">
 <div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Combine native and non-native data</span></span>
-<span><span class="va">enntt_tbl</span> <span class="op">&lt;-</span> </span>
+<span><span class="va">enntt_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">ns_dat</span>, <span class="va">nns_dat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <code>ennnt_tbl</code> data frame is the curated dataset. We can perform some data checks to make everything looks good and then proceed to writing and documenting the dataset.</p>
@@ -2142,7 +2148,7 @@ Formatting:
 </div>
 </div>
 <p>After editing the data dictionary file to include the appropriate information, we will have something similar to <a href="#tbl-cd-enntt-data-dictionary">Table&nbsp;<span>6.9</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-data-dictionary_e9bcafa6ef5adec3ad33b1600480ab23">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-data-dictionary_ff4b392877ab6ce6761b4ded57259b9c">
 <div class="cell-output-display">
 <div id="tbl-cd-enntt-data-dictionary" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">

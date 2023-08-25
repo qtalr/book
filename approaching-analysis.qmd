@@ -61,11 +61,11 @@ pacman::p_load(skimr, janitor, kableExtra, effectsize, tidytext)
 In this chapter I will build on the notions of data and information from the previous chapter. The aim of analysis is to derive knowledge from information, the next step in the DIKI Hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves another level of intervention. The goal is to break down complex information into simpler components which are more readily interpretable. In what follows, we will cover the main steps in the process of analysis. The first is to inspect the data to ensure its quality and understand its characteristics. The second is to interrogate the data to uncover patterns and relationships and interpret the findings. To conclude this chapter I will outline methods to and the importance of communicating the analysis results and procedure in a transparent and reproducible manner.
 
 ::: {.callout}
-**{{< fa terminal >}} Swirl lesson**
+**{{< fa terminal >}} Lessons**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Data visualization](https://github.com/qtalr/swirl)\
+**What**: [Data visualization](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To explore data visually in text and in graphics.
 :::
@@ -139,19 +139,19 @@ belc_tbl <-
   arrange(part_id, utt_id, word_id)
 
 # Save data ----
-write_rds(belc_tbl, "data/approaching-analysis/belc_tbl.rds")
+write_rds(belc_tbl, "data/aa-belc_tbl.rds")
 
 # Create data dictionary ----
-create_data_dictionary(data = belc_tbl, file_path = "data/approaching-analysis/belc_tbl_dd.csv", model = "gpt-3.5-turbo")
+create_data_dictionary(data = belc_tbl, file_path = "data/aa-belc_tbl_dd.csv", model = "gpt-3.5-turbo")
 ```
 
 ```{r}
 #| label: aa-belc-dataset-data-dictionary
 
 # Dataset
-belc_tbl <- read_rds("data/approaching-analysis/belc_tbl.rds")
+belc_tbl <- read_rds("data/aa-belc_tbl.rds")
 # Data dictionary
-belc_dd <- read_csv("data/approaching-analysis/belc_tbl_dd.csv")
+belc_dd <- read_csv("data/aa-belc_tbl_dd.csv")
 ```
 
 To ground this discussion I will introduce a new dataset. This dataset is drawn from the Barcelona English Language Corpus (BELC) [@Munoz2006], which is found in the TalkBank repository. I've selected the "Written composition" task from this corpus which contains 80 writing samples from 36 second language learners of English at different ages. Participants were given the task of writing for 15 minutes on the topic of "Me: my past, present and future". Data was collected for participants from one to three times over the course of seven years (at 10, 12, 16, and 17 years of age).
@@ -354,10 +354,10 @@ belc_essay_tbl <-
   mutate(group = fct_relevel(group, "T1", "T2", "T3", "T4"))
 
 # Write data ----
-write_rds(belc_essay_tbl, "data/approaching-analysis/belc_essay_tbl.rds")
+write_rds(belc_essay_tbl, "data/aa-belc_essay_tbl.rds")
 
 # Create data dictionary ----
-create_data_dictionary(belc_essay_tbl, "data/approaching-analysis/belc_essay_tbl_dd.csv", model = "gpt-3.5-turbo")
+create_data_dictionary(belc_essay_tbl, "data/aa-belc_essay_tbl_dd.csv", model = "gpt-3.5-turbo")
 ```
 
 ```{r}
@@ -365,7 +365,7 @@ create_data_dictionary(belc_essay_tbl, "data/approaching-analysis/belc_essay_tbl
 #| tbl-cap: "First 10 observations of the reconfigured BELC dataset."
 
 # Read data ----
-belc_essay_tbl <- read_rds("data/approaching-analysis/belc_essay_tbl.rds")
+belc_essay_tbl <- read_rds("data/aa-belc_essay_tbl.rds")
 
 # View data ----
 belc_essay_tbl |>
@@ -1275,7 +1275,7 @@ In line with the investigative nature of EDA, the identification of variables of
 #| fig-cap: 'Roles of variables in EDA.'
 #| out.width: '50%'
 
-knitr::include_graphics("figures/approaching-analysis/aa-eda-variables.drawio.png")
+knitr::include_graphics("figures/aa-eda-variables.drawio.png")
 ```
 
 For illustrative purposes let's consider the State of the Union Corpus (SOTU) [@R-quanteda.corpora]. The presidential addresses and a set of metadata variables are included in the corpus. I've subsetted this corpus to only include U.S. presidents since 1946. A tabular preview of the first 10 addresses (truncated for display) can be found in @tbl-eda-sotu-corpus.
@@ -1305,9 +1305,9 @@ sotu_tbl |> # select the tibble
   kable_styling()
 ```
 
-A dataset such as this one could serve as a starting point to explore many different types of research questions. In order to maintain research coherence so our efforts to not careen into a free-for-all, we need to tether our feature engineering to a unit of analysis that is relevant to the research question. A **unit of analysis** is the entity that we are interested in studying. Not to be confused with the unit of observation, which is the entity that we are able to observe and measure. 
+A dataset such as this one could serve as a starting point to explore many different types of research questions. In order to maintain research coherence so our efforts to not careen into a free-for-all, we need to tether our feature engineering to a unit of analysis that is relevant to the research question. A **unit of analysis** is the entity that we are interested in studying. Not to be confused with the unit of observation, which is the entity that we are able to observe and measure [@Sedgwick2015]. 
 
-To demonstrate the distinction, let's look consider different approaches to analyzing the SOTU dataset. For example, the unit of analysis could be the language of particular presidents, party ideology, or political rhetoric in general and the unit of observation could be individual words, phrases, sentences, etc. In some cases the unit of analysis and the unit of observation are the same. For example, if we were interested in potential changes use of the word "terrorist" over time in SOTU addresses, the unit of analysis and the unit of observation would be the same  --individual addresses. So, depending on the perspective we are interested in investigating, the choice of how to approach engineering features to gain insight will vary.
+To demonstrate the distinction, let's look consider different approaches to analyzing the SOTU dataset. For example, the unit of analysis could be the language of particular presidents, party ideology, or political rhetoric in general and the unit of observation could be individual words, phrases, sentences, etc. In some cases the unit of analysis and the unit of observation are the same. For example, if we were interested in potential changes use of the word "terrorist" over time in SOTU addresses, the unit of analysis and the unit of observation would be the same --individual addresses. So, depending on the perspective we are interested in investigating, the choice of how to approach engineering features to gain insight will vary.
 
 <!--  
 - Methods
@@ -1576,7 +1576,7 @@ There are two types of variables in PDA: the outcome variable and the predictor 
 #| fig-cap: 'Roles of variables in PDA.'
 #| out.width: '50%'
 
-knitr::include_graphics("figures/approaching-analysis/aa-pda-variables.drawio.png")
+knitr::include_graphics("figures/aa-pda-variables.drawio.png")
 ```
 
 Feature selection can be either data-driven or theory-driven. Data-driven features are those that are engineered to enhance predictive power, while theory-driven features are those that are selected based on theoretical relevance.
@@ -1587,7 +1587,7 @@ Let's consider the Europarl corpus of native, non-native and translated texts (E
 #| label: tbl-enntt-dd
 #| tbl-cap: 'Data dictionary of the ENNTT corpus.'
 
-read_csv("data/approaching-analysis/enntt_curated_dd.csv") |>
+read_csv("data/aa-enntt_curated_dd.csv") |>
   knitr::kable()
 ```
 
@@ -1684,8 +1684,25 @@ A dataset based on the Switchboard Dialog Act Corpus (SWDA) [@SWDA2008], seen in
 #| label: tbl-aa-ida-swda-dataset
 #| tbl-cap: 'Data dictionary of the SWDA dataset.'
 
+swda_curated_tbl <- 
+  read_csv("data/swda_curated.csv") |> 
+  select(
+    doc_id,
+    speaker_id,
+    sex,
+    damsl_tag,
+    utterance_text
+  )
+
+swda_curated_dd <- 
+  create_data_dictionary(
+  data = swda_curated_tbl,
+  file_path = "data/aa-swda_curated_dd.csv",
+  model = "gpt-3.5-turbo"
+)
+
 # SWDA data dictionary ----
-read_csv("data/approaching-analysis/swda_transformed_1_dd.csv") |>
+read_csv("data/aa-swda_curated_dd.csv") |>
   kable() |> 
   kable_styling()
 ```
@@ -1713,7 +1730,7 @@ We can now see in @fig-aa-ida-variables the variables roles assigned to variable
 #| fig-cap: 'Roles of variables in IDA.'
 #| out.width: '50%'
 
-knitr::include_graphics("figures/approaching-analysis/aa-ida-variables.drawio.png")
+knitr::include_graphics("figures/aa-ida-variables.drawio.png")
 ```
 
 <!--  
@@ -1818,7 +1835,7 @@ In this chapter we have focused on description and analysis --the third componen
 #| fig-cap: 'Approaching analysis: visual summary'
 #| out.width: '75%'
 
-knitr::include_graphics("figures/approaching-analysis/aa-diki.drawio.png")
+knitr::include_graphics("figures/aa-diki.drawio.png")
 ```
 
 Building on the strategies covered in [Chapter 2 "Understanding data"](#sec-understanding-data) to derive a rich relational dataset, in this chapter we outlined key points in approaching analysis. The first key step in any analysis is to perform a diagnostic assessment of the individual variables and relationships between variables. To select the appropriate descriptive measures we covered the various informational values that a variable can take. In addition to providing key information for reporting purposes, descriptive measures are important to explore so the researcher can get a better feel for the dataset before conducting an analysis.

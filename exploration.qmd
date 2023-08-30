@@ -1,7 +1,7 @@
 ---
 execute: 
   echo: true
----
+--- 
 
 # Exploration {#sec-exploration}
 
@@ -18,6 +18,26 @@ Under development.
 <!--
 
 Content:
+
+Descriptive analysis:
+- `tidytext` package
+	- `unnest_tokens()` function
+	- `count()` function
+	- `bind_tf_idf()` function
+	- `widyr` package for co-occurrence analysis
+	- `tidy()`
+  
+- `quanteda` package
+  - `dfm()` objects
+    - matrix subsetting `[, ]`
+    - `dfm_select()`, `dfm_trim()`, `dfm_remove()`, `dfm_keep()`, `dfm_sample()
+
+Unsupervised learning:
+- `cluster()`, `factoextra` package
+- `kmeans()`, `factoextra` package
+- `hclust()`, `factoextra` package
+- `topicmodels` package
+- `text2vec` package
 
 Exercises:
 
@@ -44,7 +64,7 @@ Formatting:
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 - Identify when an exploratory data analysis approach is the best fit for a given research project.
-- Describe the fundamental methods of descriptive analysis and unsupervised learning, recognizing their utility in revealing patterns and summarizing data.
+- Describe the fundamental methods of descriptive analysis and unsupervised learning, recognizing their strengths in revealing patterns and summarizing data.
 - Interpret the basic insights gained from data summarization and pattern recognition, considering how these insights could guide further questions or research.
 :::
 
@@ -55,23 +75,7 @@ Formatting:
 
 ```
 
-In this chapter we examine a wide range of strategies for deriving insight from data in cases where the researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. The chapter outlines two main branches of exploratory data analysis: 1) descriptive analysis which statistically and/ or visually summarizes a dataset and 2) unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either through unsupervised learning or descriptive methods, exploratory data analysis employs quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset in order to provide the researcher novel perspective to be qualitatively assessed.
-
-<!-- This chapter provides an introduction to exploratory data analysis (EDA) for linguists, with a focus on descriptive methods such as frequency analysis and co-occurence analysis, as well as unsupervised learning approaches such as clustering, topic modelling, and word embedding. It will also discuss the use cases of these methods in linguistics. 
-
-The chapter is organized as follows: ...
-
-We wil work with the State of the Union (SOTU) corpus, which contains the full text of all State of the Union addresses from 1790 to 2019. The corpus is available in the `quanteda.corpora` package, and can be loaded as follows: -->
-
-```{r}
-#| eval: false
-#| label: load-sotu
-#| echo: false
-
-sotu_corpus <-
-  quanteda.corpora::data_corpus_sotu # load corpus
-``` 
-
+In this chapter, we examine a wide range of strategies for deriving insight from data in cases where the researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. The chapter outlines two main branches of exploratory data analysis: 1) descriptive analysis which statistically and/ or visually summarizes a dataset and 2) unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either through descriptive or unsupervised learning methods, exploratory data analysis employs quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset in order to provide the researcher novel perspective to be qualitatively assessed.
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
@@ -80,105 +84,289 @@ sotu_corpus <-
 
 <!-- [ ] lesson: update the why -->
 
-**What**: [Matrices](https://github.com/qtalr/lessons)\
+**What**: [Matrices, Exploratory Visualization](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
-**Why**: Learn how to work with matrices to store and analyze numeric data.
+**Why**: Learn how to work with matrices to store and analyze numeric data using `quanteda` and to further your understanding of graphically representing data using `ggplot2` and other packages for more advanced plotting.
 :::
 
 ## Orientation {#sec-eda-orientation}
 
-<!-- ADD
+The aim of this section is to provide an overview of exploratory data analysis (EDA). We will delve into various descriptive methods, such as frequency analysis and co-occurrence analysis, which are fundamental tools in linguistic research. However, our exploration won't stop there. We will also integrate modern exploratory methods from unsupervised learning approaches, including clustering, topic modeling, and vector space modeling. This may sound overwhelming, but I will strive to keep explanations clear and concise, ensuring their practicality and relevance to your linguistic inquiries is apparent. To this end, we will provide real-world examples to exemplify the applicability of these methodologies. 
 
-- Research goals
-  - Approaches
-		- Analysis types
+### Research goal {#sec-eda-research-goal}
+
+As discussed in @sec-aa-explore and @sec-fr-aim, the goal of exploratory data analysis is to discover, describe, and posit new hypotheses. The researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. This analysis approach is best-suited for research where the literature on a research question is limited, or where the researcher is interested in exploring a new research question. 
+
+Since the researcher does not start with a preconceived hypothesis, the researcher is not able to test a hypothesis and generalize to a population, but rather the researcher is able to describe the data and provide a new perspective to be qualitatively assessed. This is achieved through an iterative and inductive process of data exploration, where the researcher uses quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset letting the data guide the analysis. 
+
+### Approach {#sec-eda-approach}
+
+<!-- Note:  
+
+This section should cover the following:
 - Workflow: Identify, Inspect, Interrogate, Interpret
   - Add a few words on the common aspects with other research approaches
   - And point out the differences (use of data, results, interpretation, etc.)
 
+Drop the independent sections in favor of a more integrated approach.
 -->
 
+The approach to exploratory data analysis is iterative and inductive. To reign in the analysis, however, it is important to have a research question to guide the analysis. The research question will often be broad and exploratory in nature, but it will provide a framework for the analysis including the unit of analysis and sometimes the units of observation. Yet the units of observation can be modified as needed to address the research question. Furthermore, the methods applied to the data can evolve as the research unfolds. The researcher may start with a descriptive analysis and then move to an unsupervised learning approach, or vice versa. The researcher may also pivot the approach to explore new questions and new variables. Ultimately, the researcher is guided by the data and the research question, but the researcher is not bound by a preconceived hypothesis or prediction.
 
-The aim of this section is to provide an overview of exploratory data analysis (EDA). We will delve into various descriptive methods, such as frequency analysis and co-occurrence analysis, which are fundamental tools in linguistic research. However, our exploration won't stop there. We will also integrate modern exploratory methods from unsupervised learning approaches, including clustering, topic modeling, and vector space modeling. This may sound overwhelming, but I will strive to keep explanations clear and concise, ensuring their practicality and relevance to your linguistic inquiries is apparent. To this end, we will provide real-world examples to exemplify the applicability of these methodologies. 
+<!-- Workflow -->
 
-### Research goals {#sec-eda-research-goals}
+With a research question and relevant data in hand, we can look to conduct the analysis. The workflow for exploratory data analysis is as follows:
 
-The goal of exploratory data analysis is to discover, describe, and posit new hypotheses. The researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. This analysis approach is best-suited for research where the literature on a research question is limited, or where the researcher is interested in exploring a new research question. Since the researcher does not start with a preconceived hypothesis, the researcher is not able to test a hypothesis and generalize to a population, but rather the researcher is able to describe the data and provide a new perspective to be qualitatively assessed. This is achieved through an iterative and inductive process of data exploration, where the researcher uses quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset letting the data guide the analysis. 
+1. Identify and extract the variables of interest in the dataset
+2. Inspect the dataset to ensure the quality of the data and understand its characteristics
+3. Interrogate the dataset using descriptive analysis and/ or unsupervised learning
+4. Interpret the results of the analysis to determine if they are meaningful and if they provide a new perspective on the research question
 
-### Approaches {#sec-eda-approaches}
+Let's elaborate on each of these steps. First, we want to consider our research question and identify the variables of potential interest to provide insight to our question. Starting with a transformed dataset means that much of the data preparation has already been done, but we may need to further transform the data, either up front or as we explore the data. In text analysis, this often includes identifying and extracting the linguistic variables of interest, such as words, $n$-grams, sentences, *etc*. Depending on the annotation scheme, other linguistic variables may be of interest, such as part-of-speech tags, syntactic dependencies, semantic roles, *etc*.
 
-- Can be understood as quantitative supported qualitative research as the results of exploratory analysis are interpreted qualitatively, by and large. The results, however, can be used to inform the development of a hypothesis or to inform the design of a machine learning model. It allows for leaving pre-conceived notions behind and letting the data speak for itself, under researcher-guided intuition and knowledge.
-- There is no fixed outcome variable rather there is only a set of predictors or covariates. 
-- The data is mutable, meaning that the data can be changed or modified as needed to address the research question.
+We may also want to consider the operational measures of the variables derived from the text, such as frequency, dispersion, co-occurrence, keyness, *etc*.  We may also want to consider the other variables in the dataset that may be target for grouping or filtering the dataset, such as speaker information, document information, linguistic unit information, *etc*. 
 
-#### Analysis types {#sec-eda-analysis-types}
+During or after extracting and operationalizing the variables of interest, we want to inspect the dataset to ensure the quality of the data and understand its characteristics. This may include checking for missing data, checking for outliers, checking for errors, checking for inconsistencies, *etc*. We may also want to inspect the distribution of the variables of interest to understand their characteristics. Summary statistics and visualizations, such as those covered in @sec-aa-diagnose, are useful for inspecting the dataset and also provide a foundation for interrogating the dataset.
 
-There are two main types of exploratory analysis: 1) descriptive analysis which statistically and/ or visually summarizes a dataset and 2) unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either or both of these approaches can be used to explore a dataset.
+Once we have identified the variables of interest and inspected the dataset, we can interrogate the dataset using descriptive analysis and/ or unsupervised learning. Descriptive analysis is a set of methods that statistically and/ or visually summarizes a dataset. Descriptive analysis can be used to describe a dataset and to identify linguistic units (frequency analysis) or co-occuring (co-occurrence analysis) units that are distinctive to a particular group or sub-group in the dataset. Unsupervised learning is a machine learning approach that does not assume any particular relationship between variables in a dataset. Unsupervised learning can be used to identify groupings () in the data including patterning of linguistic units, identifying semantically similar topics, and estimating word context relationships. 
 
-### Workflow {#sec-eda-workflow}
-
-Prerequisites: 
-- A working research question
-- A dataset which aligns with the research question or hypothesis in terms of its sampling frame and the variables it contains or can be derived from the text
-- A set of preliminary interests and/ or linguistic variables to explore in the dataset that align with the research question
-
-Process: 
-- Identify and extract the variables of interest in the dataset
-- Interrogate the dataset using descriptive analysis and/ or unsupervised learning
-- 
-
-<!--- Move the sections above (Approaching analysis)/ Keep the sections below -->
-
-#### Identify {#sec-eda-identify}
-
-- With the research question in mind, identify the variables of interest in the dataset
-- Identify the linguistic variables that can be derived from the text (i.e. liguistic units: words, n-grams, sentences, etc.)
-- Consider the operational measures of the variables derived from the text (i.e. frequency, dispersion, co-occurrence, etc.)
-- Consider the other variables in the dataset that may be target for grouping or filtering the dataset (i.e. speaker information, document information, linguistic unit information, etc.)
-
-#### Inspect {#sec-eda-inspect}
-
-Inspect your data to ensure the quality of your data and understand its characteristics. 
-
-#### Interrogate {#sec-eda-interrogate}
-
-Descriptive analysis:
-
-- Frequency analysis
-- Co-occurrence analysis
-
-Unsupervised learning:
-
-- Clustering
-- Topic modeling
-- Word embedding
-
-#### Interpret {#sec-eda-interpret}
+<!-- Interpret -->
 
 Exploratory methods will produce a set of statistical and/ or visual results. The researcher must interpret these results to determine if they are meaningful and if they provide a new perspective on the research question. Many times the results from one method will lead to new questions which can be explored with other methods. In some cases, the results may not be meaningful and the researcher may need to return to the data preparation stage to modify the dataset or the variables of interest. As the aim of exploratory analysis is just that, to explore, the researcher can pivot the approach to explore new questions and new variables. Ultimately, what is meaningful is determined by the researcher in the light of the research question and the potential insight obtained from the results.
 
 ## Analysis {#sec-eda-analysis}
 
-<!-- Short intro to the purpose of this section
+In this section will discuss exploratory data analysis (EDA) for linguists, with a focus on descriptive methods such as frequency analysis and co-occurence analysis, as well as unsupervised learning approaches such as clustering, topic modelling, and word embedding. To ground the discussion, we will use the the Manually Annotated Sub-Corpus (MASC) of the American National Corpus. The data dictionary for the `masc_transformed` dataset is shown in @tbl-eda-masc-dd-show.
 
-This section will discuss exploratory data analysis (EDA) for linguists, with a focus on descriptive methods such as frequency analysis and co-occurence analysis, as well as unsupervised learning approaches such as clustering, topic modelling, and word embedding. It will also discuss the use cases of these methods in linguistics.
+<!-- Show data dictionary -->
 
--->
+```{r}
+#| label: tbl-eda-masc-dd-show
+#| tbl-cap: "Data dictionary for the MASC dataset."
+#| message: false
+#| echo: false
+
+# Read in the data dictionary
+read_csv("data/masc_transformed_dd.csv") |> 
+  kable() |> 
+  kable_styling()
+```
+
+<!-- Load the MASC dataset/ preview -->
+
+We will work with the MASC as our dataset to approach multiple research questions. I'll read in the dataset, drop the `description` and `domain` variables to focus on variables of interest, and preview the dataset in @exm-eda-masc-read.
+
+::: {#exm-eda-masc-read}
+
+```{r}
+#| label: exm-eda-masc-read-show
+#| eval: false
+
+# Read and subset the MASC dataset
+masc_tbl <- 
+  read_csv("../data/masc/masc_transformed.csv") |> 
+  select(-description, -domain)
+
+# Preview the MASC dataset
+masc_tbl |> 
+  slice_head(n = 5)
+```
+
+```{r}
+#| label: exm-eda-masc-read-run
+#| message: false
+#| echo: false
+
+# Read and subset the MASC dataset
+masc_tbl <- 
+  read_csv("data/masc_transformed.csv") |> 
+  select(-description, -domain) |> 
+  mutate(token = str_to_lower(token))
+
+# Preview the MASC dataset
+masc_tbl |> 
+  slice_head(n = 5)
+```
+:::
 
 ### Descriptive analysis {#sec-eda-descriptive} 
 
+Descriptive analysis techniques are used to gain insights from text data without interpreting or making conclusions about the actual meaning or context. Common techniques include frequency analysis to determine the most frequent words or phrases; keyword analysis to identify important words; co-occurrence analysis to see what words tend to appear together; and dispersion analysis to see how words or topics are distributed throughout a document or corpus. 
 
-<!--
+Using the MASC dataset, we will entertain questions such as: 
 
-Point out the focus in this section will be onn descriptive analysis. Descriptive analysis is an approach where the researcher does not start with a preconceived hypothesis or prediction, but rather the researcher aims to uncover patterns and associations from data allowing the data to guide the trajectory of the analysis. 
+- What are the most frequently occurring words in the dataset?
+- Are there differences between spoken and written discourses?
+- Are there key words or phrases that distinguish genres?
 
--->
+Along the way, we will introduce some fundamental concepts in text analysis such as tokens and types, raw and relative frequency, and dispersion. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.
 
 #### Frequency analysis {#sec-eda-frequency}
 
-<!-- (L2 acquisition, Language and culture studies) -->
+<!-- 4 I's: identify, inspect, interrogate, interpret -->
 
-Frequency analysis is a descriptive method that counts the number of times a linguistic unit (i.e. word, n-gram, sentence, etc.) occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify linguistic units that are distinctive to a particular group or sub-group in the dataset.
+At its core, frequency analysis is a descriptive method that counts the number of times a linguistic unit (*i.e.* word, n-gram, sentence, etc.) occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify units that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset.
+
+<!--- Raw frequency (counting) --->
+
+In the `masc_tbl` data frame we have the linguistic unit `token` which corresponds to the word-level annotation of the MASC. To perform a basic frequency analysis, we start by using the `count()` function from the `dplyr` package to count the number of times each token occurs in the dataset. We'll sort and list the top word tokens, as seen in @exm-eda-masc-count.
+
+::: {#exm-eda-masc-count}
+```{r}
+#| label: eda-masc-count
+
+# Token count, sorted
+masc_tbl |> 
+  count(token, sort = TRUE)
+```
+:::
+
+The output of this frequency tabulation in @exm-eda-masc-count is a data frame with two columns: `token` and `n`. The `token` column contains the unique tokens in the dataset, and the `n` column contains the frequency of each token. The data frame is sorted in descending order by the frequency of tokens. Now the result includes over 39,000 rows --which corresponds to the number of unique tokens in the dataset. Each unique token is a **type**. In other words, a token is an instance of a type. Therefore, there will always be more tokens than types, unless every word in a corpus is unique, in which case the number of tokens and types will be the same.
+
+There is something else we should notice. As we can see among the most frequent tokens are non-words such as `,`, and `.`. As you can imagine, given the conventions of written and transcriptional language, these tokens are very frequent. For a frequency analysis of word tokens, however, we probably should remove them. In the `masc_tbl` data frame, the `pos` variable has a value of `PUNCT` (*e.g.* `,`, `.`) or `SYM` (*e.g.* `$`, `#`) for punctuation and symbols, respectively. We can use this information to remove tokens that are tagged with either of these values. We can do this by filtering the data frame to only include tokens that are not tagged with `PUNCT` or `SYM`, as seen in @exm-eda-masc-count-filter.
+
+::: {#exm-eda-masc-count-filter}
+```{r}
+#| label: eda-masc-count-filter
+
+# Filter out tokens with PUNCT or SYM for pos
+masc_tbl <- 
+  masc_tbl |> 
+  filter(pos != "PUNCT" & pos != "SYM")
+
+# Token count, sorted (again)
+masc_tbl |> 
+  count(token, sort = TRUE)
+```
+:::
+
+Now we are only viewing the most frequent tokens in the dataset. To appreciate the frequency distribution of the tokens, let's create three frequency plots: 1) all the types, 2) the top 100 types, and 3) the top 10 types in @fig-eda-masc-count-plots.
+
+```{r}
+#| label: fig-eda-masc-count-plots
+#| fig-cap: "Frequency plots of tokens in the MASC dataset"
+#| fig-subcap:
+#|  - "All types"
+#|  - "Top 100 types"
+#|  - "Top 10 types"
+#| layout-ncol: 3
+#| fig-height: 4
+
+# Plot token count for all types
+# remove x-axis labels and title
+# order types by token frequency
+masc_tbl |> 
+  count(token) |>
+  arrange(desc(n)) |>
+  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  geom_col() +
+  labs(x = "Types", y = "Token frequency") +
+  theme(axis.text.x = element_blank())
+
+# Plot token count for top 100 types
+masc_tbl |> 
+  count(token) |>
+  arrange(desc(n)) |>
+  slice_head(n = 100) |>
+  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  geom_col() +
+  labs(x = "Types", y = "Token frequency") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
+
+# Plot token count for top 10 types
+masc_tbl |> 
+  count(token) |>
+  arrange(desc(n)) |>
+  slice_head(n = 10) |>
+  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  geom_col() +
+  labs(x = "Types", y = "Token frequency") +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1.3))
+```
+
+The distributions we see in @fig-eda-masc-count-plots are highly right-skewed (in @fig-eda-masc-count-plots-1 in a very extreme way!). This is typical of natural language distributions, notably documented by George Kingsley Zipf [@Zipf1949]. This type of distribution approaches the theoretical Zipf distribution. A Zipf (or Zipfian) distribution is characterized by the fact that the frequency of any word is inversely proportional to its rank in the frequency table. In other words, the most frequent word occurs approximately twice as often as the second most frequent word, three times as often as the third most frequent word, and so on.
+
+As we can see, our distribuions to not follow the Zipf distribution exactly. This is because the Zipf distribution is a theoretical distribution, and the actual distribution of words in a corpus is affected by many factors, most notably the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+As stated above, Zipfian distributions are typical of natural language and are observed a various linguistic levels. This is because natural language is a complex system, and complex systems tend to exhibit Zipfian distributions. Other examples of complex systems that exhibit Zipfian distributions include the size of cities, the frequency of species in ecological communities, the frequency of links in the World Wide Web, *etc.*
+:::
+
+The observations captured in the Zipf distribution is key to understanding quantitative text analysis. It demonstrates that most of the tokens in a corpus occur (relatively) infrequently, while a small number of tokens occur very frequently. In fact, if we calculate the cumulative frequency of the tokens in the `masc_tbl` data frame, we can see that the top 10 types account for over 20% of the tokens in the dataset --by 100 types that increases to over 40%, as seen in @exm-eda-masc-count-cumulative.
+
+::: {#exm-eda-masc-count-cumulative}
+```{r}
+#| label: fig-eda-masc-count-cumulative
+#| fig-cap: "Cumulative frequency of tokens in the MASC dataset"
+#| fig-subcap: 
+#|   - "Top 10 types"
+#|   - "Top 100 types"
+#| layout-ncol: 2
+#| fig-height: 4
+
+# Calculate cumulative frequency
+token_cumul_freq <- 
+  masc_tbl |> 
+  count(token) |> 
+  arrange(desc(n)) |> 
+  mutate(cumulative = cumsum(n)) |> 
+  mutate(percent = cumulative / sum(n))
+
+# Plot cumulative frequency of top 10 types
+token_cumul_freq |>
+  slice_head(n = 10) |> 
+  ggplot(aes(x = reorder(token, desc(n)), y = percent)) +
+  geom_col() +
+  labs(x = "Types", y = "Cumulative frequency percent") +
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1.3))
+
+# Calculate cumulative frequency of top 100 types
+token_cumul_freq |>
+  slice_head(n = 100) |> 
+  ggplot(aes(x = reorder(token, desc(n)), y = percent)) +
+  geom_col() +
+  labs(x = "Types", y = "Cumulative frequency percent") +
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
+```
+:::
+
+If we look at the types that appear within the first 100 most frequent, you can likely also appreciate another thing about language use. Let's look at the top 100 types in @exm-eda-masc-count-top-100. I'll extract the words and list them in @tbl-eda-masc-count-top-100.
+
+
+<!---
+  [ ] work on text output
+--->
+::: {#exm-eda-masc-count-top-100}
+```{r}
+#| label: eda-masc-count-top-100
+
+# Top 100 types
+token_cumul_freq |> 
+  slice_head(n = 100) |> 
+  pull(token) |> 
+  str_c(collapse = ", ") |> 
+  str_view()
+```
+:::
+
+The most frequent words are not content words, but rather function words. This is because function words are used to express grammatical relationships between content words. In other words, function words are used to express the structure of language. This is why function words are also called grammatical words.
+
+<!-- MASC: Spoken/ Written. Domains. -->
+
+
+<!--  
+
+- Frequency analysis
+  - What are the most frequently occurring words in the dataset?
+    - By modality? --relative frequency needed
+      - Are there morphological differences between modalities?
+  - Are noun-suffixes (-ment, -ness, -ation, etc.) more productive in spoken or written discourses?
+
+-->
 
 - Raw frequency (counting)
     - Linguistic units (characters, words, n-grams, sentences, etc.)
@@ -210,6 +398,13 @@ Frequency analysis is a descriptive method that counts the number of times a lin
 
 <!-- (grammaticalization, syntactic alternations, discourse analysis, etc.) -->
 
+<!--  
+- Co-occurrence analysis
+  - Are there domain specific collocations?
+    - What are common verbs that appear in hedging constructions?
+      - Use 'may', 'might', 'will', 'would' to identify hedging constructions
+-->
+
 - Concordance
     - KWIC (keyword in context)
     This section will discuss keyword in context (KWIC) analyses, which is used to identify meaningful keywords in a given text. It will discuss various ways to analyse a text and extract keywords, as well as discuss various practical applications of KWIC in linguistics.
@@ -220,19 +415,35 @@ Frequency analysis is a descriptive method that counts the number of times a lin
 
 ### Unsupervised learning {#sec-eda-unsupervised}
 
+- [ ] Overview of unsupervised learning
+
+Unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset ... (expand on this definition)
+
+- [ ] An overview of the some of the questions we will entertain in this section. 
+
 #### Clustering {#sec-eda-clustering}
+
+<!--  
+
+- Clustering
+  - Are there discernible clusters that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
+		- Use k-means clustering to identify clusters of linguistic features or co-occurrence patterns
+		- Use hierarchical clustering to identify clusters of linguistic features or co-occurrence patterns
+
+-->
 
 This section will discuss clustering techniques, which are used to partition data into clusters based on similarity. It will discuss various approaches to clustering, such as k-means and hierarchical clustering, as well as discuss their use cases in linguistics.
 
 - K-means (pre-defined number of clusters)
 - Hierarchical clustering (dendrogram)
 
-#### Dimensionality reduction {#sec-eda-dimensionality-reduction}
-
-- PCA (principal component analysis)
-- MDS (multidimensional scaling)
-
 #### Topic modeling {#sec-eda-topic-modeling}
+
+<!--  
+- Topic modeling
+	- Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
+		- Use LDA to identify topics of linguistic features or co-occurrence patterns
+-->
 
 This section will discuss topic modeling techniques, which are used to identify and group semantically similar topics in unstructured data. It will discuss various approaches to topic modelling, such as Latent Dirichlet Allocation (LDA), and discuss their applications in linguistics.
 
@@ -240,6 +451,14 @@ This section will discuss topic modeling techniques, which are used to identify 
 - LSA (latent semantic analysis)
 
 #### Word embedding {#sec-eda-word-embedding}
+
+<!--  
+- Word embeddings
+  - Do certain words have different nearest neighbors in the embedding space when appear in spoken versus written discourses? What could this tell us about the differences between spoken and written discourses?
+    - Use word2vec to identify nearest neighbors of words in spoken and written discourses by training a model on each modality. Compare the nearest neighbors of words in each modality.
+  - If I consider hedges to be a semantic class, what are the nearest neighbors of hedges in the embedding space? What could this tell us about the semantic class of hedges?
+    - Use word2vec to identify nearest neighbors of hedges by training a model on the entire dataset. Compare the nearest neighbors of hedges to the nearest neighbors of other words.
+-->
 
 This section will discuss word embedding techniques, which are used to represent words in a vector space. It will discuss various approaches to word embedding, such as Word2Vec and GloVe, and discuss their applications in linguistics.
 
@@ -253,7 +472,6 @@ Exploratory data analysis is a set of methods that can be used to explore a data
 ## Activities {.unnumbered}
 
 <!-- [ ] Add description of the activites -->
-
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**

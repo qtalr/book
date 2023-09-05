@@ -377,6 +377,12 @@ Caution
 
 Content:
 
+Bxploratory Data Analysis (EDA) is a set of methods used for analyzing and exploring text data in the areas of text analysis and corpus linguistics. Descriptive methods commonly used in EDA include data visualization, word frequency and distribution analysis, and collocation analysis. These methods help identify common words and phrases, as well as relationships between different elements in the text. 
+
+Additionally, unsupervised learning methods such as clustering, topic modeling, semantic analysis, and word embedding are used in EDA. These techniques help group similar items, extract topics, understand content, and represent words as numerical vectors for various tasks.
+
+
+
 Descriptive analysis:
 - `tidytext` package
     - `unnest_tokens()` function
@@ -406,10 +412,11 @@ Exercises:
 Formatting:
 
 -->
-<blockquote class="blockquote">
-<p>The real voyage of discovery consists not in seeking new landscapes, but in having new eyes.</p>
-<p>— Marcel Proust</p>
-</blockquote>
+<!---
+> The real voyage of discovery consists not in seeking new landscapes, but in having new eyes.
+> 
+> --- Marcel Proust 
+--->
 <blockquote class="blockquote">
 <p>The data speaks for itself, but only if we are willing to listen.</p>
 <p>— Nate Silver</p>
@@ -470,11 +477,12 @@ Drop the independent sections in favor of a more integrated approach.
 <li>Inspect the dataset to ensure the quality of the data and understand its characteristics</li>
 <li>Interrogate the dataset using descriptive analysis and/ or unsupervised learning</li>
 <li>Interpret the results of the analysis to determine if they are meaningful and if they provide a new perspective on the research question</li>
+<li>(Optional) Pivot and repeat steps 1-4 to explore new questions and new variables</li>
 </ol>
 <p>Let’s elaborate on each of these steps. First, we want to consider our research question and identify the variables of potential interest to provide insight to our question. Starting with a transformed dataset means that much of the data preparation has already been done, but we may need to further transform the data, either up front or as we explore the data. In text analysis, this often includes identifying and extracting the linguistic variables of interest, such as words, <span class="math inline">\(n\)</span>-grams, sentences, <em>etc</em>. Depending on the annotation scheme, other linguistic variables may be of interest, such as part-of-speech tags, syntactic dependencies, semantic roles, <em>etc</em>.</p>
 <p>We may also want to consider the operational measures of the variables derived from the text, such as frequency, dispersion, co-occurrence, keyness, <em>etc</em>. We may also want to consider the other variables in the dataset that may be target for grouping or filtering the dataset, such as speaker information, document information, linguistic unit information, <em>etc</em>.</p>
 <p>During or after extracting and operationalizing the variables of interest, we want to inspect the dataset to ensure the quality of the data and understand its characteristics. This may include checking for missing data, checking for outliers, checking for errors, checking for inconsistencies, <em>etc</em>. We may also want to inspect the distribution of the variables of interest to understand their characteristics. Summary statistics and visualizations, such as those covered in <a href="approaching-analysis.html#sec-aa-diagnose"><span>Section&nbsp;3.1</span></a>, are useful for inspecting the dataset and also provide a foundation for interrogating the dataset.</p>
-<p>Once we have identified the variables of interest and inspected the dataset, we can interrogate the dataset using descriptive analysis and/ or unsupervised learning. Descriptive analysis is a set of methods that statistically and/ or visually summarizes a dataset. Descriptive analysis can be used to describe a dataset and to identify linguistic units (frequency analysis) or co-occuring (co-occurrence analysis) units that are distinctive to a particular group or sub-group in the dataset. Unsupervised learning is a machine learning approach that does not assume any particular relationship between variables in a dataset. Unsupervised learning can be used to identify groupings () in the data including patterning of linguistic units, identifying semantically similar topics, and estimating word context relationships.</p>
+<p>Once we have identified the variables of interest and inspected the dataset, we can interrogate the dataset using descriptive analysis and/ or unsupervised learning. Descriptive analysis is a set of methods that statistically and/ or visually summarizes a dataset. Descriptive analysis can be used to describe a dataset and to identify linguistic units (frequency analysis) or co-occuring (co-occurrence analysis) units that are distinctive to a particular group or sub-group in the dataset. Unsupervised learning is a machine learning approach that does not assume any particular relationship between variables in a dataset. It can be used to identify groupings (clustering) in the data including patterning of linguistic units, identifying semantically similar topics (topic modeling), and estimating word context relationships (vector space modeling).</p>
 <!-- Interpret -->
 <p>Exploratory methods will produce a set of statistical and/ or visual results. The researcher must interpret these results to determine if they are meaningful and if they provide a new perspective on the research question. Many times the results from one method will lead to new questions which can be explored with other methods. In some cases, the results may not be meaningful and the researcher may need to return to the data preparation stage to modify the dataset or the variables of interest. As the aim of exploratory analysis is just that, to explore, the researcher can pivot the approach to explore new questions and new variables. Ultimately, what is meaningful is determined by the researcher in the light of the research question and the potential insight obtained from the results.</p>
 </section></section><section id="sec-eda-analysis" class="level2" data-number="8.2"><h2 data-number="8.2" class="anchored" data-anchor-id="sec-eda-analysis">
@@ -555,7 +563,8 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 <!-- Load the MASC dataset/ preview -->
-<p>We will work with the MASC as our dataset to approach multiple research questions. I’ll read in the dataset, drop the <code>description</code> and <code>domain</code> variables to focus on variables of interest, and preview the dataset in <a href="#exm-eda-masc-read">Example&nbsp;<span>8.1</span></a>.</p>
+<p>We will work with the MASC as our dataset to approach a task, more than a question. The task will be to identify relevant materials for an English Language Learner (ELL) textbook. This will involve multiple research questions and allow us to illustrate some very fundamental concepts that will emerge across text analysis research.</p>
+<p>First, I’ll read in the dataset and only keep the variables that will pertain to our task, dropping the <code>description</code> and <code>domain</code> variables, and preview the dataset in <a href="#exm-eda-masc-read">Example&nbsp;<span>8.1</span></a>.</p>
 <div id="exm-eda-masc-read" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.1 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/exm-eda-masc-read-show_4b25ee9afaeba306d7f921b3b1e9391f">
@@ -568,122 +577,432 @@ Drop the independent sections in favor of a more integrated approach.
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-hash="exploration_cache/html/exm-eda-masc-read-run_1f63d12b53fe5987943b6e5bcc3c9d54">
+<div class="cell" data-hash="exploration_cache/html/exm-eda-masc-read-run_9842f6a1ca590d7337cb2cdeb888685f">
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 5 × 7
-&gt;   doc_id modality genre   token_num token        lemma        pos  
-&gt;    &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;
-&gt; 1      1 Written  Letters         0 december     december     NNP  
-&gt; 2      1 Written  Letters         1 1998         1998         CD   
-&gt; 3      1 Written  Letters         2 your         your         PRP$ 
-&gt; 4      1 Written  Letters         3 contribution contribution NN   
-&gt; 5      1 Written  Letters         4 to           to           TO</code></pre>
+&gt;   doc_id modality genre   term_num term         lemma        pos  
+&gt;    &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;
+&gt; 1      1 Written  Letters        0 December     december     NNP  
+&gt; 2      1 Written  Letters        1 1998         1998         CD   
+&gt; 3      1 Written  Letters        2 Your         your         PRP$ 
+&gt; 4      1 Written  Letters        3 contribution contribution NN   
+&gt; 5      1 Written  Letters        4 to           to           TO</code></pre>
 </div>
 </div>
 </div>
-<section id="sec-eda-descriptive" class="level3" data-number="8.2.1"><h3 data-number="8.2.1" class="anchored" data-anchor-id="sec-eda-descriptive">
-<span class="header-section-number">8.2.1</span> Descriptive analysis</h3>
-<p>Descriptive analysis techniques are used to gain insights from text data without interpreting or making conclusions about the actual meaning or context. Common techniques include frequency analysis to determine the most frequent words or phrases; keyword analysis to identify important words; co-occurrence analysis to see what words tend to appear together; and dispersion analysis to see how words or topics are distributed throughout a document or corpus.</p>
-<p>Using the MASC dataset, we will entertain questions such as:</p>
-<ul>
-<li>What are the most frequently occurring words in the dataset?</li>
-<li>Are there differences between spoken and written discourses?</li>
-<li>Are there key words or phrases that distinguish genres?</li>
-</ul>
-<p>Along the way, we will introduce some fundamental concepts in text analysis such as tokens and types, raw and relative frequency, and dispersion. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.</p>
-<section id="sec-eda-frequency" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-frequency">Frequency analysis</h4>
-<!-- 4 I's: identify, inspect, interrogate, interpret -->
-<p>At its core, frequency analysis is a descriptive method that counts the number of times a linguistic unit (<em>i.e.</em> word, n-gram, sentence, etc.) occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify units that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset.</p>
-<!--- Raw frequency (counting) --->
-<p>In the <code>masc_tbl</code> data frame we have the linguistic unit <code>token</code> which corresponds to the word-level annotation of the MASC. To perform a basic frequency analysis, we start by using the <code>count()</code> function from the <code>dplyr</code> package to count the number of times each token occurs in the dataset. We’ll sort and list the top word tokens, as seen in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.2</span></a>.</p>
-<div id="exm-eda-masc-count" class="theorem example">
+<p>From the output in <a href="#exm-eda-masc-read">Example&nbsp;<span>8.1</span></a>, we should note a couple of things. First the <code>doc_id</code> is treated as numeric <code>&lt;dbl&gt;</code> and it is not a quantitative variable –we should change this vector type to <code>&lt;chr&gt;</code>. Second, at some point in our analysis we may need to recode some of the character variables to factor variables as analysis methods may require this.</p>
+<div id="exm-eda-masc-doc-id" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.2 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="exploration_cache/html/eda-masc-count_de03258e113075190fc25ae2336784b9">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Token count, sorted</span></span>
-<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="va">token</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 39,475 × 2
-&gt;    token     n
-&gt;    &lt;chr&gt; &lt;int&gt;
-&gt;  1 ,     27113
-&gt;  2 .     26257
-&gt;  3 the   23373
-&gt;  4 to    12998
-&gt;  5 of    11865
-&gt;  6 and   11464
-&gt;  7 a      9779
-&gt;  8 in     7632
-&gt;  9 I      7354
-&gt; 10 that   6596
-&gt; # ℹ 39,465 more rows</code></pre>
-</div>
-</div>
-</div>
-<p>The output of this frequency tabulation in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.2</span></a> is a data frame with two columns: <code>token</code> and <code>n</code>. The <code>token</code> column contains the unique tokens in the dataset, and the <code>n</code> column contains the frequency of each token. The data frame is sorted in descending order by the frequency of tokens. Now the result includes over 39,000 rows –which corresponds to the number of unique tokens in the dataset. Each unique token is a <strong>type</strong>. In other words, a token is an instance of a type. Therefore, there will always be more tokens than types, unless every word in a corpus is unique, in which case the number of tokens and types will be the same.</p>
-<p>There is something else we should notice. As we can see among the most frequent tokens are non-words such as <code>,</code>, and <code>.</code>. As you can imagine, given the conventions of written and transcriptional language, these tokens are very frequent. For a frequency analysis of word tokens, however, we probably should remove them. In the <code>masc_tbl</code> data frame, the <code>pos</code> variable has a value of <code>PUNCT</code> (<em>e.g.</em> <code>,</code>, <code>.</code>) or <code>SYM</code> (<em>e.g.</em> <code>$</code>, <code>#</code>) for punctuation and symbols, respectively. We can use this information to remove tokens that are tagged with either of these values. We can do this by filtering the data frame to only include tokens that are not tagged with <code>PUNCT</code> or <code>SYM</code>, as seen in <a href="#exm-eda-masc-count-filter">Example&nbsp;<span>8.3</span></a>.</p>
-<div id="exm-eda-masc-count-filter" class="theorem example">
-<p><span class="theorem-title"><strong>Example 8.3 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="exploration_cache/html/eda-masc-count-filter_364182ae7b61a02ed4048d1894ca4154">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter out tokens with PUNCT or SYM for pos</span></span>
+<div class="cell" data-hash="exploration_cache/html/exm-eda-masc-doc-id_cc89983065687372749549790b7e725a">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Change doc_id to character</span></span>
 <span><span class="va">masc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pos</span> <span class="op">!=</span> <span class="st">"PUNCT"</span> <span class="op">&amp;</span> <span class="va">pos</span> <span class="op">!=</span> <span class="st">"SYM"</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>doc_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">doc_id</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>To get a better sense of distribution of the dataset, let’s use <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> from the <code>skimr</code> package to generate a summary of the dataset. In particular, let’s just focus on the character variables by using <code>yank("character")</code>, as seen in <a href="#exm-eda-masc-skim">Example&nbsp;<span>8.3</span></a>.</p>
+<div id="exm-eda-masc-skim" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.3 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/tbl-exm-eda-masc-skim_fdf0d5e686efc73a875d175ca5b6b277">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/skimr/">skimr</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Token count, sorted (again)</span></span>
+<span><span class="co"># Generate summary of the MASC dataset</span></span>
+<span><span class="va">masc_tbl_skm</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Pull character variables</span></span>
+<span><span class="va">masc_tbl_skm</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://docs.ropensci.org/skimr/reference/partition.html">yank</a></span><span class="op">(</span><span class="st">"character"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">kable</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="tbl-exm-eda-masc-skim" class="anchored">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table&nbsp;8.2: Summary of the MASC dataset.</caption>
+<thead><tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">skim_variable</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n_missing</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">complete_rate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">min</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">max</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">empty</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n_unique</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">whitespace</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">doc_id</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">392</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">modality</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">genre</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">token</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">32968</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lemma</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">28010</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pos</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+</div>
+<p>Looking at <a href="#tbl-exm-eda-masc-skim">Table&nbsp;<span>8.2</span></a>, we see that there are 392 documents, two modalities, 18 genres, over 30k unique terms (which are words), over 28k lemmas (word base forms), and 39 distinct part-of-speech tags.</p>
+<!--  
+[ ] the skim shows that there are some 'words' up to 99 characters long, which are likely errors
+[ ] there are 25 missing tokens and 4 missing lemmas
+-->
+<section id="sec-eda-descriptive" class="level3" data-number="8.2.1"><h3 data-number="8.2.1" class="anchored" data-anchor-id="sec-eda-descriptive">
+<span class="header-section-number">8.2.1</span> Descriptive analysis</h3>
+<p>Descriptive analysis techniques are used to gain insights from text data without interpreting or making conclusions about the actual meaning or context. Common techniques include frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms or topics are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together.</p>
+<p>Using the MASC dataset, we will entertain questions such as:</p>
+<ul>
+<li>What are the most common terms a beginning ELL should learn?</li>
+<li>Are there term differences between spoken and written discourses that should be emphasized?</li>
+<li>What are the most common phrasal verbs (verb particle constructions)? Do they vary by modality or genre?</li>
+</ul>
+<p>Along the way, we will introduce some fundamental concepts in text analysis such as tokens and types and frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.</p>
+<section id="sec-eda-frequency" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-frequency">Frequency analysis</h4>
+<!-- 4 I's: identify, inspect, interrogate, interpret -->
+<p>At its core, frequency analysis is a descriptive method that counts the number of times a linguistic unit, or term, (<em>i.e.</em> word, <span class="math inline">\(n\)</span>-gram, sentence, <em>etc</em>.) occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify terms that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset.</p>
+<!--- Raw frequency (counting) --->
+<section id="sec-eda-frequency-raw" class="level5"><h5 class="anchored" data-anchor-id="sec-eda-frequency-raw">Raw frequency</h5>
+<p>Let’s consider what the most common words in the MASC dataset are as a starting point to making inroads on our task by identifying relevant vocabulary for an ELL textbook.</p>
+<p>In the <code>masc_tbl</code> data frame we have the linguistic unit <code>term</code> which corresponds to the word-level annotation of the MASC. The <code>lemma</code> corresponds to the base form of each term, for words with inflectional morphology, the lemma is the word sans the inflection (<em>e.g.</em> is - be, are - be). For other words, the <code>term</code> and the <code>lemma</code> will be the same (<em>e.g.</em> the - the, in - in). These two variables pose a choice point for us: do we consider words to be the actual forms or the base forms? There is an argument to be made for both. In this case I will operationalize our linguistic unit as the <code>lemma</code> variable, as this will allow us to group words with inflectional morphology together.</p>
+<p>To perform a basic word frequency analysis, we start by using the <code>count()</code> function from the <code>dplyr</code> package to count the number of times each lemma occurs in the dataset. We’ll sort by the most frequent lemmas, as seen in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a>.</p>
+<div id="exm-eda-masc-count" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.4 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-count_dfa0ec013f34667f04d70c336e66a3c6">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Lemma count, sorted</span></span>
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="va">token</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 39,343 × 2
-&gt;    token     n
+<pre><code>&gt; # A tibble: 28,011 × 2
+&gt;    lemma     n
 &gt;    &lt;chr&gt; &lt;int&gt;
-&gt;  1 the   23373
-&gt;  2 to    12998
-&gt;  3 of    11865
-&gt;  4 and   11464
-&gt;  5 a      9762
-&gt;  6 in     7632
-&gt;  7 I      7354
-&gt;  8 that   6596
-&gt;  9 is     5230
-&gt; 10 you    4552
-&gt; # ℹ 39,333 more rows</code></pre>
+&gt;  1 ,     27113
+&gt;  2 .     26258
+&gt;  3 the   26137
+&gt;  4 be    19405
+&gt;  5 to    13548
+&gt;  6 and   12528
+&gt;  7 of    12005
+&gt;  8 a     10480
+&gt;  9 in     8374
+&gt; 10 i      7783
+&gt; # ℹ 28,001 more rows</code></pre>
 </div>
 </div>
 </div>
-<p>Now we are only viewing the most frequent tokens in the dataset. To appreciate the frequency distribution of the tokens, let’s create three frequency plots: 1) all the types, 2) the top 100 types, and 3) the top 10 types in <a href="#fig-eda-masc-count-plots">Figure&nbsp;<span>8.1</span></a>.</p>
-<div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot token count for all types</span></span>
-<span><span class="co"># remove x-axis labels and title</span></span>
-<span><span class="co"># order types by token frequency</span></span>
+<p>The output of this frequency tabulation in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a> is a data frame with two columns: <code>lemma</code> and <code>n</code>. The <code>lemma</code> column contains the unique lemmas in the dataset, and the <code>n</code> column contains the frequency of each lemma. The data frame is sorted in descending order by the frequency of lemmas. Now the result includes over 28,000 rows –which corresponds to the number of unique lemmas in the dataset.</p>
+<p>At this point, it is important to define two key concepts that are fundamental to working with text. First, a <strong>term</strong> is a defined linguistic unit extracted from a corpus. In our dataset, the terms are words, such as ‘the’, ‘houses’, ‘are’. A <strong>lemma</strong> is an annotated recoding of words which represent the uninflected base form of a word. In either case, the term or lemma is an instance of a linguistic unit. These instances are called <strong>tokens</strong>. When we count the number of times a term or lemma occurs in a dataset, we are counting the number of tokens, such as in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a>. Now, the list of unique terms, or lemmas, is a list of <strong>types</strong>. In other words, a token is an instance of a type. By definition, then, there will always be at least as many tokens as types, but more often than not (many) more tokens than types.</p>
+<p>Our first pass a calculating lemma frequency in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a> should bring something else to our attention. As we can see among the most frequent lemmas are non-words such as <code>,</code>, and <code>.</code>. As you can imagine, given the conventions of written and transcriptional language, these types are very frequent. For a frequency analysis focusing on words, however, we should probably remove them. Thinking ahead, there may also be other non-words that we want to remove, such as symbols, numbers, <em>etc</em>. Let’s take a look at <a href="#tbl-eda-masc-pos">Table&nbsp;<span>8.3</span></a>, where I’ve counted the part-of-speech tags <code>pos</code> in the dataset to see what other non-words we might want to remove.</p>
+<div id="exm-eda-masc-pos" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.5 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/tbl-eda-masc-pos_d978ff8bd548f7d177b66cd47c350f63">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># [ ] consider how to present this better, more concisely</span></span>
+<span></span>
+<span><span class="co"># Part-of-speech tags</span></span>
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">pos</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">pos</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">kable</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="tbl-eda-masc-pos" class="anchored">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table&nbsp;8.3: Part-of-speech tags in the MASC dataset.</caption>
+<thead><tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">pos</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CC</td>
+<td style="text-align: right;">16768</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CD</td>
+<td style="text-align: right;">12788</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DT</td>
+<td style="text-align: right;">48708</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EX</td>
+<td style="text-align: right;">1048</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">FW</td>
+<td style="text-align: right;">199</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">IN</td>
+<td style="text-align: right;">56710</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JJ</td>
+<td style="text-align: right;">31736</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JJR</td>
+<td style="text-align: right;">1507</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JJS</td>
+<td style="text-align: right;">776</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LRB</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LS</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MD</td>
+<td style="text-align: right;">6855</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NN</td>
+<td style="text-align: right;">78141</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NNP</td>
+<td style="text-align: right;">46417</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NNPS</td>
+<td style="text-align: right;">839</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NNS</td>
+<td style="text-align: right;">25461</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PDT</td>
+<td style="text-align: right;">259</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">POS</td>
+<td style="text-align: right;">2107</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PP</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PRP</td>
+<td style="text-align: right;">29202</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PRP$</td>
+<td style="text-align: right;">8395</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PUNCT</td>
+<td style="text-align: right;">88319</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">RB</td>
+<td style="text-align: right;">23747</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RBR</td>
+<td style="text-align: right;">600</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">RBS</td>
+<td style="text-align: right;">216</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RP</td>
+<td style="text-align: right;">1244</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">SYM</td>
+<td style="text-align: right;">2973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TO</td>
+<td style="text-align: right;">13481</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UH</td>
+<td style="text-align: right;">1574</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">VB</td>
+<td style="text-align: right;">20073</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">VBD</td>
+<td style="text-align: right;">15754</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">VBG</td>
+<td style="text-align: right;">9895</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">VBN</td>
+<td style="text-align: right;">10111</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">VBP</td>
+<td style="text-align: right;">13647</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">VBZ</td>
+<td style="text-align: right;">13824</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">WDT</td>
+<td style="text-align: right;">2388</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">WP</td>
+<td style="text-align: right;">2470</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">WP$</td>
+<td style="text-align: right;">73</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">WRB</td>
+<td style="text-align: right;">2728</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+</div>
+<p>Consulting the <a href="https://catalog.ldc.upenn.edu/docs/LDC95T7/cl93.html">PENN Tagset online</a>, we can see that the <code>pos</code> variable includes a number of non-words or other elements to exclude including:</p>
+<ul>
+<li>‘CD’ - Cardinal number</li>
+<li>‘FW’ - Foreign word</li>
+<li>‘LS’ - List item marker</li>
+<li>‘SYM’ - Symbol</li>
+</ul>
+<p>This modified tagset has grouped the punctuation tags into a single tag, ‘PUNCT’.</p>
+<p>We can use this information to remove lemmas that are tagged with either of these values. We can do this by filtering the data frame to only include lemmas that are not tagged with the <code>pos</code> values listed above, as seen in <a href="#exm-eda-masc-count-filter">Example&nbsp;<span>8.6</span></a>.</p>
+<div id="exm-eda-masc-count-filter" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.6 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-count-filter_1fff8ac9181d464038658044b9411bb1">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter out lemmas with PUNCT or SYM for pos</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="op">(</span><span class="va">pos</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD"</span>, <span class="st">"FW"</span>, <span class="st">"LS"</span>, <span class="st">"SYM"</span>, <span class="st">"PUNCT"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Lemma count, sorted (again)</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 26,166 × 2
+&gt;    lemma     n
+&gt;    &lt;chr&gt; &lt;int&gt;
+&gt;  1 the   26137
+&gt;  2 be    19405
+&gt;  3 to    13548
+&gt;  4 and   12528
+&gt;  5 of    12005
+&gt;  6 a     10461
+&gt;  7 in     8374
+&gt;  8 i      7783
+&gt;  9 that   7082
+&gt; 10 you    5276
+&gt; # ℹ 26,156 more rows</code></pre>
+</div>
+</div>
+</div>
+<p>Now we are only viewing the most frequent words in the dataset, which reduces the number of observations to around 26k. Let’s now explore the frequency distribution of the tokens. In <a href="#fig-eda-masc-count-plots">Figure&nbsp;<span>8.1</span></a>, I’ve created three plots which include: 1) all the types, 2) the top 100 types, and 3) the top 10 types in the dataset.</p>
+<div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># [ ] consider how to present the 'all types' plot better, more concisely</span></span>
+<span></span>
+<span><span class="co"># Plot lemma count for all types</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">token</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">lemma</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot token count for top 100 types</span></span>
-<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="co"># Plot lemma count for top 100 types</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">token</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">lemma</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot token count for top 10 types</span></span>
+<span><span class="co"># Plot lemma count for top 10 types</span></span>
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">token</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">lemma</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">65</span>, hjust <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="fig-eda-masc-count-plots" class="cell quarto-layout-panel" data-hash="exploration_cache/html/fig-eda-masc-count-plots_95e15cea3eaf85b82fcf94aac826f65c">
+<div id="fig-eda-masc-count-plots" class="cell quarto-layout-panel" data-hash="exploration_cache/html/fig-eda-masc-count-plots_514593db748e846f9eb20a9f07b508d8">
 <figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 33.3%;justify-content: center;">
 <div id="fig-eda-masc-count-plots-1" class="quarto-figure quarto-figure-center anchored">
@@ -709,7 +1028,7 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 <p>The distributions we see in <a href="#fig-eda-masc-count-plots">Figure&nbsp;<span>8.1</span></a> are highly right-skewed (in <a href="#fig-eda-masc-count-plots-1">Figure&nbsp;<span>8.1 (a)</span></a> in a very extreme way!). This is typical of natural language distributions, notably documented by George Kingsley Zipf <span class="citation" data-cites="Zipf1949">(<a href="references.html#ref-Zipf1949" role="doc-biblioref">Zipf 1949</a>)</span>. This type of distribution approaches the theoretical Zipf distribution. A Zipf (or Zipfian) distribution is characterized by the fact that the frequency of any word is inversely proportional to its rank in the frequency table. In other words, the most frequent word occurs approximately twice as often as the second most frequent word, three times as often as the third most frequent word, and so on.</p>
-<p>As we can see, our distribuions to not follow the Zipf distribution exactly. This is because the Zipf distribution is a theoretical distribution, and the actual distribution of words in a corpus is affected by many factors, most notably the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.</p>
+<p>As we can see, our distribuions to not follow the Zipf distribution exactly. This is because the Zipf distribution is a theoretical distribution, and the actual distribution of words in a corpus is affected by various sampling factors, including the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -721,140 +1040,346 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p>The observations captured in the Zipf distribution is key to understanding quantitative text analysis. It demonstrates that most of the tokens in a corpus occur (relatively) infrequently, while a small number of tokens occur very frequently. In fact, if we calculate the cumulative frequency of the tokens in the <code>masc_tbl</code> data frame, we can see that the top 10 types account for over 20% of the tokens in the dataset –by 100 types that increases to over 40%, as seen in <a href="#exm-eda-masc-count-cumulative">Example&nbsp;<span>8.4</span></a>.</p>
+<p>The observation captured in the Zipf distribution is key to understanding quantitative text analysis. It demonstrates that most of the types in a corpus occur (relatively) infrequently, while a small number of types occur very frequently. In fact, if we calculate the cumulative frequency of the lemmas in the <code>masc_tbl</code> data frame, we can see that the top 10 types account for over 20% of the lemmas used in the dataset –by 100 types that increases to over 40%, as seen in <a href="#exm-eda-masc-count-cumulative">Example&nbsp;<span>8.7</span></a>.</p>
 <div id="exm-eda-masc-count-cumulative" class="theorem example">
-<p><span class="theorem-title"><strong>Example 8.4 </strong></span>&nbsp;</p>
-<div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate cumulative frequency</span></span>
-<span><span class="va">token_cumul_freq</span> <span class="op">&lt;-</span> </span>
+<p><span class="theorem-title"><strong>Example 8.7 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-count-cumulative_e9afee5820589450cbe6497473d233fd">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate cumulative frequency</span></span>
+<span><span class="va">lemma_cumul_freq</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>cumulative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>percent <span class="op">=</span> <span class="va">cumulative</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot cumulative frequency of top 10 types</span></span>
-<span><span class="va">token_cumul_freq</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">token</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">lemma_cumul_freq</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">lemma</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">10</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">100</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co"># annotate("text", x = 10+10, y = 0.5, label = "10 lemmas") +</span></span>
+<span>  <span class="co"># annotate("text", x = 100+10, y = 0.5, label = "100 lemmas") +</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html">percent</a></span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Cumulative frequency percent"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html">percent</a></span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">65</span>, hjust <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Calculate cumulative frequency of top 100 types</span></span>
-<span><span class="va">token_cumul_freq</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">token</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Cumulative frequency percent"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html">percent</a></span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="fig-eda-masc-count-cumulative" class="cell quarto-layout-panel" data-hash="exploration_cache/html/fig-eda-masc-count-cumulative_6087e12d6eba4bd9f2b340fdfc128392">
-<figure class="figure"><div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-eda-masc-count-cumulative-1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-count-cumulative-1.png" class="img-fluid figure-img" data-ref-parent="fig-eda-masc-count-cumulative" width="384"></p>
-<figcaption class="figure-caption">(a) Top 10 types</figcaption></figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-eda-masc-count-cumulative-2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-count-cumulative-2.png" class="img-fluid figure-img" data-ref-parent="fig-eda-masc-count-cumulative" width="384"></p>
-<figcaption class="figure-caption">(b) Top 100 types</figcaption></figure>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-count-cumulative" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-count-cumulative-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.2: Cumulative frequency of lemmas in the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;8.2: Cumulative frequency of tokens in the MASC dataset</figcaption><p></p>
-</figure>
 </div>
-</div>
-</div>
-<p>If we look at the types that appear within the first 100 most frequent, you can likely also appreciate another thing about language use. Let’s look at the top 100 types in <a href="#exm-eda-masc-count-top-100">Example&nbsp;<span>8.5</span></a>. I’ll extract the words and list them in <span class="quarto-unresolved-ref">?tbl-eda-masc-count-top-100</span>.</p>
+<p>If we look at the types that appear within the first 100 most frequent, you can likely also appreciate another thing about language use. Let’s list the top 100 types in <a href="#exm-eda-masc-count-top-100">Example&nbsp;<span>8.8</span></a>.</p>
+<!---
+  [ ] work on text output
+--->
 <div id="exm-eda-masc-count-top-100" class="theorem example">
-<p><span class="theorem-title"><strong>Example 8.5 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="exploration_cache/html/eda-masc-count-top-100_01d7f5e41067039a2dfc52b4d5b57e1e">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Top 100 types</span></span>
-<span><span class="va">token_cumul_freq</span> <span class="op">|&gt;</span> </span>
+<p><span class="theorem-title"><strong>Example 8.8 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-count-top-100_5b24657f8c9858c13836cc7553b6553b">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Top 100 types</span></span>
+<span><span class="va">lemma_cumul_freq</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">str_c</span><span class="op">(</span>collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">str_view</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] │ the, to, of, and, a, in, I, that, is, you, for, it, 's, on, was, with, The, as, be, have, are, we, this, not, at, from, by, do, or, n't, my, an, he, your, but, they, will, his, one, me, would, about, all, can, were, had, what, there, out, And, up, It, has, if, their, more, so, our, said, her, which, know, just, like, who, time, when, s, been, people, other, We, In, think, A, no, she, them, You, into, than, did, some, get, He, could, its, only, 're, But, any, This, because, him, us, also, ', then, two, right</code></pre>
+<pre><code>&gt; [1] │ the, be, to, and, of, a, in, i, that, you, have, it, for, on, do, with, we, as, this, not, at, from, he, but, by, will, my, or, they, your, an, n't, say, one, what, so, his, if, 's, can, go, all, there, me, would, about, know, get, make, out, up, think, our, she, more, time, just, no, when, their, like, her, who, which, other, see, people, new, s, take, now, work, some, year, how, them, use, come, into, well, than, look, its, may, right, then, could, because, only, us, these, want, any, also, two, first, need, way, where, back</code></pre>
 </div>
 </div>
 </div>
-<p>The most frequent words are not content words, but rather function words. This is because function words are used to express grammatical relationships between content words. In other words, function words are used to express the structure of language. This is why function words are also called grammatical words.</p>
-<!-- MASC: Spoken/ Written. Domains. -->
-<!--  
-
-- Frequency analysis
-  - What are the most frequently occurring words in the dataset?
-    - By modality? --relative frequency needed
-      - Are there morphological differences between modalities?
-  - Are noun-suffixes (-ment, -ness, -ation, etc.) more productive in spoken or written discourses?
-
+<p>For the most part, the most frequent words are not content words, but rather function words (<em>e.g.</em> determiners, prepositions, pronouns, auxiliary verbs). Function words include a closed class of relatively few words that are used to express grammatical relationships between content words. It then is no surprise that they are the comprise many of the most frequent words in a corpus.</p>
+<p>Another key observation is that among the most frequency content words (<em>e.g.</em> nouns, verbs, adjectives, adverbs) are words that are quite semantically generic –that is, they are words that are used in a wide range of contexts and take a wide range of meanings. Take for example the adjective ‘good’. It can be used to describe a wide range of nouns, such as ‘good food’, ‘good people’, ‘good times’, <em>etc</em>. A sometimes near-synonym of ‘good’, for example ‘good student’, is the word ‘studious’. Yet, ‘studious’ is not as frequent as ‘good’ as it is used to describe a narrower range of nouns, such as ‘studious student’, ‘studious scholar’, ‘studious researcher’, <em>etc</em>. In this way, ‘studious’ is more semantically specific than ‘good’.</p>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-regular fa-lightbulb" aria-label="lightbulb"></i> Consider this</strong></p>
+<p>Based on what you now know about the expected distribution of words in a corpus, what if your were asked to predict what the most frequency English word used is in each U.S. State? What would you predict? How confident would you be in your prediction? What if you were asked to predict what the most frequency word used is in the language of a given country? What would you want to know before making your prediction?</p>
+</div>
+</div>
+</div>
+<p>So common across corpus samples, in some analyses these usual suspects of the most common words are considered irrelvant and are filtered out. In our ELL materials task, however, we might exclude them for this simple fact that it will be a given that we will teach these words given their grammatical importance. If we want to focus on the most common content words, we can filter out the function words.</p>
+<p>One approach to filtering out these words is to use a pre-determined list of <strong>stopwords</strong>. The <code>tidytext</code> package includes a data frame <code>stop_words</code> of stopword lexicons for English. We can select a lexicon from <code>stop_words</code> and use <code>anti_join()</code> to filter out the words that appear in the <code>word</code> variable from the <code>lemma</code> variable in the <code>masc_tbl</code> data frame. In <a href="#exm-eda-masc-count-stop-words">Example&nbsp;<span>8.9</span></a>, I perform this filtering and then re-run the frequency analysis for the top 100 lemmas.</p>
+<div id="exm-eda-masc-count-stop-words" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.9 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-count-stop-words_ffe488cce0f393040b5f14c286616331">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/juliasilge/tidytext">tidytext</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select stopword lexicon</span></span>
+<span><span class="va">stopwords</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">stop_words</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">lexicon</span> <span class="op">==</span> <span class="st">"SMART"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Filter out stop words</span></span>
+<span><span class="fu">anti_join</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">masc_tbl</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">stopwords</span>,</span>
+<span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"lemma"</span> <span class="op">=</span> <span class="st">"word"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">lemma</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-count-stop-words" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-count-stop-words-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.3: Frequency of tokens in the MASC dataset after filtering out stopwords</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p>The resulting plot in <a href="#fig-eda-masc-count-stop-words">Figure&nbsp;<span>8.3</span></a> paints a very different picture of the most frequent words in the dataset. The most frequent words are now content words, and the most frequent words are more semantically specific. Also note that the distribution of the lemmas is now a bit more balanced, relative to the distribution in <a href="#fig-eda-masc-count-plots-2">Figure&nbsp;<span>8.1 (b)</span></a>.</p>
+<p>Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using a combination of frequency and dispersion measures, as we will see in the next section.</p>
+<p>For our case, however, we have another strategy to apply. Since our task is to identify relevant vocabulary, beyond the fundamental function words in English, we can use the part-of-speech tags to reduce our dataset to just the content words, that is nouns, verbs, adjectives, and adverbs. We need to consult the Penn Tagset again, to ensure we are selecting the correct tags. I will assign this data frame to <code>masc_content_tbl</code> to keep it separate from our main data frame <code>masc_tbl</code>, seen in <span class="quarto-unresolved-ref">?exm-eda-masc-filter-pos</span>.</p>
+<div id="exm-eda-masc-filte-pos" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.10 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-filter-pos_80f57de9d5c2509dc5e220a3da58067f">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Penn Tagset for content words</span></span>
+<span><span class="co"># Nouns: NN, NNS,</span></span>
+<span><span class="co"># Verbs: VB, VBD, VBG, VBN, VBP, VBZ</span></span>
+<span><span class="co"># Adjectives: JJ, JJR, JJS</span></span>
+<span><span class="co"># Adverbs: RB, RBR, RBS</span></span>
+<span></span>
+<span><span class="va">content_pos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"NN"</span>, <span class="st">"NNS"</span>, <span class="st">"VB"</span>, <span class="st">"VBD"</span>, <span class="st">"VBG"</span>, <span class="st">"VBN"</span>, <span class="st">"VBP"</span>, <span class="st">"VBZ"</span>, <span class="st">"JJ"</span>, <span class="st">"JJR"</span>, <span class="st">"JJS"</span>, <span class="st">"RB"</span>, <span class="st">"RBR"</span>, <span class="st">"RBS"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select content words</span></span>
+<span><span class="va">masc_content_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pos</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">content_pos</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>We now have reduced the number of observations by 50% focusing on the content words. We are getting closer to identifying the vocabulary that we want to include in our ELL materials, but we will need some more tools to help us identify the most relevant vocabulary.</p>
+</section><section id="sec-eda-frequency-dispersion" class="level5"><h5 class="anchored" data-anchor-id="sec-eda-frequency-dispersion">Dispersion</h5>
+<!-- Dispersion 
+Dispersion measures: 
+  - $df$ (document frequency)
+`   - $idf$ (inverse document frequency)
+  - Gries' $DP$ Deviation of Proportions (DP)
+    - 1 - $DP$ normalized
 -->
-<ul>
-<li>Raw frequency (counting)
-<ul>
-<li>Linguistic units (characters, words, n-grams, sentences, etc.)</li>
-<li>Raw frequency (absolute frequency)</li>
-<li>Zipf’s law (rank-frequency)</li>
-<li>Issues with raw frequency (<span class="math inline">\(f\)</span>):
-<ul>
-<li>Incomparable across sub-corpora, corpora, and time</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Term frequency (normalization)
-<ul>
-<li>Relative frequency (proportional frequency)</li>
-<li>Makes samples (more) comparable (divergence of corpus sizes can influences validity of comparison)</li>
-<li>Issues with term frequency (<span class="math inline">\(tf\)</span>):
-<ul>
-<li>Does not reveal the distribution of terms across a text or set of texts</li>
-<li>Does not highlight distinctive words
-<ul>
-<li>One way to address this is to filter out ‘stop words’ (i.e.&nbsp;the, a, an, etc.)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Adjusted frequency (relevance)
-<ul>
-<li>Dispersion (distribution)
-<ul>
-<li>
-<span class="math inline">\(idf\)</span> (inverse document frequency)</li>
-<li>… Juilland’s <span class="math inline">\(D\)</span> (equal/ non-equal parts)</li>
-<li>Gries’ <span class="math inline">\(DP\)</span> Deviation of Proportions (DP)</li>
-</ul>
-</li>
-<li>Weights
-<ul>
-<li>
-<span class="math inline">\(tf-idf\)</span> (term frequency-inverse document frequency)
-<ul>
-<li>Distinctive words (Used to identify the most relevant keywords in a given text.)</li>
-<li>Issues with <span class="math inline">\(tf-idf\)</span>: Does not reveal the context of terms, Does not reveal the relationship between terms</li>
-</ul>
-</li>
-<li>weighted log odds (<a href="https://juliasilge.r-universe.dev/articles/tidylo/tidylo.html"><code>tidylo</code> package</a>)
-<ul>
-<li>Distinctive words (Used to identify the most relevant keywords in a given text.)</li>
-<li>Advantage over <span class="math inline">\(tf-idf\)</span>: does a better job dealing with different combinations of words and documents having different counts.</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul></section><section id="sec-eda-co-occurrence" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-co-occurrence">Co-occurrence analysis</h4>
+<p><strong>Dispersion</strong> is a measure of how evenly distributed a linguistic unit is across a dataset. This is a key concept in text analysis, as important as frequency. It is important to recognize that frequency and dispersion are measures of different characteristics. We can have two words that occur with the same frequency, but one word may be more evenly distributed across a dataset than the other. Depending on the researcher’s aims, this may be an important distinction to make. For our task, it is likely the case that we want to capture words that are well-dispersed across the dataset, for the most part, as words that have a high frequency and a low dispersion tend to be connected to a particular context, whether that be a particular genre, a particular speaker, a particular topic, <em>etc</em>. In other research, aim may be the reverse; to identify words that are highly frequent and highly concentrated in a particular context to identify words that are distinctive to that context.</p>
+<p>To estimate the distribution of types across a dataset there are basic measures, such as the number of documents a type appears in, or more complex measures in which the spread of terms in a given document and the documents’ lengths are taken into account.</p>
+<p>To calculate document frequency (<span class="math inline">\(DF\)</span>), we can use the <code>count()</code> function to count the number of documents a lemma appears in. We can then sort the results in descending order by the number of documents, as seen in <a href="#exm-eda-masc-df">Example&nbsp;<span>8.11</span></a>.</p>
+<div id="exm-eda-masc-df" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.11 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-df_ed4846e70804aec58a1a7e083961ea93">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Document frequency</span></span>
+<span><span class="va">masc_content_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span>, <span class="va">doc_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 19,200 × 2
+&gt;    lemma     n
+&gt;    &lt;chr&gt; &lt;int&gt;
+&gt;  1 be      384
+&gt;  2 have    336
+&gt;  3 do      239
+&gt;  4 not     232
+&gt;  5 make    214
+&gt;  6 more    206
+&gt;  7 other   202
+&gt;  8 time    193
+&gt;  9 year    187
+&gt; 10 know    183
+&gt; # ℹ 19,190 more rows</code></pre>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(DF\)</span> does not take into account the length of the documents in which the lemma appears nor the spread of the lemma within each document. To take these factors into account, we can use Gries’ Deviation of Proportions (<span class="math inline">\(DP\)</span>) measure <span class="citation" data-cites="Gries2023">(<a href="references.html#ref-Gries2023" role="doc-biblioref">Gries 2023, 87–88</a>)</span>.</p>
+<p>The <span class="math inline">\(DP\)</span> measure is calculated as the difference between the proportion of a tokens in a document and in tokens in the corpus. The metric can be subtracted from 1 to create a normalized measure of dispersion ranging between 0 and 1, with lower values being more dispersed.</p>
+<p>The <code>qtalrkit</code> package includes the <code>calc_dispersion_metrics()</code> function which calculates the either or both <span class="math inline">\(DF\)</span> and <span class="math inline">\(DP\)</span> (normalized) measures. In <a href="#exm-eda-masc-dp">Example&nbsp;<span>8.12</span></a>,</p>
+<div id="exm-eda-masc-dp" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.12 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-dp_643bb9baf656ff2d760388c413ef31df">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate dispersion metrics</span></span>
+<span><span class="va">masc_lemma_disp</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_content_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">calc_dispersion_metrics</span><span class="op">(</span><span class="va">lemma</span>, <span class="va">doc_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>idf <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="op">(</span><span class="va">df</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">dp</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">masc_lemma_disp</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 10 × 5
+&gt;    type      n    df    dp   idf
+&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+&gt;  1 be    19174   384 0.124 0    
+&gt;  2 have   5136   336 0.190 0.125
+&gt;  3 not    2279   232 0.240 0.396
+&gt;  4 make   1149   214 0.267 0.443
+&gt;  5 other   882   202 0.270 0.474
+&gt;  6 more   1005   206 0.276 0.464
+&gt;  7 only    627   169 0.286 0.560
+&gt;  8 take    769   176 0.286 0.542
+&gt;  9 time    931   193 0.314 0.497
+&gt; 10 see     865   152 0.327 0.604</code></pre>
+</div>
+</div>
+</div>
+<p>So for our task, we would like to identify lemmas that are frequent and well-dispersed. But two questions arise, first which measure of dispersion is best to use, <span class="math inline">\(DF\)</span> or <span class="math inline">\(DP\)</span>? Second, what is the threshold for frequency and dispersion that we should use to identify the lemmas that we want to include in our ELL materials?</p>
+<p>Let’s tackle the first question. We can compare the <span class="math inline">\(DF\)</span> and <span class="math inline">\(DP\)</span> measures by plotting them against each other, as seen in <a href="#fig-eda-masc-df-dp">Figure&nbsp;<span>8.4</span></a>.</p>
+<div id="exm-eda-masc-df-dp" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.13 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-df-dp_342e8a08a1192f4226106eb618074bac">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># cor.test for DF and DP</span></span>
+<span><span class="va">c1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.test.html">cor.test</a></span><span class="op">(</span><span class="va">masc_lemma_disp</span><span class="op">$</span><span class="va">idf</span>, <span class="va">masc_lemma_disp</span><span class="op">$</span><span class="va">dp</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot DF and DP</span></span>
+<span><span class="va">masc_lemma_disp</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">idf</span>, y <span class="op">=</span> <span class="va">dp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ylim</span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Inverse Document frequency"</span>, y <span class="op">=</span> <span class="st">"Deviation of Proportions"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-df-dp" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-df-dp-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.4: Inverse document frequency and Deviation of Proportions for lemmas in the MASC dataset</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p>Statistically, there is a high correlation between <span class="math inline">\(IDF\)</span> and <span class="math inline">\(DP\)</span> with an <span class="math inline">\(R^2\)</span> value of 0.752 and a <span class="math inline">\(p\)</span>-value less than .001. However, we can see that there is a trade-off between <span class="math inline">\(IDF\)</span> and <span class="math inline">\(DP\)</span>. For less dispersed lemmas, <span class="math inline">\(DP\)</span> is more sensitive to differences than <span class="math inline">\(IDF\)</span>. For more dispersed lemmas, <span class="math inline">\(IDF\)</span> is more sensitive to differences than <span class="math inline">\(DP\)</span>. The upshot, then, is that if your interest is in distinguishing between less dispersed types, <span class="math inline">\(DP\)</span> can provide a more sensitive measure. If your interest is in distinguishing between more dispersed types, <span class="math inline">\(IDF\)</span> can provide a more sensitive measure.</p>
+<p>The second issue is to decide what the threshold for dispersion should be. Let’s create a density plot to see if there is a natural break in the distribution of dispersion measures, as seen in <a href="#fig-eda-masc-dp-density">Figure&nbsp;<span>8.5</span></a>.</p>
+<div id="exm-eda-masc-dp-density" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.14 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-dp-density_0ce30429c38eaafe4a40baa8397e61cd">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Density plot of DP</span></span>
+<span><span class="va">masc_lemma_disp</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">dp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_density</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">.1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Deviation of Proportions"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-dp-density" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-dp-density-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.5: Density plot of Deviation of Proportions for lemmas in the MASC dataset</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p>What we are looking for is a natural break in the distribution of dispersion measures. In <a href="#fig-eda-masc-dp-density">Figure&nbsp;<span>8.5</span></a>, we can see that there is a natural break in the distribution between .85 and .97. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In <a href="#exm-eda-masc-dp-filter">Example&nbsp;<span>8.15</span></a>, I filter out lemmas that have a dispersion measure less than .91 and then re-run the frequency analysis for the top 100 lemmas.</p>
+<div id="exm-eda-masc-dp-filter" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.15 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-dp-filter_5f4955eef3ef6e0f826ef5accb1ad328">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter out lemmas with DP &lt;= .91</span></span>
+<span><span class="va">masc_lemma_disp_thres</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_lemma_disp</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">dp</span> <span class="op">&lt;=</span> <span class="fl">.91</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Re-run frequency analysis</span></span>
+<span><span class="va">masc_lemma_disp_thres</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">type</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">masc_lemma_disp_thres</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt;      [,1]   [,2]   [,3]    [,4]     [,5]   [,6]    [,7]   [,8]   [,9]    [,10] 
+&gt; [1,] "be"   "say"  "think" "other"  "s"    "well"  "want" "here" "thing" "many"
+&gt; [2,] "have" "go"   "more"  "see"    "work" "look"  "also" "t"    "tell"  "man" 
+&gt; [3,] "do"   "know" "just"  "people" "year" "then"  "way"  "new"  "first" "ask" 
+&gt; [4,] "not"  "get"  "time"  "take"   "come" "right" "need" "find" "help"  "very"
+&gt; [5,] "n't"  "make" "so"    "now"    "use"  "only"  "back" "give" "day"   "much"</code></pre>
+</div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_disp_thres</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_tail</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt;      [,1]         [,2]         [,3]        [,4]         [,5]        
+&gt; [1,] "dump"       "ignorance"  "liability" "unleash"    "blur"      
+&gt; [2,] "instrument" "mainstream" "tuition"   "buzz"       "resistance"
+&gt; [3,] "triumph"    "wildly"     "hook"      "prosperous" "absurd"    
+&gt; [4,] "harsh"      "awaken"     "fetch"     "presume"    "qualify"   
+&gt; [5,] "sting"      "dismiss"    "brave"     "summarize"  "liberty"   
+&gt;      [,6]         [,7]           [,8]           [,9]         [,10]        
+&gt; [1,] "going"      "wound"        "shy"          "protective" "wax"        
+&gt; [2,] "awkward"    "alright"      "sandy"        "preside"    "faith-based"
+&gt; [3,] "afterwards" "evolutionary" "proximity"    "rethink"    "decidedly"  
+&gt; [4,] "eve"        "envy"         "interfere"    "strictly"   "resolute"   
+&gt; [5,] "devote"     "nostalgic"    "accidentally" "explored"   "evidently"</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-dp-filter" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-dp-filter-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.6: Frequency of tokens in the MASC dataset after filtering out lemmas with a Deviation of Proportions less than .91</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<!-- Weights 
+Weights:
+- $tf-idf$ (term frequency-inverse document frequency)
+- 1 - DP_normalized
+-->
+</section><section id="sec-eda-frequency-relative" class="level5"><h5 class="anchored" data-anchor-id="sec-eda-frequency-relative">Relative frequency</h5>
+<!-- Corpus and sub-corpus comparisons 
+
+- Term frequency
+- Observed relative frequency
+-->
+<p>Although much can be learned from the distribution of linguistic units in a dataset as a whole, most frequency analyses aim to contrast the frequency of linguistic units across distinct corpora or sub-corpora of a corpus. In the MASC dataset, we can explore potential differences between the spoken and written discourses.</p>
+<p>Let’s start by following a similar approach to the one we took above for the corpus as a whole. However, this time we will add another variable to the <code>count()</code> function to group the tokens by the <code>modality</code> variable and then use this variable in the <code>facet_wrap()</code> function to create a separate plot for each modality, as seen in <a href="#exm-eda-masc-count-modality">Example&nbsp;<span>8.16</span></a>.</p>
+<div id="exm-eda-masc-count-modality" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.16 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-count-modality_e367c7bedb87fa692bb4c50e0619dbfd">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Token count by modality, sorted</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">modality</span>, <span class="va">token</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, by <span class="op">=</span> <span class="va">modality</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">token</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span> <span class="va">modality</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">modality</span>, <span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>n <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">modality</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">top_n</span><span class="op">(</span><span class="fl">100</span>, <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">token</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Types"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span> <span class="va">modality</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-count-modality-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-count-modality-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.7: Frequency of tokens in the MASC dataset by modality</figcaption></figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-count-modality-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-count-modality-2.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.8: Frequency of tokens in the MASC dataset by modality</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p>frequency analysis can also be used to identify units that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset. For example, we might be interested in identifying words that are distinctive to spoken versus written discourses.</p>
+</section></section><section id="sec-eda-co-occurrence" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-co-occurrence">Co-occurrence analysis</h4>
+<p>ELL: we want to identify verb particle constructions that are distinctive to spoken versus written discourses. These are verbs that appear as a phrase with a preposition or adverb, such as ‘look up’, ‘look after’. These are common in English, but we want to know two things: which verb particle constructions are most common and do they vary by modality?</p>
 <!-- (grammaticalization, syntactic alternations, discourse analysis, etc.) -->
 <!--  
 - Co-occurrence analysis
@@ -871,11 +1396,38 @@ Drop the independent sections in favor of a more integrated approach.
 <li>Collocation
 <ul>
 <li>PMI (pointwise mutual information)</li>
-<li>Dice’s coefficient</li>
 <li>…</li>
 </ul>
 </li>
-</ul></section></section><section id="sec-eda-unsupervised" class="level3" data-number="8.2.2"><h3 data-number="8.2.2" class="anchored" data-anchor-id="sec-eda-unsupervised">
+</ul>
+<div class="cell" data-hash="exploration_cache/html/masc-transformed-phrasal-verbs_3de2b33f41e7f225286f93589d28fdd6">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">doc_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">doc_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span></span>
+<span>    next_lemma <span class="op">=</span> <span class="fu">lead</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span>,</span>
+<span>    next_pos <span class="op">=</span> <span class="fu">lead</span><span class="op">(</span><span class="va">pos</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pos</span> <span class="op">==</span> <span class="st">"VB"</span> <span class="op">&amp;</span> <span class="va">next_pos</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RP"</span>, <span class="st">"IN"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 3,094 × 9
+&gt; # Groups:   doc_id [304]
+&gt;    doc_id modality genre   token_num token  lemma  pos   next_lemma next_pos
+&gt;    &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;   
+&gt;  1 1      Written  Letters       252 know   know   VB    for        IN      
+&gt;  2 10     Written  Email         127 buy    buy    VB    from       IN      
+&gt;  3 10     Written  Email         167 buy    buy    VB    from       IN      
+&gt;  4 10     Written  Email         248 use    use    VB    as         IN      
+&gt;  5 10     Written  Email         309 know   know   VB    if         IN      
+&gt;  6 101    Written  Email          87 head   head   VB    down       IN      
+&gt;  7 101    Written  Email          92 meet   meet   VB    up         RP      
+&gt;  8 102    Written  Email         268 comply comply VB    with       IN      
+&gt;  9 103    Written  Email          84 see    see    VB    that       IN      
+&gt; 10 103    Written  Email         130 be     be     VB    on         IN      
+&gt; # ℹ 3,084 more rows</code></pre>
+</div>
+</div>
+</section></section><section id="sec-eda-unsupervised" class="level3" data-number="8.2.2"><h3 data-number="8.2.2" class="anchored" data-anchor-id="sec-eda-unsupervised">
 <span class="header-section-number">8.2.2</span> Unsupervised learning</h3>
 <ul class="task-list">
 <li>
@@ -887,6 +1439,7 @@ Drop the independent sections in favor of a more integrated approach.
 <input type="checkbox">An overview of the some of the questions we will entertain in this section.</li>
 </ul>
 <section id="sec-eda-clustering" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-clustering">Clustering</h4>
+<p>ELL: we want to identify and group genres based on linguistic features or co-occurrence patterns. The better we can identify and group genres, the better we can identify and group linguistic features or co-occurrence patterns that are distinctive to a particular genre.</p>
 <!--  
 
 - Clustering
@@ -900,6 +1453,7 @@ Drop the independent sections in favor of a more integrated approach.
 <li>K-means (pre-defined number of clusters)</li>
 <li>Hierarchical clustering (dendrogram)</li>
 </ul></section><section id="sec-eda-topic-modeling" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-topic-modeling">Topic modeling</h4>
+<p>ELL: we want to identify themes or topics that are distinctive to genres or a particular genre. This will help us design a textbook with relevant topics for each genre and the most relevant vocabulary for each topic.</p>
 <!--  
 - Topic modeling
     - Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
@@ -910,6 +1464,7 @@ Drop the independent sections in favor of a more integrated approach.
 <li>LDA (latent Dirichlet allocation)</li>
 <li>LSA (latent semantic analysis)</li>
 </ul></section><section id="sec-eda-word-embedding" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-word-embedding">Word embedding</h4>
+<p>ELL: we want to meaning similarities and potential differences between spoken and written discourses. This will help provide students with a more nuanced understanding of potential synonyms within and differences between spoken and written discourses.</p>
 <!--  
 - Word embeddings
   - Do certain words have different nearest neighbors in the embedding space when appear in spoken versus written discourses? What could this tell us about the differences between spoken and written discourses?
@@ -995,6 +1550,9 @@ Drop the independent sections in favor of a more integrated approach.
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Gries2023" class="csl-entry" role="listitem">
+Gries, Stefan Th. 2023. <span>“Statistical Methods in Corpus Linguistics.”</span> In <em>Readings in Corpus Linguistics: A Teaching and Research Guide for Scholars in Nigeria and Beyond,</em> 78–114.
+</div>
 <div id="ref-Zipf1949" class="csl-entry" role="listitem">
 Zipf, George Kingsley. 1949. <em>Human Behavior and the Principle of Least Effort</em>. Oxford, England: Addison-Wesley Press.
 </div>

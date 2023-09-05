@@ -19,6 +19,12 @@ Under development.
 
 Content:
 
+Bxploratory Data Analysis (EDA) is a set of methods used for analyzing and exploring text data in the areas of text analysis and corpus linguistics. Descriptive methods commonly used in EDA include data visualization, word frequency and distribution analysis, and collocation analysis. These methods help identify common words and phrases, as well as relationships between different elements in the text. 
+
+Additionally, unsupervised learning methods such as clustering, topic modeling, semantic analysis, and word embedding are used in EDA. These techniques help group similar items, extract topics, understand content, and represent words as numerical vectors for various tasks.
+
+
+
 Descriptive analysis:
 - `tidytext` package
 	- `unnest_tokens()` function
@@ -49,9 +55,11 @@ Formatting:
 
 -->
 
+<!---
 > The real voyage of discovery consists not in seeking new landscapes, but in having new eyes.
 > 
-> --- Marcel Proust
+> --- Marcel Proust 
+--->
 
 
 > The data speaks for itself, but only if we are willing to listen. 
@@ -121,6 +129,7 @@ With a research question and relevant data in hand, we can look to conduct the a
 2. Inspect the dataset to ensure the quality of the data and understand its characteristics
 3. Interrogate the dataset using descriptive analysis and/ or unsupervised learning
 4. Interpret the results of the analysis to determine if they are meaningful and if they provide a new perspective on the research question
+5. (Optional) Pivot and repeat steps 1-4 to explore new questions and new variables
 
 Let's elaborate on each of these steps. First, we want to consider our research question and identify the variables of potential interest to provide insight to our question. Starting with a transformed dataset means that much of the data preparation has already been done, but we may need to further transform the data, either up front or as we explore the data. In text analysis, this often includes identifying and extracting the linguistic variables of interest, such as words, $n$-grams, sentences, *etc*. Depending on the annotation scheme, other linguistic variables may be of interest, such as part-of-speech tags, syntactic dependencies, semantic roles, *etc*.
 
@@ -128,7 +137,7 @@ We may also want to consider the operational measures of the variables derived f
 
 During or after extracting and operationalizing the variables of interest, we want to inspect the dataset to ensure the quality of the data and understand its characteristics. This may include checking for missing data, checking for outliers, checking for errors, checking for inconsistencies, *etc*. We may also want to inspect the distribution of the variables of interest to understand their characteristics. Summary statistics and visualizations, such as those covered in @sec-aa-diagnose, are useful for inspecting the dataset and also provide a foundation for interrogating the dataset.
 
-Once we have identified the variables of interest and inspected the dataset, we can interrogate the dataset using descriptive analysis and/ or unsupervised learning. Descriptive analysis is a set of methods that statistically and/ or visually summarizes a dataset. Descriptive analysis can be used to describe a dataset and to identify linguistic units (frequency analysis) or co-occuring (co-occurrence analysis) units that are distinctive to a particular group or sub-group in the dataset. Unsupervised learning is a machine learning approach that does not assume any particular relationship between variables in a dataset. Unsupervised learning can be used to identify groupings () in the data including patterning of linguistic units, identifying semantically similar topics, and estimating word context relationships. 
+Once we have identified the variables of interest and inspected the dataset, we can interrogate the dataset using descriptive analysis and/ or unsupervised learning. Descriptive analysis is a set of methods that statistically and/ or visually summarizes a dataset. Descriptive analysis can be used to describe a dataset and to identify linguistic units (frequency analysis) or co-occuring (co-occurrence analysis) units that are distinctive to a particular group or sub-group in the dataset. Unsupervised learning is a machine learning approach that does not assume any particular relationship between variables in a dataset. It can be used to identify groupings (clustering) in the data including patterning of linguistic units, identifying semantically similar topics (topic modeling), and estimating word context relationships (vector space modeling). 
 
 <!-- Interpret -->
 
@@ -154,7 +163,9 @@ read_csv("data/masc_transformed_dd.csv") |>
 
 <!-- Load the MASC dataset/ preview -->
 
-We will work with the MASC as our dataset to approach multiple research questions. I'll read in the dataset, drop the `description` and `domain` variables to focus on variables of interest, and preview the dataset in @exm-eda-masc-read.
+We will work with the MASC as our dataset to approach a task, more than a question. The task will be to identify relevant materials for an English Language Learner (ELL) textbook. This will involve multiple research questions and allow us to illustrate some very fundamental concepts that will emerge across text analysis research. 
+
+First, I'll read in the dataset and only keep the variables that will pertain to our task, dropping the `description` and `domain` variables, and preview the dataset in @exm-eda-masc-read.
 
 ::: {#exm-eda-masc-read}
 
@@ -180,8 +191,7 @@ masc_tbl |>
 # Read and subset the MASC dataset
 masc_tbl <- 
   read_csv("data/masc_transformed.csv") |> 
-  select(-description, -domain) |> 
-  mutate(token = str_to_lower(token))
+  select(-description, -domain)
 
 # Preview the MASC dataset
 masc_tbl |> 
@@ -189,58 +199,135 @@ masc_tbl |>
 ```
 :::
 
+From the output in @exm-eda-masc-read, we should note a couple of things. First the `doc_id` is treated as numeric `<dbl>` and it is not a quantitative variable --we should change this vector type to `<chr>`. Second, at some point in our analysis we may need to recode some of the character variables to factor variables as analysis methods may require this.
+
+::: {#exm-eda-masc-doc-id}
+```{r}
+#| label: exm-eda-masc-doc-id
+
+# Change doc_id to character
+masc_tbl <- 
+  masc_tbl |> 
+  mutate(doc_id = as.character(doc_id))
+```
+:::
+
+To get a better sense of distribution of the dataset, let's use `skim()` from the `skimr` package to generate a summary of the dataset. In particular, let's just focus on the character variables by using `yank("character")`, as seen in @exm-eda-masc-skim.
+
+::: {#exm-eda-masc-skim}
+```{r}
+#| label: tbl-exm-eda-masc-skim
+#| tbl-cap: "Summary of the MASC dataset."
+
+# Load package
+library(skimr)
+
+# Generate summary of the MASC dataset
+masc_tbl_skm <- 
+  masc_tbl |> 
+  skim()
+
+# Pull character variables
+masc_tbl_skm |> 
+  yank("character") |> 
+  kable()
+```
+:::
+
+Looking at @tbl-exm-eda-masc-skim, we see that there are 392 documents, two modalities, 18 genres, over 30k unique terms (which are words), over 28k lemmas (word base forms), and 39 distinct part-of-speech tags.
+
+<!--  
+[ ] the skim shows that there are some 'words' up to 99 characters long, which are likely errors
+[ ] there are 25 missing tokens and 4 missing lemmas
+-->
+
 ### Descriptive analysis {#sec-eda-descriptive} 
 
-Descriptive analysis techniques are used to gain insights from text data without interpreting or making conclusions about the actual meaning or context. Common techniques include frequency analysis to determine the most frequent words or phrases; keyword analysis to identify important words; co-occurrence analysis to see what words tend to appear together; and dispersion analysis to see how words or topics are distributed throughout a document or corpus. 
+Descriptive analysis techniques are used to gain insights from text data without interpreting or making conclusions about the actual meaning or context. Common techniques include frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms or topics are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together. 
 
 Using the MASC dataset, we will entertain questions such as: 
 
-- What are the most frequently occurring words in the dataset?
-- Are there differences between spoken and written discourses?
-- Are there key words or phrases that distinguish genres?
+- What are the most common terms a beginning ELL should learn?
+- Are there term differences between spoken and written discourses that should be emphasized?
+- What are the most common phrasal verbs (verb particle constructions)? Do they vary by modality or genre?
 
-Along the way, we will introduce some fundamental concepts in text analysis such as tokens and types, raw and relative frequency, and dispersion. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.
+Along the way, we will introduce some fundamental concepts in text analysis such as tokens and types and frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.
 
 #### Frequency analysis {#sec-eda-frequency}
 
 <!-- 4 I's: identify, inspect, interrogate, interpret -->
 
-At its core, frequency analysis is a descriptive method that counts the number of times a linguistic unit (*i.e.* word, n-gram, sentence, etc.) occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify units that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset.
+At its core, frequency analysis is a descriptive method that counts the number of times a linguistic unit, or term, (*i.e.* word, $n$-gram, sentence, *etc*.) occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify terms that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset.
 
 <!--- Raw frequency (counting) --->
 
-In the `masc_tbl` data frame we have the linguistic unit `token` which corresponds to the word-level annotation of the MASC. To perform a basic frequency analysis, we start by using the `count()` function from the `dplyr` package to count the number of times each token occurs in the dataset. We'll sort and list the top word tokens, as seen in @exm-eda-masc-count.
+##### Raw frequency {#sec-eda-frequency-raw}
+
+Let's consider what the most common words in the MASC dataset are as a starting point to making inroads on our task by identifying relevant vocabulary for an ELL textbook.
+
+In the `masc_tbl` data frame we have the linguistic unit `term` which corresponds to the word-level annotation of the MASC. The `lemma` corresponds to the base form of each term, for words with inflectional morphology, the lemma is the word sans the inflection (*e.g.* is - be, are - be). For other words, the `term` and the `lemma` will be the same (*e.g.* the - the, in - in). These two variables pose a choice point for us: do we consider words to be the actual forms or the base forms? There is an argument to be made for both. In this case I will operationalize our linguistic unit as the `lemma` variable, as this will allow us to group words with inflectional morphology together. 
+
+To perform a basic word frequency analysis, we start by using the `count()` function from the `dplyr` package to count the number of times each lemma occurs in the dataset. We'll sort by the most frequent lemmas, as seen in @exm-eda-masc-count.
 
 ::: {#exm-eda-masc-count}
 ```{r}
 #| label: eda-masc-count
 
-# Token count, sorted
+# Lemma count, sorted
 masc_tbl |> 
-  count(token, sort = TRUE)
+  count(lemma, sort = TRUE)
 ```
 :::
 
-The output of this frequency tabulation in @exm-eda-masc-count is a data frame with two columns: `token` and `n`. The `token` column contains the unique tokens in the dataset, and the `n` column contains the frequency of each token. The data frame is sorted in descending order by the frequency of tokens. Now the result includes over 39,000 rows --which corresponds to the number of unique tokens in the dataset. Each unique token is a **type**. In other words, a token is an instance of a type. Therefore, there will always be more tokens than types, unless every word in a corpus is unique, in which case the number of tokens and types will be the same.
+The output of this frequency tabulation in @exm-eda-masc-count is a data frame with two columns: `lemma` and `n`. The `lemma` column contains the unique lemmas in the dataset, and the `n` column contains the frequency of each lemma. The data frame is sorted in descending order by the frequency of lemmas. Now the result includes over 28,000 rows --which corresponds to the number of unique lemmas in the dataset. 
 
-There is something else we should notice. As we can see among the most frequent tokens are non-words such as `,`, and `.`. As you can imagine, given the conventions of written and transcriptional language, these tokens are very frequent. For a frequency analysis of word tokens, however, we probably should remove them. In the `masc_tbl` data frame, the `pos` variable has a value of `PUNCT` (*e.g.* `,`, `.`) or `SYM` (*e.g.* `$`, `#`) for punctuation and symbols, respectively. We can use this information to remove tokens that are tagged with either of these values. We can do this by filtering the data frame to only include tokens that are not tagged with `PUNCT` or `SYM`, as seen in @exm-eda-masc-count-filter.
+At this point, it is important to define two key concepts that are fundamental to working with text. First, a **term** is a defined linguistic unit extracted from a corpus. In our dataset, the terms are words, such as 'the', 'houses', 'are'. A **lemma** is an annotated recoding of words which represent the uninflected base form of a word. In either case, the term or lemma is an instance of a linguistic unit. These instances are called **tokens**. When we count the number of times a term or lemma occurs in a dataset, we are counting the number of tokens, such as in @exm-eda-masc-count. Now, the list of unique terms, or lemmas, is a list of **types**. In other words, a token is an instance of a type. By definition, then, there will always be at least as many tokens as types, but more often than not (many) more tokens than types.
+
+Our first pass a calculating lemma frequency in @exm-eda-masc-count should bring something else to our attention. As we can see among the most frequent lemmas are non-words such as `,`, and `.`. As you can imagine, given the conventions of written and transcriptional language, these types are very frequent. For a frequency analysis focusing on words, however, we should probably remove them. Thinking ahead, there may also be other non-words that we want to remove, such as symbols, numbers, *etc*. Let's take a look at @tbl-eda-masc-pos, where I've counted the part-of-speech tags `pos` in the dataset to see what other non-words we might want to remove.
+
+::: {#exm-eda-masc-pos}
+```{r}
+#| label: tbl-eda-masc-pos
+#| tbl-cap: "Part-of-speech tags in the MASC dataset."
+#| message: false
+
+# [ ] consider how to present this better, more concisely
+
+# Part-of-speech tags
+masc_tbl |> 
+  count(pos) |> 
+  arrange(pos) |> 
+  kable()
+```
+:::
+
+Consulting the [PENN Tagset online](https://catalog.ldc.upenn.edu/docs/LDC95T7/cl93.html), we can see that the `pos` variable includes a number of non-words or other elements to exclude including: 
+
+- 'CD' - Cardinal number
+- 'FW' - Foreign word 
+- 'LS' - List item marker
+- 'SYM' - Symbol 
+
+This modified tagset has grouped the punctuation tags into a single tag, 'PUNCT'.
+
+We can use this information to remove lemmas that are tagged with either of these values. We can do this by filtering the data frame to only include lemmas that are not tagged with the `pos` values listed above, as seen in @exm-eda-masc-count-filter.
 
 ::: {#exm-eda-masc-count-filter}
 ```{r}
 #| label: eda-masc-count-filter
 
-# Filter out tokens with PUNCT or SYM for pos
+# Filter out lemmas with PUNCT or SYM for pos
 masc_tbl <- 
   masc_tbl |> 
-  filter(pos != "PUNCT" & pos != "SYM")
+  filter(!(pos %in% c("CD", "FW", "LS", "SYM", "PUNCT")))
 
-# Token count, sorted (again)
+# Lemma count, sorted (again)
 masc_tbl |> 
-  count(token, sort = TRUE)
+  count(lemma, sort = TRUE)
 ```
 :::
 
-Now we are only viewing the most frequent tokens in the dataset. To appreciate the frequency distribution of the tokens, let's create three frequency plots: 1) all the types, 2) the top 100 types, and 3) the top 10 types in @fig-eda-masc-count-plots.
+Now we are only viewing the most frequent words in the dataset, which reduces the number of observations to around 26k. Let's now explore the frequency distribution of the tokens. In @fig-eda-masc-count-plots, I've created three plots which include: 1) all the types, 2) the top 100 types, and 3) the top 10 types in the dataset.
 
 ```{r}
 #| label: fig-eda-masc-count-plots
@@ -252,33 +339,33 @@ Now we are only viewing the most frequent tokens in the dataset. To appreciate t
 #| layout-ncol: 3
 #| fig-height: 4
 
-# Plot token count for all types
-# remove x-axis labels and title
-# order types by token frequency
+# [ ] consider how to present the 'all types' plot better, more concisely
+
+# Plot lemma count for all types
 masc_tbl |> 
-  count(token) |>
+  count(lemma) |>
   arrange(desc(n)) |>
-  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  ggplot(aes(x = reorder(lemma, desc(n)), y = n)) +
   geom_col() +
   labs(x = "Types", y = "Token frequency") +
   theme(axis.text.x = element_blank())
 
-# Plot token count for top 100 types
-masc_tbl |> 
-  count(token) |>
+# Plot lemma count for top 100 types
+masc_tbl |>
+  count(lemma) |>
   arrange(desc(n)) |>
   slice_head(n = 100) |>
-  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  ggplot(aes(x = reorder(lemma, desc(n)), y = n)) +
   geom_col() +
   labs(x = "Types", y = "Token frequency") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
 
-# Plot token count for top 10 types
+# Plot lemma count for top 10 types
 masc_tbl |> 
-  count(token) |>
+  count(lemma) |>
   arrange(desc(n)) |>
   slice_head(n = 10) |>
-  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  ggplot(aes(x = reorder(lemma, desc(n)), y = n)) +
   geom_col() +
   labs(x = "Types", y = "Token frequency") +
   theme(axis.text.x = element_text(angle = 65, hjust = 1.3))
@@ -286,7 +373,7 @@ masc_tbl |>
 
 The distributions we see in @fig-eda-masc-count-plots are highly right-skewed (in @fig-eda-masc-count-plots-1 in a very extreme way!). This is typical of natural language distributions, notably documented by George Kingsley Zipf [@Zipf1949]. This type of distribution approaches the theoretical Zipf distribution. A Zipf (or Zipfian) distribution is characterized by the fact that the frequency of any word is inversely proportional to its rank in the frequency table. In other words, the most frequent word occurs approximately twice as often as the second most frequent word, three times as often as the third most frequent word, and so on.
 
-As we can see, our distribuions to not follow the Zipf distribution exactly. This is because the Zipf distribution is a theoretical distribution, and the actual distribution of words in a corpus is affected by many factors, most notably the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.
+As we can see, our distribuions to not follow the Zipf distribution exactly. This is because the Zipf distribution is a theoretical distribution, and the actual distribution of words in a corpus is affected by various sampling factors, including the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.
 
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
@@ -294,48 +381,38 @@ As we can see, our distribuions to not follow the Zipf distribution exactly. Thi
 As stated above, Zipfian distributions are typical of natural language and are observed a various linguistic levels. This is because natural language is a complex system, and complex systems tend to exhibit Zipfian distributions. Other examples of complex systems that exhibit Zipfian distributions include the size of cities, the frequency of species in ecological communities, the frequency of links in the World Wide Web, *etc.*
 :::
 
-The observations captured in the Zipf distribution is key to understanding quantitative text analysis. It demonstrates that most of the tokens in a corpus occur (relatively) infrequently, while a small number of tokens occur very frequently. In fact, if we calculate the cumulative frequency of the tokens in the `masc_tbl` data frame, we can see that the top 10 types account for over 20% of the tokens in the dataset --by 100 types that increases to over 40%, as seen in @exm-eda-masc-count-cumulative.
+The observation captured in the Zipf distribution is key to understanding quantitative text analysis. It demonstrates that most of the types in a corpus occur (relatively) infrequently, while a small number of types occur very frequently. In fact, if we calculate the cumulative frequency of the lemmas in the `masc_tbl` data frame, we can see that the top 10 types account for over 20% of the lemmas used in the dataset --by 100 types that increases to over 40%, as seen in @exm-eda-masc-count-cumulative.
 
 ::: {#exm-eda-masc-count-cumulative}
 ```{r}
 #| label: fig-eda-masc-count-cumulative
-#| fig-cap: "Cumulative frequency of tokens in the MASC dataset"
-#| fig-subcap: 
-#|   - "Top 10 types"
-#|   - "Top 100 types"
-#| layout-ncol: 2
+#| fig-cap: "Cumulative frequency of lemmas in the MASC dataset"
 #| fig-height: 4
+#| fig-width: 8
 
 # Calculate cumulative frequency
-token_cumul_freq <- 
+lemma_cumul_freq <- 
   masc_tbl |> 
-  count(token) |> 
+  count(lemma) |> 
   arrange(desc(n)) |> 
   mutate(cumulative = cumsum(n)) |> 
   mutate(percent = cumulative / sum(n))
 
-# Plot cumulative frequency of top 10 types
-token_cumul_freq |>
-  slice_head(n = 10) |> 
-  ggplot(aes(x = reorder(token, desc(n)), y = percent)) +
+lemma_cumul_freq |>
+  slice_head(n = 2000) |> 
+  ggplot(aes(x = reorder(lemma, desc(n)), y = percent)) +
   geom_col() +
+  geom_vline(xintercept = 10, linetype = "dashed") +
+  geom_vline(xintercept = 100, linetype = "dashed") +
+  # annotate("text", x = 10+10, y = 0.5, label = "10 lemmas") +
+  # annotate("text", x = 100+10, y = 0.5, label = "100 lemmas") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
   labs(x = "Types", y = "Cumulative frequency percent") +
-  scale_y_continuous(labels = scales::percent) +
-  theme(axis.text.x = element_text(angle = 65, hjust = 1.3))
-
-# Calculate cumulative frequency of top 100 types
-token_cumul_freq |>
-  slice_head(n = 100) |> 
-  ggplot(aes(x = reorder(token, desc(n)), y = percent)) +
-  geom_col() +
-  labs(x = "Types", y = "Cumulative frequency percent") +
-  scale_y_continuous(labels = scales::percent) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
+  theme(axis.text.x = element_blank())
 ```
 :::
 
-If we look at the types that appear within the first 100 most frequent, you can likely also appreciate another thing about language use. Let's look at the top 100 types in @exm-eda-masc-count-top-100. I'll extract the words and list them in @tbl-eda-masc-count-top-100.
-
+If we look at the types that appear within the first 100 most frequent, you can likely also appreciate another thing about language use. Let's list the top 100 types in @exm-eda-masc-count-top-100.
 
 <!---
   [ ] work on text output
@@ -345,56 +422,276 @@ If we look at the types that appear within the first 100 most frequent, you can 
 #| label: eda-masc-count-top-100
 
 # Top 100 types
-token_cumul_freq |> 
+lemma_cumul_freq |> 
   slice_head(n = 100) |> 
-  pull(token) |> 
+  pull(lemma) |> 
   str_c(collapse = ", ") |> 
   str_view()
 ```
 :::
 
-The most frequent words are not content words, but rather function words. This is because function words are used to express grammatical relationships between content words. In other words, function words are used to express the structure of language. This is why function words are also called grammatical words.
 
-<!-- MASC: Spoken/ Written. Domains. -->
+For the most part, the most frequent words are not content words, but rather function words (*e.g.* determiners, prepositions, pronouns, auxiliary verbs). Function words include a closed class of relatively few words that are used to express grammatical relationships between content words. It then is no surprise that they are the comprise many of the most frequent words in a corpus. 
 
+Another key observation is that among the most frequency content words (*e.g.* nouns, verbs, adjectives, adverbs) are words that are quite semantically generic --that is, they are words that are used in a wide range of contexts and take a wide range of meanings. Take for example the adjective 'good'. It can be used to describe a wide range of nouns, such as 'good food', 'good people', 'good times', *etc*. A sometimes near-synonym of 'good', for example 'good student', is the word 'studious'. Yet, 'studious' is not as frequent as 'good' as it is used to describe a narrower range of nouns, such as 'studious student', 'studious scholar', 'studious researcher', *etc*. In this way, 'studious' is more semantically specific than 'good'.
 
-<!--  
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
-- Frequency analysis
-  - What are the most frequently occurring words in the dataset?
-    - By modality? --relative frequency needed
-      - Are there morphological differences between modalities?
-  - Are noun-suffixes (-ment, -ness, -ation, etc.) more productive in spoken or written discourses?
+Based on what you now know about the expected distribution of words in a corpus, what if your were asked to predict what the most frequency English word used is in each U.S. State? What would you predict? How confident would you be in your prediction? What if you were asked to predict what the most frequency word used is in the language of a given country? What would you want to know before making your prediction?
+:::
 
+So common across corpus samples, in some analyses these usual suspects of the most common words are considered irrelvant and are filtered out. In our ELL materials task, however, we might exclude them for this simple fact that it will be a given that we will teach these words given their grammatical importance. If we want to focus on the most common content words, we can filter out the function words.
+
+One approach to filtering out these words is to use a pre-determined list of **stopwords**. The `tidytext` package includes a data frame `stop_words` of stopword lexicons for English. We can select a lexicon from `stop_words` and use `anti_join()` to filter out the words that appear in the `word` variable from the `lemma` variable in the `masc_tbl` data frame. In @exm-eda-masc-count-stop-words, I perform this filtering and then re-run the frequency analysis for the top 100 lemmas.
+
+::: {#exm-eda-masc-count-stop-words}
+```{r}
+#| label: fig-eda-masc-count-stop-words
+#| fig-cap: "Frequency of tokens in the MASC dataset after filtering out stopwords"
+#| fig-height: 4
+#| fig-width: 8
+
+# Load package
+library(tidytext)
+
+# Select stopword lexicon
+stopwords <- 
+  stop_words |> 
+  filter(lexicon == "SMART")
+
+# Filter out stop words
+anti_join(
+  x = masc_tbl,
+  y = stopwords,
+  by = c("lemma" = "word")
+  ) |>
+  count(lemma, sort = TRUE) |> 
+  slice_head(n = 100) |> 
+  ggplot(aes(x = reorder(lemma, desc(n)), y = n)) +
+  geom_col() +
+  labs(x = "Types", y = "Token frequency") +
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
+```
+:::
+
+The resulting plot in @fig-eda-masc-count-stop-words paints a very different picture of the most frequent words in the dataset. The most frequent words are now content words, and the most frequent words are more semantically specific. Also note that the distribution of the lemmas is now a bit more balanced, relative to the distribution in @fig-eda-masc-count-plots-2.
+
+Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using a combination of frequency and dispersion measures, as we will see in the next section.
+
+For our case, however, we have another strategy to apply. Since our task is to identify relevant vocabulary, beyond the fundamental function words in English, we can use the part-of-speech tags to reduce our dataset to just the content words, that is nouns, verbs, adjectives, and adverbs. We need to consult the Penn Tagset again, to ensure we are selecting the correct tags. I will assign this data frame to `masc_content_tbl` to keep it separate from our main data frame `masc_tbl`, seen in @exm-eda-masc-filter-pos.
+
+::: {#exm-eda-masc-filte-pos}
+```{r}
+#| label: eda-masc-filter-pos
+
+# Penn Tagset for content words
+# Nouns: NN, NNS,
+# Verbs: VB, VBD, VBG, VBN, VBP, VBZ
+# Adjectives: JJ, JJR, JJS
+# Adverbs: RB, RBR, RBS
+
+content_pos <- c("NN", "NNS", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "JJ", "JJR", "JJS", "RB", "RBR", "RBS")
+
+# Select content words
+masc_content_tbl <- 
+  masc_tbl |> 
+  filter(pos %in% content_pos)
+```
+:::
+
+We now have reduced the number of observations by `r label_percent()(1-nrow(masc_content_tbl) / nrow(masc_tbl))` focusing on the content words. We are getting closer to identifying the vocabulary that we want to include in our ELL materials, but we will need some more tools to help us identify the most relevant vocabulary.
+
+##### Dispersion {#sec-eda-frequency-dispersion}
+
+<!-- Dispersion 
+Dispersion measures: 
+  - $df$ (document frequency)
+`   - $idf$ (inverse document frequency)
+  - Gries' $DP$ Deviation of Proportions (DP)
+    - 1 - $DP$ normalized
 -->
 
-- Raw frequency (counting)
-    - Linguistic units (characters, words, n-grams, sentences, etc.)
-    - Raw frequency (absolute frequency)
-    - Zipf's law (rank-frequency)
-    - Issues with raw frequency ($f$): 
-        - Incomparable across sub-corpora, corpora, and time
-- Term frequency (normalization)
-    - Relative frequency (proportional frequency)
-    - Makes samples (more) comparable (divergence of corpus sizes can influences validity of comparison)
-    - Issues with term frequency ($tf$): 
-        - Does not reveal the distribution of terms across a text or set of texts
-        - Does not highlight distinctive words
-            - One way to address this is to filter out 'stop words' (i.e. the, a, an, etc.)
-- Adjusted frequency (relevance)
-    - Dispersion (distribution)
-        - $idf$ (inverse document frequency)
-        - ... Juilland's $D$ (equal/ non-equal parts)
-        - Gries' $DP$ Deviation of Proportions (DP)
-    - Weights
-        - $tf-idf$ (term frequency-inverse document frequency)
-            - Distinctive words (Used to identify the most relevant keywords in a given text.)
-            - Issues with $tf-idf$: Does not reveal the context of terms, Does not reveal the relationship between terms
-        - weighted log odds ([`tidylo` package](https://juliasilge.r-universe.dev/articles/tidylo/tidylo.html))
-            - Distinctive words (Used to identify the most relevant keywords in a given text.)
-            - Advantage over $tf-idf$: does a better job dealing with different combinations of words and documents having different counts.
+**Dispersion** is a measure of how evenly distributed a linguistic unit is across a dataset. This is a key concept in text analysis, as important as frequency. It is important to recognize that frequency and dispersion are measures of different characteristics. We can have two words that occur with the same frequency, but one word may be more evenly distributed across a dataset than the other. Depending on the researcher's aims, this may be an important distinction to make. For our task, it is likely the case that we want to capture words that are well-dispersed across the dataset, for the most part, as words that have a high frequency and a low dispersion tend to be connected to a particular context, whether that be a particular genre, a particular speaker, a particular topic, *etc*. In other research, aim may be the reverse; to identify words that are highly frequent and highly concentrated in a particular context to identify words that are distinctive to that context.
+
+To estimate the distribution of types across a dataset there are basic measures, such as the number of documents a type appears in, or more complex measures in which the spread of terms in a given document and the documents' lengths are taken into account. 
+
+To calculate document frequency ($DF$), we can use the `count()` function to count the number of documents a lemma appears in. We can then sort the results in descending order by the number of documents, as seen in @exm-eda-masc-df.
+
+::: {#exm-eda-masc-df}
+```{r}
+#| label: eda-masc-df
+
+# Document frequency
+masc_content_tbl |> 
+  count(lemma, doc_id) |> 
+  count(lemma, sort = TRUE)
+```
+:::
+
+$DF$ does not take into account the length of the documents in which the lemma appears nor the spread of the lemma within each document. To take these factors into account, we can use Gries' Deviation of Proportions ($DP$) measure [@Gries2023, pp. 87-88]. 
+
+The $DP$ measure is calculated as the difference between the proportion of a tokens in a document and in tokens in the corpus. The metric can be subtracted from 1 to create a normalized measure of dispersion ranging between 0 and 1, with lower values being more dispersed.
+
+The `qtalrkit` package includes the `calc_dispersion_metrics()` function which calculates the either or both $DF$ and $DP$ (normalized) measures. In @exm-eda-masc-dp, 
+
+::: {#exm-eda-masc-dp}
+```{r}
+#| label: eda-masc-dp
+
+# Calculate dispersion metrics
+masc_lemma_disp <- 
+  masc_content_tbl |>
+  calc_dispersion_metrics(lemma, doc_id) |> 
+  mutate(idf = 1 - (df / max(df))) |>
+  arrange(dp)
+
+# Preview
+masc_lemma_disp |> 
+  slice_head(n = 10)
+```
+:::
+
+So for our task, we would like to identify lemmas that are frequent and well-dispersed. But two questions arise, first which measure of dispersion is best to use, $DF$ or $DP$? Second, what is the threshold for frequency and dispersion that we should use to identify the lemmas that we want to include in our ELL materials?
+
+Let's tackle the first question. We can compare the $DF$ and $DP$ measures by plotting them against each other, as seen in @fig-eda-masc-df-dp.
+
+::: {#exm-eda-masc-df-dp}
+```{r}
+#| label: fig-eda-masc-df-dp
+#| fig-cap: "Inverse document frequency and Deviation of Proportions for lemmas in the MASC dataset"
+#| fig-width: 8
+#| fig-height: 4
+
+# cor.test for DF and DP
+c1 <- cor.test(masc_lemma_disp$idf, masc_lemma_disp$dp)
+
+# Plot DF and DP
+masc_lemma_disp |> 
+  ggplot(aes(x = idf, y = dp)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  ylim(0,1) +
+  labs(x = "Inverse Document frequency", y = "Deviation of Proportions")
+```
+:::
+
+Statistically, there is a high correlation between $IDF$ and $DP$ with an $R^2$ value of `r c1$estimate^2` and a $p$-value less than .001. However, we can see that there is a trade-off between $IDF$ and $DP$. For less dispersed lemmas, $DP$ is more sensitive to differences than $IDF$. For more dispersed lemmas, $IDF$ is more sensitive to differences than $DP$. The upshot, then, is that if your interest is in distinguishing between less dispersed types, $DP$ can provide a more sensitive measure. If your interest is in distinguishing between more dispersed types, $IDF$ can provide a more sensitive measure.
+
+The second issue is to decide what the threshold for dispersion should be. Let's create a density plot to see if there is a natural break in the distribution of dispersion measures, as seen in @fig-eda-masc-dp-density.
+
+::: {#exm-eda-masc-dp-density}
+```{r}
+#| label: fig-eda-masc-dp-density
+#| fig-cap: "Density plot of Deviation of Proportions for lemmas in the MASC dataset"
+#| fig-width: 8
+#| fig-height: 4
+
+# Density plot of DP
+masc_lemma_disp |> 
+  ggplot(aes(x = dp)) +
+  geom_density() +
+  scale_x_continuous(breaks = seq(0, 1, .1)) +
+  labs(x = "Deviation of Proportions")
+```
+:::
+
+What we are looking for is a natural break in the distribution of dispersion measures. In @fig-eda-masc-dp-density, we can see that there is a natural break in the distribution between .85 and .97. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In @exm-eda-masc-dp-filter, I filter out lemmas that have a dispersion measure less than .91 and then re-run the frequency analysis for the top 100 lemmas.
+
+::: {#exm-eda-masc-dp-filter}
+```{r}
+#| label: fig-eda-masc-dp-filter
+#| fig-cap: "Frequency of tokens in the MASC dataset after filtering out lemmas with a Deviation of Proportions less than .91"
+#| fig-height: 4
+#| fig-width: 8
+
+# Filter out lemmas with DP <= .91
+masc_lemma_disp_thres <- 
+  masc_lemma_disp |> 
+  filter(dp <= .91) |> 
+  arrange(desc(n))
+
+# Re-run frequency analysis
+masc_lemma_disp_thres |> 
+  slice_head(n = 100) |> 
+  ggplot(aes(x = reorder(type, desc(n)), y = n)) +
+  geom_col() +
+  labs(x = "Types", y = "Token frequency") +
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
+
+masc_lemma_disp_thres |> 
+  slice_head(n = 50) |> 
+  pull(type) |>
+  matrix(ncol = 10)
+
+masc_lemma_disp_thres |>
+  slice_tail(n = 50) |> 
+  pull(type) |>
+  matrix(ncol = 10)
+```
+:::
+
+
+<!-- Weights 
+Weights:
+- $tf-idf$ (term frequency-inverse document frequency)
+- 1 - DP_normalized
+-->
+
+
+##### Relative frequency {#sec-eda-frequency-relative}
+<!-- Corpus and sub-corpus comparisons 
+
+- Term frequency
+- Observed relative frequency
+-->
+
+
+Although much can be learned from the distribution of linguistic units in a dataset as a whole, most frequency analyses aim to contrast the frequency of linguistic units across distinct corpora or sub-corpora of a corpus. In the MASC dataset, we can explore potential differences between the spoken and written discourses. 
+
+Let's start by following a similar approach to the one we took above for the corpus as a whole. However, this time we will add another variable to the `count()` function to group the tokens by the `modality` variable and then use this variable in the `facet_wrap()` function to create a separate plot for each modality, as seen in @exm-eda-masc-count-modality.
+
+::: {#exm-eda-masc-count-modality}
+```{r}
+#| label: fig-eda-masc-count-modality
+#| fig-cap: "Frequency of tokens in the MASC dataset by modality"
+#| fig-height: 4
+#| fig-width: 8
+
+# Token count by modality, sorted
+masc_tbl |> 
+  count(modality, token, sort = TRUE) |> 
+  slice_head(n = 50, by = modality) |> 
+  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  geom_col() +
+  labs(x = "Types", y = "Token frequency") +
+  scale_y_continuous(labels = scales::comma) +
+  facet_wrap(~ modality, ncol = 1, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+masc_tbl |> 
+  group_by(modality, token) |>
+  summarise(n = n()) |> 
+  arrange(modality, desc(n)) |> 
+  top_n(100, n) |> 
+  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
+  geom_col() +
+  labs(x = "Types", y = "Token frequency") +
+  scale_y_continuous(labels = scales::comma) +
+  facet_wrap(~ modality, ncol = 1, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+:::
+
+
+frequency analysis can also be used to identify units that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset. For example, we might be interested in identifying words that are distinctive to spoken versus written discourses. 
+
 
 #### Co-occurrence analysis {#sec-eda-co-occurrence}
+
+ELL: we want to identify verb particle constructions that are distinctive to spoken versus written discourses. These are verbs that appear as a phrase with a preposition or adverb, such as 'look up', 'look after'. These are common in English, but we want to know two things: which verb particle constructions are most common and do they vary by modality?
 
 <!-- (grammaticalization, syntactic alternations, discourse analysis, etc.) -->
 
@@ -410,8 +707,21 @@ The most frequent words are not content words, but rather function words. This i
     This section will discuss keyword in context (KWIC) analyses, which is used to identify meaningful keywords in a given text. It will discuss various ways to analyse a text and extract keywords, as well as discuss various practical applications of KWIC in linguistics.
 - Collocation
     - PMI (pointwise mutual information)
-    - Dice's coefficient
     - ...
+
+
+```{r}
+#| label: masc-transformed-phrasal-verbs
+
+masc_tbl |>
+  arrange(doc_id) |>
+  group_by(doc_id) |>
+  mutate(
+    next_lemma = lead(lemma),
+    next_pos = lead(pos)
+  ) |>
+  filter(pos == "VB" & next_pos %in% c("RP", "IN"))
+```
 
 ### Unsupervised learning {#sec-eda-unsupervised}
 
@@ -422,6 +732,8 @@ Unsupervised learning which is a machine learning approach that does not assume 
 - [ ] An overview of the some of the questions we will entertain in this section. 
 
 #### Clustering {#sec-eda-clustering}
+
+ELL: we want to identify and group genres based on linguistic features or co-occurrence patterns. The better we can identify and group genres, the better we can identify and group linguistic features or co-occurrence patterns that are distinctive to a particular genre.
 
 <!--  
 
@@ -439,6 +751,8 @@ This section will discuss clustering techniques, which are used to partition dat
 
 #### Topic modeling {#sec-eda-topic-modeling}
 
+ELL: we want to identify themes or topics that are distinctive to genres or a particular genre. This will help us design a textbook with relevant topics for each genre and the most relevant vocabulary for each topic.
+
 <!--  
 - Topic modeling
 	- Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
@@ -451,6 +765,8 @@ This section will discuss topic modeling techniques, which are used to identify 
 - LSA (latent semantic analysis)
 
 #### Word embedding {#sec-eda-word-embedding}
+
+ELL: we want to meaning similarities and potential differences between spoken and written discourses. This will help provide students with a more nuanced understanding of potential synonyms within and differences between spoken and written discourses.
 
 <!--  
 - Word embeddings

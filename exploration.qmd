@@ -191,7 +191,7 @@ masc_tbl |>
 # Read and subset the MASC dataset
 masc_tbl <- 
   read_csv("data/masc_transformed.csv") |> 
-  select(-description, -domain)
+  select(-description, -domain) 
 
 # Preview the MASC dataset
 masc_tbl |> 
@@ -281,7 +281,9 @@ masc_tbl |>
 
 The output of this frequency tabulation in @exm-eda-masc-count is a data frame with two columns: `lemma` and `n`. The `lemma` column contains the unique lemmas in the dataset, and the `n` column contains the frequency of each lemma. The data frame is sorted in descending order by the frequency of lemmas. Now the result includes over 28,000 rows --which corresponds to the number of unique lemmas in the dataset. 
 
-At this point, it is important to define two key concepts that are fundamental to working with text. First, a **term** is a defined linguistic unit extracted from a corpus. In our dataset, the terms are words, such as 'the', 'houses', 'are'. A **lemma** is an annotated recoding of words which represent the uninflected base form of a word. In either case, the term or lemma is an instance of a linguistic unit. These instances are called **tokens**. When we count the number of times a term or lemma occurs in a dataset, we are counting the number of tokens, such as in @exm-eda-masc-count. Now, the list of unique terms, or lemmas, is a list of **types**. In other words, a token is an instance of a type. By definition, then, there will always be at least as many tokens as types, but more often than not (many) more tokens than types.
+- [ ] re-write this to make tokens-types make more sense with 'term' and 'lemma'
+
+At this point, it is important to define two key concepts that are fundamental to working with text. First, a **term** is a defined linguistic unit extracted from a corpus. In our dataset, the terms are words, such as 'the', 'houses', 'are'. A lemma is an annotated recoding of words which represent the uninflected base form of a word. In either case, the term or lemma is an instance of a linguistic unit. These instances are called **tokens**. When we count the number of times a term or lemma occurs in a dataset, we are counting the number of tokens (`n`), such as in @exm-eda-masc-count. Now, the list of unique linguistic units is a list of **types** (`lemma`). By definition, then, there will always be at least as many tokens as types, but more often than not (many) more tokens than types.
 
 Our first pass a calculating lemma frequency in @exm-eda-masc-count should bring something else to our attention. As we can see among the most frequent lemmas are non-words such as `,`, and `.`. As you can imagine, given the conventions of written and transcriptional language, these types are very frequent. For a frequency analysis focusing on words, however, we should probably remove them. Thinking ahead, there may also be other non-words that we want to remove, such as symbols, numbers, *etc*. Let's take a look at @tbl-eda-masc-pos, where I've counted the part-of-speech tags `pos` in the dataset to see what other non-words we might want to remove.
 
@@ -311,6 +313,8 @@ Consulting the [PENN Tagset online](https://catalog.ldc.upenn.edu/docs/LDC95T7/c
 This modified tagset has grouped the punctuation tags into a single tag, 'PUNCT'.
 
 We can use this information to remove lemmas that are tagged with either of these values. We can do this by filtering the data frame to only include lemmas that are not tagged with the `pos` values listed above, as seen in @exm-eda-masc-count-filter.
+
+- [ ] think about how to name, rename objects: `masc_words_tbl`?
 
 ::: {#exm-eda-masc-count-filter}
 ```{r}
@@ -419,14 +423,15 @@ If we look at the types that appear within the first 100 most frequent, you can 
 --->
 ::: {#exm-eda-masc-count-top-100}
 ```{r}
-#| label: eda-masc-count-top-100
+#| label: tbl-eda-masc-count-top-100
+#| tbl-cap: "Top 100 lemma types in the MASC dataset."
 
 # Top 100 types
 lemma_cumul_freq |> 
   slice_head(n = 100) |> 
   pull(lemma) |> 
-  str_c(collapse = ", ") |> 
-  str_view()
+  matrix(ncol = 10, byrow = TRUE) |>
+  kable(col.names = NULL)
 ```
 :::
 
@@ -447,10 +452,8 @@ One approach to filtering out these words is to use a pre-determined list of **s
 
 ::: {#exm-eda-masc-count-stop-words}
 ```{r}
-#| label: fig-eda-masc-count-stop-words
-#| fig-cap: "Frequency of tokens in the MASC dataset after filtering out stopwords"
-#| fig-height: 4
-#| fig-width: 8
+#| label: tbl-eda-masc-count-stop-words
+#| tbl-cap: "Frequency of tokens in the MASC dataset after filtering out stopwords"
 
 # Load package
 library(tidytext)
@@ -468,21 +471,20 @@ anti_join(
   ) |>
   count(lemma, sort = TRUE) |> 
   slice_head(n = 100) |> 
-  ggplot(aes(x = reorder(lemma, desc(n)), y = n)) +
-  geom_col() +
-  labs(x = "Types", y = "Token frequency") +
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
+  pull(lemma) |> 
+  matrix(ncol = 10, byrow = TRUE) |>
+  as_tibble() |> 
+  kable(col.names = NULL)
 ```
 :::
 
-The resulting plot in @fig-eda-masc-count-stop-words paints a very different picture of the most frequent words in the dataset. The most frequent words are now content words, and the most frequent words are more semantically specific. Also note that the distribution of the lemmas is now a bit more balanced, relative to the distribution in @fig-eda-masc-count-plots-2.
+The resulting list in @tbl-eda-masc-count-stop-words paints a different picture of the most frequent words in the dataset. The most frequent words are now content words, and included in most frequent words are more semantically specific words.
 
-Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using a combination of frequency and dispersion measures, as we will see in the next section.
+Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using a combination of frequency and dispersion measures, as we will see in [the next section.]
 
 For our case, however, we have another strategy to apply. Since our task is to identify relevant vocabulary, beyond the fundamental function words in English, we can use the part-of-speech tags to reduce our dataset to just the content words, that is nouns, verbs, adjectives, and adverbs. We need to consult the Penn Tagset again, to ensure we are selecting the correct tags. I will assign this data frame to `masc_content_tbl` to keep it separate from our main data frame `masc_tbl`, seen in @exm-eda-masc-filter-pos.
 
-::: {#exm-eda-masc-filte-pos}
+::: {#exm-eda-masc-filter-pos}
 ```{r}
 #| label: eda-masc-filter-pos
 
@@ -505,46 +507,43 @@ We now have reduced the number of observations by `r label_percent()(1-nrow(masc
 
 ##### Dispersion {#sec-eda-frequency-dispersion}
 
-<!-- Dispersion 
-Dispersion measures: 
-  - $df$ (document frequency)
-`   - $idf$ (inverse document frequency)
-  - Gries' $DP$ Deviation of Proportions (DP)
-    - 1 - $DP$ normalized
--->
+**Dispersion** is a measure of how evenly distributed a linguistic unit is across a dataset. This is a key concept in text analysis, as important as frequency. It is important to recognize that frequency and dispersion are measures of different characteristics. We can have two words that occur with the same frequency, but one word may be more evenly distributed across a dataset than the other. Depending on the researcher's aims, this may be an important distinction to make. For our task, it is likely the case that we want to capture words that are well-dispersed across the dataset as words that have a high frequency and a low dispersion tend to be connected to a particular context, whether that be a particular genre, a particular speaker, a particular topic, *etc*. In other research, aim may be the reverse; to identify words that are highly frequent and highly concentrated in a particular context to identify words that are distinctive to that context.
 
-**Dispersion** is a measure of how evenly distributed a linguistic unit is across a dataset. This is a key concept in text analysis, as important as frequency. It is important to recognize that frequency and dispersion are measures of different characteristics. We can have two words that occur with the same frequency, but one word may be more evenly distributed across a dataset than the other. Depending on the researcher's aims, this may be an important distinction to make. For our task, it is likely the case that we want to capture words that are well-dispersed across the dataset, for the most part, as words that have a high frequency and a low dispersion tend to be connected to a particular context, whether that be a particular genre, a particular speaker, a particular topic, *etc*. In other research, aim may be the reverse; to identify words that are highly frequent and highly concentrated in a particular context to identify words that are distinctive to that context.
+This a wide variety of measures that can be used to estimate the distribution of types across a dataset. Let's focus on three measures: document frequency ($df$), inverse document frequency ($idf$), and Gries' Deviation of Proportions ($dp$).
 
-To estimate the distribution of types across a dataset there are basic measures, such as the number of documents a type appears in, or more complex measures in which the spread of terms in a given document and the documents' lengths are taken into account. 
+The most basic measure is **document frequency** ($df$). This is the number of documents in which a type appears at least once. For example, if a type appears in 10 documents, then the document frequency is 10. This is a very basic measure, but it is a good starting point.
 
-To calculate document frequency ($DF$), we can use the `count()` function to count the number of documents a lemma appears in. We can then sort the results in descending order by the number of documents, as seen in @exm-eda-masc-df.
+A nuanced version of document frequency is **inverse document frequency** ($idf$). This measure takes the total number of documents and divides it by the document frequency. This results in a measure that is inversely proportional to the document frequency. That is, the higher the document frequency, the lower the inverse document frequency. This measure is often log-transformed to spread out the values.
 
-::: {#exm-eda-masc-df}
-```{r}
-#| label: eda-masc-df
+One thing to consider about $df$ and $idf$ is that niether takes into account the length of the documents in which the type appears nor the spread of the type within each document. To take these factors into account, we can use Gries' Deviation of Proportions ($dp$) measure [@Gries2023, pp. 87-88]. The $dp$ measure is calculated as the difference between the proportion of a tokens in a document and tokens in the corpus. The metric can be subtracted from 1 to create a normalized measure of dispersion ranging between 0 and 1, with lower values being more dispersed.
 
-# Document frequency
-masc_content_tbl |> 
-  count(lemma, doc_id) |> 
-  count(lemma, sort = TRUE)
-```
-:::
+Let's consider how these measures differ with three scenarios: 
 
-$DF$ does not take into account the length of the documents in which the lemma appears nor the spread of the lemma within each document. To take these factors into account, we can use Gries' Deviation of Proportions ($DP$) measure [@Gries2023, pp. 87-88]. 
+Imagine a type with a token frequency of 100 appears in each of the 10 documents in a corpus.
 
-The $DP$ measure is calculated as the difference between the proportion of a tokens in a document and in tokens in the corpus. The metric can be subtracted from 1 to create a normalized measure of dispersion ranging between 0 and 1, with lower values being more dispersed.
+A. Each of the documents is 100 words long. The type appears 10 times in each document. 
+B. Each of the documents is 100 words long. But now the type appears once in 9 documents and 91 times in 1 document. 
+C. Nine of the documents constitute 99% of the corpus. The type appears once in each of the 9 documents and 91 times in the 10th document.
 
-The `qtalrkit` package includes the `calc_dispersion_metrics()` function which calculates the either or both $DF$ and $DP$ (normalized) measures. In @exm-eda-masc-dp, 
+Scenario A is the most dispersed, scenario B is less dispersed, and scenario C is the least dispersed. Yet, the type's $df$ and $idf$ scores will be the same. But the $dp$ score will reflect increasing concentration of the type from A to B to C. You may wonder why we would want to use $df$ or $idf$ at all. The answer is some combination of the fact that they are computationally less expensive to calculate, they are widely used (especially $idf$), and/ or in many practical situations they often highly correlated with $dp$.
+
+So for our task we will use $dp$ as our measure of dispersion. The `qtalrkit` package includes the `calc_type_metrics()` function which calculates, among other metrics, the dispersion metrics $df$, $idf$, and/ or $dp$. Let's select `dp` and assign the result to `masc_lemma_disp`, as seen in @exm-eda-masc-dp.
 
 ::: {#exm-eda-masc-dp}
 ```{r}
 #| label: eda-masc-dp
 
-# Calculate dispersion metrics
+# Load package
+library(qtalrkit)
+
+# Calculate deviance of proportions (DP)
 masc_lemma_disp <- 
-  masc_content_tbl |>
-  calc_dispersion_metrics(lemma, doc_id) |> 
-  mutate(idf = 1 - (df / max(df))) |>
+  masc_content_tbl |> 
+  calc_type_metrics(
+    type = lemma, 
+    documents = doc_id, 
+    dispersion = "dp"
+  ) |> 
   arrange(dp)
 
 # Preview
@@ -553,33 +552,19 @@ masc_lemma_disp |>
 ```
 :::
 
-So for our task, we would like to identify lemmas that are frequent and well-dispersed. But two questions arise, first which measure of dispersion is best to use, $DF$ or $DP$? Second, what is the threshold for frequency and dispersion that we should use to identify the lemmas that we want to include in our ELL materials?
+We would like to identify lemmas that are frequent and well-dispersed. But an important question arises, what is the threshold for frequency and dispersion that we should use to identify the lemmas that we want to include in our ELL materials?
 
-Let's tackle the first question. We can compare the $DF$ and $DP$ measures by plotting them against each other, as seen in @fig-eda-masc-df-dp.
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
-::: {#exm-eda-masc-df-dp}
-```{r}
-#| label: fig-eda-masc-df-dp
-#| fig-cap: "Inverse document frequency and Deviation of Proportions for lemmas in the MASC dataset"
-#| fig-width: 8
-#| fig-height: 4
+You may be wondering why the Inverse Document Frequency is, in fact, the inverse of the document counts, instead of just a count of the documents that each type appears in. The $idf$ is a very common measure in machine learning that is used in combination with (term) frequency to calculate the $tf-idf$ (term frequency-inverse document frequency) measure. That is, the product of the frequency of a term and the inverse document frequency of the term. This serves as a weighting measure that lowers the $tf-idf$ score for terms that are frequent across documents and increases the $tf-idf$ score for terms that are infrequent across documents. 
 
-# cor.test for DF and DP
-c1 <- cor.test(masc_lemma_disp$idf, masc_lemma_disp$dp)
+Consider what types will end up with a high or a low $tf-idf$ score. What use(s) could this measure have for distinguishing between types in a corpus? 
 
-# Plot DF and DP
-masc_lemma_disp |> 
-  ggplot(aes(x = idf, y = dp)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE) +
-  ylim(0,1) +
-  labs(x = "Inverse Document frequency", y = "Deviation of Proportions")
-```
+Hint: consider the earlier discussion of stopword lists.
 :::
 
-Statistically, there is a high correlation between $IDF$ and $DP$ with an $R^2$ value of `r c1$estimate^2` and a $p$-value less than .001. However, we can see that there is a trade-off between $IDF$ and $DP$. For less dispersed lemmas, $DP$ is more sensitive to differences than $IDF$. For more dispersed lemmas, $IDF$ is more sensitive to differences than $DP$. The upshot, then, is that if your interest is in distinguishing between less dispersed types, $DP$ can provide a more sensitive measure. If your interest is in distinguishing between more dispersed types, $IDF$ can provide a more sensitive measure.
-
-The second issue is to decide what the threshold for dispersion should be. Let's create a density plot to see if there is a natural break in the distribution of dispersion measures, as seen in @fig-eda-masc-dp-density.
+There are statistical approaches to identifying natural breakpoints, including clustering, but a visual inspection is often good enough for practical purposes. Let's create a density plot to see if there is a natural break in the distribution of our dispersion measure, as seen in @fig-eda-masc-dp-density.
 
 ::: {#exm-eda-masc-dp-density}
 ```{r}
@@ -588,7 +573,7 @@ The second issue is to decide what the threshold for dispersion should be. Let's
 #| fig-width: 8
 #| fig-height: 4
 
-# Density plot of DP
+# Density plot of dp
 masc_lemma_disp |> 
   ggplot(aes(x = dp)) +
   geom_density() +
@@ -597,131 +582,460 @@ masc_lemma_disp |>
 ```
 :::
 
-What we are looking for is a natural break in the distribution of dispersion measures. In @fig-eda-masc-dp-density, we can see that there is a natural break in the distribution between .85 and .97. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In @exm-eda-masc-dp-filter, I filter out lemmas that have a dispersion measure less than .91 and then re-run the frequency analysis for the top 100 lemmas.
+What we are looking for is an elbow in the distribution of dispersion measures. In @fig-eda-masc-dp-density, we can see that there is distinctive bend in the distribution between .85 and .97. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In @exm-eda-masc-dp-filter, I filter out lemmas that have a dispersion measure less than .91. Then in @tbl-eda-masc-dp-filter, I preview the top and bottom 50 lemmas in the dataset.
 
 ::: {#exm-eda-masc-dp-filter}
 ```{r}
-#| label: fig-eda-masc-dp-filter
-#| fig-cap: "Frequency of tokens in the MASC dataset after filtering out lemmas with a Deviation of Proportions less than .91"
-#| fig-height: 4
-#| fig-width: 8
+#| label: tbl-eda-masc-dp-filter
+#| tbl-cap: "Frequency of tokens in the MASC dataset after filtering out lemmas with a Deviation of Proportions less than .91"
+#| tbl-subcap: 
+#| - "Top 50 lemmas"
+#| - "Bottom 50 lemmas"
+#| layout-nrow: 2
 
-# Filter out lemmas with DP <= .91
-masc_lemma_disp_thres <- 
+# Filter for lemmas with dp <= .91
+masc_lemma_disp_thr <- 
   masc_lemma_disp |> 
   filter(dp <= .91) |> 
   arrange(desc(n))
 
-# Re-run frequency analysis
-masc_lemma_disp_thres |> 
-  slice_head(n = 100) |> 
-  ggplot(aes(x = reorder(type, desc(n)), y = n)) +
-  geom_col() +
-  labs(x = "Types", y = "Token frequency") +
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1.3))
-
-masc_lemma_disp_thres |> 
+# Preview top
+masc_lemma_disp_thr |> 
   slice_head(n = 50) |> 
   pull(type) |>
-  matrix(ncol = 10)
+  matrix(ncol = 10, byrow = TRUE) |> 
+  kable(col.names = NULL)
 
-masc_lemma_disp_thres |>
+# Preview bottom
+masc_lemma_disp_thr |>
   slice_tail(n = 50) |> 
   pull(type) |>
-  matrix(ncol = 10)
+  matrix(ncol = 10) |> 
+  kable(col.names = NULL)
 ```
 :::
 
-
-<!-- Weights 
-Weights:
-- $tf-idf$ (term frequency-inverse document frequency)
-- 1 - DP_normalized
--->
-
+We now have a good candidate list of common vocabulary that is spread well across the corpus. 
 
 ##### Relative frequency {#sec-eda-frequency-relative}
-<!-- Corpus and sub-corpus comparisons 
 
-- Term frequency
-- Observed relative frequency
--->
+Gauging frequency and dispersion across the entire corpus is a good starting point for any frequency analysis, but it is often the case that we want to compare the frequency and dispersion of linguistic units across corpora or sub-corpora. 
 
+In the case of the MASC dataset, for example, we may want to compare metrics across the two modalities or the various genres. Simply comparing frequency counts across these sub-corpora is not a good approach, and can be misleading, as the sub-corpora may vary in size. For example, if one sub-corpus is twice as large as another sub-corpus, then, all else being equal, the frequency counts will be twice as large in the larger sub-corpus. This is why we use relative frequency measures, which are normalized by the size of the sub-corpus.
 
-Although much can be learned from the distribution of linguistic units in a dataset as a whole, most frequency analyses aim to contrast the frequency of linguistic units across distinct corpora or sub-corpora of a corpus. In the MASC dataset, we can explore potential differences between the spoken and written discourses. 
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
-Let's start by following a similar approach to the one we took above for the corpus as a whole. However, this time we will add another variable to the `count()` function to group the tokens by the `modality` variable and then use this variable in the `facet_wrap()` function to create a separate plot for each modality, as seen in @exm-eda-masc-count-modality.
+A variable in the MASC dataset that has yet to be used is the `pos` part-of-speech variable. How could we use this variable to refine our frequency and dispersion analysis of lemma types?
 
-::: {#exm-eda-masc-count-modality}
+Hint: consider lemma forms that may be tagged with different parts-of-speech.
+:::
+
+To normalize the frequency of linguistic units across sub-corpora, we can use the **relative frequency** measure. This is the frequency of a linguistic unit divided by the total number of linguistic units in the sub-corpus. This bakes in the size of the sub-corpus into the measure. The notion of relative frequency is key to all research working with text, as it is the basis for the statistical approach to text analysis where comparisons are made. 
+
+There are some field-specific terms that are used to refer to relative frequency measures. For example, in information retrieval and Natural Language Processing, the relative frequency measure is often referred to as the **term frequency**. In corpus linguistics, the relative frequency measure is often modified slightly to include a constant (*e.g.* $rf * 100$) which is known as the **observed relative frequency**. Athough the observed relative frequency per number of tokens is not strictly necessary, it is often used to make the values more interpretable as we can now talk about an observed relative frequency of 1.5 as a linguistic unit that occurs 1.5 times per 100 linguistic units.
+
+Let's consider how we might compare the frequency and dispersion of lemmas across the two modalities in the MASC dataset, spoken and written. To make this a bit more interesting and more relevant, let's add the `pos` variable to our analysis. The intent, then, will be to identify lemmas tagged with particular parts of speech that are particularly indicative of each of the modaliites. 
+
+We can do this by collapsing the `lemma` and `pos` variables into a single variable, `lemma_pos`, with the `str_c()` function, as seen in @exm-eda-masc-type.
+
+::: {#exm-eda-masc-type}
 ```{r}
-#| label: fig-eda-masc-count-modality
-#| fig-cap: "Frequency of tokens in the MASC dataset by modality"
-#| fig-height: 4
+#| label: eda-masc-type
+
+# Collapse lemma and pos into type
+masc_content_tbl <- 
+  masc_content_tbl |> 
+  mutate(lemma_pos = str_c(lemma, pos, sep = "_"))
+
+# Preview
+masc_content_tbl |> 
+  slice_head(n = 10)
+```
+:::
+
+Now this will increase the number of lemma types in the dataset as we are now considering lemmas where the same lemma form is tagged with different parts-of-speech. 
+
+Getting back to calculating the frequency and dispersion of lemmas in each modality, we can use the `calc_type_metrics()` function with `lemma_pos` as our type argument. We will, however, need to apply this function to each sub-corpus independently and then concatenate the two data frames. This function returns a (raw) frequency measure by default, but we can specify the`frequency` argument to `rf` to calculate the relative frequency of the linguistic units as in @exm-eda-masc-metrics-modality.
+
+::: {#exm-eda-masc-metrics-modality}
+```{r}
+#| label: eda-masc-metrics-modality
+
+# Calculate relative frequency
+# Spoken
+masc_spoken_metrics <- 
+  masc_content_tbl |> 
+  filter(modality == "Spoken") |> 
+  calc_type_metrics(
+    type = lemma_pos, 
+    documents = doc_id, 
+    frequency = "rf",
+    dispersion = "dp"
+  ) |> 
+  mutate(modality = "Spoken") |>
+  arrange(desc(n))
+
+# Written 
+masc_written_metrics <- 
+  masc_content_tbl |> 
+  filter(modality == "Written") |> 
+  calc_type_metrics(
+    type = lemma_pos, 
+    documents = doc_id, 
+    frequency = "rf",
+    dispersion = "dp"
+  ) |> 
+  mutate(modality = "Written") |> 
+  arrange(desc(n))
+
+# Concatenate spoken and written metrics
+masc_metrics <-
+  bind_rows(masc_spoken_metrics, masc_written_metrics)
+
+# Preview
+masc_metrics |> 
+  slice_head(n = 10)
+```
+:::
+
+With the `rf` measure, we are now in a position to compare 'apples to apples', as you might say. We can now compare the relative frequency of lemmas across the two modalities. Let's preview the top 10 lemmas in each modality, as seen in @exm-eda-masc-relative-frequency-top.
+
+::: {#exm-eda-masc-relative-frequency-top}
+```{r}
+#| label: eda-masc-relative-frequency-top
+
+# Preview top 10 lemmas in each modality
+masc_metrics |> 
+  group_by(modality) |> 
+  slice_max(n = 10, order_by = rf) |>
+  ungroup()
+```
+:::
+
+We can appreciate, now, that there are similarities and a few differences between the most frequent lemmas for each modality. First, there are similar lemmas in written and spoken modalities, such as 'be', 'have', and 'not'. Second, the top 10 include verbs and adverbs. Now we are looking at the most frequent types, so it is not surprising that we see more in common than not. However, looking close we can see that contracted forms are more frequent in the spoken modality, such as 'isn't', 'don't', and 'can't' and that ordering of the verb tenses differs to some degree. Whether these are important distinctions for our task is something we will need to consider.
+
+We can further cull our results by filtering out lemmas that are not well-dispersed across the sub-corpora. Although it may be tempting to use the threshold we used earlier, we should consider that the size of the sub-corpora are different and the distribution of the dispersion measure may be different. With this in mind, we need to visualize the distribution of the dispersion measure for each modality, as seen in @fig-eda-masc-dispersion-threshold.
+
+```{r}
+#| label: fig-eda-masc-dispersion-threshold
+#| fig-cap: "Density plot of Deviation of Proportions for lemmas in the MASC dataset by modality"
 #| fig-width: 8
+#| fig-height: 4
 
-# Token count by modality, sorted
-masc_tbl |> 
-  count(modality, token, sort = TRUE) |> 
-  slice_head(n = 50, by = modality) |> 
-  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
-  geom_col() +
-  labs(x = "Types", y = "Token frequency") +
-  scale_y_continuous(labels = scales::comma) +
-  facet_wrap(~ modality, ncol = 1, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90))
+# Density plot of dp by modality
+masc_metrics |> 
+  ggplot(aes(x = dp)) +
+  geom_density(alpha = .5) +
+  scale_x_continuous(breaks = seq(0, 1, .1)) +
+  labs(x = "Deviation of Proportions", y = "Density") +
+  facet_wrap(~ modality, ncol = 2, scales = "free_x")
+```
 
-masc_tbl |> 
-  group_by(modality, token) |>
-  summarise(n = n()) |> 
-  arrange(modality, desc(n)) |> 
-  top_n(100, n) |> 
-  ggplot(aes(x = reorder(token, desc(n)), y = n)) +
-  geom_col() +
-  labs(x = "Types", y = "Token frequency") +
-  scale_y_continuous(labels = scales::comma) +
-  facet_wrap(~ modality, ncol = 1, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90))
+As expected, the density plots point to different thresholds for each modality.The written subcorpus follows closely with the previous distribution, but the spoken subcorpus has more than one bend in the distribution. Why are there multiple peaks in the density plot? It points to some level of inconsistency in the spoken data, either potentially some level of context-dependent language use (genres, topics, speech styles) or it could be due to the fact that the spoken subcorpus' size is too small to provide a reliable distribution.
+
+In any case, we can estimate the threshold for the spoken corpus making use of the largest peak in the distribution as the reference point. With this approach in mind, lets maintain the $.91$ threshold for the written subcorpus and use a $.79$ threshold for the spoken subcorpus. Let's filter out lemmas that have a dispersion measure less than .91 for the written subcorpus and less than .79 for the spoken subcorpus, as seen in @exm-eda-masc-subcorpora-filtered.
+
+::: {#exm-eda-masc-subcorpora-filtered}
+```{r}
+#| label: eda-masc-subcorpora-filtered
+
+# Filter for lemmas with
+# dp <= .91 for written and 
+# dp <= .79 for spoken
+masc_metrics_thr <- 
+  masc_metrics |> 
+  filter(
+    (modality == "Written" & dp <= .91) | 
+    (modality == "Spoken" & dp <= .79)
+  ) |> 
+  arrange(desc(rf))
+```
+:::
+
+Filtering the less-dispersed types reduces the dataset from `r nrow(masc_metrics)` to `r nrow(masc_metrics_thr)` observations. This will provide us with a more succinct list of common and well-dispersed lemmas that are used in each modality. 
+
+As much as the frequency and dispersion measures can provide us with a good starting point, it does not provide an understanding of what types are more indicative of a particular sub-corpus, modality subcorpora in our case. We can do this by calculating the log odds ratio of each lemma in each modality. 
+
+The **log odds ratio** is a measure that quantifies the difference between the frequencies of a type in two corpora or sub-corpora. In spirit and in name, it compares the odds of a type occurring in one corpus versus the other. The values range from negative to positive infinity, with negative values indicating that the type is more frequent in the first corpus and positive values indicating that the lemma is more frequent in the second corpus. The magnitude of the value indicates the strength of the association.
+
+The `tidylo` package provides a convenient function `bind_log_odds()` to calculate the log odds ratio, and a weighed variant, for each type in each sub-corpus. Let's use this function to calculate the log odds ratio for each lemma in each modality, as seen in @exm-eda-masc-log-odds.
+
+::: {#exm-eda-masc-log-odds}
+```{r}
+#| label: eda-masc-log-odds
+
+# Load package
+library(tidylo)
+
+# Calculate log odds ratio
+masc_metrics_thr <- 
+  masc_metrics_thr |> 
+  bind_log_odds(
+    set = modality,
+    feature = type,
+    n = n, 
+    unweighted = TRUE
+  )
+
+# Preview (ordered by log_odds)
+# Spoken
+masc_metrics_thr |> 
+  slice_max(n = 10, order_by = log_odds)
+
+# Written
+masc_metrics_thr |> 
+  slice_min(n = 10, order_by = log_odds)
 ```
 :::
 
 
-frequency analysis can also be used to identify units that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset. For example, we might be interested in identifying words that are distinctive to spoken versus written discourses. 
+- [ ]  not clear to me what the log_odds are doing. I thought they would run from 1 to -1 with the more negative, the more indicative of writing (as it is alphabetically second)
 
+[description of the results...]
+
+The second measure produced by `bind_log_odds()` function, is the weighted log odds ratio. This measure provides a more robust and interpretable measure for comparing term frequencies across corpora, especially when term frequencies are low or when corpora are of different sizes. The weighting (or standardization) also makes it easier to identify terms that are particularly distinctive or characteristic of one corpus over another. Note that the weighted measure's interpretation is slightly different that the log odds's. The larger positive values in each corpus indicate that the type is more indicative of that (sub-)corpus, and the larger negative values indicate that the type is less indicative. 
+
+Let's imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regular expression magic. Let's use the `str_subset()` function to filter for lemmas that start with 'V' and then use `slice_max()` to extract the top 10 most indicative verb lemmas, as seen in @exm-eda-masc-log-odds-weighted-verbs.
+
+::: {#exm-eda-masc-log-odds-weighted-verbs}
+```{r}
+#| label: eda-masc-log-odds-weighted-verbs
+
+# Preview (ordered by log_odds_weighted)
+# Spoken and written
+masc_metrics_thr |> 
+  group_by(modality) |> 
+  filter(str_detect(type, "_V")) |> 
+  slice_max(n = 10, order_by = log_odds_weighted) |>
+  select(-n, -log_odds) |>
+  ungroup() 
+```
+:::
+
+Note that the log odds are larger for the spoken modality than the written modality. This indicates that theses types are more strongly indicative of the spoken modality than the types in the written modality are indicative of the written modality. This is not surprising, as the written modality is typically more diverse in terms of lexical usage than the spoken modality, where the terms tend to be repeated more often, including verbs.
 
 #### Co-occurrence analysis {#sec-eda-co-occurrence}
 
-ELL: we want to identify verb particle constructions that are distinctive to spoken versus written discourses. These are verbs that appear as a phrase with a preposition or adverb, such as 'look up', 'look after'. These are common in English, but we want to know two things: which verb particle constructions are most common and do they vary by modality?
+Moving forward on our task, we have a good idea of the general vocabulary that we want to include in our ELL materials and can identify lemma types that are particularly indicative of each modality. Another useful approach to complement our analysis is to identify words that co-occur with our target lemmas --in particular verbs. In English it is common for verbs to appear with a preposition or adverb, such as 'give up', 'look after'. These 'phrasal verbs' form a semantic unit that is distinct from the verb alone.
 
-<!-- (grammaticalization, syntactic alternations, discourse analysis, etc.) -->
+In cases such as this, we are aiming to do a co-occurrence analysis. Co-occurrence analysis is a set of methods that are used to identify words that appear in close proximity to a target type. 
 
-<!--  
-- Co-occurrence analysis
-  - Are there domain specific collocations?
-    - What are common verbs that appear in hedging constructions?
-      - Use 'may', 'might', 'will', 'would' to identify hedging constructions
--->
+<!-- Concordances -->
 
-- Concordance
-    - KWIC (keyword in context)
-    This section will discuss keyword in context (KWIC) analyses, which is used to identify meaningful keywords in a given text. It will discuss various ways to analyse a text and extract keywords, as well as discuss various practical applications of KWIC in linguistics.
-- Collocation
-    - PMI (pointwise mutual information)
-    - ...
+An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). This is a table that displays the target word in the center of the table and the words that appear before and after the target word. This is a useful approach for spot identifying collocations of a target word or phrase. 
 
+The `quanteda` package includes a function `kwic()` that can be used to create a KWIC table. It does require some transformation to the data, however. We need to collapse the `lemma` column into a single string for each document from the original transformed dataset, `masc_tbl`.  Then we can apply the `corpus()` and then `tokens` function to create a quanteda tokens object. Then we can apply the `kwic()` function to create a KWIC table.
+
+::: {#exm-eda-masc-kwic}
+```{r}
+#| label: eda-masc-kwic
+
+
+# Collapse lemma, pos into a single string
+masc_text_tbl <- 
+  masc_tbl |> 
+  mutate(lemma_pos = str_c(lemma, pos, sep = "_")) |>
+  group_by(doc_id, modality, genre) |> 
+  summarize(text = str_c(lemma_pos, collapse = " ")) |> 
+  ungroup()
+
+# Load package
+library(quanteda)
+
+masc_corpus <- 
+  masc_text_tbl |> 
+  corpus(
+    text_field = "text",
+    docid_field = "doc_id"
+  )
+
+summary(masc_corpus)
+
+masc_corpus |> 
+  tokens() |> 
+  kwic(
+    pattern = phrase("*_V* *_IN*"),
+    window = 3
+  ) |> 
+  slice_sample(n = 10)
+``` 
+:::
+
+<!-- N-grams -->
+
+A straightforward quantitative way to explore co-occurrence is to set the unit of observation to an $n-gram$ of terms. An $n-gram$ is a sequence of $n$ words. For example, a 2-gram is a sequence of two words, a 3-gram is a sequence of three words, and so on. Then, the frequency and dispersion metrics can be calculated for each $n-gram$.
+
+In general, deriving $n-grams$ from a corpus is a straightforward process. The `tidytext` package includes a function `unnest_tokens()` that can be used to create $n-grams$ from a corpus. The function can take a single column of untokenized text or a tokenized column in combination with a variable to use as the grouping variable. In the `masc_tbl` dataset, we have tokenized text in the `lemma` column and a grouping variable in the `doc_id` column. We can use the `unnest_tokens()` function to create a new data frame with a row for each $n-gram$ in each document, as seen in @exm-eda-masc-bigrams-tidytext.
+
+::: {#exm-eda-masc-bigrams-tidytext}
+```{r}
+#| label: eda-masc-bigrams-tidytext
+
+# Load package
+library(tidytext)
+
+# Create bigrams
+masc_tbl |> 
+  unnest_tokens(
+    output = bigrams, 
+    input = lemma, 
+    token = "ngrams", 
+    n = 2, 
+    collapse = "doc_id"
+    ) |> 
+  slice_head(n = 10)
+```
+:::
+
+The result of this operation can be joined with the original dataset using the `doc_id` as the key variable. Then we can calculate the frequency and dispersion metrics for each $n-gram$ in each modality. However, this approach is not ideal for our task. The reason is that we are interested in identifying $n-grams$ that include verbs. The `unnest_tokens()` function does not allow us to filter the $n-grams$ by part-of-speech.
+
+Another, more informative approach is to create a new variable that combines the lemma and part-of-speech for each observation before using `unnest_tokens()` to generate the bigrams. We can use the `str_c()` function from the `stringr` package to join the `lemma` and `pos` columns into a single string, so that we have a variable `lemma_pos` with the lemma and part-of-speech joined by an underscore. 
+
+One consideration that we need to take for our goal to identify verb particle constructions, is how we ultimately want to group our `lemma_pos` values. This is particularly important given the fact that our `pos` tags for verbs include information about the verb's tense and person. This means that a verb in a verb particle bigram, such as 'look after', will be represented by multiple `lemma_pos` values, such as 'look_VB', 'look_VBP', 'look_VBD', and 'look_VBG'. If we want this level of detail, we just proceed as described above. However, if we want to group the verb particle bigrams by a single verb value, we need to recode the `pos` values for verbs. We can do this with the `case_match()` function from the `dplyr` package.
+
+In @exm-eda-masc-lemma-pos, I recode the `pos` values for verbs to 'V' and then join the `lemma` and `pos` columns into a single string.
+
+::: {#exm-eda-masc-lemma-pos}
+```{r}
+#| label: eda-masc-lemma-pos
+
+# Collapse lemma into a single string
+masc_lemma_pos_tbl <- 
+  masc_tbl |> 
+  mutate(pos = case_when(
+    str_detect(pos, "^V") ~ "V",
+    TRUE ~ pos
+  )) |> 
+  group_by(doc_id) |> 
+  mutate(lemma_pos = str_c(lemma, pos, sep = "_")) |>
+  ungroup()
+
+# Preview
+masc_lemma_pos_tbl |> 
+  slice_head(n = 10)
+
+masc_lemma_pos_tbl |> 
+  unnest_tokens(
+    output = bigrams, 
+    input = lemma_pos, 
+    token = "ngrams", 
+    n = 2, 
+    to_lower = FALSE,
+    collapse = "doc_id"
+  ) |> 
+  filter(str_detect(bigrams, "_V.*_IN")) |> 
+  calc_type_metrics(
+    type = bigrams, 
+    documents = doc_id, 
+    frequency = "rf",
+    dispersion = "dp"
+  ) |> 
+  arrange(desc(rf))
+```
+:::
+
+We have identified and derived frequency and dispersion metrics for $n-grams$ that include verb particle construction candidates. Yet, there is a problem with this approach. The problem is that the $n-grams$ are not necessarily verb particle constructions in the sense that they form a semantic unit. Second, frequency and dispersion metrics are not necessarily the best measures for identifying the co-occurrence relationship between the verb and the particle. In other words, just because a two-word sequence is frequent and well-dispersed does not mean that the two words form a semantic unit. 
+
+<!-- Collocation -->
+
+To address these issues, we can use a statistical measures to estimate collocational strength between two words. A **collocation** is a sequence of words that co-occur more often than would be expected by chance. The most common measure of collocation is the **pointwise mutual information** (PMI) measure. The PMI measure is calculated as the log ratio of the observed frequency of two words co-occurring to the expected frequency of the two words co-occurring. The expected frequency is calculated as the product of the frequency of each word. The PMI measure is a log ratio, so the values range from negative to positive infinity, with negative values indicating that the two words co-occur less often than would be expected by chance and positive values indicating that the two words co-occur more often than would be expected by chance. The magnitude of the value indicates the strength of the association.
+
+Let's calculate the PMI for all the bigrams in the MASC dataset. We can use the `calc_assoc_metrics()` function from `qtalrkit`. We need to specify the `association` argument to `pmi` and the `type` argument to `bigrams`, as seen in @exm-eda-masc-bigrams-pmi.
+
+::: {#exm-eda-masc-bigrams-pmi}
+```{r}
+#| label: eda-masc-bigrams-pmi
+
+masc_lemma_pos_assoc <- 
+  masc_lemma_pos_tbl |> 
+  calc_assoc_metrics(
+    doc_index = doc_id, 
+    token_index = term_num, 
+    type = lemma_pos, 
+    association = "pmi"
+  )
+
+# Preview 
+masc_lemma_pos_assoc |> 
+  arrange(desc(pmi)) |>
+  slice_head(n = 10)
+```
+:::
+
+One caveat to using the PMI measure is that it is sensitive to the frequency of the words. If the words in a bigram pair are infrequent, and especially if they only occur once, then the PMI measure will be inflated. To mitigate this issue, we can apply a frequency threshold to the bigrams before calculating the PMI measure. Let's filter out bigrams that occur less than 10 times, as seen in @exm-eda-masc-bigrams-pmi-filtered.
+
+::: {#exm-eda-masc-bigrams-pmi-filtered}
+```{r}
+#| label: eda-masc-bigrams-pmi-filtered
+
+# Filter for bigrams that occur >= 10 times
+masc_lemma_pos_assoc_thr <- 
+  masc_lemma_pos_assoc |> 
+  filter(n >= 10) |> 
+  arrange(desc(pmi))
+
+# Preview
+masc_lemma_pos_assoc_thr |> 
+  slice_head(n = 10)
+```
+:::
+
+Now we are in a position to identify verb particle constructions. We can filter for bigrams that include a verb and a particle and that have a PMI measure greater than 0, as seen in @exm-eda-masc-bigrams-pmi-filtered-vpc.
+
+::: {#exm-eda-masc-bigrams-pmi-filtered-vpc}
+```{r}
+#| label: eda-masc-bigrams-pmi-filtered-vpc
+
+# Filter for bigrams that include a verb and a particle
+# and that have a PMI measure greater than 0
+masc_verb_part_assoc <- 
+  masc_lemma_pos_assoc_thr |> 
+  filter(str_detect(x, "_V")) |> 
+  filter(str_detect(y, "_IN")) |>
+  filter(pmi > 0) |> 
+  arrange(x)
+
+# Preview 
+masc_verb_part_assoc |> 
+  slice_head(n = 10)
+```
+:::
+
+We can clean up the results a bit by removing the part-of-speech tags from the `x` and `y` variables, up our minimum PMI value, and create a network plot to visualize the results, as seen in @fig-eda-masc-verb-part-network.
 
 ```{r}
-#| label: masc-transformed-phrasal-verbs
+#| label: fig-eda-masc-verb-part-network
+#| fig-cap: "Network plot of verb particle constructions in the MASC dataset"
+#| fig-width: 8
 
-masc_tbl |>
-  arrange(doc_id) |>
-  group_by(doc_id) |>
+# Clean up results
+masc_verb_part_assoc_plot <- 
+  masc_verb_part_assoc |> 
+  filter(pmi >= 2) |> 
   mutate(
-    next_lemma = lead(lemma),
-    next_pos = lead(pos)
-  ) |>
-  filter(pos == "VB" & next_pos %in% c("RP", "IN"))
+    x = str_remove(x, "_V.*"),
+    y = str_remove(y, "_IN")
+  )
+
+# Create an association network plot 
+# `x` and `y` are the nodes
+# `pmi` is the edge weight
+
+library(igraph)
+library(ggraph)
+
+masc_verb_part_assoc_plot |> 
+  graph_from_data_frame() |> 
+  ggraph(layout = "nicely") +
+  geom_edge_link(aes(color = pmi), alpha = 0.8, edge_width = 0.8, arrow = grid::arrow()) +
+  geom_node_point(color = "black") +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  scale_edge_color_gradient(low = "grey90", high = "grey20") +
+  theme_void()
 ```
+
+There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be answered with co-occurrence analysis.
 
 ### Unsupervised learning {#sec-eda-unsupervised}
 

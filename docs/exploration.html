@@ -706,12 +706,12 @@ Drop the independent sections in favor of a more integrated approach.
 -->
 <section id="sec-eda-descriptive" class="level3" data-number="8.2.1"><h3 data-number="8.2.1" class="anchored" data-anchor-id="sec-eda-descriptive">
 <span class="header-section-number">8.2.1</span> Descriptive analysis</h3>
-<p>Descriptive analysis techniques are used to gain insights from text data without interpreting or making conclusions about the actual meaning or context. Common techniques include frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms or topics are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together.</p>
+<p>Descriptive analysis includes common techniques such as frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms or topics are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together.</p>
 <p>Using the MASC dataset, we will entertain questions such as:</p>
 <ul>
 <li>What are the most common terms a beginning ELL should learn?</li>
 <li>Are there term differences between spoken and written discourses that should be emphasized?</li>
-<li>What are the most common phrasal verbs (verb particle constructions)? Do they vary by modality or genre?</li>
+<li>What are the most common verb particle constructions?</li>
 </ul>
 <p>Along the way, we will introduce some fundamental concepts in text analysis such as tokens and types and frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.</p>
 <section id="sec-eda-frequency" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-frequency">Frequency analysis</h4>
@@ -2330,27 +2330,31 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 <p>We can clean up the results a bit by removing the part-of-speech tags from the <code>x</code> and <code>y</code> variables, up our minimum PMI value, and create a network plot to visualize the results, as seen in <a href="#fig-eda-masc-verb-part-network">Figure&nbsp;<span>8.5</span></a>.</p>
-<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-verb-part-network_1cc1369ea722f16581b6111c4972b801">
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-verb-part-network_5028ecd96c4d2168be52c23a829a44c4">
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Clean up results</span></span>
-<span><span class="va">masc_verb_part_assoc_plot</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="va">masc_verb_part_assoc</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pmi</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">masc_verb_part_assoc_plot</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">masc_verb_part_assoc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pmi</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="fu">str_remove</span><span class="op">(</span><span class="va">x</span>, <span class="st">"_V.*"</span><span class="op">)</span>,</span>
 <span>    y <span class="op">=</span> <span class="fu">str_remove</span><span class="op">(</span><span class="va">y</span>, <span class="st">"_IN"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create an association network plot </span></span>
+<span><span class="co"># Create an association network plot</span></span>
 <span><span class="co"># `x` and `y` are the nodes</span></span>
 <span><span class="co"># `pmi` is the edge weight</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/">igraph</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggraph.data-imaginist.com">ggraph</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">masc_verb_part_assoc_plot</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://r.igraph.org/reference/graph_from_data_frame.html">graph_from_data_frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">masc_verb_part_assoc_plot</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://r.igraph.org/reference/graph_from_data_frame.html">graph_from_data_frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggraph.data-imaginist.com/reference/ggraph.html">ggraph</a></span><span class="op">(</span>layout <span class="op">=</span> <span class="st">"nicely"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggraph.data-imaginist.com/reference/geom_edge_link.html">geom_edge_link</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">pmi</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>, edge_width <span class="op">=</span> <span class="fl">0.8</span>, arrow <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/arrow.html">arrow</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggraph.data-imaginist.com/reference/geom_edge_link.html">geom_edge_link</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">pmi</span><span class="op">)</span>,</span>
+<span>    alpha <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>    edge_width <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>    arrow <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/arrow.html">arrow</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggraph.data-imaginist.com/reference/geom_node_point.html">geom_node_point</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggraph.data-imaginist.com/reference/geom_node_text.html">geom_node_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">name</span><span class="op">)</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggraph.data-imaginist.com/reference/scale_edge_colour.html">scale_edge_color_gradient</a></span><span class="op">(</span>low <span class="op">=</span> <span class="st">"grey90"</span>, high <span class="op">=</span> <span class="st">"grey20"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -2362,35 +2366,212 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p>There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be answered with co-occurrence analysis.</p>
+<p>From this plot, and from the underlying data, we can explore verb particle constructions. We could go further and apply our co-occurrence methods to each modality separately, if we wanted to identify verb particle constructions that are distinctive to each modality. We could also apply our co-occurrence methods to other parts-of-speech, such as adjectives and nouns, to identify collocations of these parts-of-speech. There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be addressed with co-occurrence analysis.</p>
 </section></section><section id="sec-eda-unsupervised" class="level3" data-number="8.2.2"><h3 data-number="8.2.2" class="anchored" data-anchor-id="sec-eda-unsupervised">
 <span class="header-section-number">8.2.2</span> Unsupervised learning</h3>
-<ul class="task-list">
-<li>
-<input type="checkbox">Overview of unsupervised learning</li>
-</ul>
-<p>Unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset … (expand on this definition)</p>
-<ul class="task-list">
-<li>
-<input type="checkbox">An overview of the some of the questions we will entertain in this section.</li>
-</ul>
-<section id="sec-eda-clustering" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-clustering">Clustering</h4>
-<p>ELL: we want to identify and group genres based on linguistic features or co-occurrence patterns. The better we can identify and group genres, the better we can identify and group linguistic features or co-occurrence patterns that are distinctive to a particular genre.</p>
-<!--  
-
-- Clustering
-  - Are there discernible clusters that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
-        - Use k-means clustering to identify clusters of linguistic features or co-occurrence patterns
-        - Use hierarchical clustering to identify clusters of linguistic features or co-occurrence patterns
-
--->
-<p>This section will discuss clustering techniques, which are used to partition data into clusters based on similarity. It will discuss various approaches to clustering, such as k-means and hierarchical clustering, as well as discuss their use cases in linguistics.</p>
+<p>Aligned in purpose, unsupervised learning approaches to exploratory data analysis are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include clustering, topic modeling, and word embedding.</p>
+<p>We will continue to use the MASC dataset as we develop materials for our ELL textbook to illustrate unsupervised learning methods. In the process, we will explore the following questions:</p>
 <ul>
-<li>K-means (pre-defined number of clusters)</li>
+<li>Can we identify genres based on linguistic features or co-occurrence patterns of the data itself?</li>
+<li>Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?</li>
+<li>Do certain words or phrases have different meanings or uses depending on the modality in which they appear?</li>
+</ul>
+<p>Through these questions we will build on our knowledge of frequency, dispersion, and co-occurrence analysis and introduce concepts and methods associated with machine learning.</p>
+<section id="sec-eda-clustering" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-clustering">Clustering</h4>
+<p><strong>Clustering</strong> is a unsupervised learning technique that can be used to group similar items in the text data, helping to organize the data into distinct categories and discover relationships between different elements in the text. The main steps in the procedure includes identifying the relevant linguistic features to use for clustering, representing the features in a way that can be used for clustering, and applying a clustering algorithm to the data. However, it is important to consider the strengths and weaknesses of the clustering algorithm for a particular task and how the results will be evaluated.</p>
+<p>In our ELL textbook task, we may very well want to identify terms that are particularly indicative of each genre. This will help us design a textbook with relevant communicative context in which terms are used most naturally. However,we may have questions about how well the labeled genres in the dataset map to real distinctions in language use. For example, are the genres ‘Letters’ and ‘Journal’ really distinct genres? Or, are they more similar than different? If they are more similar than different, then we may want to consider combining them into a single genre.</p>
+<p>Enter clustering. Instead of relying on the labels in the MASC dataset, we can let the data itself say something about how related the genres are. Yet, a pivotal question is what features should we use, otherwise known as <strong>feature selection</strong>. We could use terms or lemmas, but we may want to consider other features, such as parts-of-speech or some co-occurrence patterns. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results.</p>
+<p>Another key question is what clustering algorithm to use. Again, we are not married to one algorithm, and we can perform clustering multiple times with different algorithms, but not all algorithms are created equal. Some algorithms are better suited for certain types of data and certain types of tasks. For example, <strong>Hierarchical clustering</strong> is a good choice when we are not sure how many clusters we want to identify, as it does not require us to specify the number of clusters from the outset. However, it is not a good choice when we have a large dataset, as it can be computationally expensive compared to some other algorithms. <strong>K-means clustering</strong>, on the other hand, is a good choice when we want to identify a pre-defined number of clusters, and the aim is to gauge how well the data fit the clusters. These two clustering techniques, therefore complement each other with Hierarchical clustering being a good choice for initial exploration and K-means clustering being a good choice for targeted evaluation.</p>
+<p>With these considerations in mind, let’s start by identifying the linguistic features that we want to use for clustering. Imagine that among the various features that we are interested in associating with genres, adjective use is one of them. The MASC dataset, <code>masc_tbl</code> includes the <code>pos</code> column and we can use this to isolate adjectives in the dataset. But first, we need to consider how we are going to operationalize ‘adjective use’.</p>
+<p>In machine learning, operationalizing a concept is often referred to as feature engineering. <strong>Feature engineering</strong> is the process of transforming raw data into features that can be used for machine learning. In our case, adjective use could refer to raw frequency, relative frequency, or dispersion of individual adjectives, or even some co-occurrence pattern that includes adjectives. Each of these measures of use bakes in a different assumption about what adjective use means. Furthermore, some measures may be more useful for the clustering purposes at hand than others. For example, dispersion, while useful for identifying how spread or concentrated a type is across a corpus, may not be as useful for identifying genres based on adjective use since we will likely want to identify adjective-genre associations regardless of how spread or concentrated the adjective is across the corpus. Or maybe it is. For this reason, it is crucial to understand the implications of the feature engineering decisions that we make in the context of the task at hand.</p>
+<p>Let’s consider the raw frequency distribution of individual adjectives in the MASC dataset by genre. I will use the <code><a href="https://sfirke.github.io/janitor/reference/tabyl.html">tabyl()</a></code> function from the <code>janitor</code> package to create a frequency table of adjectives in the dataset, as seen in <a href="#exm-eda-masc-adjective-frequency">Example&nbsp;<span>8.26</span></a>.</p>
+<div id="exm-eda-masc-adjective-frequency" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.26 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-adjective-frequency_1d8e275f99af2a788338b18ec98d8eec">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span> <span class="co"># for tabyl()</span></span>
+<span></span>
+<span><span class="co"># Barplot of adjective frequency</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pos</span> <span class="op">==</span> <span class="st">"JJ"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># "JJ" Adjective in the Penn tagset</span></span>
+<span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/tabyl.html">tabyl</a></span><span class="op">(</span><span class="va">genre</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/adorn_pct_formatting.html">adorn_pct_formatting</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">genre</span>, y <span class="op">=</span> <span class="va">percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_col</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Genre"</span>, y <span class="op">=</span> <span class="st">"Percent"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html">coord_flip</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-adjective-frequency" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-adjective-frequency-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.6: Barplot of adjective frequency in the MASC dataset</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<p>From the perspective of raw frequency, we can see that the distribution of adjectives is not even across genres. This is not surprising, as the genres are not evenly distributed across the dataset. However, this means that we cannot compare the raw frequencies of adjectives across genres. Instead, we need to normalize the frequencies. But normalize them how? Normalizing by genre will not work, as we will be back to comparing apples to oranges. Instead, we need to normalize the frequencies by the total number of adjectives in each document. This will give us the relative frequency of adjectives in each document and allow the documents to be compared without bias.</p>
+<p>The next question to address in any analysis is how to represent the features. In our case, we want to represent the relative frequency of adjectives in each document. In machine learning, the most common way to represent features is in a matrix. In our case, we want to create a matrix with the documents in the rows and the types in the columns. The values in the matrix will be the relative frequency of each adjective in each document. This configuration is known as a <strong>document-term matrix</strong> (DTM).</p>
+<p>To recast a data frame into a DTM, we can use the <code><a href="https://rdrr.io/pkg/tidytext/man/document_term_casters.html">cast_dtm()</a></code> function from the <code>tidytext</code> package. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of adjectives into a matrix and then normalize the matrix by documents.</p>
+<p>Let’s add raw frequency counts for adjectives in each document into a TDM, as seen in <a href="#exm-eda-masc-adjective-matrix">Example&nbsp;<span>8.27</span></a>.</p>
+<div id="exm-eda-masc-adjective-matrix" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.27 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-adjective-matrix_9f7f930a6b0d1fedc4850631ed4f27b2">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/juliasilge/tidytext">tidytext</a></span><span class="op">)</span> <span class="co"># for cast_sparse()</span></span>
+<span><span class="co"># library(Matrix) # for sparse matrices</span></span>
+<span></span>
+<span><span class="co"># Create a dtm of adjective frequencies</span></span>
+<span><span class="va">masc_adj_dtm</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pos</span> <span class="op">==</span> <span class="st">"JJ"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tidytext/man/document_term_casters.html">cast_dtm</a></span><span class="op">(</span></span>
+<span>    document <span class="op">=</span> <span class="va">doc_id</span>,</span>
+<span>    term <span class="op">=</span> <span class="va">lemma</span>,</span>
+<span>    value <span class="op">=</span> <span class="va">n</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">masc_adj_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt;      Terms
+&gt; Docs  big common entire extra first
+&gt;   1     1      1      1     1     1
+&gt;   10    0      0      0     0     0
+&gt;   100   0      0      0     0     0
+&gt;   101   0      0      0     0     0
+&gt;   102   0      0      0     0     0
+&gt;   103   0      0      0     0     0
+&gt;   104   0      0      0     0     0
+&gt;   105   0      0      0     0     0
+&gt;   106   0      0      0     0     0
+&gt;   107   0      0      0     0     0</code></pre>
+</div>
+</div>
+</div>
+<p>Note preview the a subset of the contents of a matrix, such as in <a href="#exm-eda-masc-adjective-matrix">Example&nbsp;<span>8.27</span></a>, we use bracket syntax <code>[]</code> instead of the <code><a href="https://rdrr.io/r/utils/head.html">head()</a></code> function.</p>
+<p>Now we can normalize the matrix by documents. We can do this by dividing each adjective count by the total number of adjectives in each document. This is a row-wise transformation, so we can use the <code><a href="https://rdrr.io/r/base/colSums.html">rowSums()</a></code> function from base R to calculate the total number of adjectives in each document and then divide each adjective frequency by its row’s total adjective count, as seen in <a href="#exm-eda-masc-adjective-matrix-normalized">Example&nbsp;<span>8.28</span></a>.</p>
+<div id="exm-eda-masc-adjective-matrix-normalized" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.28 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-adjective-matrix-normalized_fba1295050da135b5796acf46825c4f6">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize the matrix by documents</span></span>
+<span><span class="va">masc_adj_norm_dtm</span> <span class="op">&lt;-</span> <span class="va">masc_adj_dtm</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">masc_adj_dtm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">masc_adj_norm_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt;      Terms
+&gt; Docs    big common entire extra first
+&gt;   1   0.037  0.037  0.037 0.037 0.037
+&gt;   10  0.000  0.000  0.000 0.000 0.000
+&gt;   100 0.000  0.000  0.000 0.000 0.000
+&gt;   101 0.000  0.000  0.000 0.000 0.000
+&gt;   102 0.000  0.000  0.000 0.000 0.000
+&gt;   103 0.000  0.000  0.000 0.000 0.000
+&gt;   104 0.000  0.000  0.000 0.000 0.000
+&gt;   105 0.000  0.000  0.000 0.000 0.000
+&gt;   106 0.000  0.000  0.000 0.000 0.000
+&gt;   107 0.000  0.000  0.000 0.000 0.000</code></pre>
+</div>
+</div>
+</div>
+<ul>
+<li>clustering algorithms
+<ul>
+<li>Hierarchical clustering</li>
+<li>K-means clustering
+<ul>
+<li>Random seed</li>
+<li>Number of clusters</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>evaluation metrics
+<ul>
+<li>Dendrogram</li>
+<li>Silhouette coefficient</li>
+<li>Elbow method</li>
+</ul>
+</li>
+<li>interpretability
+<ul>
+<li>Visualize clusters</li>
+<li>Identify cluster features</li>
+</ul>
+</li>
 <li>Hierarchical clustering (dendrogram)</li>
+</ul>
+<p>Now that we have a TDM and we have normalized the matrix by documents, we can apply a clustering algorithm to the data. Let’s start with Hierarchical clustering. Hierarchical clustering is a good choice when we are not sure how many clusters we want to identify. To apply Hierarchical clustering, we need to calculate the distance between each pair of documents. The distance measure that we use will depend on the type of data that we have. Given the skewed nature of word frequencies, we will use the Manhattan distance measure. The Manhattan method is often used in text analysis because it measures the absolute differences between the coordinates of two points. This means that it is not affected by the direction of the differences, only their magnitude.</p>
+<p>Let’s calculate the Manhattan distance between each pair of documents using the <code><a href="https://rdrr.io/r/stats/dist.html">dist()</a></code> function from base R, as seen in <span class="quarto-unresolved-ref">?exm-eda-masc-adjective-dist</span>. The <code><a href="https://rdrr.io/r/stats/dist.html">dist()</a></code> function takes an argument <code>method = "manhattan"</code> to specify the Manhattan distance measure.</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-adjective-dist_e582c2086578734b89462bb1cfbfc0df">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate the Manhattan distance matrix</span></span>
+<span><span class="va">masc_adj_dist</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_adj_norm_dtm</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"manhattan"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview </span></span>
+<span><span class="va">masc_adj_dist</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; [1] 1.93 2.00 2.00 2.00 2.00 2.00</code></pre>
+</div>
+</div>
+<p>Now we can apply the clustering algorithm. For Hiearchical clustering, we can use the <code><a href="https://rdrr.io/r/stats/hclust.html">hclust()</a></code> function from base R. The <code><a href="https://rdrr.io/r/stats/hclust.html">hclust()</a></code> function takes the distance matrix as its argument and an argument <code>method = "average"</code> to specify the average linkage method. The average linkage method takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods.</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-adjective-hclust_d27ce204b5d5ada2edd06dfda06b4a7e">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Apply the clustering algorithm</span></span>
+<span><span class="va">masc_adj_hclust</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_adj_dist</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html">hclust</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can now visualize the results of the clustering using a dendrogram. The <code>ggdendro</code> package includes a function <code><a href="https://rdrr.io/pkg/ggdendro/man/ggdendrogram.html">ggdendrogram()</a></code> that can be used to create a dendrogram plot. The <code><a href="https://rdrr.io/pkg/ggdendro/man/ggdendrogram.html">ggdendrogram()</a></code> function takes the output of the <code><a href="https://rdrr.io/r/stats/hclust.html">hclust()</a></code> function as its argument. We can use the <code><a href="https://rdrr.io/pkg/ggdendro/man/theme_dendro.html">theme_dendro()</a></code> function from the <code>ggdendro</code> package to customize the appearance of the dendrogram, as seen in <a href="#fig-eda-masc-adjective-hclust">Figure&nbsp;<span>8.7</span></a>.</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-adjective-hclust_47601631c9fea4480052d8ff7b6cc5ed">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/andrie/ggdendro">ggdendro</a></span><span class="op">)</span> <span class="co"># for dendrogram plots</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.sthda.com/english/rpkgs/factoextra">factoextra</a></span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># Create a dendrogram plot</span></span>
+<span><span class="va">masc_adj_hclust</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/factoextra/man/fviz_dend.html">fviz_dend</a></span><span class="op">(</span></span>
+<span>    k <span class="op">=</span> <span class="fl">18</span>,</span>
+<span>    <span class="co"># rect = TRUE,</span></span>
+<span>    <span class="co"># rect_fill = TRUE,</span></span>
+<span>    <span class="co"># rect_border = "grey50",</span></span>
+<span>    <span class="co"># rect_border_size = 0.5,</span></span>
+<span>    <span class="co"># rect_fill_alpha = 0.1,</span></span>
+<span>    xlab <span class="op">=</span> <span class="st">"Documents"</span>,</span>
+<span>    ylab <span class="op">=</span> <span class="st">"Distance"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a dendrogram plot</span></span>
+<span><span class="co"># masc_adj_hclust |&gt; </span></span>
+<span><span class="co">#   ggdendrogram() +</span></span>
+<span><span class="co">#   theme_dendro()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-eda-masc-adjective-hclust" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-adjective-hclust-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.7: Dendrogram of adjective use in the MASC dataset</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Distance measures:</p>
+<ul>
+<li>Euclidean distance: The straight-line distance between two points in Euclidean space. This is the most common distance measure and is used by default in the <code><a href="https://rdrr.io/r/stats/dist.html">dist()</a></code> function. It is a good choice when the data is normally distributed and the features are on the same scale. However, it is sensitive to outliers and does not work well when the data is not normally distributed or the features are on different scales.</li>
+<li>Manhattan distance: particularly useful for count data, such as word frequency, because it measures the absolute differences between the coordinates of two points. This means that it is not affected by the direction of the differences, only their magnitude.</li>
+<li>Cosine distance: Cosine similarity is often used in text mining because it measures the angle between two vectors, rather than their absolute distances. This makes it more robust against documents of different lengths. It is less sensitive to outliers than Euclidean distance.</li>
+</ul>
+<p>Clustering methods:</p>
+<ul>
+<li><p>Average linkage takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods.</p></li>
+<li><p>Ward’s method (specifically ward.D2) minimizes the total within-cluster variance. It tends to produce more compact, spherical clusters.</p></li>
+<li><p>K-means (pre-defined number of clusters)</p></li>
 </ul></section><section id="sec-eda-topic-modeling" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-topic-modeling">Topic modeling</h4>
 <p>ELL: we want to identify themes or topics that are distinctive to genres or a particular genre. This will help us design a textbook with relevant topics for each genre and the most relevant vocabulary for each topic.</p>
 <!--  
+
+Topic modeling: Another unsupervised learning technique used to identify and extract topics from a set of documents. This can be useful for summarizing and understanding the content in a corpus.
+
+
 - Topic modeling
     - Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
         - Use LDA to identify topics of linguistic features or co-occurrence patterns
@@ -2402,6 +2583,9 @@ Drop the independent sections in favor of a more integrated approach.
 </ul></section><section id="sec-eda-word-embedding" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-word-embedding">Word embedding</h4>
 <p>ELL: we want to meaning similarities and potential differences between spoken and written discourses. This will help provide students with a more nuanced understanding of potential synonyms within and differences between spoken and written discourses.</p>
 <!--  
+
+Word embedding: An unsupervised learning technique used for representing words as numerical vectors. This can be used for creating a vector space model of the text data, which can be used for tasks such as language translation or text classification.
+
 - Word embeddings
   - Do certain words have different nearest neighbors in the embedding space when appear in spoken versus written discourses? What could this tell us about the differences between spoken and written discourses?
     - Use word2vec to identify nearest neighbors of words in spoken and written discourses by training a model on each modality. Compare the nearest neighbors of words in each modality.

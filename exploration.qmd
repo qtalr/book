@@ -243,13 +243,13 @@ Looking at @tbl-exm-eda-masc-skim, we see that there are 392 documents, two moda
 
 ### Descriptive analysis {#sec-eda-descriptive} 
 
-Descriptive analysis techniques are used to gain insights from text data without interpreting or making conclusions about the actual meaning or context. Common techniques include frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms or topics are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together. 
+Descriptive analysis includes common techniques such as frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms or topics are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together. 
 
 Using the MASC dataset, we will entertain questions such as: 
 
 - What are the most common terms a beginning ELL should learn?
 - Are there term differences between spoken and written discourses that should be emphasized?
-- What are the most common phrasal verbs (verb particle constructions)? Do they vary by modality or genre?
+- What are the most common verb particle constructions?
 
 Along the way, we will introduce some fundamental concepts in text analysis such as tokens and types and frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.
 
@@ -1010,64 +1010,263 @@ We can clean up the results a bit by removing the part-of-speech tags from the `
 #| fig-width: 8
 
 # Clean up results
-masc_verb_part_assoc_plot <- 
-  masc_verb_part_assoc |> 
-  filter(pmi >= 2) |> 
+masc_verb_part_assoc_plot <-
+  masc_verb_part_assoc |>
+  filter(pmi >= 2) |>
   mutate(
     x = str_remove(x, "_V.*"),
     y = str_remove(y, "_IN")
   )
 
-# Create an association network plot 
+# Create an association network plot
 # `x` and `y` are the nodes
 # `pmi` is the edge weight
 
 library(igraph)
 library(ggraph)
 
-masc_verb_part_assoc_plot |> 
-  graph_from_data_frame() |> 
+masc_verb_part_assoc_plot |>
+  graph_from_data_frame() |>
   ggraph(layout = "nicely") +
-  geom_edge_link(aes(color = pmi), alpha = 0.8, edge_width = 0.8, arrow = grid::arrow()) +
+  geom_edge_link(aes(color = pmi),
+    alpha = 0.8,
+    edge_width = 0.8,
+    arrow = grid::arrow()
+  ) +
   geom_node_point(color = "black") +
   geom_node_text(aes(label = name), repel = TRUE) +
   scale_edge_color_gradient(low = "grey90", high = "grey20") +
   theme_void()
 ```
 
-There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be answered with co-occurrence analysis.
+From this plot, and from the underlying data, we can explore verb particle constructions. We could go further and apply our co-occurrence methods to each modality separately, if we wanted to identify verb particle constructions that are distinctive to each modality. We could also apply our co-occurrence methods to other parts-of-speech, such as adjectives and nouns, to identify collocations of these parts-of-speech. There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be addressed with co-occurrence analysis.
 
 ### Unsupervised learning {#sec-eda-unsupervised}
 
-- [ ] Overview of unsupervised learning
+Aligned in purpose, unsupervised learning approaches to exploratory data analysis are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include clustering, topic modeling, and word embedding.
 
-Unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset ... (expand on this definition)
+We will continue to use the MASC dataset as we develop materials for our ELL textbook to illustrate unsupervised learning methods. In the process, we will explore the following questions:
 
-- [ ] An overview of the some of the questions we will entertain in this section. 
+- Can we identify genres based on linguistic features or co-occurrence patterns of the data itself?
+- Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
+- Do certain words or phrases have different meanings or uses depending on the modality in which they appear?
+
+Through these questions we will build on our knowledge of frequency, dispersion, and co-occurrence analysis and introduce concepts and methods associated with machine learning.  
 
 #### Clustering {#sec-eda-clustering}
 
-ELL: we want to identify and group genres based on linguistic features or co-occurrence patterns. The better we can identify and group genres, the better we can identify and group linguistic features or co-occurrence patterns that are distinctive to a particular genre.
+**Clustering** is a unsupervised learning technique that can be used to group similar items in the text data, helping to organize the data into distinct categories and discover relationships between different elements in the text. The main steps in the procedure includes identifying the relevant linguistic features to use for clustering, representing the features in a way that can be used for clustering, and applying a clustering algorithm to the data. However, it is important to consider the strengths and weaknesses of the clustering algorithm for a particular task and how the results will be evaluated.
 
-<!--  
+In our ELL textbook task, we may very well want to identify terms that are particularly indicative of each genre. This will help us design a textbook with relevant communicative context in which terms are used most naturally. However,we may have questions about how well the labeled genres in the dataset map to real distinctions in language use. For example, are the genres 'Letters' and 'Journal' really distinct genres? Or, are they more similar than different? If they are more similar than different, then we may want to consider combining them into a single genre. 
 
-- Clustering
-  - Are there discernible clusters that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
-		- Use k-means clustering to identify clusters of linguistic features or co-occurrence patterns
-		- Use hierarchical clustering to identify clusters of linguistic features or co-occurrence patterns
+Enter clustering. Instead of relying on the labels in the MASC dataset, we can let the data itself say something about how related the genres are. Yet, a pivotal question is what features should we use, otherwise known as **feature selection**. We could use terms or lemmas, but we may want to consider other features, such as parts-of-speech or some co-occurrence patterns. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results. 
 
--->
+Another key question is what clustering algorithm to use. Again, we are not married to one algorithm, and we can perform clustering multiple times with different algorithms, but not all algorithms are created equal. Some algorithms are better suited for certain types of data and certain types of tasks. For example, **Hierarchical clustering** is a good choice when we are not sure how many clusters we want to identify, as it does not require us to specify the number of clusters from the outset. However, it is not a good choice when we have a large dataset, as it can be computationally expensive compared to some other algorithms. **K-means clustering**, on the other hand, is a good choice when we want to identify a pre-defined number of clusters, and the aim is to gauge how well the data fit the clusters. These two clustering techniques, therefore complement each other with Hierarchical clustering being a good choice for initial exploration and K-means clustering being a good choice for targeted evaluation.
 
-This section will discuss clustering techniques, which are used to partition data into clusters based on similarity. It will discuss various approaches to clustering, such as k-means and hierarchical clustering, as well as discuss their use cases in linguistics.
+With these considerations in mind, let's start by identifying the linguistic features that we want to use for clustering. Imagine that among the various features that we are interested in associating with genres, adjective use is one of them. The MASC dataset, `masc_tbl` includes the `pos` column and we can use this to isolate adjectives in the dataset. But first, we need to consider how we are going to operationalize 'adjective use'. 
+
+In machine learning, operationalizing a concept is often referred to as feature engineering. **Feature engineering** is the process of transforming raw data into features that can be used for machine learning. In our case, adjective use could refer to raw frequency, relative frequency, or dispersion of individual adjectives, or even some co-occurrence pattern that includes adjectives. Each of these measures of use bakes in a different assumption about what adjective use means. Furthermore, some measures may be more useful for the clustering purposes at hand than others. For example, dispersion, while useful for identifying how spread or concentrated a type is across a corpus, may not be as useful for identifying genres based on adjective use since we will likely want to identify adjective-genre associations regardless of how spread or concentrated the adjective is across the corpus. Or maybe it is. For this reason, it is crucial to understand the implications of the feature engineering decisions that we make in the context of the task at hand.
+
+Let's consider the raw frequency distribution of individual adjectives in the MASC dataset by genre. I will use the `tabyl()` function from the `janitor` package to create a frequency table of adjectives in the dataset, as seen in @exm-eda-masc-adjective-frequency.
+
+::: {#exm-eda-masc-adjective-frequency}
+```{r}
+#| label: fig-eda-masc-adjective-frequency
+#| fig-cap: "Barplot of adjective frequency in the MASC dataset"
+#| fig-width: 8
+#| fig-height: 4
+
+# Load packages
+library(janitor) # for tabyl()
+
+# Barplot of adjective frequency
+masc_tbl |> 
+  filter(pos == "JJ") |> # "JJ" Adjective in the Penn tagset
+  tabyl(genre) |> 
+  adorn_pct_formatting(digits = 1) |> 
+  ggplot(aes(x = genre, y = percent)) +
+  geom_col() +
+  labs(x = "Genre", y = "Percent") +
+  coord_flip()
+```
+:::
+
+From the perspective of raw frequency, we can see that the distribution of adjectives is not even across genres. This is not surprising, as the genres are not evenly distributed across the dataset. However, this means that we cannot compare the raw frequencies of adjectives across genres. Instead, we need to normalize the frequencies. But normalize them how? Normalizing by genre will not work, as we will be back to comparing apples to oranges. Instead, we need to normalize the frequencies by the total number of adjectives in each document. This will give us the relative frequency of adjectives in each document and allow the documents to be compared without bias. 
+
+The next question to address in any analysis is how to represent the features. In our case, we want to represent the relative frequency of adjectives in each document. In machine learning, the most common way to represent features is in a matrix. In our case, we want to create a matrix with the documents in the rows and the types in the columns. The values in the matrix will be the relative frequency of each adjective in each document. This configuration is known as a **document-term matrix** (DTM).
+
+To recast a data frame into a DTM, we can use the `cast_dtm()` function from the `tidytext` package. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of adjectives into a matrix and then normalize the matrix by documents. 
+
+Let's add raw frequency counts for adjectives in each document into a TDM, as seen in @exm-eda-masc-adjective-matrix.
+
+::: {#exm-eda-masc-adjective-matrix}
+```{r}
+#| label: eda-masc-adjective-matrix
+
+# Load package
+library(tidytext) # for cast_sparse()
+# library(Matrix) # for sparse matrices
+
+# Create a dtm of adjective frequencies
+masc_adj_dtm <- 
+  masc_tbl |> 
+  filter(pos == "JJ") |> 
+  count(doc_id, lemma) |> 
+  cast_dtm(
+    document = doc_id,
+    term = lemma,
+    value = n
+  ) |> 
+  as.matrix()
+
+# Preview
+masc_adj_dtm[1:10, 1:5]
+```
+:::
+
+Note preview the a subset of the contents of a matrix, such as in @exm-eda-masc-adjective-matrix, we use bracket syntax `[]` instead of the `head()` function.
+
+Now we can normalize the matrix by documents. We can do this by dividing each adjective count by the total number of adjectives in each document. This is a row-wise transformation, so we can use the `rowSums()` function from base R to calculate the total number of adjectives in each document and then divide each adjective frequency by its row's total adjective count, as seen in @exm-eda-masc-adjective-matrix-normalized.
+
+::: {#exm-eda-masc-adjective-matrix-normalized}
+```{r}
+#| label: eda-masc-adjective-matrix-normalized
+
+# Normalize the matrix by documents
+masc_adj_norm_dtm <- masc_adj_dtm / rowSums(masc_adj_dtm)
+
+# Preview
+masc_adj_norm_dtm[1:10, 1:5]
+```
+:::
+
+- clustering algorithms
+  - Hierarchical clustering
+  - K-means clustering
+    - Random seed
+    - Number of clusters
+- evaluation metrics
+  - Dendrogram
+  - Silhouette coefficient
+  - Elbow method
+- interpretability
+  - Visualize clusters
+  - Identify cluster features
+
+
+- Hierarchical clustering (dendrogram)
+
+Now that we have a TDM and we have normalized the matrix by documents, we can apply a clustering algorithm to the data. Let's start with Hierarchical clustering. Hierarchical clustering is a good choice when we are not sure how many clusters we want to identify. To apply Hierarchical clustering, we need to calculate the distance between each pair of documents. The distance measure that we use will depend on the type of data that we have. Given the skewed nature of word frequencies, we will use the Manhattan distance measure. The Manhattan method is often used in text analysis because it measures the absolute differences between the coordinates of two points. This means that it is not affected by the direction of the differences, only their magnitude.
+
+Let's calculate the Manhattan distance between each pair of documents using the `dist()` function from base R, as seen in @exm-eda-masc-adjective-dist. The `dist()` function takes an argument `method = "manhattan"` to specify the Manhattan distance measure.
+
+```{r}
+#| label: eda-masc-adjective-dist
+
+# Calculate the Manhattan distance matrix
+masc_adj_dist <- 
+  masc_adj_norm_dtm |> 
+  dist(method = "manhattan")
+
+# Preview 
+masc_adj_dist |> head()
+```
+
+Now we can apply the clustering algorithm. For Hiearchical clustering, we can use the `hclust()` function from base R. The `hclust()` function takes the distance matrix as its argument and an argument `method = "average"` to specify the average linkage method. The average linkage method takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods.
+
+```{r}
+#| label: eda-masc-adjective-hclust
+
+# Apply the clustering algorithm
+masc_adj_hclust <- 
+  masc_adj_dist |> 
+  hclust()
+
+```
+
+We can now visualize the results of the clustering using a dendrogram. The `ggdendro` package includes a function `ggdendrogram()` that can be used to create a dendrogram plot. The `ggdendrogram()` function takes the output of the `hclust()` function as its argument. We can use the `theme_dendro()` function from the `ggdendro` package to customize the appearance of the dendrogram, as seen in @fig-eda-masc-adjective-hclust.
+
+```{r}
+#| label: fig-eda-masc-adjective-hclust
+#| fig-cap: "Dendrogram of adjective use in the MASC dataset"
+#| fig-width: 8
+#| fig-height: 4
+
+# Load package
+library(ggdendro) # for dendrogram plots
+library(factoextra) 
+
+# Create a dendrogram plot
+masc_adj_hclust |> 
+  fviz_dend(
+    k = 18,
+    # rect = TRUE,
+    # rect_fill = TRUE,
+    # rect_border = "grey50",
+    # rect_border_size = 0.5,
+    # rect_fill_alpha = 0.1,
+    xlab = "Documents",
+    ylab = "Distance"
+  ) +
+  theme_minimal()
+
+# Create a dendrogram plot
+# masc_adj_hclust |> 
+#   ggdendrogram() +
+#   theme_dendro()
+```
+
+Distance measures: 
+
+- Euclidean distance: The straight-line distance between two points in Euclidean space. This is the most common distance measure and is used by default in the `dist()` function. It is a good choice when the data is normally distributed and the features are on the same scale. However, it is sensitive to outliers and does not work well when the data is not normally distributed or the features are on different scales.
+- Manhattan distance: particularly useful for count data, such as word frequency, because it measures the absolute differences between the coordinates of two points. This means that it is not affected by the direction of the differences, only their magnitude.
+- Cosine distance: Cosine similarity is often used in text mining because it measures the angle between two vectors, rather than their absolute distances. This makes it more robust against documents of different lengths. It is less sensitive to outliers than Euclidean distance. 
+
+
+Clustering methods:
+
+- Average linkage takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods.
+- Ward's method (specifically ward.D2) minimizes the total within-cluster variance. It tends to produce more compact, spherical clusters.
+
 
 - K-means (pre-defined number of clusters)
-- Hierarchical clustering (dendrogram)
+
+Working with K-means clustering is similar to Hierarchical clustering. The main difference is that we need to specify the number of clusters that we want to identify. Since we are exploring the usefulness of the 18 genre labels used in the MASC dataset we have a good idea of how many clusters we want to start with. Our goal, then, will be to assess how well this number of clusters fits the data. If it does not fit the data well, we can try a different number of clusters. We can then compare the results of the clustering with the genre labels to see how well the clusters map to the labels and make ajustments to the way we group the labels as necessary. 
+
+Let's start by applying the K-means clustering algorithm to the data. We can use the `kmeans()` function from base R to apply the K-means clustering algorithm. The `kmeans()` function takes the matrix of features as its first argument and the number of clusters as its second argument. We can specify the number of clusters with the `centers` argument. The `kmeans()` function also takes an argument `nstart` to specify the number of random starts. The K-means algorithm is sensitive to the initial starting points, so it is a good idea to run the algorithm multiple times with different starting points. The `nstart` argument specifies the number of random starts. The default value is 1, but we can increase this to 10 or 20 to increase the likelihood of finding a good solution. 
+
+```{r}
+#| label: eda-masc-adjective-kmeans
+
+# Apply the clustering algorithm
+masc_adj_kmeans <- 
+  # masc_adj_norm_dtm |> 
+  masc_adj_norm_dtm[-c(304, 215), ] |> 
+  kmeans(
+    centers = 2,
+    nstart = 20
+  )
+
+# Preview
+masc_adj_kmeans
+```
+
+We can plot the clusters with the `factoextra` package's `fviz_cluster()` function, as seen in @fig-eda-masc-adjective-kmeans. The `fviz_cluster()` function takes the output of the `kmeans()` function as its first argument and the matrix of features as its second argument. The `ggdendro` package's `ggdendrogram()` function can also be used to plot the clusters, as seen in @fig-eda-masc-adjective-kmeans-dendro.
+
+```{r}
+
+fviz_cluster(masc_adj_kmeans, masc_adj_norm_dtm[-c(304, 215), ])
+```
 
 #### Topic modeling {#sec-eda-topic-modeling}
 
 ELL: we want to identify themes or topics that are distinctive to genres or a particular genre. This will help us design a textbook with relevant topics for each genre and the most relevant vocabulary for each topic.
 
 <!--  
+
+Topic modeling: Another unsupervised learning technique used to identify and extract topics from a set of documents. This can be useful for summarizing and understanding the content in a corpus.
+
+
 - Topic modeling
 	- Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
 		- Use LDA to identify topics of linguistic features or co-occurrence patterns
@@ -1083,6 +1282,9 @@ This section will discuss topic modeling techniques, which are used to identify 
 ELL: we want to meaning similarities and potential differences between spoken and written discourses. This will help provide students with a more nuanced understanding of potential synonyms within and differences between spoken and written discourses.
 
 <!--  
+
+Word embedding: An unsupervised learning technique used for representing words as numerical vectors. This can be used for creating a vector space model of the text data, which can be used for tasks such as language translation or text classification.
+
 - Word embeddings
   - Do certain words have different nearest neighbors in the embedding space when appear in spoken versus written discourses? What could this tell us about the differences between spoken and written discourses?
     - Use word2vec to identify nearest neighbors of words in spoken and written discourses by training a model on each modality. Compare the nearest neighbors of words in each modality.

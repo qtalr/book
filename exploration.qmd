@@ -1,7 +1,8 @@
 ---
 execute: 
   echo: true
---- 
+  cache: refresh  
+---
 
 # Exploration {#sec-exploration}
 
@@ -1043,7 +1044,7 @@ From this plot, and from the underlying data, we can explore verb particle const
 
 ### Unsupervised learning {#sec-eda-unsupervised}
 
-Aligned in purpose, unsupervised learning approaches to exploratory data analysis are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include clustering, topic modeling, and word embedding.
+Aligned in purpose with descriptive approaches, unsupervised learning approaches to exploratory data analysis are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include principle component analysis, clustering, topic modeling, and word embedding.
 
 We will continue to use the MASC dataset as we develop materials for our ELL textbook to illustrate unsupervised learning methods. In the process, we will explore the following questions:
 
@@ -1059,204 +1060,406 @@ Through these questions we will build on our knowledge of frequency, dispersion,
 
 In our ELL textbook task, we may very well want to identify terms that are particularly indicative of each genre. This will help us design a textbook with relevant communicative context in which terms are used most naturally. However,we may have questions about how well the labeled genres in the dataset map to real distinctions in language use. For example, are the genres 'Letters' and 'Journal' really distinct genres? Or, are they more similar than different? If they are more similar than different, then we may want to consider combining them into a single genre. 
 
-Enter clustering. Instead of relying on the labels in the MASC dataset, we can let the data itself say something about how related the genres are. Yet, a pivotal question is what features should we use, otherwise known as **feature selection**. We could use terms or lemmas, but we may want to consider other features, such as parts-of-speech or some co-occurrence patterns. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results. 
+Enter clustering. Instead of relying entirely on the labels in the MASC dataset, we can let the data itself say something about how related the genres are. Yet, a pivotal question is what features should we use, otherwise known as **feature selection**. We could use terms or lemmas, but we may want to consider other features, such as parts-of-speech or some co-occurrence patterns. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results. 
 
 Another key question is what clustering algorithm to use. Again, we are not married to one algorithm, and we can perform clustering multiple times with different algorithms, but not all algorithms are created equal. Some algorithms are better suited for certain types of data and certain types of tasks. For example, **Hierarchical clustering** is a good choice when we are not sure how many clusters we want to identify, as it does not require us to specify the number of clusters from the outset. However, it is not a good choice when we have a large dataset, as it can be computationally expensive compared to some other algorithms. **K-means clustering**, on the other hand, is a good choice when we want to identify a pre-defined number of clusters, and the aim is to gauge how well the data fit the clusters. These two clustering techniques, therefore complement each other with Hierarchical clustering being a good choice for initial exploration and K-means clustering being a good choice for targeted evaluation.
 
-With these considerations in mind, let's start by identifying the linguistic features that we want to use for clustering. Imagine that among the various features that we are interested in associating with genres, adjective use is one of them. The MASC dataset, `masc_tbl` includes the `pos` column and we can use this to isolate adjectives in the dataset. But first, we need to consider how we are going to operationalize 'adjective use'. 
+With these considerations in mind, let's start by identifying the linguistic features that we want to use for clustering. Imagine that among the various features that we are interested in associating with genres, we consider lemma use and part-of-speech use. However, we need to operationalize what we mean by 'use' and then transform the data into a format that can be used for clustering. In machine learning, this process is known as **feature engineering**. Since we aim to compare documents it is logical for us to use the document-normalized features. So in both lemma and part-of-speech tags, we will use the relative frequency. An additional operation that we can apply to the lemma feature is to weight the relative frequency by the dispersion of the lemma. This will give us a measure of the distinctiveness of the lemma in the document. A common implementation of this approach is to use the $tf-idf$ measure, which is the product of the relative frequency and the inverse document frequency. 
 
-In machine learning, operationalizing a concept is often referred to as feature engineering. **Feature engineering** is the process of transforming raw data into features that can be used for machine learning. In our case, adjective use could refer to raw frequency, relative frequency, or dispersion of individual adjectives, or even some co-occurrence pattern that includes adjectives. Each of these measures of use bakes in a different assumption about what adjective use means. Furthermore, some measures may be more useful for the clustering purposes at hand than others. For example, dispersion, while useful for identifying how spread or concentrated a type is across a corpus, may not be as useful for identifying genres based on adjective use since we will likely want to identify adjective-genre associations regardless of how spread or concentrated the adjective is across the corpus. Or maybe it is. For this reason, it is crucial to understand the implications of the feature engineering decisions that we make in the context of the task at hand.
+Each of these engineered feature sets represents a different aspect of the lexical nature of the documents. The relative frequency of lemmas represents the lexical diversity of the documents, the dispersion-weighted $tf-idf$ of lemmas represents the distinctiveness of the lemmas in the documents, and the relative frequency of part-of-speech tags represents the grammatical diversity of the documents [@Petrenz2011]. //FIXME CITATIONS
 
-Let's consider the raw frequency distribution of individual adjectives in the MASC dataset by genre. I will use the `tabyl()` function from the `janitor` package to create a frequency table of adjectives in the dataset, as seen in @exm-eda-masc-adjective-frequency.
+The next question to address in any analysis is how to represent the features. In our case, we want to represent the features in each document. In machine learning, the most common way to represent features is in a matrix. In our case, we want to create a matrix with the documents in the rows and the features in the columns. The values in the matrix will be the operationalization of lexical use in each document for each of our three candidate measures. This configuration is known as a **document-term matrix** (DTM).
 
-::: {#exm-eda-masc-adjective-frequency}
+To recast a data frame into a DTM, we can use the `cast_dtm()` function from the `tidytext` package. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of lemmas and part-of-speech tags into a matrix and then normalize the matrix by documents. For the $tf-idf$ measure we use the `bind_tf_idf()` function from the `tidytext` package. This function takes a DTM and calculates the $tf-idf$ measure for each feature in each document. This is a normalized measure, so we do not need to normalize the matrix by documents. Let's see how this works with the MASC dataset in @exm-eda-masc-dtms.
+
 ```{r}
-#| label: fig-eda-masc-adjective-frequency
-#| fig-cap: "Barplot of adjective frequency in the MASC dataset"
-#| fig-width: 8
-#| fig-height: 4
+#| label: exm-eda-masc-filter-us
+#| include: false
+
+# Filter out lemmas with PUNCT, SYM, NNP, NNPS for pos
+masc_tbl <- 
+  masc_tbl |> 
+  filter(!(pos %in% c("CD", "FW", "LS", "SYM", "PUNCT", "NNP", "NNPS")))
+```
+
+::: {#exm-eda-masc-dtms}
+```{r}
+#| label: eda-masc-dtms
 
 # Load packages
-library(janitor) # for tabyl()
+library(tidytext)
 
-# Barplot of adjective frequency
-masc_tbl |> 
-  filter(pos == "JJ") |> # "JJ" Adjective in the Penn tagset
-  tabyl(genre) |> 
-  adorn_pct_formatting(digits = 1) |> 
-  ggplot(aes(x = genre, y = percent)) +
-  geom_col() +
-  labs(x = "Genre", y = "Percent") +
-  coord_flip()
-```
-:::
-
-From the perspective of raw frequency, we can see that the distribution of adjectives is not even across genres. This is not surprising, as the genres are not evenly distributed across the dataset. However, this means that we cannot compare the raw frequencies of adjectives across genres. Instead, we need to normalize the frequencies. But normalize them how? Normalizing by genre will not work, as we will be back to comparing apples to oranges. Instead, we need to normalize the frequencies by the total number of adjectives in each document. This will give us the relative frequency of adjectives in each document and allow the documents to be compared without bias. 
-
-The next question to address in any analysis is how to represent the features. In our case, we want to represent the relative frequency of adjectives in each document. In machine learning, the most common way to represent features is in a matrix. In our case, we want to create a matrix with the documents in the rows and the types in the columns. The values in the matrix will be the relative frequency of each adjective in each document. This configuration is known as a **document-term matrix** (DTM).
-
-To recast a data frame into a DTM, we can use the `cast_dtm()` function from the `tidytext` package. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of adjectives into a matrix and then normalize the matrix by documents. 
-
-Let's add raw frequency counts for adjectives in each document into a TDM, as seen in @exm-eda-masc-adjective-matrix.
-
-::: {#exm-eda-masc-adjective-matrix}
-```{r}
-#| label: eda-masc-adjective-matrix
-
-# Load package
-library(tidytext) # for cast_sparse()
-# library(Matrix) # for sparse matrices
-
-# Create a dtm of adjective frequencies
-masc_adj_dtm <- 
+# Create a document-term matrix of lemmas
+masc_lemma_dtm <- 
   masc_tbl |> 
-  filter(pos == "JJ") |> 
   count(doc_id, lemma) |> 
-  cast_dtm(
-    document = doc_id,
-    term = lemma,
-    value = n
-  ) |> 
+  cast_dtm(doc_id, lemma, n) |> 
   as.matrix()
 
-# Preview
-masc_adj_dtm[1:10, 1:5]
+# Create a document-term matrix of part-of-speech tags
+masc_pos_dtm <- 
+  masc_tbl |> 
+  count(doc_id, pos) |> 
+  cast_dtm(doc_id, pos, n) |> 
+  as.matrix()
+
+# Create a document-term matrix of tf-idf weighted lemmas
+masc_lemma_tfidf_dtm <- 
+  masc_tbl |> 
+  count(doc_id, lemma) |> 
+  bind_tf_idf(doc_id, lemma, n) |> 
+  cast_dtm(doc_id, lemma, tf_idf) |> 
+  as.matrix()
 ```
 :::
 
-Note preview the a subset of the contents of a matrix, such as in @exm-eda-masc-adjective-matrix, we use bracket syntax `[]` instead of the `head()` function.
+Note preview the a subset of the contents of a matrix, such as in @exm-eda-masc-dtms, we use bracket syntax `[]` instead of the `head()` function. Let's take a look at the first 5 rows and 5 columns of the matrices, as seen in @exm-eda-masc-dtms-preview.
 
-Now we can normalize the matrix by documents. We can do this by dividing each adjective count by the total number of adjectives in each document. This is a row-wise transformation, so we can use the `rowSums()` function from base R to calculate the total number of adjectives in each document and then divide each adjective frequency by its row's total adjective count, as seen in @exm-eda-masc-adjective-matrix-normalized.
-
-::: {#exm-eda-masc-adjective-matrix-normalized}
+::: {#exm-eda-masc-dtms-preview}
 ```{r}
-#| label: eda-masc-adjective-matrix-normalized
-
-# Normalize the matrix by documents
-masc_adj_norm_dtm <- masc_adj_dtm / rowSums(masc_adj_dtm)
+#| label: eda-masc-dtms-preview
 
 # Preview
-masc_adj_norm_dtm[1:10, 1:5]
+masc_lemma_dtm[1:5, 1:5]
+masc_pos_dtm[1:5, 1:5]
+masc_lemma_tfidf_dtm[1:5, 1:5]
 ```
 :::
 
-- clustering algorithms
-  - Hierarchical clustering
-  - K-means clustering
-    - Random seed
-    - Number of clusters
-- evaluation metrics
-  - Dendrogram
-  - Silhouette coefficient
-  - Elbow method
-- interpretability
-  - Visualize clusters
-  - Identify cluster features
+Now we can normalize the lemma and pos matrices by documents. We can do this by dividing each feature count by the total count in each document. This is a row-wise transformation, so we can use the `rowSums()` function from base R to calculate the total count in each document. Then each count divided by its row's total count, as seen in @exm-eda-masc-dtms-normalized.
 
-
-- Hierarchical clustering (dendrogram)
-
-Now that we have a TDM and we have normalized the matrix by documents, we can apply a clustering algorithm to the data. Let's start with Hierarchical clustering. Hierarchical clustering is a good choice when we are not sure how many clusters we want to identify. To apply Hierarchical clustering, we need to calculate the distance between each pair of documents. The distance measure that we use will depend on the type of data that we have. Given the skewed nature of word frequencies, we will use the Manhattan distance measure. The Manhattan method is often used in text analysis because it measures the absolute differences between the coordinates of two points. This means that it is not affected by the direction of the differences, only their magnitude.
-
-Let's calculate the Manhattan distance between each pair of documents using the `dist()` function from base R, as seen in @exm-eda-masc-adjective-dist. The `dist()` function takes an argument `method = "manhattan"` to specify the Manhattan distance measure.
-
+::: {#exm-eda-masc-dtms-normalized}
 ```{r}
-#| label: eda-masc-adjective-dist
+#| label: eda-masc-dtms-normalized
 
-# Calculate the Manhattan distance matrix
-masc_adj_dist <- 
-  masc_adj_norm_dtm |> 
-  dist(method = "manhattan")
+# Normalize lemma and pos matrices by documents
+masc_lemma_dtm <- 
+  masc_lemma_dtm / rowSums(masc_lemma_dtm)
 
-# Preview 
-masc_adj_dist |> head()
+masc_pos_dtm <- 
+  masc_pos_dtm / rowSums(masc_pos_dtm)
 ```
+:::
 
-Now we can apply the clustering algorithm. For Hiearchical clustering, we can use the `hclust()` function from base R. The `hclust()` function takes the distance matrix as its argument and an argument `method = "average"` to specify the average linkage method. The average linkage method takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods.
+There are two concerns to address before we can proceed with clustering. First, clustering algorithm performance tends to degrade with the number of features. If we consider either the relative frequency of lemmas or the dispersion-weighted $tf-idf$ of lemmas, we are looking at over 25k features! Second, clustering algorithms perform better with more informative features. That is to say, features that are more distinct across the documents provide better information for deriving useful clusters. 
 
+We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use **dimensionality reduction**. Dimensionality reduction is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is **principle component analysis** (PCA). PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principle components. The principle components are ordered by the amount of variance that they explain in the data. The first principle component explains the most variance, the second principle component explains the second most variance, and so on.
+
+We can apply PCA to each of these features and assess how well the features account for the variation in the data. We can then use the features that account for the most variation in the data for clustering. The `prcomp()` function from base R can be used to perform PCA. Let's apply PCA to each of our candidate feature matrices, as seen in @exm-eda-masc-dtms-pca.
+
+::: {#exm-eda-masc-dtms-pca}
 ```{r}
-#| label: eda-masc-adjective-hclust
+#| label: eda-masc-dtms-pca
 
-# Apply the clustering algorithm
-masc_adj_hclust <- 
-  masc_adj_dist |> 
-  hclust()
+# Set seed for reproducibility
+set.seed(123)
 
+# Apply PCA to each feature matrix
+masc_lemma_pca <- 
+  masc_lemma_dtm |> 
+  prcomp()
+
+masc_pos_pca <- 
+  masc_pos_dtm |> 
+  prcomp()
+
+masc_lemma_tfidf_pca <- 
+  masc_lemma_tfidf_dtm |> 
+  prcomp()
 ```
+:::
 
-We can now visualize the results of the clustering using a dendrogram. The `ggdendro` package includes a function `ggdendrogram()` that can be used to create a dendrogram plot. The `ggdendrogram()` function takes the output of the `hclust()` function as its argument. We can use the `theme_dendro()` function from the `ggdendro` package to customize the appearance of the dendrogram, as seen in @fig-eda-masc-adjective-hclust.
+We can visualize the amount of variance explained by each principle component with a scree plot. The `fviz_eig()` function from the `factoextra` package can be used to create a scree plot. The `fviz_eig()` function takes the output of the `prcomp()` function as its argument and an argument `ncp = 10` to specify the number of principle components to include in the plot. Let's create a scree plot for each of our candidate feature matrices, as seen in @fig-eda-masc-dtms-pca-scree.
 
 ```{r}
-#| label: fig-eda-masc-adjective-hclust
-#| fig-cap: "Dendrogram of adjective use in the MASC dataset"
-#| fig-width: 8
+#| label: fig-eda-masc-dtms-pca-scree
+#| fig-cap: "Scree plot of the principle components of the MASC dataset"
+#| fig-subcap: 
+#| - "Lemma relative frequency"
+#| - "Lemma dispersion-weighted tf-idf"
+#| - "Part-of-speech relative frequency"
 #| fig-height: 4
+#| layout-ncol: 3
 
 # Load package
-library(ggdendro) # for dendrogram plots
-library(factoextra) 
+library(factoextra)
 
-# Create a dendrogram plot
-masc_adj_hclust |> 
-  fviz_dend(
-    k = 18,
-    # rect = TRUE,
-    # rect_fill = TRUE,
-    # rect_border = "grey50",
-    # rect_border_size = 0.5,
-    # rect_fill_alpha = 0.1,
-    xlab = "Documents",
-    ylab = "Distance"
-  ) +
-  theme_minimal()
+# Scree plot: lemma relative frequency
+fviz_eig(masc_lemma_pca, ncp = 10)
 
-# Create a dendrogram plot
-# masc_adj_hclust |> 
-#   ggdendrogram() +
-#   theme_dendro()
+# Scree plot: lemma dispersion-weighted tf-idf
+fviz_eig(masc_lemma_tfidf_pca, ncp = 10)
+
+# Scree plot: part-of-speech relative frequency
+fviz_eig(masc_pos_pca, ncp = 10)
 ```
 
-Distance measures: 
+From @fig-eda-masc-dtms-pca-scree, we can see the plots are different. All trend toward less variance explained as the number of dimensions increase. But for our purposes, we are interested in the largest variance explained with the fewest dimensions. To that end, the @fig-eda-masc-dtms-pca-scree-3 plot is the most reduced and most informative. The amount of variance explained is over 30% for the first dimension alone, however, the variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm. 
 
-- Euclidean distance: The straight-line distance between two points in Euclidean space. This is the most common distance measure and is used by default in the `dist()` function. It is a good choice when the data is normally distributed and the features are on the same scale. However, it is sensitive to outliers and does not work well when the data is not normally distributed or the features are on different scales.
-- Manhattan distance: particularly useful for count data, such as word frequency, because it measures the absolute differences between the coordinates of two points. This means that it is not affected by the direction of the differences, only their magnitude.
-- Cosine distance: Cosine similarity is often used in text mining because it measures the angle between two vectors, rather than their absolute distances. This makes it more robust against documents of different lengths. It is less sensitive to outliers than Euclidean distance. 
+To calculate the amount of variance explained by each principle component we can square the standard deviations of the principle components and divide by the sum of the squared standard deviations. Let's calculate the amount of variance explained by each principle component for each of our candidate feature matrices, as seen in @exm-eda-masc-dtms-pca-variance.
 
+::: {#exm-eda-masc-dtms-pca-variance}
+```{r}
+#| label: eda-masc-dtms-pca-variance
 
-Clustering methods:
+# Calculate variance explained for first 3 principle components
+# lemma
+masc_lemma_pca_var <-
+  masc_lemma_pca$sdev^2 / sum(masc_lemma_pca$sdev^2) * 100
 
-- Average linkage takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods.
-- Ward's method (specifically ward.D2) minimizes the total within-cluster variance. It tends to produce more compact, spherical clusters.
+sum(masc_lemma_pca_var[1:4])
 
+# pos
+masc_pos_pca_var <-
+  masc_pos_pca$sdev^2 / sum(masc_pos_pca$sdev^2) * 100
 
-- K-means (pre-defined number of clusters)
+sum(masc_pos_pca_var[1:4])
 
-Working with K-means clustering is similar to Hierarchical clustering. The main difference is that we need to specify the number of clusters that we want to identify. Since we are exploring the usefulness of the 18 genre labels used in the MASC dataset we have a good idea of how many clusters we want to start with. Our goal, then, will be to assess how well this number of clusters fits the data. If it does not fit the data well, we can try a different number of clusters. We can then compare the results of the clustering with the genre labels to see how well the clusters map to the labels and make ajustments to the way we group the labels as necessary. 
+# lemma tf-idf
+masc_lemma_tfidf_pca_var <-
+  masc_lemma_tfidf_pca$sdev^2 / sum(masc_lemma_tfidf_pca$sdev^2) * 100
 
-Let's start by applying the K-means clustering algorithm to the data. We can use the `kmeans()` function from base R to apply the K-means clustering algorithm. The `kmeans()` function takes the matrix of features as its first argument and the number of clusters as its second argument. We can specify the number of clusters with the `centers` argument. The `kmeans()` function also takes an argument `nstart` to specify the number of random starts. The K-means algorithm is sensitive to the initial starting points, so it is a good idea to run the algorithm multiple times with different starting points. The `nstart` argument specifies the number of random starts. The default value is 1, but we can increase this to 10 or 20 to increase the likelihood of finding a good solution. 
+sum(masc_lemma_tfidf_pca_var[1:4])
+```
+:::
+
+Combining the findings in the Scree plots and the variance explained calculations, we can see that the first four principle components of the part-of-speech features account for a good proportion of the variance. Therefore, all else being equal, we should use the part-of-speech features. As with all things exploratory, however, it is important to consider the implications of our feature selection for our interpretation of the results. In this case, the part-of-speech features approximate grammatical diversity of the documents, more so than lexical diversity. This means that the clusters that we identify will be based on a particular measure of grammatical diversity of the documents. If, for example, we want to identify clusters based on the lexical diversity of the documents, we may opt to use the lemma features, or some other operationalized measure of lexical diversity. 
+
+Before we leave PCA, let's also take a look at the principle components themselves. The `get_pca_var()` function from the `factoextra` package can be used to extract the principle components from the output of the `prcomp()` function. The `get_pca_var()` function takes the output of the `prcomp()` function as its argument and an argument `ncp = 10` to specify the number of principle components to include in the plot. Let's create a plot of the first five principle components for the part-of-speech data, as seen in @fig-eda-masc-dtms-pca-pc.
 
 ```{r}
-#| label: eda-masc-adjective-kmeans
+#| label: fig-eda-masc-dtms-pca-pc
+#| fig-cap: "Feature contributions to the PCA of the MASC dataset"
+#| fig-width: 8
+
+# Load package
+library(factoextra)
+
+# Plot principle components: pos
+masc_pos_pca |>
+  fviz_contrib(
+    choice = "var",
+    axes = 1:4,
+    top = 20
+  )
+```
+
+From @fig-eda-masc-dtms-pca-pc, we can see that the four principle components are dominated by the relative frequency of nouns, personal pronouns, prepositions, and determiners. This information can help us better understand the results of the clustering algorithm.
+
+Now that we have identified the features that we want to use for clustering and we have represented the features in a way that can be used for clustering, we can apply a clustering algorithm to the data. For Hiearchical clustering, we can use the `hclust()` function from base R. The `hclust()` function takes a distance matrix as its argument and an argument `method = "average"` to specify the average linkage method. The average linkage method takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods. Let's apply the clustering algorithm to the part-of-speech features, as seen in @exm-eda-masc-pos-hclust.
+
+::: {#exm-eda-masc-pos-hclust}
+```{r}
+#| label: fig-eda-masc-pos-hclust
+#| fig-cap: "Hierarchical clustering of the MASC dataset"
+#| fig-width: 8
+
+# Extract first 4 principle components
+masc_pos_pca_pc <- 
+  masc_pos_pca$x[, 1:4]
+
+# Create distance matrix
+masc_pos_dist <- 
+  masc_pos_pca_pc |> 
+  dist(method = "manhattan")
 
 # Apply the clustering algorithm
-masc_adj_kmeans <- 
-  # masc_adj_norm_dtm |> 
-  masc_adj_norm_dtm[-c(304, 215), ] |> 
-  kmeans(
-    centers = 2,
-    nstart = 20
-  )
+masc_pos_hc <- 
+  masc_pos_dist |> 
+  hclust(method = "average")
 
-# Preview
-masc_adj_kmeans
+# Visualize
+masc_pos_hc |> fviz_dend(show_labels = FALSE)
 ```
+:::
 
-We can plot the clusters with the `factoextra` package's `fviz_cluster()` function, as seen in @fig-eda-masc-adjective-kmeans. The `fviz_cluster()` function takes the output of the `kmeans()` function as its first argument and the matrix of features as its second argument. The `ggdendro` package's `ggdendrogram()` function can also be used to plot the clusters, as seen in @fig-eda-masc-adjective-kmeans-dendro.
+Since we are exploring the usefulness of the 18 genre labels used in the MASC dataset we have a good idea of how many clusters we want to start with. This is a good case to employ the K-means clustering algorithm. In K-means clustering, we specify the number of clusters that we want to identify. For each cluster number, a random center is generated. Then each observation is assigned to the cluster with the nearest center. The center of each cluster is then recalculated based on the distribution of the observations in the cluster. This process is iterates either a pre-defined number of times, or until the centers converge (*i.e* observations stop switching clusters).
+
+We can use the `kmeans()` function from base R to apply the K-means clustering algorithm. The `kmeans()` function takes the matrix of features as its first argument and the number of clusters as its second argument. We can specify the number of clusters with the `centers` argument. The `kmeans()` function also takes an argument `nstart` to specify the number of random starts. The K-means algorithm is sensitive to the initial starting points, so it is a good idea to run the algorithm multiple times with different starting points. The `nstart` argument specifies the number of random starts. The default value is 1, but we can increase this to 10 or 20 to increase the likelihood of finding a good solution.
+
+Our goal, then, will be to assess how well this number of clusters fits the data. If it does not fit the data well, we can try a different number of clusters. We can then compare the results of the clustering with the genre labels to see how well the clusters map to the labels and make ajustments to the way we group the labels as necessary. 
+
+Let's start with 18 clusters, assuming the target of the number of genres in the MASC dataset. We can apply the K-means clustering algorithm to the part-of-speech features, as seen in @exm-eda-masc-pos-kmeans.
+
+::: {#exm-eda-masc-pos-kmeans}
+```{r}
+#| label: eda-masc-pos-kmeans
+
+# Extract first 4 principle components
+masc_pos_pca_pc <-
+  masc_pos_pca$x[, 1:4] 
+
+# K-means clustering
+masc_pos_kmeans <- 
+  masc_pos_pca_pc |> 
+  kmeans(
+    centers = 18,
+    nstart = 25,
+    iter.max = 20
+  )
+```
+:::
+
+The `factoextra` package provides `fviz_cluster()` function for visualizing the results of clustering algorithms. The `fviz_cluster()` function takes the output of the `kmeans()` function as its first argument and the matrix of features as its second argument. The `fviz_cluster()` function can be used to visualize the clusters in the data, as seen in @fig-eda-masc-pos-kmeans.
 
 ```{r}
+#| label: fig-eda-masc-pos-kmeans
+#| fig-cap: "K-means clustering of the MASC dataset"
+#| fig-width: 8
 
-fviz_cluster(masc_adj_kmeans, masc_adj_norm_dtm[-c(304, 215), ])
+# Visualize
+masc_pos_kmeans |>  # output of kmeans()
+  fviz_cluster(
+    data = masc_pos_pca_pc, # matrix of features
+    ellipse.type = "norm",
+    ellipse.level = 0.95,
+    geom = "point",
+    pointsize = 1,
+    palette = "grey",
+    ggtheme = theme_qtalr()
+  )
 ```
+
+The ellipses in a k-means plot represent the 95% confidence interval for each cluster. The ellipses are based on the multivariate normal distribution of the data in each cluster. The size and shape of the ellipses tell us about the variance of the data in each cluster. The larger the ellipse the greater the dispersion of values. A wide ellipse suggests high within cluster variability. The distance between the clusters also tells us about the similarity between the clusters. The closer the clusters are to each other, the more similar they are. The further the clusters are from each other, the more dissimilar they are.
+
+So in @fig-eda-masc-pos-kmeans, we see a mix of shapes and sizes. This suggests that some clusters are more homogeneous than others. We also see separation between the large wide clusters towards the top of the plot and the smaller, more circular clusters towards the center. With 18 clusters, we have a lot of clusters, so it is difficult to interpret the results as there is a large amount of overlap. In sum, 18 clusters is likely not an optimal number for this clustering approach.
+
+We could run the code in @exm-eda-masc-pos-kmeans for different values for $k$ and plot each in turn. But a more effective way to determine the optimal number of clusters is to plot the within-cluster sum of squares (WSS) for a range of values for $k$. The WSS is the sum of the squared distance between each observation and its cluster center. With a plot of the WSS for a range of values for $k$, we can identify the value for $k$ where the WSS begins to level off. This is known as the **elbow method**. The elbow method is a heuristic, so it is not always clear where the elbow is. However, it is a good starting point for identifying the optimal number of clusters.
+
+Again, the `factoextra` package has us covered. The `fviz_nbclust()` function can be used to plot the WSS for a range of values for $k$. The `fviz_nbclust()` function takes the `kmeans()` function as its first argument and the matrix of features as its second argument. The `fviz_nbclust()` function also takes arguments `method = "wss"` to specify the WSS method and `k.max = 20` to specify the maximum number of clusters to plot. Let's plot the WSS for a range of values for $k$, as seen in @fig-eda-masc-pos-kmeans-elbow.
+
+```{r}
+#| label: fig-eda-masc-pos-kmeans-elbow
+#| fig-cap: "Elbow method for k-means clustering of the MASC dataset"
+#| fig-width: 8
+
+# Determine the optimal number of clusters
+masc_pos_pca_pc |> 
+  fviz_nbclust(
+    FUNcluster = kmeans,
+    method = "wss", # method
+    k.max = 20,
+    nstart = 25,
+    iter.max = 20
+  )
+```
+
+It is clear that there is significant gains in cluster fit from 1 to 4 clusters, but the gains begin to level off after 5-7 clusters. Now we can skip ahead and try 4 clusters, as seen in @exm-eda-masc-pos-kmeans-fit.
+
+::: {#exm-eda-masc-pos-kmeans-fit}
+```{r}
+#| label: fig-eda-masc-pos-kmeans-fit
+#| fig-cap: "K-means clustering of the MASC dataset with 4 clusters"
+#| fig-width: 8
+
+# Set seed for reproducibility
+set.seed(123)
+
+# K-means: for 5 clusters
+masc_pos_kmeans_fit <-
+  masc_pos_pca_pc |>
+  kmeans(
+    centers = 4,
+    nstart = 25,
+    iter.max = 20
+  )
+
+# Visualize
+masc_pos_kmeans_fit |> 
+  fviz_cluster(
+  data = masc_pos_pca_pc,
+  ellipse.type = "norm",
+  ellipse.level = 0.95,
+  geom = "point",
+  pointsize = 1,
+  palette = "grey",
+  ggtheme = theme_qtalr()
+)
+```
+:::
+
+The results are much more interpretable with 4 clusters. We can see that the clusters are more homogeneous and more distinct from each other, in particular clusters 1 and 2, and are generally similar in shape and size. However, there is still some overlap between the clusters, in particular for clusters 3 and 4. We expect there to be noise as we have paired down the number of features from over 25k to 4, so this is a good working solution.
+
+From this point we can join document-cluster pairings produced by the k-means algorithm with the original dataset. We can then explore the clusters in terms of the original features. We can also explore the clusters in terms of the original labels. Let's join the cluster assignments to the original dataset, as seen in @exm-eda-masc-pos-kmeans-join.
+
+::: {#exm-eda-masc-pos-kmeans-join}
+```{r}
+#| label: eda-masc-pos-kmeans-join
+
+# Organize k-means clusters into a tibble 
+masc_pos_cluster_tbl <- 
+  tibble(
+    doc_id = names(masc_pos_kmeans_fit$cluster),
+    cluster = masc_pos_kmeans_fit$cluster
+  )
+
+# Join cluster assignments to original dataset
+masc_cluster_tbl <- 
+  masc_tbl|> 
+  left_join(
+    masc_pos_cluster_tbl,
+    by = "doc_id"
+  )
+
+# Preview 
+masc_cluster_tbl |> 
+  slice_head(n = 5)
+```
+:::
+
+We now see that the cluster assignments from the k-means algorithm have been joined to the original dataset. We can now explore the clusters in terms of the original features. For example, let's look at the distribution of the clusters across modality first, as seen in @exm-eda-masc-pos-kmeans-modality. To do this, we first need to reduce our dataset to the distinct combinations of modality, genre, and cluster. Then, we can use the `janitor` package's `tabyl()` function to provided formatted percentages.
+
+::: {#exm-eda-masc-pos-kmeans-modality}
+```{r}
+#| label: eda-masc-pos-kmeans-modality
+
+# Load package
+library(janitor)
+
+# Reduce to distinct combinations of modality, genre, and cluster
+masc_meta_tbl <- 
+  masc_cluster_tbl |> 
+  distinct(modality, genre, cluster)
+
+# Tabulate: cluster by modality
+masc_meta_tbl |>
+  tabyl(cluster, modality) |> 
+  adorn_percentages("row") |> 
+  adorn_pct_formatting(digits = 1)
+```
+:::
+
+From @exm-eda-masc-pos-kmeans-modality, we can see that the clusters are not evenly distributed across the modalities. In particular, cluster 1 is where the great majority of the spoken modality appears. We can also appreciate that there may be some written genres that are more similar to spoken genres than other written genres. This may be something we could like to explore further. 
+
+Let's dive into genres and limit our analysis to the written modality, as seen in @exm-eda-masc-pos-kmeans-genre. To do this, we first need to filter the dataset to the written modality. In addition to the row-wise percentages which capture the proportion of the genre that contributes to each cluster, let's also consider the column-wise percentages to consider how each genre is distrributed across the clusters.
+
+::: {#exm-eda-masc-pos-kmeans-genre}
+```{r}
+#| label: eda-masc-pos-kmeans-genre
+
+# Tabulate: cluster by genre for written modality
+masc_meta_tbl |>
+  filter(modality == "Written") |>
+  tabyl(cluster, genre) |> 
+  adorn_percentages("row") |> 
+  adorn_pct_formatting(digits = 1)
+
+# Tabulate: cluster by genre for written modality
+masc_meta_tbl |>
+  filter(modality == "Written") |>
+  tabyl(cluster, genre) |> 
+  adorn_percentages("col") |> 
+  adorn_pct_formatting(digits = 1)
+```
+:::
+
+On the other hand, looking at the written genres, we see that there are some genres which are grouped entirely in cluster 1. In other words, these genres, such as 'Fictlets' and 'Jokes', align with spoken genres in terms of their grammatical diversity. This is an interesting finding that we may want to explore further. Furthermore, it may be of interest to explore individual documents in genres which have a signifcant proportion of documents in cluster 1. There are too many possibilities to explore here but this is a good example of how exploratory data analysis can be used to identify new questions and new variables of interest.
+
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
+
+Given the cluster assignments derived using the distribution of part-of-speech tags, what other relationships between the clusters and the original features could one explore? What are the limitations of this approach? What are the implications of this approach for the interpretation of the results?
+:::
 
 #### Topic modeling {#sec-eda-topic-modeling}
 
@@ -1275,7 +1478,78 @@ Topic modeling: Another unsupervised learning technique used to identify and ext
 This section will discuss topic modeling techniques, which are used to identify and group semantically similar topics in unstructured data. It will discuss various approaches to topic modelling, such as Latent Dirichlet Allocation (LDA), and discuss their applications in linguistics.
 
 - LDA (latent Dirichlet allocation)
-- LSA (latent semantic analysis)
+
+Let's load the `topicmodels` package. Then we will clean the lemmas removing stop words. 
+
+```{r}
+#| label: eda-masc-topic-modeling
+
+# Load package
+library(topicmodels) # for topic modeling
+
+# Clean lemmas
+masc_lemma_clean <- 
+  masc_tbl |> 
+  filter(!lemma %in% stop_words$word) |> 
+  select(doc_id, lemma)
+```
+
+Next, we will create a document-term matrix (DTM) of the lemmas. We will use the `cast_dtm()` function.
+
+```{r}
+# Create a dtm of lemmas
+
+masc_lemma_dtm <- 
+  masc_lemma_clean |> 
+  count(doc_id, lemma) |> 
+  cast_dtm(
+    document = doc_id,
+    term = lemma,
+    value = n
+  ) |> 
+  as.matrix()
+```
+
+We can fit a LDA model to our DTM. 
+
+```{r}
+#| label: eda-masc-topic-modeling-lda
+
+# Fit a LDA model
+lemma_lda_model <- 
+  LDA(
+    masc_lemma_dtm,
+    k = 10,
+    control = list(seed = 1234)
+  )
+
+# Extract the topics
+lemma_topics <- 
+  lemma_lda_model |> 
+  tidy(matrix = "beta") |> # beta: distribution of words in each topic. Gamma: distribution of topics in each document.
+  group_by(topic) |>
+  slice_max(beta, n = 10) |>
+  ungroup() |>
+  arrange(topic, desc(beta))
+```
+
+So, if I want to see the words associated with the topics, use the 'beta' matrix. For the topics associated with each document, use the 'gamma' matrix. 
+
+View the top words in each topic in a bar plot. 
+
+```{r}
+#| label: fig-eda-masc-topic-modeling-lda
+#| fig-width: 8
+
+# View the topics in a bar plot
+lemma_topics |> 
+  mutate(term = reorder_within(term, beta, topic)) |> 
+  ggplot(aes(term, beta)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered()
+```
 
 #### Word embedding {#sec-eda-word-embedding}
 

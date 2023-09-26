@@ -19,8 +19,9 @@ Ready for review.
 
 Content:
 - [ ] Reorganize and summarize this chapter to fit between 7-8k words.
-
-
+  - 2023-08-28: My idea is to significantly trim the Diagnose section. 
+    - Verify: missing data, anomalies may only need prose and some toy examples.
+    - Describe: central tendency, dispersion, and distribution should be considered together. Interdependence should be outlined but not discussed in detail, and referred to as part of the analysis process (i.e. Inspect)
 
 - [x] Focus on analysis: 1) aims (explore: EDA, examine: PDA, extrapolate: IDA), 2) variables, and 3) methods. To be able to make primary decision on what type of analysis is appropriate for the research project given the research aims.
   - [x] Research goals: explore (EDA), examine/ employ (PDA), and extrapolate (IDA).
@@ -75,11 +76,6 @@ In this chapter I will build on the notions of data and information from the pre
 <!-- Purpose: Organize and summarize data -->
 
 The purpose of diagnostic measures is to inspect your data to ensure its quality and understand its characteristics. There are two primary types of diagnostic measures: verfication and description. Verification methods are applied to catch missing or erroneous data while descriptive methods are used to gain a better understanding of the data. Although treated in two separate sections, in practice these methods are complementary and are often addressed in tandem.
-
-<!--  
-Previous: 
-A descriptive assessment of the dataset includes a set of diagnostic measures and tabular and visual summaries which provide researchers a better understanding of the structure of a dataset, prepare the researcher to make decisions about which statistical methods and/ or tests are most appropriate, and to safeguard against false assumptions (missing data, data distributions, etc.).
--->
 
 ```{r}
 #| label: aa-belc
@@ -270,6 +266,8 @@ belc_tbl |>
 From our knowledge of the data, we can gauge whether these values are expected. For example, `sex` has two values; likely corresponding to some coding of 'male' and 'female'. The variable `part_id` has 36 distinct values, which is expected since there are 36 participants and `group` has four, corresponding to the longitudinal time groups. It is also possible to gauge the expected values for `lemma` as we know that these are the base words and should be less than the number of words in the dataset. 
 
 Further verfication of the categorical variables is need, of course. This may include aggregating the data to see the distribution of values and/ or checking the values against the documentation.
+
+<!-- [ ] the point on outliers can refer to the next section -->
 
 Let's now consider numeric variables. Numeric variables, by their very nature, do not lend themselves to the same type of summary used for categorical variables (*i.e.* character lengths, number of unique values, or aggregation) to detect anomalies. For numeric variables there are two types of anomalies that we will consider: outliers and errors in coding. **Outliers** are anomalies that are extreme values that are not representative of the great majority of the data points. To determine what is extreme, we need to consider the distribution of the data, that is, the range of values and the frequency of values. It is rarely the case that we can eyeball the distribution of the data based on raw values. Instead, a combination of summary statistics and visualizations are used to determine the distribution of the data. For this reason, the detection of outliers is often carried out as part of the descriptive assessment of the data, as we will see in @sec-aa-describe. 
 
@@ -947,7 +945,7 @@ belc_essay_tbl <-
   belc_essay_tbl |>
   # Filter out essays with less than 10 tokens
   filter(tokens >= 10) |>
-  anti_join(get_outliers(belc_essay_tbl, prop_l2), by = "essay_id")
+  anti_join(find_outliers(belc_essay_tbl, prop_l2), by = "essay_id")
 
 # Density plots ----
 
@@ -1431,7 +1429,7 @@ sotu_freq_p # Frequency plots
 sotu_free_p # Co-occurence analysis
 ```
 
-The second group, **unsupervised learning** is a subtype of machine learning in which an algorithm is used to find patterns within and between variables in the data without any guidance (supervision). In this way, the algorithm, or machine learner, is left to make connections and associations wherever they may appear in the input data. If we were interested in finding word-use continuities and discontinuities between presidents, we could use a clustering algorithm, seen in @fig-aa-eda-sotu-unsupervised-1. Or if we wanted to uncover themes ... {{< fa wrench >}} [ADD: modify plot] we could use a vector space model, as in @fig-aa-eda-sotu-unsupervised-2.
+The second group, **unsupervised learning**, is a subtype of machine learning in which an algorithm is used to find patterns within and between variables in the data without any guidance (supervision). In this way, the algorithm, or machine learner, is left to make connections and associations wherever they may appear in the input data. If we were interested in finding word-use continuities and discontinuities between presidents, we could use a clustering algorithm, seen in @fig-aa-eda-sotu-unsupervised-1. Or if we wanted to uncover themes ... {{< fa wrench >}} [ADD: modify plot] we could use a vector space model, as in @fig-aa-eda-sotu-unsupervised-2.
 
 <!-- Add unsupervised learning graphics -->
 

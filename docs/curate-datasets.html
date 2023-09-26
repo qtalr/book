@@ -485,7 +485,7 @@ Formatting:
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> _main.R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <em>europarl_do.csv</em> file contains the data origin information documented as part of the acquisition process. The contents are seen in <a href="#tbl-cd-europarl-data-origin">Table&nbsp;<span>6.1</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-data-origin_b047ffe89e23933352ede90fa0944dec">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-data-origin_b517276ecbb3bc61a923bdcb0b66a567">
 <div class="cell-output-display">
 <div id="tbl-cd-europarl-data-origin" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -562,7 +562,7 @@ Formatting:
 <p>We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.</p>
 <p>Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the “idealized structure” of the data. For a curated dataset there are two considerations. First, we want to maintain the original structure of the data as much as possible. This provides a link to the original data and gives us a default dataset structure from which we can derive other structures that fit our analysis needs. Second, we want to add structure to the data that makes it easier to work with. This is the ‘tidy’ part of the data curation process. The aim is to imbue the dataset with as much of the metadata the data resource makes available.</p>
 <p>Given what we know about the data, we can define the idealized structure of the data as seen in <a href="#tbl-cd-europarl-structure-example">Table&nbsp;<span>6.2</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-structure-example_663e30a624b24975b654d9ed015a7e3b">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-europarl-structure-example_9d8d0a83a64660e8c54854d61a67260c">
 <div class="cell-output-display">
 <div id="tbl-cd-europarl-structure-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -626,7 +626,7 @@ Formatting:
 - [x] make clear reference to "idealized structure" table, for each of the sections (unstructured, structured, semi-structured)
 -->
 <p>To create the idealized dataset structure in <a href="#tbl-cd-europarl-structure-example">Table&nbsp;<span>6.2</span></a>, lets’s start by reading the files into R. We will use the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function from the <code>readtext</code> package. <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> is a versatile function that can read many different types of text files (<em>e.g.</em> <em>.txt</em>, <em>.csv</em>, <em>xml</em>, <em>etc.</em>). It can also read multiple files at once using wildcard matching. We will use it to read the <em>.es</em> and <em>.en</em> files by passing the path to the directory where the files are located, and then use the <code>*</code> wildcard to read all the files in the directory.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-readtext-show_add5fb4a30d71c3e3e2b74910ac083b3">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-readtext-show_d9a2ee2ae53cdd2c6fac529bc0dd9d86">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/quanteda/readtext">readtext</a></span><span class="op">)</span></span>
 <span></span>
@@ -653,7 +653,7 @@ Formatting:
 <p>Let’s inspect the <code>europarl_docs_tbl</code> object with the <code><a href="https://rdrr.io/r/utils/str.html">str()</a></code> function, in <a href="#exm-cd-europarl-readtext-str">Example&nbsp;<span>6.3</span></a>.</p>
 <div id="exm-cd-europarl-readtext-str" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.3 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-readtext-str_f6f75e337188d8cd350e26016e0e1ed2">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-readtext-str_d49da16bc648712f765ec4f94312a6e9">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">europarl_docs_tbl</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -679,7 +679,7 @@ Formatting:
 <p>The fact that we only have one row for each file means that all the text in each file is contained in one cell! We want to break these cells up into rows for each line, as they appear in the original data. You may be wondering why the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function did not do this for us, after all the original data was already separated into lines. The reason is that the <code><a href="https://rdrr.io/pkg/readtext/man/readtext.html">readtext()</a></code> function chose to read the files as plain text, and plain text does not have any structure. The line breaks, however, are still there, they are just represented as a special character, <code>\n</code>. Comparing <a href="#exm-cd-europarl-text-lines">Example&nbsp;<span>6.4</span></a> and <a href="#exm-cd-europarl-text-lines-raw">Example&nbsp;<span>6.5</span></a>, we can see that the text is a single long character vector, and that the line breaks are represented as <code>\n</code>.</p>
 <div id="exm-cd-europarl-text-lines" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.4 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines_fd5b9ddb0cabf4a28aa432a0d819ee97">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines_089e96eb7dda39716c2e84f97fb10b5c">
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview first 50 characters</span></span>
 <span><span class="va">europarl_docs_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -695,7 +695,7 @@ Formatting:
 </div>
 <div id="exm-cd-europarl-text-lines-raw" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.5 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-raw_df56cb768cfeeb515bda56c9c0432006">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-raw_24ae4e7794b60fb681d3cf40c7b79a87">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview first 50 raw characters</span></span>
 <span><span class="va">europarl_docs_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -724,7 +724,7 @@ Formatting:
 <p>To do this we will use another function from the <code>stringr</code> package, <code>str_split()</code>, whose function is to split a character vector into smaller character vectors based on some splitting criteria. In <a href="#exm-cd-europarl-text-lines-tbl">Example&nbsp;<span>6.6</span></a>, we use the <code>str_split()</code> function to split the text into lines based on the <code>\n</code> character and assign it to the new column <code>lines</code> using <code>mutate()</code>. Since we will not need the <code>text</code> column anymore, we can use <code>select()</code> to drop it.</p>
 <div id="exm-cd-europarl-text-lines-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.6 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl_bcc748bf3070bbc136d8f46430ce8aa7">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl_2f8abf67c1c8ce5fe930345e4dacbad3">
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Split text into lines</span></span>
 <span><span class="va">europarl_lines_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_docs_tbl</span> <span class="op">|&gt;</span> </span>
@@ -746,7 +746,7 @@ Formatting:
 <p>The list of character vectors, lines in our case, is still associated with the respective <code>doc_id</code> value. However, we want to create a new row for each line in the list. To do this, we will use the <code>unnest()</code> function from the <code>tidyr</code> package <span class="citation" data-cites="R-tidyr">(<a href="references.html#ref-R-tidyr" role="doc-biblioref">Wickham, Vaughan, and Girlich 2023</a>)</span>. The <code>unnest()</code> function takes a list column and creates a new row for each element in the list. We use the <code>unnest()</code> function to create a new row for each line in the <code>lines</code> column. We can see the output from <a href="#exm-cd-europarl-text-lines-tbl-unnest">Example&nbsp;<span>6.7</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-tbl-unnest" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.7 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl-unnest_86a56ae86c89b157f43c29fa27f048d5">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl-unnest_9cacb53d960647eab176c8afe62c9bb2">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a new row for each line</span></span>
 <span><span class="va">europarl_lines_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_tbl</span> <span class="op">|&gt;</span> </span>
@@ -770,7 +770,7 @@ Formatting:
 <p>Remember that the data in the Europarl corpus is aligned, meaning that each line in the source file is aligned with a line in the target file. So we need to make sure that the number of lines in each file is the same. We can do this by grouping the data by <code>doc_id</code> and then counting the number of lines in each file. We can do this using the <code>group_by()</code> and <code>count()</code> functions from the <code>dplyr</code> package <span class="citation" data-cites="R-dplyr">(<a href="references.html#ref-R-dplyr" role="doc-biblioref">Wickham et al. 2023</a>)</span>. We can see the output in <a href="#exm-cd-europarl-text-lines-tbl-count">Example&nbsp;<span>6.8</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-tbl-count" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.8 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl-count_d752d3738d0db15b86db85fd11ea7d6f">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-tbl-count_352ec23ac40e027e742cc7a53c2d7827">
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Count the number of lines in each file</span></span>
 <span><span class="va">europarl_lines_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">doc_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -790,7 +790,7 @@ Formatting:
 <p>We can do this using the <code>case_when()</code> function from the <code>dplyr</code> package <span class="citation" data-cites="R-dplyr">(<a href="references.html#ref-R-dplyr" role="doc-biblioref">Wickham et al. 2023</a>)</span>. The <code>case_when()</code> function takes a series of conditions and assigns a value based on the first condition that is met. In this case, we will use <code>mutate()</code> to create the <code>type</code> column and then use the <code>doc_id</code> column to create the conditions and the <code>type</code> column to assign the values from <code>case_when()</code>. We will store the output in a new object called <code>europarl_lines_type_tbl</code>, as seen in <a href="#exm-cd-europarl-text-lines-type-tbl">Example&nbsp;<span>6.9</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-type-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.9 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-tbl_da7735fc88fc7c81d6b5ed7b0cd494f8">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-tbl_655f8b048501ea6f52eb2db25b49958a">
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create `type` column</span></span>
 <span><span class="va">europarl_lines_type_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_tbl</span> <span class="op">|&gt;</span> </span>
@@ -814,7 +814,7 @@ Formatting:
 <p>We can now overwrite the <code>doc_id</code> column with a unique identifier for each line. A numeric identifier makes sense. We can do this by using the <code>mutate()</code> function to assign <code>doc_id</code> a sequential number with <code>row_number()</code>, which increments by 1 for each row. We will store the output in a new object called <code>europarl_lines_type_id_tbl</code>, as seen in <a href="#exm-cd-europarl-text-lines-type-id-tbl">Example&nbsp;<span>6.10</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-type-id-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.10 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-tbl_8a915577fe631ce68d3d2722fd7fa0ac">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-tbl_2a8ac6c347d93e85e106b6a198b96586">
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create new `doc_id` column</span></span>
 <span><span class="va">europarl_lines_type_id_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_type_tbl</span> <span class="op">|&gt;</span> </span>
@@ -835,7 +835,7 @@ Formatting:
 <p>The last step to get to our envisioned dataset structure is to add the <code>line_id</code> column which will be calculated by grouping the data by <code>type</code> and then assigning a row number to each of the lines in each group. We use the <code>group_by()</code> function to perform the grouping as seen in <a href="#exm-cd-europarl-text-lines-type-id-line-id-tbl">Example&nbsp;<span>6.11</span></a>.</p>
 <div id="exm-cd-europarl-text-lines-type-id-line-id-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.11 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-line-id-tbl_cff20cbd392611e0bfda70a83b8e3c8f">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-line-id-tbl_ee56fb9952ecd87fc2a5aa775292affb">
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create `line_id` column</span></span>
 <span><span class="va">europarl_lines_type_id_line_id_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_type_id_tbl</span> <span class="op">|&gt;</span> </span>
@@ -860,7 +860,7 @@ Formatting:
 <p>Reordering the columns involves using the <code>select()</code> function and list the order of the columns. To sort by columns, we will use <code>arrange()</code> and specify the columns to order by. We store the results in a more legible object, <code>europarl_curated_tbl</code>, as seen in <a href="#exm-cd-europarl-curated-tbl">Example&nbsp;<span>6.12</span></a>.</p>
 <div id="exm-cd-europarl-curated-tbl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.12 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-line-id-tbl-reorder_baf8876eeb693abc2ca6e7ea4a19f1ea">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-europarl-text-lines-type-id-line-id-tbl-reorder_38c1ec5b63aeb876a8ccf5c4821abde7">
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Reorder columns and sort rows</span></span>
 <span><span class="va">europarl_curated_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">europarl_lines_type_id_line_id_tbl</span> <span class="op">|&gt;</span> </span>
@@ -899,7 +899,7 @@ Formatting:
 <p>Now the question is where to save our CSV file. Since our <code>europarl_curated_tbl</code> dataset is derived by our work, we will added it to the <code>derived/</code> directory. I’ll create a <code>europarl/</code> directory with <code><a href="https://fs.r-lib.org/reference/create.html">dir_create()</a></code> just to keep things organized.</p>
 <div id="exm-cd-unstructured-write-europarl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.14 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-unstructured-write-europarl_3da587daee8341590dead1938acc6865">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-unstructured-write-europarl_6e9bee42c11b52aa58911b2968b6be6c">
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create the europarl/ directory</span></span>
 <span><span class="fu">dir_create</span><span class="op">(</span>path <span class="op">=</span> <span class="st">"../data/derived/europarl/"</span><span class="op">)</span></span>
 <span></span>
@@ -938,7 +938,7 @@ Formatting:
 </div>
 <div id="exm-cd-unstructured-data-dictionary" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.16 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-unstructured-data-dictionary_89179ee9671554bae4833b72051bffbc">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-unstructured-data-dictionary_78fdb0dc2978df3c661ab3fcb682b6c6">
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create the data dictionary</span></span>
 <span><span class="fu">create_data_dictionary</span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">europarl_curated_tbl</span>,</span>
@@ -947,7 +947,7 @@ Formatting:
 </div>
 </div>
 <p>An example of the data dictionary for the <code>europarl_curated_tbl</code> dataset is shown in <a href="#tbl-cd-unstructured-data-dictionary-example">Table&nbsp;<span>6.3</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-unstructured-data-dictionary-example_df0e47a0fc8749433bf73ea33c33224f">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-unstructured-data-dictionary-example_4351afb5c2f30b35f238c55ddf37d2f6">
 <div class="cell-output-display">
 <div id="tbl-cd-unstructured-data-dictionary-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -996,7 +996,7 @@ Formatting:
 <section id="reading-data-1" class="level3" data-number="6.2.1"><h3 data-number="6.2.1" class="anchored" data-anchor-id="reading-data-1">
 <span class="header-section-number">6.2.1</span> Reading data</h3>
 <p>Let’s consider some common formats for structured data and how to read them into R. First, we will consider R-native formats, such as package datasets and RDS files. Then will consider non-native formats, such as relational databases and datasets produced by other software. Finally, we will consider software agnostic formats, such as CSV.</p>
-<p>R and some R packages provide structured datasets that are available for use directly within R. For example, the <code>languageR</code> package <span class="citation" data-cites="R-languageR">(<a href="references.html#ref-R-languageR" role="doc-biblioref">Baayen and Shafaei-Bajestan 2019</a>)</span> provides the <code>dative</code> dataset, which is a dataset containing the realization of the dative as NP or PP in the Switchboard corpus and the Treebank Wall Street Journal collection. The <code>janeaustenr</code> package <span class="citation" data-cites="R-janeaustenr">(<a href="references.html#ref-R-janeaustenr" role="doc-biblioref">Silge 2022</a>)</span> provides the <code>austen_books</code> dataset, which is a dataset of Jane Austen’s novels. Package datasets are loaded into an R session using either the <code><a href="https://rdrr.io/r/utils/data.html">data()</a></code> function, if the package is loaded, or the <code>::</code> operator, if the package is not loaded. For example, <code>data(dative)</code> or <code><a href="https://rdrr.io/pkg/languageR/man/dative.html">languageR::dative</a></code>.</p>
+<p>R and some R packages provide structured datasets that are available for use directly within R. For example, the <code>languageR</code> package <span class="citation" data-cites="R-languageR">(<a href="references.html#ref-R-languageR" role="doc-biblioref"><strong>R-languageR?</strong></a>)</span> provides the <code>dative</code> dataset, which is a dataset containing the realization of the dative as NP or PP in the Switchboard corpus and the Treebank Wall Street Journal collection. The <code>janeaustenr</code> package <span class="citation" data-cites="R-janeaustenr">(<a href="references.html#ref-R-janeaustenr" role="doc-biblioref">Silge 2022</a>)</span> provides the <code>austen_books</code> dataset, which is a dataset of Jane Austen’s novels. Package datasets are loaded into an R session using either the <code><a href="https://rdrr.io/r/utils/data.html">data()</a></code> function, if the package is loaded, or the <code>::</code> operator, if the package is not loaded. For example, <code>data(dative)</code> or <code><a href="https://rdrr.io/pkg/languageR/man/dative.html">languageR::dative</a></code>.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1037,7 +1037,7 @@ Formatting:
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> utterances.csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>In addition to other important information, the data origin file <em>cabnc_do.csv</em> shown in <a href="#tbl-cd-cabnc-do">Table&nbsp;<span>6.4</span></a> informs us the the datasets are related by a common variable.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-do_b8c20a762c65e7a292c1e175696f7c9b">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-do_b959eaea4d0c814cd19a0705bc5457b4">
 <div class="cell-output-display">
 <div id="tbl-cd-cabnc-do" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1093,7 +1093,7 @@ Formatting:
 <p>With our idealized dataset in mind, let’s start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the <code>read_csv()</code> function, as seen in <a href="#exm-cd-cabnc-read">Example&nbsp;<span>6.19</span></a>.</p>
 <div id="exm-cd-cabnc-read" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.19 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-read_c8e3db943fc5134b06bdbad6f5a20f56">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-read_3fbaebb0d111e9112b9f0835b4006c79">
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read the relevant datasets</span></span>
 <span><span class="va">cabnc_utterances</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/cabnc/original/utterances.csv"</span><span class="op">)</span></span>
@@ -1104,7 +1104,7 @@ Formatting:
 <p>The next step is to inspect the structure of the datasets. We can use the <code>glimpse()</code> function for this task.</p>
 <div id="exm-cd-cabnc-glimpse" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.20 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-glimpse_5338108eb12e38f8bb286a3cef6b3038">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-glimpse_2b48042c7542e2d69d180f174a68405e">
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview the structure of the datasets</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">cabnc_utterances</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1144,7 +1144,7 @@ Formatting:
 <p>From visual inspection of the output of <a href="#exm-cd-cabnc-glimpse">Example&nbsp;<span>6.20</span></a> we can see that there are common variables in both datasets. It is also possible to intersect the datasets to see which variables are common using the <code><a href="https://rdrr.io/r/base/sets.html">intersect()</a></code> function to intersect the column names of each data frame with the <code><a href="https://rdrr.io/r/base/names.html">names()</a></code> function, as seen in <a href="#exm-cd-cabnc-intersect">Example&nbsp;<span>6.21</span></a>.</p>
 <div id="exm-cd-cabnc-intersect" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.21 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-intersect_c46e46a412e8423282d5cf361c0eb4d5">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-intersect_0f92b641d1ae6567ac6705a1e5b5a531">
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Find the common variables</span></span>
 <span><span class="va">common_vars</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/sets.html">intersect</a></span><span class="op">(</span></span>
@@ -1163,7 +1163,7 @@ Formatting:
 <p>In this case, the variable names and values are consistent across the datasets. Therefore, we can join the datasets together using the <code>left_join()</code> function from the <code>dplyr</code> package, as seen in <a href="#exm-cd-cabnc-join">Example&nbsp;<span>6.22</span></a>. This function will take the dataset on the left (<code>x =</code>) and join it to the dataset on the right (<code>y =</code>). The <code>by</code> argument specifies the variables to join on. The choice of which dataset to put on the left usually depends on which dataset has the most detailed information. In this case, the <code>cabnc_utterances</code> dataset has more detailed information about the utterances so we will put this dataset on the left.</p>
 <div id="exm-cd-cabnc-join" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.22 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-join_a874feacfd3f82671db8a612e60cf1bc">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-join_6e0a2474397f73199732b7ef54d2599d">
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join the datasets</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">left_join</span><span class="op">(</span></span>
@@ -1184,14 +1184,14 @@ Formatting:
 <p>Let’s get a high-level summary of the variables in the dataset. We can use the <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> function from the <code>skimr</code> package <span class="citation" data-cites="R-skimr">(<a href="references.html#ref-R-skimr" role="doc-biblioref">Waring et al. 2022</a>)</span> to get a summary of the variables in the dataset<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <div id="exm-cd-cabnc-skim" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.23 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-skim-show_c1909625eaa8358eb0d1a75661bd9a49">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-skim-show_eb61206f58d700fe8dd17977d576b09c">
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/skimr/">skimr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summarize the variables in the dataset</span></span>
 <span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="va">cabnc_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="tbl-cd-cabnc-skim-run" class="cell tbl-parent quarto-layout-panel anchored" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-skim-run_18bf8060a1c976c2d63e97445bb29abd">
+<div id="tbl-cd-cabnc-skim-run" class="cell tbl-parent quarto-layout-panel anchored" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-skim-run_85747f1608abf3ef45183b0894ae49ab">
 <div class="panel-caption table-caption">
 <p>Table&nbsp;6.5: Summary of variables in the CABNC dataset</p>
 </div>
@@ -1362,7 +1362,7 @@ Formatting:
 <p>Another way to explore this is to look at the number of unique values in the <code>who</code> variable for each unique value in the <code>name</code> variable. We can do this using the <code>group_by()</code> and <code>summarize()</code> functions from the <code>dplyr</code> package. For each value of <code>name</code>, we will count the number of unique values in <code>who</code> and then sort the results in descending order.</p>
 <div id="exm-cd-cabnc-who-name" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.24 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-who-name_f5e4b0660b91188e0ced6f9f2c6067f1">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-who-name_841a978a63bfc09c3f8a033e12e6714f">
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cabnc_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">summarize</span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">who</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1390,7 +1390,7 @@ Formatting:
 <p>In all, we will remove the following variables from the dataset: <code>postcodes</code>, <code>gems</code>, <code>role</code>, <code>language</code>, <code>age</code>, <code>name</code>, and <code>path</code>. To drop variables from a data frame we can use the <code>select()</code> function in combination with the <code>-</code> operator. The <code>-</code> operator tells the <code>select()</code> function to drop the variables that follow it.</p>
 <div id="exm-cd-cabnc-drop-vars" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.25 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-drop-vars_4f48c1e30a6edbeb2cd435b8712d5e82">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-drop-vars_d2e8cba5955a7e020d170e3cfd6e53da">
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Drop variables</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">cabnc_tbl</span> <span class="op">|&gt;</span> </span>
@@ -1419,7 +1419,7 @@ Formatting:
 <p>Now we have a dataset with 12 informative variables which describe the utterances for each recording. There are variables about the recordings, such as the <code>filename</code>, about the speakers, such as the <code>sex</code> and <code>who</code>, and about the utterances, such as the <code>utterance</code>, <code>utt_num</code>, <em>etc.</em>. Let’s organize the columns to read left to right from most general to most specific. Again we turn to the <code>select()</code> function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative.</p>
 <div id="exm-cd-cabnc-rename-vars" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.26 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-rename-vars_38624c5363eb04d230a22b4a766701ed">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-rename-vars_c09580e526e2ea8015b20eff3ed4673b">
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Rename variables</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">cabnc_tbl</span> <span class="op">|&gt;</span> </span>
@@ -1461,7 +1461,7 @@ Formatting:
 <p>The variable order is organized after running <a href="#exm-cd-cabnc-rename-vars">Example&nbsp;<span>6.26</span></a>. Now let’s sort the rows by <code>doc_id</code> and <code>utt_num</code> so that the utterances are in order. The <code>arrange()</code> function takes a data frame and a list of variables to sort by, in the order they are listed.</p>
 <div id="exm-cd-cabnc-sort-rows" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.27 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-sort-rows_bde0ff2144aaf83b20f8c4dd937612e3">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-sort-rows_b7f623cdd1358e657ca557c41678ea47">
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Sort rows</span></span>
 <span><span class="va">cabnc_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cabnc_tbl</span> <span class="op">|&gt;</span></span>
@@ -1495,7 +1495,7 @@ Formatting:
 <p>Let’s now write this dataset to disk. Again, since this is a dataset we have created, we will store the dataset in the <em>data/derived/</em> directory. To keep the CABNC separate from any other datasets that we may need for our research project, I will create a subdirectory called <em>cabnc/</em> to store the dataset. Into this directory we can write a CSV file with our <code>cabnc_tbl</code> data frame with the <code>write_csv()</code> function, as seen in <a href="#exm-cd-cabnc-write-csv">Example&nbsp;<span>6.28</span></a>.</p>
 <div id="exm-cd-cabnc-write-csv" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.28 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-write-csv_239c3630ba10f90f498e74aba298962c">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-write-csv_fcb38353df99d4002b1635b4b921b3f2">
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create cabnc directory</span></span>
 <span><span class="fu">dir_create</span><span class="op">(</span>path <span class="op">=</span> <span class="st">"../data/derived/cabnc"</span><span class="op">)</span></span>
 <span></span>
@@ -1507,7 +1507,7 @@ Formatting:
 <p>The final step is to create a data dictionary file for this dataset. We can do this using the <code><a href="https://qtalr.github.io/qtalrkit/reference/create_data_dictionary.html">create_data_dictionary()</a></code> function, passing the data frame object name and a path to the directory where we want to store the data dictionary. The <code><a href="https://qtalr.github.io/qtalrkit/reference/create_data_dictionary.html">create_data_dictionary()</a></code> function will create a CSV file with a data dictionary template in the specified directory.</p>
 <div id="exm-cd-cabnc-create-data-dict" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.29 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-create-data-dict_6a21fdfebd5bf9c968875c021d064c87">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-cabnc-create-data-dict_254082b376de857f822609c3449571cc">
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create data dictionary</span></span>
 <span><span class="fu">create_data_dictionary</span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">cabnc_tbl</span>,</span>
@@ -1516,7 +1516,7 @@ Formatting:
 </div>
 </div>
 <p>After running the code in <a href="#exm-cd-cabnc-create-data-dict">Example&nbsp;<span>6.29</span></a>, we can open the <em>cabnc_curated_dd.csv</em> file in the <em>data/derived/cabnc/</em> directory and fill in the data dictionary template. An example of an edited data dictionary is shown in <a href="#tbl-cd-cabnc-dd-example">Table&nbsp;<span>6.6</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-dd-example_0387e62d7e8e843d1933df5afff002ba">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-cabnc-dd-example_5cdf8b93c26bec404f48be93ef908ef8">
 <div class="cell-output-display">
 <div id="tbl-cd-cabnc-dd-example" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1690,7 +1690,7 @@ Formatting:
 <span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>        <span class="ex">└──</span> translations.tok</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We now inspect the data origin file for the ENNTT corpus, <em>enntt_do.csv</em>, in <a href="#tbl-cd-enntt-do">Table&nbsp;<span>6.7</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-do_5d22dfc9d9d716a64627769a625bf5c7">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-do_41e7c382c9e8a945387726a2ffea486a">
 <div class="cell-output-display">
 <div id="tbl-cd-enntt-do" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -1818,7 +1818,7 @@ Formatting:
 <p>Starting with the natives, we read in the <em>.dat</em> file as an XML file with the <code><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html()</a></code> function and then extract the line nodes with the <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements()</a></code> function as in <a href="#exm-cd-enntt-read-xml">Example&nbsp;<span>6.33</span></a>.</p>
 <div id="exm-cd-enntt-read-xml" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.33 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-xml_7c98d42b42afab087933facf5da63b24">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-xml_28140e184093c02ce73ba13a9541b8f8">
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rvest.tidyverse.org/">rvest</a></span><span class="op">)</span></span>
 <span></span>
@@ -1843,7 +1843,7 @@ Formatting:
 <p>When can see that the <code>ns_dat_lines</code> object is a special type of list, <code>xml_nodeset</code> which contains 116,341 line nodes. Let’s now jump out of sequence and read in the <em>.tok</em> file as a text file, in <a href="#exm-cd-enntt-read-lines">Example&nbsp;<span>6.34</span></a>, again by lines using <code>read_lines()</code>, and compare the two to make sure that our approach will work.</p>
 <div id="exm-cd-enntt-read-lines" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.34 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-lines_ee1aad311722ff6487a3f19742a7e0ce">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-read-lines_af4fb31b1a26c1d12ce06840ecf92e37">
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in *.tok* file by lines</span></span>
 <span><span class="va">ns_tok_lines</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">read_lines</span><span class="op">(</span><span class="st">"data/enntt/original/natives.tok"</span><span class="op">)</span></span>
@@ -1913,7 +1913,7 @@ Formatting:
 <p>The results from <a href="#exm-cd-enntt-extract-attributes">Example&nbsp;<span>6.36</span></a> show that the attributes have been extracted and mapped to our idealized column names, but this would be tedious to do for each line node. A function to extract attributes and values from a line and add them to a data frame would help simplify this process. The function in <a href="#exm-cd-enntt-extract-attributes-function">Example&nbsp;<span>6.37</span></a> does just that.</p>
 <div id="exm-cd-enntt-extract-attributes-function" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.37 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-extract-attributes-function_1474b448aff9aa96a9e25d9d68a82bf0">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-extract-attributes-function_06b183af546e301f9ae1b65191cde00c">
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Function to extract attributes from line node</span></span>
 <span><span class="va">extract_dat_attrs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">line_node</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">session_id</span> <span class="op">&lt;-</span> <span class="va">line_node</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"session_id"</span><span class="op">)</span></span>
@@ -1928,7 +1928,7 @@ Formatting:
 <p>It’s a good idea to test out the function to verify that it works as expected. We can do this by passing the various indices to the <code>ns_dat_lines</code> object to the function as in <a href="#exm-cd-enntt-test-extract-attributes-function">Example&nbsp;<span>6.38</span></a>.</p>
 <div id="exm-cd-enntt-test-extract-attributes-function" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.38 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-test-extract-attributes-function_4f52c2ee1b88bd6840dd53b56f3dc79e">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-test-extract-attributes-function_a086cceccd07eb90823bc28544cf9db8">
 <div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Test function</span></span>
 <span><span class="fu">extract_dat_attrs</span><span class="op">(</span><span class="va">ns_dat_lines</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1956,7 +1956,7 @@ Formatting:
 <p>Looks like the <code>extract_dat_attrs()</code> function is ready for prime-time. Let’s now apply it to all of the line nodes in the <code>ns_dat_lines</code> object using the <code><a href="https://purrr.tidyverse.org/reference/map_dfr.html">map_dfr()</a></code> function from the <code>purrr</code> package as in <a href="#exm-cd-enntt-extract-attributes-all">Example&nbsp;<span>6.39</span></a>.</p>
 <div id="exm-cd-enntt-extract-attributes-all" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.39 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-extract-attributes-all_d0175bdbd1f9697d54d659c30a49dbe7">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-extract-attributes-all_315fbe61ed980649b494d4cf90445ef7">
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract attributes from all line nodes</span></span>
 <span><span class="va">ns_dat_attrs</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">ns_dat_lines</span> <span class="op">|&gt;</span> </span>
@@ -1988,7 +1988,7 @@ Formatting:
 <p>We can see that the <code>ns_dat_attrs</code> object is a data frame with 116,341 rows and 4 columns, just has we expected. We can now combine the <code>ns_dat_attrs</code> data frame with the <code>ns_tok_lines</code> vector to create a single data frame with the attributes and the text. This is done with the <code>mutate()</code> function assigning the <code>ns_tok_lines</code> vector to a new column named <code>text</code> as in <a href="#exm-cd-enntt-combine-attributes-text">Example&nbsp;<span>6.40</span></a>.</p>
 <div id="exm-cd-enntt-combine-attributes-text" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.40 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-attributes-text_078edebba6450feb32ecc33111c87e54">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-attributes-text_36e7350ac4df259c99891fdeeee4116f">
 <div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Combine attributes and text</span></span>
 <span><span class="va">ns_dat</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">ns_dat_attrs</span> <span class="op">|&gt;</span> </span>
@@ -2013,7 +2013,7 @@ Formatting:
 <p>Note that there is at least one tweak we need to make to our existing code base if we plan on combining the native and non-native data. As our function stands, it will return a data frame with the same column names for both the native and non-native data. We will need to add a column to which we will indicate what type of data it is (native or non-native). This is where the <code>type</code> column we planned earlier comes in. There are multiple ways to do this. We could add a column to the data frame before we return it, or we could add a column to the data frame after we return it. I will opt for the former and embed it inside of our function <code>combine_dat_tok()</code>.</p>
 <div id="exm-cd-enntt-combine-dat-tok-function" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.41 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok-function_b5ae2e6ad3e10554409f32fb98802a3c">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok-function_967efe74f2139f95b242307d1b7af60e">
 <div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rvest.tidyverse.org/">rvest</a></span><span class="op">)</span> <span class="co"># for reading/parsing HTML</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/">purrr</a></span><span class="op">)</span> <span class="co"># for mapping functions</span></span>
@@ -2060,7 +2060,7 @@ Formatting:
 <p>Apply the <code>combine_dat_tok()</code> function to read in the data for the native speakers and the non-native speakers in a few lines of code, as in <a href="#exm-cd-enntt-combine-dat-tok">Example&nbsp;<span>6.42</span></a>.</p>
 <div id="exm-cd-enntt-combine-dat-tok" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.42 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok_c0d9eef31368759e5f9c1f7f35bff676">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok_9688dd7bdfe7925fe2d2bbabca6c03bd">
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Native speakers</span></span>
 <span><span class="va">ns_dat</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">combine_dat_tok</span><span class="op">(</span></span>
@@ -2079,7 +2079,7 @@ Formatting:
 <span><span class="co"># Preview</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">nns_dat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok-run_6ae974200b4a342e4274ea5a7dc20ce4">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-combine-dat-tok-run_1755f37d15f0b0957a3b03248704a1d5">
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; Rows: 116,341
 &gt; Columns: 6
@@ -2103,7 +2103,7 @@ Formatting:
 </div>
 </div>
 <p>The last step to curate the dataset is to combine the native and non-native data into a single data frame. We can do this using the <code>bind_rows()</code> function from the <code>dplyr</code> package, as essentially we are just stacking the rows from each data frame on top of each other.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/combine-ns-dat-nns-dat_b3ebb032115e04d21d82c87d02c09056">
+<div class="cell" data-hash="curate-datasets_cache/html/combine-ns-dat-nns-dat_5f9c2cc47a21b3aa99161485404fc243">
 <div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Combine native and non-native data</span></span>
 <span><span class="va">enntt_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">ns_dat</span>, <span class="va">nns_dat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2125,7 +2125,7 @@ Formatting:
 <p>As we have done for the other curated datasets, we will write our curated dataset to a <em>.csv</em> file. We will use the <code>write_csv()</code> function and name the file appropriately, as in <a href="#exm-cd-enntt-write-csv">Example&nbsp;<span>6.43</span></a>.</p>
 <div id="exm-cd-enntt-write-csv" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.43 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-write-csv_2b12cb32aec1282085f2f47bb34c3ff4">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-write-csv_6a15007ea138128e3c16fb43048b025d">
 <div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create directory</span></span>
 <span><span class="fu"><a href="https://fs.r-lib.org/reference/create.html">dir_create</a></span><span class="op">(</span><span class="st">"../data/derived/enntt"</span><span class="op">)</span></span>
 <span></span>
@@ -2136,7 +2136,7 @@ Formatting:
 <p>Document the dataset in a data dictionary using the <code><a href="https://qtalr.github.io/qtalrkit/reference/create_data_dictionary.html">create_data_dictionary()</a></code> function from the <code>qtalrkit</code> package, as in <a href="#exm-cd-enntt-create-data-dictionary">Example&nbsp;<span>6.44</span></a>.</p>
 <div id="exm-cd-enntt-create-data-dictionary" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.44 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-create-data-dictionary_c4c729642ed0df3a0f6a2930a47f19d3">
+<div class="cell" data-hash="curate-datasets_cache/html/cd-enntt-create-data-dictionary_d9b5ebc2f1a795bd52e189df5048fc8e">
 <div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/qtalr/qtalrkit">qtalrkit</a></span><span class="op">)</span></span>
 <span></span>
@@ -2148,7 +2148,7 @@ Formatting:
 </div>
 </div>
 <p>After editing the data dictionary file to include the appropriate information, we will have something similar to <a href="#tbl-cd-enntt-data-dictionary">Table&nbsp;<span>6.9</span></a>.</p>
-<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-data-dictionary_ff4b392877ab6ce6761b4ded57259b9c">
+<div class="cell" data-hash="curate-datasets_cache/html/tbl-cd-enntt-data-dictionary_7384b3646710769f08776ba9c5bf2915">
 <div class="cell-output-display">
 <div id="tbl-cd-enntt-data-dictionary" class="anchored">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -2237,6 +2237,10 @@ Formatting:
 </section></section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
 <p>In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data –unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of metadata included. The results from data curation results in a dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. In addition to the code we use to derived the curated dataset’s structure, we also include a data dictionary which documents the curated dataset.</p>
 </section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
+<ul class="task-list">
+<li>
+<input type="checkbox"><i class="fa-solid fa-wrench" aria-label="wrench"></i> Add description of outcomes</li>
+</ul>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -2246,7 +2250,7 @@ Formatting:
 <p><strong><i class="fa-regular fa-file-code" aria-label="file-code"></i> Recipe</strong></p>
 <!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 <!-- [ ] edit links and goals/ outcomes -->
-<p><strong>What</strong>: <a href="https://lin380.github.io/tadr/articles/recipe_7.html">Organizing and documenting datasets</a><br><strong>How</strong>: Read Recipe 7 and participate in the Hypothes.is online social annotation.<br><strong>Why</strong>: To rehearse methods for deriving tidying datasets to use a the base for further project-specific purposes. We will explore how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to change the dimensions of a dataset to either expand or collapse columns or rows.</p>
+<p><strong>What</strong>: <a href="https://qtalr.github.io/qtalrkit/articles/recipe-6.html">Organizing and documenting datasets</a><br><strong>How</strong>: Read Recipe 6 and participate in the Hypothes.is online social annotation.<br><strong>Why</strong>: To rehearse methods for deriving tidying datasets to use a the base for further project-specific purposes. We will explore how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to change the dimensions of a dataset to either expand or collapse columns or rows.</p>
 </div>
 </div>
 </div>
@@ -2260,7 +2264,7 @@ Formatting:
 <!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 <!-- [ ] edit links and goals/ outcomes -->
 <!-- [ ] update name of lab to something more lively -->
-<p><strong>What</strong>: <a href="https://github.com/lin380/lab_7">Pattern Matching and Manipulate Datasets</a><br><strong>How</strong>: Clone, fork, and complete the steps in Lab 7.<br><strong>Why</strong>: To gain experience working with coding strategies reshaping data using tidyverse functions and regular expressions, to practice reading/ writing data from/ to disk, and to implement organizational strategies for organizing and documenting a dataset in reproducible fashion.</p>
+<p><strong>What</strong>: <a href="https://github.com/qtalr/lab-6">Pattern Matching and Manipulate Datasets</a><br><strong>How</strong>: Clone, fork, and complete the steps in Lab 6.<br><strong>Why</strong>: To gain experience working with coding strategies reshaping data using tidyverse functions and regular expressions, to practice reading/ writing data from/ to disk, and to implement organizational strategies for organizing and documenting a dataset in reproducible fashion.</p>
 </div>
 </div>
 </div>
@@ -2296,9 +2300,6 @@ Formatting:
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-R-languageR" class="csl-entry" role="listitem">
-Baayen, R. H., and Elnaz Shafaei-Bajestan. 2019. <em>languageR: Analyzing Linguistic Data: A Practical Introduction to Statistics</em>. <a href="https://CRAN.R-project.org/package=languageR">https://CRAN.R-project.org/package=languageR</a>.
-</div>
 <div id="ref-R-readtext" class="csl-entry" role="listitem">
 Benoit, Kenneth, and Adam Obeng. 2023. <em>Readtext: Import and Handling for Plain and Formatted Text Files</em>. <a href="https://github.com/quanteda/readtext">https://github.com/quanteda/readtext</a>.
 </div>
@@ -2309,28 +2310,28 @@ Koehn, P. 2005. <span>“Europarl: A Parallel Corpus for Statistical Machine Tra
 Ooms, Jeroen. 2023. <em>Jsonlite: A Simple and Robust JSON Parser and Generator for r</em>. <a href="https://jeroen.r-universe.dev/jsonlite%0Ahttps://arxiv.org/abs/1403.2805">https://jeroen.r-universe.dev/jsonlite https://arxiv.org/abs/1403.2805</a>.
 </div>
 <div id="ref-R-DBI" class="csl-entry" role="listitem">
-R Special Interest Group on Databases (R-SIG-DB), Hadley Wickham, and Kirill Müller. 2022. <em>DBI: R Database Interface</em>. <a href="https://CRAN.R-project.org/package=DBI">https://CRAN.R-project.org/package=DBI</a>.
+R Special Interest Group on Databases (R-SIG-DB), Hadley Wickham, and Kirill Müller. 2022. <em>DBI: R Database Interface</em>. <a href="https://dbi.r-dbi.org">https://dbi.r-dbi.org</a>.
 </div>
 <div id="ref-R-janeaustenr" class="csl-entry" role="listitem">
 Silge, Julia. 2022. <em>Janeaustenr: Jane Austen’s Complete Novels</em>. <a href="https://github.com/juliasilge/janeaustenr">https://github.com/juliasilge/janeaustenr</a>.
 </div>
 <div id="ref-R-skimr" class="csl-entry" role="listitem">
-Waring, Elin, Michael Quinn, Amelia McNamara, Eduardo Arino de la Rubia, Hao Zhu, and Shannon Ellis. 2022. <em>Skimr: Compact and Flexible Summaries of Data</em>. <a href="https://CRAN.R-project.org/package=skimr">https://CRAN.R-project.org/package=skimr</a>.
+Waring, Elin, Michael Quinn, Amelia McNamara, Eduardo Arino de la Rubia, Hao Zhu, and Shannon Ellis. 2022. <em>Skimr: Compact and Flexible Summaries of Data</em>. <a href="https://docs.ropensci.org/skimr/">https://docs.ropensci.org/skimr/</a>.
 </div>
 <div id="ref-R-stringr" class="csl-entry" role="listitem">
-Wickham, Hadley. 2022. <em>Stringr: Simple, Consistent Wrappers for Common String Operations</em>. <a href="https://CRAN.R-project.org/package=stringr">https://CRAN.R-project.org/package=stringr</a>.
+Wickham, Hadley. 2022. <em>Stringr: Simple, Consistent Wrappers for Common String Operations</em>. <a href="https://stringr.tidyverse.org">https://stringr.tidyverse.org</a>.
 </div>
 <div id="ref-R-dplyr" class="csl-entry" role="listitem">
-Wickham, Hadley, Romain François, Lionel Henry, Kirill Müller, and Davis Vaughan. 2023. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.
+Wickham, Hadley, Romain François, Lionel Henry, Kirill Müller, and Davis Vaughan. 2023. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://dplyr.tidyverse.org">https://dplyr.tidyverse.org</a>.
 </div>
 <div id="ref-R-dbplyr" class="csl-entry" role="listitem">
-Wickham, Hadley, Maximilian Girlich, and Edgar Ruiz. 2023. <em>Dbplyr: A Dplyr Back End for Databases</em>. <a href="https://CRAN.R-project.org/package=dbplyr">https://CRAN.R-project.org/package=dbplyr</a>.
+Wickham, Hadley, Maximilian Girlich, and Edgar Ruiz. 2023. <em>Dbplyr: A Dplyr Back End for Databases</em>. <a href="https://dbplyr.tidyverse.org/">https://dbplyr.tidyverse.org/</a>.
 </div>
 <div id="ref-R-haven" class="csl-entry" role="listitem">
-Wickham, Hadley, Evan Miller, and Danny Smith. 2023. <em>Haven: Import and Export SPSS, Stata and SAS Files</em>. <a href="https://CRAN.R-project.org/package=haven">https://CRAN.R-project.org/package=haven</a>.
+Wickham, Hadley, Evan Miller, and Danny Smith. 2023. <em>Haven: Import and Export SPSS, Stata and SAS Files</em>. <a href="https://haven.tidyverse.org">https://haven.tidyverse.org</a>.
 </div>
 <div id="ref-R-tidyr" class="csl-entry" role="listitem">
-Wickham, Hadley, Davis Vaughan, and Maximilian Girlich. 2023. <em>Tidyr: Tidy Messy Data</em>. <a href="https://CRAN.R-project.org/package=tidyr">https://CRAN.R-project.org/package=tidyr</a>.
+Wickham, Hadley, Davis Vaughan, and Maximilian Girlich. 2023. <em>Tidyr: Tidy Messy Data</em>. <a href="https://tidyr.tidyverse.org">https://tidyr.tidyverse.org</a>.
 </div>
 </div>
 </section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><hr>

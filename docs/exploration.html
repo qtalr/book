@@ -360,24 +360,24 @@ div.csl-indent {
   </div>
   
 
-</header><div class="callout callout-style-default callout-caution callout-titled" title="Caution">
+</header><div class="callout callout-style-default callout-tip callout-titled" title="Draft">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Caution
+Draft
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Under development.</p>
+<p>Ready for review.</p>
 </div>
 </div>
 <!--
 
 Content:
 
-Bxploratory Data Analysis (EDA) is a set of methods used for analyzing and exploring text data in the areas of text analysis and corpus linguistics. Descriptive methods commonly used in EDA include data visualization, word frequency and distribution analysis, and collocation analysis. These methods help identify common words and phrases, as well as relationships between different elements in the text. 
+Exploratory Data Analysis (EDA) is a set of methods used for analyzing and exploring text data in the areas of text analysis and corpus linguistics. Descriptive methods commonly used in EDA include data visualization, word frequency and distribution analysis, and collocation analysis. These methods help identify common words and phrases, as well as relationships between different elements in the text. 
 
 Additionally, unsupervised learning methods such as clustering, topic modeling, semantic analysis, and word embedding are used in EDA. These techniques help group similar items, extract topics, understand content, and represent words as numerical vectors for various tasks.
 
@@ -446,7 +446,10 @@ Formatting:
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-terminal" aria-label="terminal"></i> Lessons</strong></p>
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<!-- [ ] lesson: update the why -->
+<!-- 
+- [ ] Update lesson name, 
+- [ ] update lesson purpose
+-->
 <p><strong>What</strong>: <a href="https://github.com/qtalr/lessons">Matrices, Exploratory Visualization</a><br><strong>How</strong>: In the R Console pane load <code>swirl</code>, run <code>swirl()</code>, and follow prompts to select the lesson.<br><strong>Why</strong>: Learn how to work with matrices to store and analyze numeric data using <code>quanteda</code> and to further your understanding of graphically representing data using <code>ggplot2</code> and other packages for more advanced plotting.</p>
 </div>
 </div>
@@ -747,192 +750,25 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 <p>The output of this frequency tabulation in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a> is a data frame with two columns: <code>lemma</code> and <code>n</code>. The <code>lemma</code> column contains the unique lemmas in the dataset, and the <code>n</code> column contains the frequency of each lemma. The data frame is sorted in descending order by the frequency of lemmas. Now the result includes over 28,000 rows –which corresponds to the number of unique lemmas in the dataset.</p>
-<ul class="task-list">
-<li>
-<input type="checkbox">re-write this to make tokens-types make more sense with ‘term’ and ‘lemma’</li>
-</ul>
 <p>At this point, it is important to define two key concepts that are fundamental to working with text. First, a <strong>term</strong> is a defined linguistic unit extracted from a corpus. In our dataset, the terms are words, such as ‘the’, ‘houses’, ‘are’. A lemma is an annotated recoding of words which represent the uninflected base form of a word. In either case, the term or lemma is an instance of a linguistic unit. These instances are called <strong>tokens</strong>. When we count the number of times a term or lemma occurs in a dataset, we are counting the number of tokens (<code>n</code>), such as in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a>. Now, the list of unique linguistic units is a list of <strong>types</strong> (<code>lemma</code>). By definition, then, there will always be at least as many tokens as types, but more often than not (many) more tokens than types.</p>
-<p>Our first pass a calculating lemma frequency in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a> should bring something else to our attention. As we can see among the most frequent lemmas are non-words such as <code>,</code>, and <code>.</code>. As you can imagine, given the conventions of written and transcriptional language, these types are very frequent. For a frequency analysis focusing on words, however, we should probably remove them. Thinking ahead, there may also be other non-words that we want to remove, such as symbols, numbers, <em>etc</em>. Let’s take a look at <a href="#tbl-eda-masc-pos">Table&nbsp;<span>8.3</span></a>, where I’ve counted the part-of-speech tags <code>pos</code> in the dataset to see what other non-words we might want to remove.</p>
+<p>Our first pass a calculating lemma frequency in <a href="#exm-eda-masc-count">Example&nbsp;<span>8.4</span></a> should bring something else to our attention. As we can see among the most frequent lemmas are non-words such as <code>,</code>, and <code>.</code>. As you can imagine, given the conventions of written and transcriptional language, these types are very frequent. For a frequency analysis focusing on words, however, we should probably remove them. Thinking ahead, there may also be other non-words that we want to remove, such as symbols, numbers, <em>etc</em>. Let’s take a look at <a href="#fig-eda-masc-pos">Figure&nbsp;<span>8.1</span></a>, where I’ve counted the part-of-speech tags <code>pos</code> in the dataset to see what other non-words we might want to remove.</p>
 <div id="exm-eda-masc-pos" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.5 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="exploration_cache/html/tbl-eda-masc-pos_dfe1111018354707114ac35394877be8">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># [ ] consider how to present this better, more concisely</span></span>
-<span></span>
-<span><span class="co"># Part-of-speech tags</span></span>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-pos_eff897f4eb5c779ac7e219b745894552">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Part-of-speech tags</span></span>
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">count</span><span class="op">(</span><span class="va">pos</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">pos</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">kable</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu">ggplot</span><span class="op">(</span></span>
+<span>    <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">pos</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Part-of-speech tags"</span>, y <span class="op">=</span> <span class="st">"Token frequency"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="tbl-eda-masc-pos" class="anchored">
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<caption>Table&nbsp;8.3: Part-of-speech tags in the MASC dataset.</caption>
-<thead><tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">pos</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">CC</td>
-<td style="text-align: right;">16768</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">CD</td>
-<td style="text-align: right;">12786</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">DT</td>
-<td style="text-align: right;">48708</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">EX</td>
-<td style="text-align: right;">1048</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">FW</td>
-<td style="text-align: right;">199</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">IN</td>
-<td style="text-align: right;">56710</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">JJ</td>
-<td style="text-align: right;">31711</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">JJR</td>
-<td style="text-align: right;">1507</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">JJS</td>
-<td style="text-align: right;">776</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">LRB</td>
-<td style="text-align: right;">3</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">LS</td>
-<td style="text-align: right;">54</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">MD</td>
-<td style="text-align: right;">6855</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">NN</td>
-<td style="text-align: right;">77899</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">NNP</td>
-<td style="text-align: right;">46388</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">NNPS</td>
-<td style="text-align: right;">839</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">NNS</td>
-<td style="text-align: right;">25458</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">PDT</td>
-<td style="text-align: right;">259</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">POS</td>
-<td style="text-align: right;">2897</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">PP</td>
-<td style="text-align: right;">7</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">PRP</td>
-<td style="text-align: right;">29202</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">PRP$</td>
-<td style="text-align: right;">8395</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">PUNCT</td>
-<td style="text-align: right;">88258</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">RB</td>
-<td style="text-align: right;">23808</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">RBR</td>
-<td style="text-align: right;">600</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">RBS</td>
-<td style="text-align: right;">216</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">RP</td>
-<td style="text-align: right;">1244</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">SYM</td>
-<td style="text-align: right;">2973</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">TO</td>
-<td style="text-align: right;">13481</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">UH</td>
-<td style="text-align: right;">1695</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">VB</td>
-<td style="text-align: right;">20072</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">VBD</td>
-<td style="text-align: right;">15807</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">VBG</td>
-<td style="text-align: right;">9895</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">VBN</td>
-<td style="text-align: right;">10111</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">VBP</td>
-<td style="text-align: right;">13665</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">VBZ</td>
-<td style="text-align: right;">13083</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">WDT</td>
-<td style="text-align: right;">2388</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">WP</td>
-<td style="text-align: right;">2470</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">WP$</td>
-<td style="text-align: right;">73</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">WRB</td>
-<td style="text-align: right;">2728</td>
-</tr>
-</tbody>
-</table>
+<div id="fig-eda-masc-pos" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-pos-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.1: Part-of-speech tags in the MASC dataset.</figcaption></figure>
 </div>
-
-
 </div>
 </div>
 </div>
@@ -945,10 +781,6 @@ Drop the independent sections in favor of a more integrated approach.
 </ul>
 <p>This modified tagset has grouped the punctuation tags into a single tag, ‘PUNCT’.</p>
 <p>We can use this information to remove lemmas that are tagged with either of these values. We can do this by filtering the data frame to only include lemmas that are not tagged with the <code>pos</code> values listed above, as seen in <a href="#exm-eda-masc-count-filter">Example&nbsp;<span>8.6</span></a>.</p>
-<ul class="task-list">
-<li>
-<input type="checkbox">think about how to name, rename objects: <code>masc_words_tbl</code>?</li>
-</ul>
 <div id="exm-eda-masc-count-filter" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.6 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-count-filter_8417aa7a5f7e253a636f0a03f0aed5ab">
@@ -978,7 +810,7 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p>Now we are only viewing the most frequent words in the dataset, which reduces the number of observations to around 26k. Let’s now explore the frequency distribution of the tokens. In <a href="#fig-eda-masc-count-plots">Figure&nbsp;<span>8.1</span></a>, I’ve created three plots which include: 1) all the types, 2) the top 100 types, and 3) the top 10 types in the dataset.</p>
+<p>Now we are only viewing the most frequent words in the dataset, which reduces the number of observations to around 26k. Let’s now explore the frequency distribution of the tokens. In <a href="#fig-eda-masc-count-plots">Figure&nbsp;<span>8.2</span></a>, I’ve created three plots which include: 1) all the types, 2) the top 100 types, and 3) the top 10 types in the dataset.</p>
 <div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># [ ] consider how to present the 'all types' plot better, more concisely</span></span>
 <span></span>
@@ -1031,11 +863,11 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;8.1: Frequency plots of tokens in the MASC dataset</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.2: Frequency plots of tokens in the MASC dataset</figcaption><p></p>
 </figure>
 </div>
 </div>
-<p>The distributions we see in <a href="#fig-eda-masc-count-plots">Figure&nbsp;<span>8.1</span></a> are highly right-skewed (in <a href="#fig-eda-masc-count-plots-1">Figure&nbsp;<span>8.1 (a)</span></a> in a very extreme way!). This is typical of natural language distributions, notably documented by George Kingsley Zipf <span class="citation" data-cites="Zipf1949">(<a href="references.html#ref-Zipf1949" role="doc-biblioref">Zipf 1949</a>)</span>. This type of distribution approaches the theoretical Zipf distribution. A Zipf (or Zipfian) distribution is characterized by the fact that the frequency of any word is inversely proportional to its rank in the frequency table. In other words, the most frequent word occurs approximately twice as often as the second most frequent word, three times as often as the third most frequent word, and so on.</p>
+<p>The distributions we see in <a href="#fig-eda-masc-count-plots">Figure&nbsp;<span>8.2</span></a> are highly right-skewed (in <a href="#fig-eda-masc-count-plots-1">Figure&nbsp;<span>8.2 (a)</span></a> in a very extreme way!). This is typical of natural language distributions, notably documented by George Kingsley Zipf <span class="citation" data-cites="Zipf1949">(<a href="references.html#ref-Zipf1949" role="doc-biblioref">Zipf 1949</a>)</span>. This type of distribution approaches the theoretical Zipf distribution. A Zipf (or Zipfian) distribution is characterized by the fact that the frequency of any word is inversely proportional to its rank in the frequency table. In other words, the most frequent word occurs approximately twice as often as the second most frequent word, three times as often as the third most frequent word, and so on.</p>
 <p>As we can see, our distribuions to not follow the Zipf distribution exactly. This is because the Zipf distribution is a theoretical distribution, and the actual distribution of words in a corpus is affected by various sampling factors, including the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
@@ -1074,15 +906,12 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-count-cumulative" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-count-cumulative-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.2: Cumulative frequency of lemmas in the MASC dataset</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.3: Cumulative frequency of lemmas in the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
 </div>
 <p>If we look at the types that appear within the first 100 most frequent, you can likely also appreciate another thing about language use. Let’s list the top 100 types in <a href="#exm-eda-masc-count-top-100">Example&nbsp;<span>8.8</span></a>.</p>
-<!---
-  [ ] work on text output
---->
 <div id="exm-eda-masc-count-top-100" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.8 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/tbl-eda-masc-count-top-100_a4f9d3cfca1e92c2054f810334b3183c">
@@ -1095,7 +924,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="tbl-eda-masc-count-top-100" class="anchored">
 <table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<caption>Table&nbsp;8.4: Top 100 lemma types in the MASC dataset.</caption>
+<caption>Table&nbsp;8.3: Top 100 lemma types in the MASC dataset.</caption>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">the</td>
@@ -1266,7 +1095,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="tbl-eda-masc-count-stop-words" class="anchored">
 <table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<caption>Table&nbsp;8.5: Frequency of tokens in the MASC dataset after filtering out stopwords</caption>
+<caption>Table&nbsp;8.4: Frequency of tokens in the MASC dataset after filtering out stopwords</caption>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">n't</td>
@@ -1396,7 +1225,7 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p>The resulting list in <a href="#tbl-eda-masc-count-stop-words">Table&nbsp;<span>8.5</span></a> paints a different picture of the most frequent words in the dataset. The most frequent words are now content words, and included in most frequent words are more semantically specific words.</p>
+<p>The resulting list in <a href="#tbl-eda-masc-count-stop-words">Table&nbsp;<span>8.4</span></a> paints a different picture of the most frequent words in the dataset. The most frequent words are now content words, and included in most frequent words are more semantically specific words.</p>
 <p>Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using a combination of frequency and dispersion measures, as we will see in [the next section.]</p>
 <p>For our case, however, we have another strategy to apply. Since our task is to identify relevant vocabulary, beyond the fundamental function words in English, we can use the part-of-speech tags to reduce our dataset to just the content words, that is nouns, verbs, adjectives, and adverbs. We need to consult the Penn Tagset again, to ensure we are selecting the correct tags. I will assign this data frame to <code>masc_content_tbl</code> to keep it separate from our main data frame <code>masc_tbl</code>, seen in <a href="#exm-eda-masc-filter-pos">Example&nbsp;<span>8.10</span></a>.</p>
 <div id="exm-eda-masc-filter-pos" class="theorem example">
@@ -1478,7 +1307,7 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p>There are statistical approaches to identifying natural breakpoints, including clustering, but a visual inspection is often good enough for practical purposes. Let’s create a density plot to see if there is a natural break in the distribution of our dispersion measure, as seen in <a href="#fig-eda-masc-dp-density">Figure&nbsp;<span>8.3</span></a>.</p>
+<p>There are statistical approaches to identifying natural breakpoints, including clustering, but a visual inspection is often good enough for practical purposes. Let’s create a density plot to see if there is a natural break in the distribution of our dispersion measure, as seen in <a href="#fig-eda-masc-dp-density">Figure&nbsp;<span>8.4</span></a>.</p>
 <div id="exm-eda-masc-dp-density" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.12 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-dp-density_92b3da8e09c503db0e658ba9b87d712c">
@@ -1491,12 +1320,12 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-dp-density" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-dp-density-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.3: Density plot of Deviation of Proportions for lemmas in the MASC dataset</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.4: Density plot of Deviation of Proportions for lemmas in the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
 </div>
-<p>What we are looking for is an elbow in the distribution of dispersion measures. In <a href="#fig-eda-masc-dp-density">Figure&nbsp;<span>8.3</span></a>, we can see that there is distinctive bend in the distribution between .85 and .97. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In <a href="#exm-eda-masc-dp-filter">Example&nbsp;<span>8.13</span></a>, I filter out lemmas that have a dispersion measure less than .91. Then in <a href="#tbl-eda-masc-dp-filter">Table&nbsp;<span>8.6</span></a>, I preview the top and bottom 50 lemmas in the dataset.</p>
+<p>What we are looking for is an elbow in the distribution of dispersion measures. In <a href="#fig-eda-masc-dp-density">Figure&nbsp;<span>8.4</span></a>, we can see that there is distinctive bend in the distribution between .85 and .97. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In <a href="#exm-eda-masc-dp-filter">Example&nbsp;<span>8.13</span></a>, I filter out lemmas that have a dispersion measure less than .91. Then in <a href="#tbl-eda-masc-dp-filter">Table&nbsp;<span>8.5</span></a>, I preview the top and bottom 50 lemmas in the dataset.</p>
 <div id="exm-eda-masc-dp-filter" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.13 </strong></span>&nbsp;</p>
 <div>
@@ -1520,7 +1349,7 @@ Drop the independent sections in favor of a more integrated approach.
 <span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="tbl-eda-masc-dp-filter" class="cell tbl-parent quarto-layout-panel anchored" data-hash="exploration_cache/html/tbl-eda-masc-dp-filter_2721ca5e38251bfabe8e4d9ee5ac4d8b">
 <div class="panel-caption table-caption">
-<p>Table&nbsp;8.6: Frequency of tokens in the MASC dataset after filtering out lemmas with a Deviation of Proportions less than .91</p>
+<p>Table&nbsp;8.5: Frequency of tokens in the MASC dataset after filtering out lemmas with a Deviation of Proportions less than .91</p>
 </div>
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div id="tbl-eda-masc-dp-filter-1" class="quarto-layout-cell quarto-layout-cell-subref anchored" data-ref-parent="tbl-eda-masc-dp-filter" style="flex-basis: 50.0%;justify-content: center;">
@@ -1818,7 +1647,7 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 <p>We can appreciate, now, that there are similarities and a few differences between the most frequent lemmas for each modality. First, there are similar lemmas in written and spoken modalities, such as ‘be’, ‘have’, and ‘not’. Second, the top 10 include verbs and adverbs. Now we are looking at the most frequent types, so it is not surprising that we see more in common than not. However, looking close we can see that contracted forms are more frequent in the spoken modality, such as ‘isn’t’, ‘don’t’, and ‘can’t’ and that ordering of the verb tenses differs to some degree. Whether these are important distinctions for our task is something we will need to consider.</p>
-<p>We can further cull our results by filtering out lemmas that are not well-dispersed across the sub-corpora. Although it may be tempting to use the threshold we used earlier, we should consider that the size of the sub-corpora are different and the distribution of the dispersion measure may be different. With this in mind, we need to visualize the distribution of the dispersion measure for each modality, as seen in <a href="#fig-eda-masc-dispersion-threshold">Figure&nbsp;<span>8.4</span></a>.</p>
+<p>We can further cull our results by filtering out lemmas that are not well-dispersed across the sub-corpora. Although it may be tempting to use the threshold we used earlier, we should consider that the size of the sub-corpora are different and the distribution of the dispersion measure may be different. With this in mind, we need to visualize the distribution of the dispersion measure for each modality, as seen in <a href="#fig-eda-masc-dispersion-threshold">Figure&nbsp;<span>8.5</span></a>.</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-dispersion-threshold_f9b5665ffc93447d55226851e9d9660b">
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Density plot of dp by modality</span></span>
 <span><span class="va">masc_metrics</span> <span class="op">|&gt;</span> </span>
@@ -1830,7 +1659,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-dispersion-threshold" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-dispersion-threshold-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.4: Density plot of Deviation of Proportions for lemmas in the MASC dataset by modality</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.5: Density plot of Deviation of Proportions for lemmas in the MASC dataset by modality</figcaption></figure>
 </div>
 </div>
 </div>
@@ -1910,11 +1739,7 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<ul class="task-list">
-<li>
-<input type="checkbox">not clear to me what the log_odds are doing. I thought they would run from 1 to -1 with the more negative, the more indicative of writing (as it is alphabetically second)</li>
-</ul>
-<p>[description of the results…]</p>
+<p>The distinctive terms in each modality from <a href="#exm-eda-masc-log-odds">Example&nbsp;<span>8.18</span></a> may not jibe with your intuitio, and that’s understandable. This is likely because we are comparing sub-corpora of different sizes and with different document lengths. The log odds ratio is a measure that is sensitive to these differences.</p>
 <p>The second measure produced by <code><a href="https://juliasilge.github.io/tidylo/reference/bind_log_odds.html">bind_log_odds()</a></code> function, is the weighted log odds ratio. This measure provides a more robust and interpretable measure for comparing term frequencies across corpora, especially when term frequencies are low or when corpora are of different sizes. The weighting (or standardization) also makes it easier to identify terms that are particularly distinctive or characteristic of one corpus over another. Note that the weighted measure’s interpretation is slightly different that the log odds’s. The larger positive values in each corpus indicate that the type is more indicative of that (sub-)corpus, and the larger negative values indicate that the type is less indicative.</p>
 <p>Let’s imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regular expression magic. Let’s use the <code>str_subset()</code> function to filter for lemmas that start with ‘V’ and then use <code>slice_max()</code> to extract the top 10 most indicative verb lemmas, as seen in <a href="#exm-eda-masc-log-odds-weighted-verbs">Example&nbsp;<span>8.19</span></a>.</p>
 <div id="exm-eda-masc-log-odds-weighted-verbs" class="theorem example">
@@ -1964,7 +1789,7 @@ Drop the independent sections in favor of a more integrated approach.
 <p>The <code>quanteda</code> package includes a function <code><a href="https://quanteda.io/reference/kwic.html">kwic()</a></code> that can be used to create a KWIC table. It does require some transformation to the data, however. We need to collapse the <code>lemma</code> column into a single string for each document from the original transformed dataset, <code>masc_tbl</code>. Then we can apply the <code><a href="https://quanteda.io/reference/corpus.html">corpus()</a></code> and then <code>tokens</code> function to create a quanteda tokens object. Then we can apply the <code><a href="https://quanteda.io/reference/kwic.html">kwic()</a></code> function to create a KWIC table.</p>
 <div id="exm-eda-masc-kwic" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.20 </strong></span>&nbsp;</p>
-<div class="cell" data-hash="exploration_cache/html/eda-masc-kwic_a12d37512a8319a6a9e2f75ea59f7df8">
+<div class="cell" data-hash="exploration_cache/html/eda-masc-kwic_f5a5ebd0a54dbdf50327b98ed925bc76">
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collapse lemma, pos into a single string</span></span>
 <span><span class="va">masc_text_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
@@ -1983,142 +1808,29 @@ Drop the independent sections in favor of a more integrated approach.
 <span>    docid_field <span class="op">=</span> <span class="st">"doc_id"</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">masc_corpus</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; Corpus consisting of 392 documents, showing 100 documents:
-&gt; 
-&gt;  Text Types Tokens Sentences modality        genre
-&gt;     1   251    528         2  Written      Letters
-&gt;    10   168    343         1  Written        Email
-&gt;   100    47     50         1  Written        Email
-&gt;   101   127    210         1  Written        Email
-&gt;   102   195    351         1  Written        Email
-&gt;   103   102    124         1  Written        Email
-&gt;   104   123    166         2  Written        Email
-&gt;   105   163    296         5  Written        Email
-&gt;   106    52     55         1  Written        Email
-&gt;   107   120    181         3  Written        Email
-&gt;   108   153    259         1  Written        Email
-&gt;   109   107    138         3  Written        Email
-&gt;    11   217    407         1  Written        Email
-&gt;   110    47     54         4  Written        Email
-&gt;   111   182    287         1  Written        Email
-&gt;   112  2452  16668        20   Spoken   Transcript
-&gt;   113  2449  16198         9   Spoken   Transcript
-&gt;   114   178    306         1  Written        Email
-&gt;   115   139    220         1  Written        Email
-&gt;   116   102    134         1  Written        Email
-&gt;   117   147    247         1  Written        Email
-&gt;   118    54     64         1  Written        Email
-&gt;   119   197    365         1  Written        Email
-&gt;    12   326    746         1  Written        Email
-&gt;   120   172    291         1  Written        Email
-&gt;   121   234    479         1  Written        Email
-&gt;   122    97    149         1  Written        Email
-&gt;   123   184    349         1  Written        Email
-&gt;   124   186    348         1  Written        Email
-&gt;   125   174    290         1  Written        Email
-&gt;   126   314    651         5  Written        Email
-&gt;   127    76     99         1  Written        Email
-&gt;   128   209    330         6  Written      Letters
-&gt;   129   172    287         2  Written        Email
-&gt;    13   183    330         2  Written        Email
-&gt;   130   145    204         1  Written        Email
-&gt;   131   150    219         1  Written        Email
-&gt;   132   175    267         3  Written        Email
-&gt;   133    82     99         1  Written        Email
-&gt;   134   116    190         1  Written    Newspaper
-&gt;   135   135    231         2  Written    Newspaper
-&gt;   136   266    558         1  Written      Letters
-&gt;   137  1490   4991         3  Written      Journal
-&gt;   138   330    675         2  Written         Blog
-&gt;   139   355    793         4  Written         Blog
-&gt;    14   204    358         2  Written        Email
-&gt;   140  1542   7188        50  Written        Essay
-&gt;   141   409    858         2  Written         Blog
-&gt;   142   131    188         3  Written        Email
-&gt;   143   363    826         3  Written      Journal
-&gt;   144   270    533         2  Written      Journal
-&gt;   145   356    723         2  Written      Journal
-&gt;   146   412    735         4  Written      Journal
-&gt;   147   428    752         1  Written      Journal
-&gt;   148   359    673         4  Written      Journal
-&gt;   149   447    913         1  Written      Journal
-&gt;    15   112    160         1  Written        Email
-&gt;   150   413    974         1  Written      Journal
-&gt;   151   980   4121         8  Written        Essay
-&gt;   152  1031   6961         8   Spoken Face-to-face
-&gt;   153   934   2968        16  Written        Essay
-&gt;   154  1181   7128        58   Spoken Face-to-face
-&gt;   155  1363   6010        20  Written  Non-fiction
-&gt;   156  1616   5582        49  Written  Non-fiction
-&gt;   157   141    222         1  Written        Email
-&gt;   158  2334  21868        35   Spoken   Transcript
-&gt;   159    70     80         1  Written        Email
-&gt;    16   184    288         2  Written        Email
-&gt;   160    54     78         1  Written    Newspaper
-&gt;   161   126    175         1  Written        Email
-&gt;   162  1457   5532         5  Written         Blog
-&gt;   163  1254   4823        27  Written   Government
-&gt;   164   352    743         8  Written        Email
-&gt;   165   347    671         2  Written        Email
-&gt;   166   821   2365         1  Written         Blog
-&gt;   167   908   2445        24  Written         Blog
-&gt;   168   222    409         2  Written        Email
-&gt;   169   981   2761        23  Written Travel Guide
-&gt;    17   102    151         1  Written        Email
-&gt;   170  1004   2687        17  Written Travel Guide
-&gt;   171  1116   2746         6  Written Travel Guide
-&gt;   172   855   2601         9  Written        Essay
-&gt;   173   324    724         1  Written         Blog
-&gt;   174   302    584         1  Written         Blog
-&gt;   175   361    824         1  Written      Letters
-&gt;   176   541   1165         3  Written Travel Guide
-&gt;   177   428    844         1  Written Travel Guide
-&gt;   178   452    994         2  Written         Blog
-&gt;   179   443   1191        11   Spoken Movie Script
-&gt;    18   104    141         1  Written        Email
-&gt;   180   280    563         7   Spoken Movie Script
-&gt;   181   656   1880        18   Spoken Movie Script
-&gt;   182    82    132         1   Spoken Movie Script
-&gt;   183   795   3047        67   Spoken Movie Script
-&gt;   184   538   2092         3  Written   Government
-&gt;   185   292    576         1  Written        Email
-&gt;   186  1454   9317        12   Spoken   Transcript
-&gt;   187   667   1732        15  Written        Essay
-&gt;   188    66    101         1  Written        Email
-&gt;   189   379    863         2  Written      Letters</code></pre>
-</div>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_corpus</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">masc_corpus</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://quanteda.io/reference/tokens.html">tokens</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://quanteda.io/reference/kwic.html">kwic</a></span><span class="op">(</span></span>
 <span>    pattern <span class="op">=</span> <span class="fu"><a href="https://quanteda.io/reference/phrase.html">phrase</a></span><span class="op">(</span><span class="st">"*_V* *_IN*"</span><span class="op">)</span>,</span>
 <span>    window <span class="op">=</span> <span class="fl">3</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">docname</span>, <span class="va">pre</span>, <span class="va">keyword</span>, <span class="va">post</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Keyword-in-context with 10 matches.                                                                             
-&gt;    [156, 1538:1539]           or_CC when_WRB firm_NNS |  operate_VBP in_IN  |
-&gt;    [230, 3699:3700]             of_IN leaf_NN mold_NN |   fly_VBD from_IN   |
-&gt;    [311, 3665:3666]       warm_JJ danville_NNP sun_NN |  wonder_VBG if_IN   |
-&gt;      [214, 503:504]            a_DT semus_NN truck_NN |  load_VBN with_IN   |
-&gt;    [166, 1730:1731]            noir_NN i_PRP have_VBD |   think_VBN of_IN   |
-&gt;      [173, 315:316] fanwoody_NNP facebook_NNP page_NN |  look_VBZ like_IN   |
-&gt;    [217, 1975:1976]  colonial_NN authority_NNS who_WP |  feel_VBD that_IN   |
-&gt;    [170, 1732:1733]   prophet_NNP muhammad_NNP be_VBD | transport_VBN in_IN |
-&gt;    [300, 9778:9779]              you_PRP all_DT by_IN |   come_VBN on_IN    |
-&gt;  [112, 12160:12161]            some_DT of_IN those_DT |  have_VBP since_IN  |
-&gt;                                    
-&gt;  economic_JJ cluster_NNS however_RB
-&gt;  under_IN his_PRP $                
-&gt;  i_PRP will_MD see_VB              
-&gt;  leaf_NN mulch_NN it_PRP           
-&gt;  the_DT kiltman_NN with_IN         
-&gt;  today_NN whoops_NNP it_PRP        
-&gt;  they_PRP have_VBD the_DT          
-&gt;  night_NN from_IN mecca_NNP        
-&gt;  who_WP be_VBZ first_NN            
-&gt;  get_VBN it_PRP but_CC</code></pre>
+<pre><code>&gt; # A tibble: 10 × 4
+&gt;    docname pre                               keyword             post           
+&gt;    &lt;chr&gt;   &lt;chr&gt;                             &lt;chr&gt;               &lt;chr&gt;          
+&gt;  1 171     other_JJ hollywood_NNP star_NNS   come_VBD as_IN      well_RB simply…
+&gt;  2 242     not_RB only_RB i_PRP              find_VBD out_IN     more_JJR about…
+&gt;  3 206     long_JJ have_VBP you_PRP          live_VBD in_IN      charlotte_NNP …
+&gt;  4 76      fire_NN let_VBG it_PRP            burn_VBP out_IN     by_IN itself_P…
+&gt;  5 170     s_POS paranoia_NN by_IN           flee_VBG into_IN    egypt_NNP with…
+&gt;  6 382     be_VBZ currently_RB be_VBG        examine_VBN by_IN   regulator_NNS …
+&gt;  7 217     collection_NN of_IN nestorian_NNP cross_VBZ from_IN   the_DT yuan_NN…
+&gt;  8 98      destroy_VBN save_VB for_IN        reserve_VBN for_IN  the_DT smithso…
+&gt;  9 233     secret_JJ in_NNP attorney_NNS     charge_VBN with_IN  prosecute_VBG …
+&gt; 10 153     the_DT artist_NN have_VBD         reach_VBN within_IN himself_PRP it…</code></pre>
 </div>
 </div>
 </div>
@@ -2128,7 +1840,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-bigrams-tidytext" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.21 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-bigrams-tidytext_84081f6d7937388fe3be6eec325092cf">
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/juliasilge/tidytext">tidytext</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create bigrams</span></span>
@@ -2165,7 +1877,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-lemma-pos" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.22 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-lemma-pos_d24e050c60e75afa9a3f0326021ac088">
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collapse lemma into a single string</span></span>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collapse lemma into a single string</span></span>
 <span><span class="va">masc_lemma_pos_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>pos <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
@@ -2194,7 +1906,7 @@ Drop the independent sections in favor of a more integrated approach.
 &gt;  9 1      Written  Letters        9 than         than         IN    than_IN     
 &gt; 10 1      Written  Letters       10 you          you          PRP   you_PRP</code></pre>
 </div>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_tbl</span> <span class="op">|&gt;</span> </span>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens</a></span><span class="op">(</span></span>
 <span>    output <span class="op">=</span> <span class="va">bigrams</span>, </span>
 <span>    input <span class="op">=</span> <span class="va">lemma_pos</span>, </span>
@@ -2236,7 +1948,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-bigrams-pmi" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.23 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-bigrams-pmi_a3f447db8201afaa557f0fcbb9aff032">
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_assoc</span> <span class="op">&lt;-</span> </span>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_assoc</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_lemma_pos_tbl</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://qtalr.github.io/qtalrkit/reference/calc_assoc_metrics.html">calc_assoc_metrics</a></span><span class="op">(</span></span>
 <span>    doc_index <span class="op">=</span> <span class="va">doc_id</span>, </span>
@@ -2270,7 +1982,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-bigrams-pmi-filtered" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.24 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-bigrams-pmi-filtered_fc46803d0c3a0b62fae030988ea92eb3">
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for bigrams that occur &gt;= 10 times</span></span>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for bigrams that occur &gt;= 10 times</span></span>
 <span><span class="va">masc_lemma_pos_assoc_thr</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_lemma_pos_assoc</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -2300,7 +2012,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-bigrams-pmi-filtered-vpc" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.25 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-bigrams-pmi-filtered-vpc_9de0741884752531046cdb00173a97ed">
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for bigrams that include a verb and a particle</span></span>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for bigrams that include a verb and a particle</span></span>
 <span><span class="co"># and that have a PMI measure greater than 0</span></span>
 <span><span class="va">masc_verb_part_assoc</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_lemma_pos_assoc_thr</span> <span class="op">|&gt;</span> </span>
@@ -2329,9 +2041,9 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p>We can clean up the results a bit by removing the part-of-speech tags from the <code>x</code> and <code>y</code> variables, up our minimum PMI value, and create a network plot to visualize the results, as seen in <a href="#fig-eda-masc-verb-part-network">Figure&nbsp;<span>8.5</span></a>.</p>
+<p>We can clean up the results a bit by removing the part-of-speech tags from the <code>x</code> and <code>y</code> variables, up our minimum PMI value, and create a network plot to visualize the results, as seen in <a href="#fig-eda-masc-verb-part-network">Figure&nbsp;<span>8.6</span></a>.</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-verb-part-network_5028ecd96c4d2168be52c23a829a44c4">
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Clean up results</span></span>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Clean up results</span></span>
 <span><span class="va">masc_verb_part_assoc_plot</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_verb_part_assoc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pmi</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2362,34 +2074,34 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-verb-part-network" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-verb-part-network-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.5: Network plot of verb particle constructions in the MASC dataset</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.6: Network plot of verb particle constructions in the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
 <p>From this plot, and from the underlying data, we can explore verb particle constructions. We could go further and apply our co-occurrence methods to each modality separately, if we wanted to identify verb particle constructions that are distinctive to each modality. We could also apply our co-occurrence methods to other parts-of-speech, such as adjectives and nouns, to identify collocations of these parts-of-speech. There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be addressed with co-occurrence analysis.</p>
 </section></section><section id="sec-eda-unsupervised" class="level3" data-number="8.2.2"><h3 data-number="8.2.2" class="anchored" data-anchor-id="sec-eda-unsupervised">
 <span class="header-section-number">8.2.2</span> Unsupervised learning</h3>
-<p>Aligned in purpose with descriptive approaches, unsupervised learning approaches to exploratory data analysis are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include principle component analysis, clustering, topic modeling, and word embedding.</p>
+<p>Aligned in purpose with descriptive approaches, unsupervised learning approaches to exploratory data analysis are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include principle component analysis, clustering, and vector space modeling.</p>
 <p>We will continue to use the MASC dataset as we develop materials for our ELL textbook to illustrate unsupervised learning methods. In the process, we will explore the following questions:</p>
 <ul>
-<li>Can we identify genres based on linguistic features or co-occurrence patterns of the data itself?</li>
-<li>Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?</li>
-<li>Do certain words or phrases have different meanings or uses depending on the modality in which they appear?</li>
+<li>Can we identify and group documents based on linguistic features or co-occurrence patterns of the data itself?</li>
+<li>Do the groups of documents map to the labels in the dataset?</li>
+<li>Can we estimate the semantics of words based on their co-occurrence patterns?</li>
 </ul>
 <p>Through these questions we will build on our knowledge of frequency, dispersion, and co-occurrence analysis and introduce concepts and methods associated with machine learning.</p>
 <section id="sec-eda-clustering" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-clustering">Clustering</h4>
 <p><strong>Clustering</strong> is a unsupervised learning technique that can be used to group similar items in the text data, helping to organize the data into distinct categories and discover relationships between different elements in the text. The main steps in the procedure includes identifying the relevant linguistic features to use for clustering, representing the features in a way that can be used for clustering, and applying a clustering algorithm to the data. However, it is important to consider the strengths and weaknesses of the clustering algorithm for a particular task and how the results will be evaluated.</p>
-<p>In our ELL textbook task, we may very well want to identify terms that are particularly indicative of each genre. This will help us design a textbook with relevant communicative context in which terms are used most naturally. However,we may have questions about how well the labeled genres in the dataset map to real distinctions in language use. For example, are the genres ‘Letters’ and ‘Journal’ really distinct genres? Or, are they more similar than different? If they are more similar than different, then we may want to consider combining them into a single genre.</p>
-<p>Enter clustering. Instead of relying entirely on the labels in the MASC dataset, we can let the data itself say something about how related the genres are. Yet, a pivotal question is what features should we use, otherwise known as <strong>feature selection</strong>. We could use terms or lemmas, but we may want to consider other features, such as parts-of-speech or some co-occurrence patterns. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results.</p>
+<p>In our ELL textbook task, we may very well want to explore the similiarities and/ or differences between the documents based on the distribution of linguistic features. This provides us a view to evaluate to what extent the labels in the dataset (modality and genre) map to the distribution of linguistic features. Based on this evaluation, we may want to consider re-labeling the documents, collapsing labels, or even adding new labels.</p>
+<p>Enter clustering. Instead of relying entirely on the labels in the MASC dataset, we can let the data itself say something about how related the documents are. Yet, a pivotal question is what features should we use, otherwise known as <strong>feature selection</strong>. We could use terms or lemmas, but we may want to consider other features, such as parts-of-speech or some co-occurrence patterns. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results.</p>
 <p>Another key question is what clustering algorithm to use. Again, we are not married to one algorithm, and we can perform clustering multiple times with different algorithms, but not all algorithms are created equal. Some algorithms are better suited for certain types of data and certain types of tasks. For example, <strong>Hierarchical clustering</strong> is a good choice when we are not sure how many clusters we want to identify, as it does not require us to specify the number of clusters from the outset. However, it is not a good choice when we have a large dataset, as it can be computationally expensive compared to some other algorithms. <strong>K-means clustering</strong>, on the other hand, is a good choice when we want to identify a pre-defined number of clusters, and the aim is to gauge how well the data fit the clusters. These two clustering techniques, therefore complement each other with Hierarchical clustering being a good choice for initial exploration and K-means clustering being a good choice for targeted evaluation.</p>
-<p>With these considerations in mind, let’s start by identifying the linguistic features that we want to use for clustering. Imagine that among the various features that we are interested in associating with genres, we consider lemma use and part-of-speech use. However, we need to operationalize what we mean by ‘use’ and then transform the data into a format that can be used for clustering. In machine learning, this process is known as <strong>feature engineering</strong>. Since we aim to compare documents it is logical for us to use the document-normalized features. So in both lemma and part-of-speech tags, we will use the relative frequency. An additional operation that we can apply to the lemma feature is to weight the relative frequency by the dispersion of the lemma. This will give us a measure of the distinctiveness of the lemma in the document. A common implementation of this approach is to use the <span class="math inline">\(tf-idf\)</span> measure, which is the product of the relative frequency and the inverse document frequency.</p>
+<p>With these considerations in mind, let’s start by identifying the linguistic features that we want to use for clustering. Imagine that among the various features that we are interested in associating documents, we consider lemma use and part-of-speech use. However, we need to operationalize what we mean by ‘use’. In machine learning, this process is known as <strong>feature engineering</strong>. Since we aim to compare documents it is logical for us to use the document-normalized features. So in both lemma and part-of-speech tags, we will use the relative frequency. An additional operation that we can apply to the lemma feature is to weight the relative frequency by the dispersion of the lemma. This will give us a measure of the distinctiveness of the lemma in the document. A common implementation of this approach is to use the <span class="math inline">\(tf-idf\)</span> measure, which is the product of the relative frequency and the inverse document frequency.</p>
 <p>Each of these engineered feature sets represents a different aspect of the lexical nature of the documents. The relative frequency of lemmas represents the lexical diversity of the documents, the dispersion-weighted <span class="math inline">\(tf-idf\)</span> of lemmas represents the distinctiveness of the lemmas in the documents, and the relative frequency of part-of-speech tags represents the grammatical diversity of the documents <span class="citation" data-cites="Petrenz2011">(<a href="references.html#ref-Petrenz2011" role="doc-biblioref">Petrenz and Webber 2011</a>)</span>. //FIXME CITATIONS</p>
 <p>The next question to address in any analysis is how to represent the features. In our case, we want to represent the features in each document. In machine learning, the most common way to represent features is in a matrix. In our case, we want to create a matrix with the documents in the rows and the features in the columns. The values in the matrix will be the operationalization of lexical use in each document for each of our three candidate measures. This configuration is known as a <strong>document-term matrix</strong> (DTM).</p>
 <p>To recast a data frame into a DTM, we can use the <code><a href="https://rdrr.io/pkg/tidytext/man/document_term_casters.html">cast_dtm()</a></code> function from the <code>tidytext</code> package. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of lemmas and part-of-speech tags into a matrix and then normalize the matrix by documents. For the <span class="math inline">\(tf-idf\)</span> measure we use the <code><a href="https://rdrr.io/pkg/tidytext/man/bind_tf_idf.html">bind_tf_idf()</a></code> function from the <code>tidytext</code> package. This function takes a DTM and calculates the <span class="math inline">\(tf-idf\)</span> measure for each feature in each document. This is a normalized measure, so we do not need to normalize the matrix by documents. Let’s see how this works with the MASC dataset in <a href="#exm-eda-masc-dtms">Example&nbsp;<span>8.26</span></a>.</p>
 <div id="exm-eda-masc-dtms" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.26 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-dtms_2d7a441c4386f2377644a08dc2c64a69">
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/juliasilge/tidytext">tidytext</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create a document-term matrix of lemmas</span></span>
@@ -2419,7 +2131,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-dtms-preview" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.27 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-dtms-preview_40777982056e6e452472847f8c933023">
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
 <span><span class="va">masc_lemma_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt;      Terms
@@ -2430,7 +2142,7 @@ Drop the independent sections in favor of a more integrated approach.
 &gt;   101  0  0  0  2       0
 &gt;   102  0  0  0  1       0</code></pre>
 </div>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_pos_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_pos_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt;      Terms
 &gt; Docs  CC DT EX IN JJ
@@ -2440,7 +2152,7 @@ Drop the independent sections in favor of a more integrated approach.
 &gt;   101  3 16  0 23  7
 &gt;   102 20 29  0 34 20</code></pre>
 </div>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_tfidf_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_tfidf_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt;      Terms
 &gt; Docs      'd      's    M.        a account
@@ -2456,7 +2168,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-dtms-normalized" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.28 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-dtms-normalized_5138fc71377e39e6f0d93b44748297b3">
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize lemma and pos matrices by documents</span></span>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize lemma and pos matrices by documents</span></span>
 <span><span class="va">masc_lemma_dtm</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_lemma_dtm</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">masc_lemma_dtm</span><span class="op">)</span></span>
 <span></span>
@@ -2470,7 +2182,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-dtms-pca" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.29 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-dtms-pca_8357c2127fcf20fdc86bbbf202717349">
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Apply PCA to each feature matrix</span></span>
@@ -2487,9 +2199,9 @@ Drop the independent sections in favor of a more integrated approach.
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>We can visualize the amount of variance explained by each principle component with a scree plot. The <code><a href="https://rdrr.io/pkg/factoextra/man/eigenvalue.html">fviz_eig()</a></code> function from the <code>factoextra</code> package can be used to create a scree plot. The <code><a href="https://rdrr.io/pkg/factoextra/man/eigenvalue.html">fviz_eig()</a></code> function takes the output of the <code><a href="https://rdrr.io/r/stats/prcomp.html">prcomp()</a></code> function as its argument and an argument <code>ncp = 10</code> to specify the number of principle components to include in the plot. Let’s create a scree plot for each of our candidate feature matrices, as seen in <a href="#fig-eda-masc-dtms-pca-scree">Figure&nbsp;<span>8.6</span></a>.</p>
+<p>We can visualize the amount of variance explained by each principle component with a scree plot. The <code><a href="https://rdrr.io/pkg/factoextra/man/eigenvalue.html">fviz_eig()</a></code> function from the <code>factoextra</code> package can be used to create a scree plot. The <code><a href="https://rdrr.io/pkg/factoextra/man/eigenvalue.html">fviz_eig()</a></code> function takes the output of the <code><a href="https://rdrr.io/r/stats/prcomp.html">prcomp()</a></code> function as its argument and an argument <code>ncp = 10</code> to specify the number of principle components to include in the plot. Let’s create a scree plot for each of our candidate feature matrices, as seen in <a href="#fig-eda-masc-dtms-pca-scree">Figure&nbsp;<span>8.7</span></a>.</p>
 <div>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.sthda.com/english/rpkgs/factoextra">factoextra</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Scree plot: lemma relative frequency</span></span>
@@ -2521,16 +2233,16 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;8.6: Scree plot of the principle components of the MASC dataset</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.7: Scree plot of the principle components of the MASC dataset</figcaption><p></p>
 </figure>
 </div>
 </div>
-<p>From <a href="#fig-eda-masc-dtms-pca-scree">Figure&nbsp;<span>8.6</span></a>, we can see the plots are different. All trend toward less variance explained as the number of dimensions increase. But for our purposes, we are interested in the largest variance explained with the fewest dimensions. To that end, the <a href="#fig-eda-masc-dtms-pca-scree-3">Figure&nbsp;<span>8.6 (c)</span></a> plot is the most reduced and most informative. The amount of variance explained is over 30% for the first dimension alone, however, the variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.</p>
+<p>From <a href="#fig-eda-masc-dtms-pca-scree">Figure&nbsp;<span>8.7</span></a>, we can see the plots are different. All trend toward less variance explained as the number of dimensions increase. But for our purposes, we are interested in the largest variance explained with the fewest dimensions. To that end, the <a href="#fig-eda-masc-dtms-pca-scree-3">Figure&nbsp;<span>8.7 (c)</span></a> plot is the most reduced and most informative. The amount of variance explained is over 30% for the first dimension alone, however, the variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.</p>
 <p>To calculate the amount of variance explained by each principle component we can square the standard deviations of the principle components and divide by the sum of the squared standard deviations. Let’s calculate the amount of variance explained by each principle component for each of our candidate feature matrices, as seen in <a href="#exm-eda-masc-dtms-pca-variance">Example&nbsp;<span>8.30</span></a>.</p>
 <div id="exm-eda-masc-dtms-pca-variance" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.30 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-dtms-pca-variance_341f0b7fc9b6a757c90e8baa7677c6da">
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate variance explained for first 3 principle components</span></span>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate variance explained for first 3 principle components</span></span>
 <span><span class="co"># lemma</span></span>
 <span><span class="va">masc_lemma_pca_var</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_lemma_pca</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">masc_lemma_pca</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span></span>
@@ -2539,7 +2251,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; [1] 24.3</code></pre>
 </div>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># pos</span></span>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># pos</span></span>
 <span><span class="va">masc_pos_pca_var</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_pos_pca</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">masc_pos_pca</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span></span>
 <span></span>
@@ -2547,7 +2259,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; [1] 68.2</code></pre>
 </div>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># lemma tf-idf</span></span>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># lemma tf-idf</span></span>
 <span><span class="va">masc_lemma_tfidf_pca_var</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_lemma_tfidf_pca</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">masc_lemma_tfidf_pca</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span></span>
 <span></span>
@@ -2558,9 +2270,9 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 <p>Combining the findings in the Scree plots and the variance explained calculations, we can see that the first four principle components of the part-of-speech features account for a good proportion of the variance. Therefore, all else being equal, we should use the part-of-speech features. As with all things exploratory, however, it is important to consider the implications of our feature selection for our interpretation of the results. In this case, the part-of-speech features approximate grammatical diversity of the documents, more so than lexical diversity. This means that the clusters that we identify will be based on a particular measure of grammatical diversity of the documents. If, for example, we want to identify clusters based on the lexical diversity of the documents, we may opt to use the lemma features, or some other operationalized measure of lexical diversity.</p>
-<p>Before we leave PCA, let’s also take a look at the principle components themselves. The <code><a href="https://rdrr.io/pkg/factoextra/man/get_pca.html">get_pca_var()</a></code> function from the <code>factoextra</code> package can be used to extract the principle components from the output of the <code><a href="https://rdrr.io/r/stats/prcomp.html">prcomp()</a></code> function. The <code><a href="https://rdrr.io/pkg/factoextra/man/get_pca.html">get_pca_var()</a></code> function takes the output of the <code><a href="https://rdrr.io/r/stats/prcomp.html">prcomp()</a></code> function as its argument and an argument <code>ncp = 10</code> to specify the number of principle components to include in the plot. Let’s create a plot of the first five principle components for the part-of-speech data, as seen in <a href="#fig-eda-masc-dtms-pca-pc">Figure&nbsp;<span>8.7</span></a>.</p>
+<p>Before we leave PCA, let’s also take a look at the principle components themselves. The <code><a href="https://rdrr.io/pkg/factoextra/man/get_pca.html">get_pca_var()</a></code> function from the <code>factoextra</code> package can be used to extract the principle components from the output of the <code><a href="https://rdrr.io/r/stats/prcomp.html">prcomp()</a></code> function. The <code><a href="https://rdrr.io/pkg/factoextra/man/get_pca.html">get_pca_var()</a></code> function takes the output of the <code><a href="https://rdrr.io/r/stats/prcomp.html">prcomp()</a></code> function as its argument and an argument <code>ncp = 10</code> to specify the number of principle components to include in the plot. Let’s create a plot of the first five principle components for the part-of-speech data, as seen in <a href="#fig-eda-masc-dtms-pca-pc">Figure&nbsp;<span>8.8</span></a>.</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-dtms-pca-pc_455b47a362352edb1507450fc116229f">
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.sthda.com/english/rpkgs/factoextra">factoextra</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot principle components: pos</span></span>
@@ -2573,16 +2285,16 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-dtms-pca-pc" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-dtms-pca-pc-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.7: Feature contributions to the PCA of the MASC dataset</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.8: Feature contributions to the PCA of the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
-<p>From <a href="#fig-eda-masc-dtms-pca-pc">Figure&nbsp;<span>8.7</span></a>, we can see that the four principle components are dominated by the relative frequency of nouns, personal pronouns, prepositions, and determiners. This information can help us better understand the results of the clustering algorithm.</p>
+<p>From <a href="#fig-eda-masc-dtms-pca-pc">Figure&nbsp;<span>8.8</span></a>, we can see that the four principle components are dominated by the relative frequency of nouns, personal pronouns, prepositions, and determiners. This information can help us better understand the results of the clustering algorithm.</p>
 <p>Now that we have identified the features that we want to use for clustering and we have represented the features in a way that can be used for clustering, we can apply a clustering algorithm to the data. For Hiearchical clustering, we can use the <code><a href="https://rdrr.io/r/stats/hclust.html">hclust()</a></code> function from base R. The <code><a href="https://rdrr.io/r/stats/hclust.html">hclust()</a></code> function takes a distance matrix as its argument and an argument <code>method = "average"</code> to specify the average linkage method. The average linkage method takes the average of the dissimilarities between all pairs in two clusters. It is less sensitive to outliers compared to other methods. Let’s apply the clustering algorithm to the part-of-speech features, as seen in <a href="#exm-eda-masc-pos-hclust">Example&nbsp;<span>8.31</span></a>.</p>
 <div id="exm-eda-masc-pos-hclust" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.31 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-pos-hclust_ccc36288c0ae43ea34e1e2c7ed83ddb3">
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract first 4 principle components</span></span>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract first 4 principle components</span></span>
 <span><span class="va">masc_pos_pca_pc</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_pos_pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span></span>
@@ -2601,7 +2313,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-pos-hclust" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-pos-hclust-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.8: Hierarchical clustering of the MASC dataset</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.9: Hierarchical clustering of the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
@@ -2613,7 +2325,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-pos-kmeans" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.32 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-pos-kmeans_89b7cfa6f0088d39725d2e1053b5c70a">
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract first 4 principle components</span></span>
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract first 4 principle components</span></span>
 <span><span class="va">masc_pos_pca_pc</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_pos_pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> </span>
 <span></span>
@@ -2627,9 +2339,9 @@ Drop the independent sections in favor of a more integrated approach.
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>The <code>factoextra</code> package provides <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_cluster.html">fviz_cluster()</a></code> function for visualizing the results of clustering algorithms. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_cluster.html">fviz_cluster()</a></code> function takes the output of the <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> function as its first argument and the matrix of features as its second argument. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_cluster.html">fviz_cluster()</a></code> function can be used to visualize the clusters in the data, as seen in <a href="#fig-eda-masc-pos-kmeans">Figure&nbsp;<span>8.9</span></a>.</p>
+<p>The <code>factoextra</code> package provides <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_cluster.html">fviz_cluster()</a></code> function for visualizing the results of clustering algorithms. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_cluster.html">fviz_cluster()</a></code> function takes the output of the <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> function as its first argument and the matrix of features as its second argument. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_cluster.html">fviz_cluster()</a></code> function can be used to visualize the clusters in the data, as seen in <a href="#fig-eda-masc-pos-kmeans">Figure&nbsp;<span>8.10</span></a>.</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-pos-kmeans_a914270748e83b8b875087b5795ec810">
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize</span></span>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize</span></span>
 <span><span class="va">masc_pos_kmeans</span> <span class="op">|&gt;</span>  <span class="co"># output of kmeans()</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/factoextra/man/fviz_cluster.html">fviz_cluster</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">masc_pos_pca_pc</span>, <span class="co"># matrix of features</span></span>
@@ -2643,16 +2355,16 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-pos-kmeans" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-pos-kmeans-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.9: K-means clustering of the MASC dataset</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.10: K-means clustering of the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
 <p>The ellipses in a k-means plot represent the 95% confidence interval for each cluster. The ellipses are based on the multivariate normal distribution of the data in each cluster. The size and shape of the ellipses tell us about the variance of the data in each cluster. The larger the ellipse the greater the dispersion of values. A wide ellipse suggests high within cluster variability. The distance between the clusters also tells us about the similarity between the clusters. The closer the clusters are to each other, the more similar they are. The further the clusters are from each other, the more dissimilar they are.</p>
-<p>So in <a href="#fig-eda-masc-pos-kmeans">Figure&nbsp;<span>8.9</span></a>, we see a mix of shapes and sizes. This suggests that some clusters are more homogeneous than others. We also see separation between the large wide clusters towards the top of the plot and the smaller, more circular clusters towards the center. With 18 clusters, we have a lot of clusters, so it is difficult to interpret the results as there is a large amount of overlap. In sum, 18 clusters is likely not an optimal number for this clustering approach.</p>
+<p>So in <a href="#fig-eda-masc-pos-kmeans">Figure&nbsp;<span>8.10</span></a>, we see a mix of shapes and sizes. This suggests that some clusters are more homogeneous than others. We also see separation between the large wide clusters towards the top of the plot and the smaller, more circular clusters towards the center. With 18 clusters, we have a lot of clusters, so it is difficult to interpret the results as there is a large amount of overlap. In sum, 18 clusters is likely not an optimal number for this clustering approach.</p>
 <p>We could run the code in <a href="#exm-eda-masc-pos-kmeans">Example&nbsp;<span>8.32</span></a> for different values for <span class="math inline">\(k\)</span> and plot each in turn. But a more effective way to determine the optimal number of clusters is to plot the within-cluster sum of squares (WSS) for a range of values for <span class="math inline">\(k\)</span>. The WSS is the sum of the squared distance between each observation and its cluster center. With a plot of the WSS for a range of values for <span class="math inline">\(k\)</span>, we can identify the value for <span class="math inline">\(k\)</span> where the WSS begins to level off. This is known as the <strong>elbow method</strong>. The elbow method is a heuristic, so it is not always clear where the elbow is. However, it is a good starting point for identifying the optimal number of clusters.</p>
-<p>Again, the <code>factoextra</code> package has us covered. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function can be used to plot the WSS for a range of values for <span class="math inline">\(k\)</span>. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function takes the <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> function as its first argument and the matrix of features as its second argument. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function also takes arguments <code>method = "wss"</code> to specify the WSS method and <code>k.max = 20</code> to specify the maximum number of clusters to plot. Let’s plot the WSS for a range of values for <span class="math inline">\(k\)</span>, as seen in <a href="#fig-eda-masc-pos-kmeans-elbow">Figure&nbsp;<span>8.10</span></a>.</p>
+<p>Again, the <code>factoextra</code> package has us covered. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function can be used to plot the WSS for a range of values for <span class="math inline">\(k\)</span>. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function takes the <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> function as its first argument and the matrix of features as its second argument. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function also takes arguments <code>method = "wss"</code> to specify the WSS method and <code>k.max = 20</code> to specify the maximum number of clusters to plot. Let’s plot the WSS for a range of values for <span class="math inline">\(k\)</span>, as seen in <a href="#fig-eda-masc-pos-kmeans-elbow">Figure&nbsp;<span>8.11</span></a>.</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-pos-kmeans-elbow_6e9d05240a39ea53dde8cf2be06ae589">
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Determine the optimal number of clusters</span></span>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Determine the optimal number of clusters</span></span>
 <span><span class="va">masc_pos_pca_pc</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust</a></span><span class="op">(</span></span>
 <span>    FUNcluster <span class="op">=</span> <span class="va">kmeans</span>,</span>
@@ -2664,7 +2376,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-pos-kmeans-elbow" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-pos-kmeans-elbow-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.10: Elbow method for k-means clustering of the MASC dataset</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.11: Elbow method for k-means clustering of the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
@@ -2672,7 +2384,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-pos-kmeans-fit" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.33 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/fig-eda-masc-pos-kmeans-fit_f33d5fa467cd4cb45bce0ae300a81818">
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># K-means: for 5 clusters</span></span>
@@ -2698,7 +2410,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div class="cell-output-display">
 <div id="fig-eda-masc-pos-kmeans-fit" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-pos-kmeans-fit-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.11: K-means clustering of the MASC dataset with 4 clusters</figcaption></figure>
+<figcaption class="figure-caption">Figure&nbsp;8.12: K-means clustering of the MASC dataset with 4 clusters</figcaption></figure>
 </div>
 </div>
 </div>
@@ -2708,7 +2420,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-pos-kmeans-join" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.34 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-pos-kmeans-join_0b0e183d26eb082cc9cde9d725638eff">
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Organize k-means clusters into a tibble </span></span>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Organize k-means clusters into a tibble </span></span>
 <span><span class="va">masc_pos_cluster_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu">tibble</span><span class="op">(</span></span>
 <span>    doc_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">masc_pos_kmeans_fit</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span>,</span>
@@ -2742,7 +2454,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-pos-kmeans-modality" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.35 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-pos-kmeans-modality_4465455774d20189d1ea95b2fc2762de">
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Reduce to distinct combinations of modality, genre, and cluster</span></span>
@@ -2769,7 +2481,7 @@ Drop the independent sections in favor of a more integrated approach.
 <div id="exm-eda-masc-pos-kmeans-genre" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.36 </strong></span>&nbsp;</p>
 <div class="cell" data-hash="exploration_cache/html/eda-masc-pos-kmeans-genre_b54058c80d4f6dda85da4a40a375d1ef">
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tabulate: cluster by genre for written modality</span></span>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tabulate: cluster by genre for written modality</span></span>
 <span><span class="va">masc_meta_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">modality</span> <span class="op">==</span> <span class="st">"Written"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/tabyl.html">tabyl</a></span><span class="op">(</span><span class="va">cluster</span>, <span class="va">genre</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -2787,7 +2499,7 @@ Drop the independent sections in favor of a more integrated approach.
 &gt;      20.0%        0.0%      0.0%         0.0%   20.0%
 &gt;       9.1%        9.1%      9.1%         9.1%    0.0%</code></pre>
 </div>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tabulate: cluster by genre for written modality</span></span>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tabulate: cluster by genre for written modality</span></span>
 <span><span class="va">masc_meta_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">modality</span> <span class="op">==</span> <span class="st">"Written"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/tabyl.html">tabyl</a></span><span class="op">(</span><span class="va">cluster</span>, <span class="va">genre</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -2819,100 +2531,275 @@ Drop the independent sections in favor of a more integrated approach.
 </div>
 </div>
 </div>
-</section><section id="sec-eda-topic-modeling" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-topic-modeling">Topic modeling</h4>
-<p>ELL: we want to identify themes or topics that are distinctive to genres or a particular genre. This will help us design a textbook with relevant topics for each genre and the most relevant vocabulary for each topic.</p>
-<!--  
-
-Topic modeling: Another unsupervised learning technique used to identify and extract topics from a set of documents. This can be useful for summarizing and understanding the content in a corpus.
-
-
-- Topic modeling
-    - Are there discernible topics that separate spoken from written discourses based on linguistic features or co-occurrence patterns?
-        - Use LDA to identify topics of linguistic features or co-occurrence patterns
+</section><section id="sec-eda-vector-space-models" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-vector-space-models">Vector space models</h4>
+<p>In our discussion of clustering, we targeted associations between documents based on the distribution of linguistic features. We now turn to targeting associations between linguistic features based on their distribution across documents. The technique we will introduce is known as <strong>vector space modeling</strong>. Vector space modeling aims to represent linguistic features as numerical vectors which reflect the various linguistic contexts in which the features appear. Together these vectors form a feature-context space in which features with similar contextual distributions are closer together.</p>
+<p>An interesting property of vector space models is that are able to capture semantic and/ or syntactic relationships between features based on their distribution. In this way, vector space modeling can be seen as an implementation of the <strong>distributional hypothesis</strong> –that words that appear in similar linguistic contexts tend to have similar meanings <span class="citation" data-cites="Harris1954">(<a href="references.html#ref-Harris1954" role="doc-biblioref">Harris 1954</a>)</span>. As <span class="citation" data-cites="Firth1957">Firth (<a href="references.html#ref-Firth1957" role="doc-biblioref">1957</a>)</span> states “you shall know a word by the company it keeps”.</p>
+<div class="callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-regular fa-file-alt" aria-label="file-alt"></i> Case study</strong></p>
+<p><span class="citation" data-cites="Garg2018">Garg et al. (<a href="references.html#ref-Garg2018" role="doc-biblioref">2018</a>)</span> quantify and compare gender and ethnic stereotypes over time using word embeddings. The authors explore the temporal dynamics of stereotypes using word embeddings as a quantitative measure of bias. The data used includes word embeddings from the Google News dataset for contemporary analysis, as well as embeddings from the COHA and Google Books datasets for historical analysis. Additional validation is done using embeddings from the New York Times Annotated Corpus. Several word lists representing gender, ethnicity, and neutral words are collated for analysis. The main finding is that language reflects and perpetuates cultural stereotypes, and the analysis shows consistency in the relationships between embedding bias and external metrics across datasets over time. The results also highlight the impact of historical events, such as the women’s movement of the 1960s, on the encoding of stereotypes.</p>
+</div>
+</div>
+</div>
+<p>Let’s assume in our textbook project we are interested in gathering information about English’s expression of the semantic concepts of manner and motion. For learners of English, this can be an area of difficulty as languages differ in how these semantic properties are expressed. English is a good example of a “satellite-framed” language, that is that manner and motion are often encoded in the same verb with a particle encoding the motion path (“rush out”, “climb up”). Other languages such as Spanish, Turkish, and Japanese are “verb-framed” languages, that is that motion but not manner is encoded in the verb (“salir corriendo”, “koşarak çıkmak”, “走り出す”).</p>
+<p>We can use vector space modeling to represent the distribution of verbs in the MASC dataset and then target the concepts of manner and motion to then explore how English encodes these concepts. The question will be what will our features be. They could be terms, lemmas, pos tags, etc. Or they could be some combination. Considering the task at hand which we will ultimately want to know something about verbs, it makes sense to include the part of speech information in combination with either the term or the lemma.</p>
+<p>If we include term and pos then we have a feature for every morphological variant of the term (e.g.&nbsp;house_VB, housed_VBD, housing_VBG). This can make the model more sizeable than it needs to be. If we include lemma and pos then we have a feature for every lemma with a distinct grammatical category (e.g.&nbsp;house_NN, house_VB). Note that as the pos tags are from the Penn tagset, many morphological variants appear in the tag itself (e.g.&nbsp;house_VB, houses_VBZ, housing_VBG). This is a good example of how the choice of features can impact the size of the model. In our case, it is not clear that we need to include the morphological variants of the verbs, so we will use lemma and a simplified pos as our features.</p>
+<p>To engineer these features we will need to simplify the tags. We will conflate Penn tagset distinctions between nouns, verbs, adjectives, and adverbs. This will give us a feature for every lemma with a distinct grammatical category (e.g.&nbsp;house_NOUN, house_VERB), and no more than that. To do this we can apply the <code>case_when()</code> function from the <code>dplyr</code> package. The <code>case_when()</code> function takes a series of logical statements and returns a value based on the first logical statement that is <code>TRUE</code>. Let’s conflate the Penn tagset distinctions between nouns, verbs, adjectives, and adverbs, as seen in <a href="#exm-eda-masc-vsm-lemma-pos">Example&nbsp;<span>8.37</span></a>.</p>
+<!--
+- Nouns: `NN` (singular common noun), `NNS` (plural common noun), `NNP` (singular proper noun), `NNPS` (plural proper noun)
+- Verbs: `VB` (base form), `VBD` (past tense), `VBG` (gerund), `VBN` (past participle), `VBP` (non-3rd person singular present), `VBZ` (3rd person singular present)
+- Adjectives: `JJ` (adjective), `JJR` (comparative adjective), `JJS` (superlative adjective)
+- Adverbs: `RB` (adverb), `RBR` (comparative adverb), `RBS` (superlative adverb)
 -->
-<p>This section will discuss topic modeling techniques, which are used to identify and group semantically similar topics in unstructured data. It will discuss various approaches to topic modelling, such as Latent Dirichlet Allocation (LDA), and discuss their applications in linguistics.</p>
-<ul>
-<li>LDA (latent Dirichlet allocation)</li>
-</ul>
-<p>Let’s load the <code>topicmodels</code> package. Then we will clean the lemmas removing stop words.</p>
-<div class="cell" data-hash="exploration_cache/html/eda-masc-topic-modeling_31a881eeb4c88881de38bc281758f477">
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">topicmodels</span><span class="op">)</span> <span class="co"># for topic modeling</span></span>
-<span></span>
-<span><span class="co"># Clean lemmas</span></span>
-<span><span class="va">masc_lemma_clean</span> <span class="op">&lt;-</span> </span>
+<div id="exm-eda-masc-vsm-lemma-pos" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.37 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-vsm-lemma-pos_6c4aa3263f4d69d587f00e34a3f8992e">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Conflate Penn tagset into Universal-like tagset</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="va">lemma</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">stop_words</span><span class="op">$</span><span class="va">word</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">lemma</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Next, we will create a document-term matrix (DTM) of the lemmas. We will use the <code><a href="https://rdrr.io/pkg/tidytext/man/document_term_casters.html">cast_dtm()</a></code> function.</p>
-<div class="cell" data-hash="exploration_cache/html/unnamed-chunk-50_d9a81875c02ef99ee12de5c65abfe0d7">
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a dtm of lemmas</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>xpos <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
+<span>    <span class="va">pos</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"NN"</span>, <span class="st">"NNS"</span>, <span class="st">"NNP"</span>, <span class="st">"NNPS"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"NOUN"</span>,</span>
+<span>    <span class="va">pos</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"VB"</span>, <span class="st">"VBD"</span>, <span class="st">"VBG"</span>, <span class="st">"VBN"</span>, <span class="st">"VBP"</span>, <span class="st">"VBZ"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"VERB"</span>,</span>
+<span>    <span class="va">pos</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"JJ"</span>, <span class="st">"JJR"</span>, <span class="st">"JJS"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"ADJ"</span>,</span>
+<span>    <span class="va">pos</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RB"</span>, <span class="st">"RBR"</span>, <span class="st">"RBS"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"ADV"</span>,</span>
+<span>    <span class="cn">TRUE</span> <span class="op">~</span> <span class="va">pos</span> <span class="co"># keep other tags</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">masc_lemma_dtm</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="va">masc_lemma_clean</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/tidytext/man/document_term_casters.html">cast_dtm</a></span><span class="op">(</span></span>
-<span>    document <span class="op">=</span> <span class="va">doc_id</span>,</span>
-<span>    term <span class="op">=</span> <span class="va">lemma</span>,</span>
-<span>    value <span class="op">=</span> <span class="va">n</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co"># Lemma + pos</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>lemma_pos <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="va">lemma</span>, <span class="va">xpos</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; Rows: 439,539
+&gt; Columns: 9
+&gt; $ doc_id    &lt;chr&gt; "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", …
+&gt; $ modality  &lt;chr&gt; "Written", "Written", "Written", "Written", "Written", "Writ…
+&gt; $ genre     &lt;chr&gt; "Letters", "Letters", "Letters", "Letters", "Letters", "Lett…
+&gt; $ term_num  &lt;dbl&gt; 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20,…
+&gt; $ term      &lt;chr&gt; "Your", "contribution", "to", "will", "mean", "more", "than"…
+&gt; $ lemma     &lt;chr&gt; "your", "contribution", "to", "will", "mean", "more", "than"…
+&gt; $ pos       &lt;chr&gt; "PRP$", "NN", "TO", "MD", "VB", "JJR", "IN", "PRP", "MD", "V…
+&gt; $ xpos      &lt;chr&gt; "PRP$", "NOUN", "TO", "MD", "VERB", "ADJ", "IN", "PRP", "MD"…
+&gt; $ lemma_pos &lt;chr&gt; "your_PRP$", "contribution_NOUN", "to_TO", "will_MD", "mean_…</code></pre>
 </div>
-<p>We can fit a LDA model to our DTM.</p>
-<div class="cell" data-hash="exploration_cache/html/eda-masc-topic-modeling-lda_d51e621754c31eaa4404a40a8b2b71c2">
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit a LDA model</span></span>
-<span><span class="va">lemma_lda_model</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/topicmodels/man/lda.html">LDA</a></span><span class="op">(</span></span>
-<span>    <span class="va">masc_lemma_dtm</span>,</span>
-<span>    k <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span></span>
+</div>
+</div>
+<p>When VSM is applied to words, it is known as <strong>word embedding</strong>. To calculate word embeddings there are various algorithms that can be used (BERT, word2vec, GloVe, <em>etc.</em>) The most common algorithm is <strong>word2vec</strong> <span class="citation" data-cites="Mikolov2013b">(<a href="references.html#ref-Mikolov2013b" role="doc-biblioref">Mikolov et al. 2013</a>)</span>. Word2vec is a neural network-based algorithm that learns word embeddings from a large corpus of text. In the word2vec algorithm the researcher can choose to learn embeddings from a Continuous Bag of Words (CBOW) or a Skip-gram model. The CBOW model predicts a target word based on the context words. The Skip-gram model predicts the context words based on the target word. The CBOW model is faster to train and is better for frequent words. The Skip-gram model is slower to train and is better for infrequent words.</p>
+<p>Another consideration to take into account is the size of the corpus used to train the model. VSM provide more reliable results when trained on larger corpora. The MASC dataset is relatively small. We’ve simplified our features in order to have a smaller vocabulary in hopes to offset this limitation to a degree. But the choice of either CBOW or Skip-gram can also help to offset this limitation. CBOW can be better for smaller corpora as it aggregates context infomation.</p>
+<p>To implement the word2vec algorithm on our lemma + pos features, we will use the <code>word2vec</code> package. The <code><a href="https://rdrr.io/pkg/word2vec/man/word2vec.html">word2vec()</a></code> function takes a text file and uses it to train the vector representations. To prepare the MASC dataset for training, we will need to write the lemma + pos features to a text file as a single character string. We can do this by first collapsing the <code>lemma_pos</code> variable into a single string for each document using the <code>str_c()</code> function from the <code>stringr</code> package. Then we can use the <code><a href="https://rdrr.io/r/base/writeLines.html">writeLines()</a></code> function to write the string to a text file. Let’s prepare the MASC dataset for training, as seen in <a href="#exm-eda-masc-vsm-word2vec-text">Example&nbsp;<span>8.38</span></a>.</p>
+<div id="exm-eda-masc-vsm-word2vec-text" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.38 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-vsm-word2vec-text-show_7f95f24ffdd72d3faa312c438b2d4f49">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Prepare data for word2vec training</span></span>
+<span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">summarize</span><span class="op">(</span>text <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="va">lemma_pos</span>, collapse <span class="op">=</span> <span class="st">" "</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html">writeLines</a></span><span class="op">(</span></span>
+<span>    con <span class="op">=</span> <span class="st">"../data/derived/masc_word2vec.txt"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>With our <em>masc_word2vect.txt</em> file, we read in. apply the word2vec algorithm using the <code>word2vec</code> package, and write the model to disk. By default, te <code><a href="https://rdrr.io/pkg/word2vec/man/word2vec.html">word2vec()</a></code> function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let’s apply the default algorithm to the text file spliting features by sentence punctuation, as seen in <a href="#exm-eda-masc-vsm-word2vec-train">Example&nbsp;<span>8.39</span></a>.</p>
+<div id="exm-eda-masc-vsm-word2vec-train" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.39 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-vsm-word2vec-train-show_f8446bbc27e2c1720e224e2b3feec53e">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bnosac/word2vec">word2vec</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Traing word2vec model</span></span>
+<span><span class="va">masc_model</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/word2vec/man/word2vec.html">word2vec</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"../data/derived/masc_word2vec.txt"</span>,</span>
+<span>    split <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">".?!"</span><span class="op">)</span>,</span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extract the topics</span></span>
-<span><span class="va">lemma_topics</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="va">lemma_lda_model</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span>matrix <span class="op">=</span> <span class="st">"beta"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># beta: distribution of words in each topic. Gamma: distribution of topics in each document.</span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">topic</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">slice_max</span><span class="op">(</span><span class="va">beta</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">topic</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">beta</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co"># Write model to disk</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/word2vec/man/write.word2vec.html">write.word2vec</a></span><span class="op">(</span></span>
+<span>  <span class="va">masc_model</span>,</span>
+<span>  file <span class="op">=</span> <span class="st">"../data/derived/masc_word2vec.bin"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>So, if I want to see the words associated with the topics, use the ‘beta’ matrix. For the topics associated with each document, use the ‘gamma’ matrix.</p>
-<p>View the top words in each topic in a bar plot.</p>
-<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-topic-modeling-lda_ed8bf0245dc73540822ae9ef7650ad7d">
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># View the topics in a bar plot</span></span>
-<span><span class="va">lemma_topics</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/tidytext/man/reorder_within.html">reorder_within</a></span><span class="op">(</span><span class="va">term</span>, <span class="va">beta</span>, <span class="va">topic</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">term</span>, <span class="va">beta</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_col</a></span><span class="op">(</span>show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">topic</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/tidytext/man/reorder_within.html">scale_x_reordered</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Writing the model to disk is important as it allows us to read the model in without having to retrain it. In cases where the corpus is large, this can save a lot of computational time.</p>
+<p>Now that we have a trained model, we can read it in with the <code><a href="https://rdrr.io/pkg/wordVectors/man/read.vectors.html">read.vectors()</a></code> function from the <code>wordVectors</code> package.</p>
+<div id="exm-eda-masc-vsm-word2vec-read" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.40 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-vsm-word2vec-read-show_e48b774a46f7b5c0c12e57682a3c73c3">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/bmschmidt/wordVectors">wordVectors</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Read word2vec model</span></span>
+<span><span class="va">masc_model</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/wordVectors/man/read.vectors.html">read.vectors</a></span><span class="op">(</span></span>
+<span>    filename <span class="op">=</span> <span class="st">"../data/derived/masc_word2vec.bin"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>The <code><a href="https://rdrr.io/pkg/wordVectors/man/read.vectors.html">read.vectors()</a></code> function returns a matrix where each row is a term in the model and each column is a dimension in the vector space, as seen in <a href="#exm-eda-masc-vsm-word2vec-vector-object">Example&nbsp;<span>8.41</span></a>.</p>
+<div id="exm-eda-masc-vsm-word2vec-vector-object" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.41 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-vsm-word2vec-vector-object_87cc7e9c8968e0822307f4ae83e3210e">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">masc_model</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; [1] 5892   50</code></pre>
+</div>
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
+<span><span class="va">masc_model</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; A VectorSpaceModel object of  5  words and  5  vectors
+&gt;                     [,1]  [,2]   [,3]   [,4]    [,5]
+&gt; map_VERB           0.476 0.590  0.572 -0.547 -0.0146
+&gt; KGCUBS10_NOUN     -0.304 1.506 -0.407  1.518  0.1857
+&gt; MICKEY3_NOUN      -0.259 0.854 -0.925  0.759  0.1816
+&gt; amenity_NOUN       1.284 0.502 -0.921  0.488 -1.1896
+&gt; transmission_NOUN -1.580 1.493 -0.205  1.457 -1.7360
+&gt; attr(,".cache")
+&gt; &lt;environment: 0x7fdc08066940&gt;</code></pre>
+</div>
+</div>
+</div>
+<p>The row-wise vector in the model is the vector representation of each feature. The notion is that these values can now be compared with other terms to explore distributional relatedness. We can extract specific features from the matrix using the <code>[]</code> operator.</p>
+<p>As an example, let’s compare the vectors for noun-verb pairs for the lemmas ‘run’ and ‘walk’. To do this we extract these features from the model. To appreciate the relatedness of these features it is best to visualize them. We can do this by first reducing the dimensionality of the vectors using principal components analysis (PCA). We can then plot the first two principle components, as seen in <a href="#fig-eda-masc-vsm-word2vec-similarity">Figure&nbsp;<span>8.13</span></a>.</p>
+<div id="exm-eda-masc-vsm-word2vec-similarity" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.42 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-vsm-word2vec-similarity_ae2674c107e4ff1654df2f50f70f89ac">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract vectors</span></span>
+<span><span class="va">word_vectors</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">masc_model</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"run_VERB"</span>, <span class="st">"walk_VERB"</span>, <span class="st">"run_NOUN"</span>, <span class="st">"walk_NOUN"</span><span class="op">)</span>, <span class="op">]</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="va">pca</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">word_vectors</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pca_tbl</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>word <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">word_vectors</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pca_tbl</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, label <span class="op">=</span> <span class="va">word</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggrepel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggrepel/man/geom_text_repel.html">geom_text_repel</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-eda-masc-topic-modeling-lda" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-topic-modeling-lda-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8.12: <strong>?(caption)</strong></figcaption></figure>
+<div id="fig-eda-masc-vsm-word2vec-similarity" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-vsm-word2vec-similarity-1.png" class="img-fluid figure-img" width="384"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.13: Similarity between ‘run’ and ‘walk’ in the MASC dataset</figcaption></figure>
 </div>
 </div>
 </div>
-</section><section id="sec-eda-word-embedding" class="level4"><h4 class="anchored" data-anchor-id="sec-eda-word-embedding">Word embedding</h4>
-<p>ELL: we want to meaning similarities and potential differences between spoken and written discourses. This will help provide students with a more nuanced understanding of potential synonyms within and differences between spoken and written discourses.</p>
-<!--  
-
-Word embedding: An unsupervised learning technique used for representing words as numerical vectors. This can be used for creating a vector space model of the text data, which can be used for tasks such as language translation or text classification.
-
-- Word embeddings
-  - Do certain words have different nearest neighbors in the embedding space when appear in spoken versus written discourses? What could this tell us about the differences between spoken and written discourses?
-    - Use word2vec to identify nearest neighbors of words in spoken and written discourses by training a model on each modality. Compare the nearest neighbors of words in each modality.
-  - If I consider hedges to be a semantic class, what are the nearest neighbors of hedges in the embedding space? What could this tell us about the semantic class of hedges?
-    - Use word2vec to identify nearest neighbors of hedges by training a model on the entire dataset. Compare the nearest neighbors of hedges to the nearest neighbors of other words.
--->
-<p>This section will discuss word embedding techniques, which are used to represent words in a vector space. It will discuss various approaches to word embedding, such as Word2Vec and GloVe, and discuss their applications in linguistics.</p>
-<ul>
-<li>Word2vec (skip-gram)</li>
-<li>GloVe (global vectors for word representation)</li>
-</ul></section></section></section><section id="summary" class="level2" data-number="8.3"><h2 data-number="8.3" class="anchored" data-anchor-id="summary">
+</div>
+<p>From <a href="#fig-eda-masc-vsm-word2vec-similarity">Figure&nbsp;<span>8.13</span></a>, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC1, we can see that there is a distinction between part-of-speech. Looking along PC1, we see some pariety between lemma meanings. Given these features, we can see that meaning and grammatical category can be captured in the vector space.</p>
+<p>An interesting property of vector space models is that we can build up a dimension of meaning by adding vectors that are expect to approximate that meaning. For example, we can add the vectors for typical motion verbs to create a vector for motion-similarity and one for manner-similarity. We can then compare the feature vectors for all verbs and assess their motion-similarity and manner-similarity.</p>
+<p>To do this let’s first subset the model to only include verbs, as in <a href="#exm-eda-masc-vsm-word2vec-verbs">Example&nbsp;<span>8.43</span></a>. We will also remove the part-of-speech tags from the rownames of the matrix as they are no longer needed.</p>
+<div id="exm-eda-masc-vsm-word2vec-verbs" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.43 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-vsm-word2vec-verbs_2d0dd92abb5517bf627e25e21e0acc8d">
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter to verbs</span></span>
+<span><span class="va">verbs</span> <span class="op">&lt;-</span> <span class="fu">str_subset</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">masc_model</span><span class="op">)</span>, <span class="st">".*_VERB"</span><span class="op">)</span></span>
+<span><span class="va">verb_vectors</span> <span class="op">&lt;-</span> <span class="va">masc_model</span><span class="op">[</span><span class="va">verbs</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Remove part-of-speech tags</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">verb_vectors</span><span class="op">)</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">verb_vectors</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">str_replace_all</span><span class="op">(</span><span class="st">"_VERB"</span>, <span class="st">""</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Inspect</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">verb_vectors</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; [1] 1115   50</code></pre>
+</div>
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
+<span><span class="va">verb_vectors</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; A VectorSpaceModel object of  5  words and  5  vectors
+&gt;            [,1]  [,2]   [,3]    [,4]    [,5]
+&gt; map       0.476 0.590  0.572 -0.5469 -0.0146
+&gt; whip      0.636 0.897 -1.017 -0.0436 -0.3124
+&gt; enroll    0.600 0.580 -0.335  0.0160 -1.0247
+&gt; tuck     -0.795 1.834 -1.696 -0.3221  0.5523
+&gt; suppress -0.368 1.970 -1.438  0.6805 -0.3694
+&gt; attr(,".cache")
+&gt; &lt;environment: 0x7fdbef3661f8&gt;</code></pre>
+</div>
+</div>
+</div>
+<p>We now have <code>verb_vectors</code> which includes the vector representations for all verbs 1115 in the MASC dataset. Next, let’s seed the vectors for motion-similarity and manner-similarity and calculate the vector ‘closeness’ to the motion and manner seed vectors with the <code><a href="https://rdrr.io/pkg/wordVectors/man/closest_to.html">closest_to()</a></code> function from the <code>wordVectors()</code> package.</p>
+<div id="exm-eda-masc-vsm-word2vec-manner-motion" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.44 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-vsm-word2vec-add_0dcdf527b384e046231db28dacbfba7b">
+<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add vectors for motion-similarity and manner-similarity</span></span>
+<span><span class="va">motion</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"come"</span>, <span class="st">"leave"</span>, <span class="st">"arrive"</span>, <span class="st">"enter"</span>, <span class="st">"exit"</span>, <span class="st">"depart"</span>, <span class="st">"return"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">motion_similarity</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">verb_vectors</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/wordVectors/man/closest_to.html">closest_to</a></span><span class="op">(</span><span class="va">motion</span>, n <span class="op">=</span> <span class="cn">Inf</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">motion_similarity</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; Rows: 1,115
+&gt; Columns: 2
+&gt; $ word                   &lt;chr&gt; "sever", "hang", "nod", "splash", "return", "sl…
+&gt; $ `similarity to motion` &lt;dbl&gt; 0.781, 0.776, 0.769, 0.760, 0.755, 0.755, 0.745…</code></pre>
+</div>
+<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">manner</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"run"</span>, <span class="st">"walk"</span>, <span class="st">"jump"</span>, <span class="st">"crawl"</span>, <span class="st">"swim"</span>, <span class="st">"fly"</span>, <span class="st">"drive"</span>, <span class="st">"ride"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">manner_similarity</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">verb_vectors</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/wordVectors/man/closest_to.html">closest_to</a></span><span class="op">(</span><span class="va">manner</span>, n <span class="op">=</span> <span class="cn">Inf</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">manner_similarity</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; Rows: 1,115
+&gt; Columns: 2
+&gt; $ word                   &lt;chr&gt; "crawl", "drop", "step", "hang", "walk", "throw…
+&gt; $ `similarity to manner` &lt;dbl&gt; 0.894, 0.880, 0.867, 0.861, 0.858, 0.857, 0.850…</code></pre>
+</div>
+</div>
+</div>
+<p>The <code>motion_similarity</code> and <code>motion_similarity</code> data frames each contain all the verbs with a corresponding closeness measure. We can join these two data frames by feature to create a single data frame with the motion-similarity and manner-similarity measures, as seen in <a href="#exm-eda-masc-vsm-word2vec-manner-motion">Example&nbsp;<span>8.45</span></a>.</p>
+<div id="exm-eda-masc-vsm-word2vec-manner-motion" class="theorem example">
+<p><span class="theorem-title"><strong>Example 8.45 </strong></span>&nbsp;</p>
+<div class="cell" data-hash="exploration_cache/html/eda-masc-vsm-word2vec-manner-motion_4c6f227c7cadf88180e036664fada2ff">
+<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join motion-similarity and manner-similarity</span></span>
+<span><span class="va">manner_motion_similarity</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">manner_similarity</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">motion_similarity</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">manner_motion_similarity</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; Rows: 1,115
+&gt; Columns: 3
+&gt; $ word                   &lt;chr&gt; "crawl", "drop", "step", "hang", "walk", "throw…
+&gt; $ `similarity to manner` &lt;dbl&gt; 0.894, 0.880, 0.867, 0.861, 0.858, 0.857, 0.850…
+&gt; $ `similarity to motion` &lt;dbl&gt; 0.742, 0.743, 0.692, 0.776, 0.695, 0.627, 0.702…</code></pre>
+</div>
+</div>
+</div>
+<p>The result of <a href="#exm-eda-masc-vsm-word2vec-manner-motion">Example&nbsp;<span>8.45</span></a> is a data frame with the motion-similarity and manner-similarity measures for all verbs in the MASC dataset. We can now visualize the distribution of motion-similarity and manner-similarity measures, as seen in <a href="#fig-eda-masc-vsm-word2vec-manner-motion-compare">Figure&nbsp;<span>8.14</span></a>.</p>
+<div class="cell" data-hash="exploration_cache/html/fig-eda-masc-vsm-word2vec-manner-motion-compare_ca9a5956d2b77cfa07f493cebce4d1cd">
+<div class="cell-output-display">
+<div id="fig-eda-masc-vsm-word2vec-manner-motion-compare" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure"><p><img src="exploration_files/figure-html/fig-eda-masc-vsm-word2vec-manner-motion-compare-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8.14: Motion-similarity and manner-similarity of verbs in the MASC dataset</figcaption></figure>
+</div>
+</div>
+</div>
+<p>From <a href="#fig-eda-masc-vsm-word2vec-manner-motion-compare">Figure&nbsp;<span>8.14</span></a>, we can see that the manner-similarity is plotted on the x-axis and the motion-similarity on the y-axis. I’ve added horizontal and vertical lines to break the scatterplot into quadrants –the top-right corresponding to high manner- and motion-similiarity and the bottom-left corresponding to low manner- and motion-similarity. This captures the majority of the verbs in the dataset. The verbs in the top-left quadrant have high motion-similarity but lower manner similarity, and verbs in the bottom-right quadrant have high manner-similarity but lower motion-similarity.</p>
+<p>I’ve randomly sampled 50 verbs from the dataset and plotted them as text labels. I’ve also plotted the motion and manner seed vectors as triangle and box points, respectively. We can see that motion- and manner-similiarity seed verbs are found in the top-left quandrant together, showing that they are semantically related. Verbs in the other quadrants are either lower in motion- or manner-similarity, or both. From a qualitative point of view it appears that many of the verbs coincide with inuition. Some, however, less so. This is to be expected to some degree as the model is trained on a relatively small corpus. All in all, this serves as an example of how vector space modeling can be used to explore semantic relationships between linguistic features.</p>
+</section></section></section><section id="summary" class="level2" data-number="8.3"><h2 data-number="8.3" class="anchored" data-anchor-id="summary">
 <span class="header-section-number">8.3</span> Summary</h2>
 <p>Exploratory data analysis is a set of methods that can be used to explore a dataset and to identify new questions and new variables of interest. The methods can be used to describe a dataset and to identify linguistic units that are distinctive to a particular group or sub-group in the dataset. The methods can also be used to identify semantically similar topics in unstructured data. The results of exploratory analysis can be used to inform the development of a hypothesis or to inform the design of a machine learning model.</p>
 </section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
@@ -2986,8 +2873,20 @@ Word embedding: An unsupervised learning technique used for representing words a
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Firth1957" class="csl-entry" role="listitem">
+Firth, John R. 1957. <em>Papers in Linguistics</em>. Oxford University Press.
+</div>
+<div id="ref-Garg2018" class="csl-entry" role="listitem">
+Garg, Nikhil, Londa Schiebinger, Dan Jurafsky, and James Zou. 2018. <span>“Word Embeddings Quantify 100 Years of Gender and Ethnic Stereotypes.”</span> <em>Proceedings of the National Academy of Sciences</em> 115 (16): E3635–44. <a href="https://doi.org/10.1073/pnas.1720347115">https://doi.org/10.1073/pnas.1720347115</a>.
+</div>
 <div id="ref-Gries2023" class="csl-entry" role="listitem">
 Gries, Stefan Th. 2023. <span>“Statistical Methods in Corpus Linguistics.”</span> In <em>Readings in Corpus Linguistics: A Teaching and Research Guide for Scholars in Nigeria and Beyond,</em> 78–114.
+</div>
+<div id="ref-Harris1954" class="csl-entry" role="listitem">
+Harris, Zellig S. 1954. <span>“Distributional Structure.”</span> <em>Word</em> 10 (2-3): 146–62. <a href="https://doi.org/10.1080/00437956.1954.11659520">https://doi.org/10.1080/00437956.1954.11659520</a>.
+</div>
+<div id="ref-Mikolov2013b" class="csl-entry" role="listitem">
+Mikolov, Tomas, Ilya Sutskever, Kai Chen, Greg Corrado, and Jeffrey Dean. 2013. <span>“Distributed Representations of Words and Phrases and Their Compositionality.”</span> In <em>Advances in Neural Information Processing Systems</em>, 3111–19.
 </div>
 <div id="ref-Petrenz2011" class="csl-entry" role="listitem">
 Petrenz, Philipp, and Bonnie Webber. 2011. <span>“Stable Classification of Text Genres.”</span> <em>Computational Linguistics</em> 37 (2): 385–93. <a href="https://doi.org/10.1162/COLI_a_00052">https://doi.org/10.1162/COLI_a_00052</a>.

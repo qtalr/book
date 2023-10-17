@@ -19,31 +19,7 @@ Ready for review.
 
 Content:
 
-Exploratory Data Analysis (EDA) is a set of methods used for analyzing and exploring text data in the areas of text analysis and corpus linguistics. Descriptive methods commonly used in EDA include data visualization, word frequency and distribution analysis, and collocation analysis. These methods help identify common words and phrases, as well as relationships between different elements in the text. 
-
-Additionally, unsupervised learning methods such as clustering, topic modeling, semantic analysis, and word embedding are used in EDA. These techniques help group similar items, extract topics, understand content, and represent words as numerical vectors for various tasks.
-
-
-
-Descriptive analysis:
-- `tidytext` package
-	- `unnest_tokens()` function
-	- `count()` function
-	- `bind_tf_idf()` function
-	- `widyr` package for co-occurrence analysis
-	- `tidy()`
-  
-- `quanteda` package
-  - `dfm()` objects
-    - matrix subsetting `[, ]`
-    - `dfm_select()`, `dfm_trim()`, `dfm_remove()`, `dfm_keep()`, `dfm_sample()
-
-Unsupervised learning:
-- `cluster()`, `factoextra` package
-- `kmeans()`, `factoextra` package
-- `hclust()`, `factoextra` package
-- `topicmodels` package
-- `text2vec` package
+- [ ] edit: consider the `tidycluster` package for clustering?
 
 Exercises:
 
@@ -102,7 +78,7 @@ In this chapter, we examine a wide range of strategies for deriving insight from
 
 ## Orientation {#sec-eda-orientation}
 
-The aim of this section is to provide an overview of exploratory data analysis (EDA). We will delve into various descriptive methods, such as frequency analysis and co-occurrence analysis, which are fundamental tools in linguistic research. However, our exploration won't stop there. We will also integrate modern exploratory methods from unsupervised learning approaches, including clustering, topic modeling, and vector space modeling. This may sound overwhelming, but I will strive to keep explanations clear and concise, ensuring their practicality and relevance to your linguistic inquiries is apparent. To this end, we will provide real-world examples to exemplify the applicability of these methodologies. 
+The aim of this section is to provide an overview of exploratory data analysis (EDA). We will delve into various descriptive methods, such as frequency analysis and co-occurrence analysis, which are fundamental tools in linguistic research. However, our exploration won't stop there. We will also integrate modern exploratory methods from unsupervised learning approaches, including clustering, dimensionality reductin, and vector space modeling. This may sound overwhelming, but I will strive to keep explanations clear and concise, ensuring their practicality and relevance to your linguistic inquiries is apparent. To this end, we will provide real-world examples to exemplify the applicability of these methodologies. 
 
 ### Research goal {#sec-eda-research-goal}
 
@@ -115,24 +91,26 @@ Since the researcher does not start with a preconceived hypothesis, the research
 <!-- Note:  
 
 This section should cover the following:
-- Workflow: Identify, Inspect, Interrogate, Interpret
+- Workflow: Identify, Inspect, Interrogate, Interpret, (Iterate)
   - Add a few words on the common aspects with other research approaches
   - And point out the differences (use of data, results, interpretation, etc.)
-
-Drop the independent sections in favor of a more integrated approach.
 -->
 
 The approach to exploratory data analysis is iterative and inductive. To reign in the analysis, however, it is important to have a research question to guide the analysis. The research question will often be broad and exploratory in nature, but it will provide a framework for the analysis including the unit of analysis and sometimes the units of observation. Yet the units of observation can be modified as needed to address the research question. Furthermore, the methods applied to the data can evolve as the research unfolds. The researcher may start with a descriptive analysis and then move to an unsupervised learning approach, or vice versa. The researcher may also pivot the approach to explore new questions and new variables. Ultimately, the researcher is guided by the data and the research question, but the researcher is not bound by a preconceived hypothesis or prediction.
 
 <!-- Workflow -->
 
-With a research question and relevant data in hand, we can look to conduct the analysis. The workflow for exploratory data analysis is as follows:
+With a research question and relevant data in hand, we can look to conduct the analysis. The general workflow for exploratory data analysis is shown in @tbl-eda-workflow.
 
-1. Identify and extract the variables of interest in the dataset
-2. Inspect the dataset to ensure the quality of the data and understand its characteristics
-3. Interrogate the dataset using descriptive analysis and/ or unsupervised learning
-4. Interpret the results of the analysis to determine if they are meaningful and if they provide a new perspective on the research question
-5. (Optional) Pivot and repeat steps 1-4 to explore new questions and new variables
+| Step | Name | Description |
+|:----:|:-----|:------------|
+| 1 | Identify | Consider the research question and identify variables of potential interest to provide insight into our question. |
+| 2 | Inspect | Check for missing data, outliers, *etc*. and check data distributions and transform if necessary. |
+| 3 | Interrogate | Submit the selected variables to descriptive (frequency, keyword, co-occurrence analysis, *etc.*) or unsupervised learning (clustering, dimensionality reduction, vector spacing modeling, *etc.*) methods to provide quantitative measures to evaluate. |
+| 4 | Interpret | Evaluate the results and determine if they are valid and meaningful to respond to the research question. |
+| 5 | (Optional) Iterate | Repeat steps 1-4 as new questions emerge from your interpretation. |
+
+: Workflow for exploratory data analysis {#tbl-eda-workflow .striped}
 
 Let's elaborate on each of these steps. First, we want to consider our research question and identify the variables of potential interest to provide insight to our question. Starting with a transformed dataset means that much of the data preparation has already been done, but we may need to further transform the data, either up front or as we explore the data. In text analysis, this often includes identifying and extracting the linguistic variables of interest, such as words, $n$-grams, sentences, *etc*. Depending on the annotation scheme, other linguistic variables may be of interest, such as part-of-speech tags, syntactic dependencies, semantic roles, *etc*.
 
@@ -284,9 +262,9 @@ masc_tbl |>
 
 The output of this frequency tabulation in @exm-eda-masc-count is a data frame with two columns: `lemma` and `n`. The `lemma` column contains the unique lemmas in the dataset, and the `n` column contains the frequency of each lemma. The data frame is sorted in descending order by the frequency of lemmas. Now the result includes over 28,000 rows --which corresponds to the number of unique lemmas in the dataset. 
 
-At this point, it is important to define two key concepts that are fundamental to working with text. First, a **term** is a defined linguistic unit extracted from a corpus. In our dataset, the terms are words, such as 'the', 'houses', 'are'. A lemma is an annotated recoding of words which represent the uninflected base form of a word. In either case, the term or lemma is an instance of a linguistic unit. These instances are called **tokens**. When we count the number of times a term or lemma occurs in a dataset, we are counting the number of tokens (`n`), such as in @exm-eda-masc-count. Now, the list of unique linguistic units is a list of **types** (`lemma`). By definition, then, there will always be at least as many tokens as types, but more often than not (many) more tokens than types.
+At this point, it is important to define a few key concepts that are fundamental to working with text. First, a **term** is a defined linguistic unit extracted from a corpus. In our dataset, the terms are words, such as 'the', 'houses', 'are'. A lemma is an annotated recoding of words which represent the uninflected base form of a word. In either case, the term or lemma is an instance of a linguistic unit. These instances are called **tokens**. When we count the number of times a term or lemma occurs in a dataset, we are counting the number of tokens (`n`), such as in @exm-eda-masc-count. Now, the list of unique linguistic units is a list of **types** (`lemma`). By definition, then, there will always be at least as many tokens as types, but more often than not (many) more tokens than types.
 
-Our first pass a calculating lemma frequency in @exm-eda-masc-count should bring something else to our attention. As we can see among the most frequent lemmas are non-words such as `,`, and `.`. As you can imagine, given the conventions of written and transcriptional language, these types are very frequent. For a frequency analysis focusing on words, however, we should probably remove them. Thinking ahead, there may also be other non-words that we want to remove, such as symbols, numbers, *etc*. Let's take a look at @fig-eda-masc-pos, where I've counted the part-of-speech tags `pos` in the dataset to see what other non-words we might want to remove.
+Our first pass at calculating lemma frequency in @exm-eda-masc-count should bring something else to our attention. As we can see among the most frequent lemmas are non-words such as `,`, and `.`. As you can imagine, given the conventions of written and transcriptional language, these types are very frequent. For a frequency analysis focusing on words, however, we should probably remove them. Thinking ahead, there may also be other non-words that we want to remove, such as symbols, numbers, *etc*. Let's take a look at @fig-eda-masc-pos, where I've counted the part-of-speech tags `pos` in the dataset to see what other non-words we might want to remove.
 
 ::: {#exm-eda-masc-pos}
 ```{r}
@@ -1668,6 +1646,12 @@ pca_tbl |>
 ```
 :::
 
+<!--  
+
+[ ] If PC1 and PC2 are orthogonal and appear to be picking up part of speech vs. meaning, should the other values select pos-ness or meaning-ness?
+
+-->
+
 From @fig-eda-masc-vsm-word2vec-similarity, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC1, we can see that there is a distinction between part-of-speech. Looking along PC1, we see some pariety between lemma meanings. Given these features, we can see that meaning and grammatical category can be captured in the vector space.
 
 An interesting property of vector space models is that we can build up a dimension of meaning by adding vectors that are expect to approximate that meaning. For example, we can add the vectors for typical motion verbs to create a vector for motion-similarity and one for manner-similarity. We can then compare the feature vectors for all verbs and assess their motion-similarity and manner-similarity.
@@ -1826,7 +1810,7 @@ I've randomly sampled 50 verbs from the dataset and plotted them as text labels.
 
 ## Summary 
 
-In this chapter we surveyed a range of descriptive and unsupervised learning methods for exploratory data analysis. Exploratory analysis is a set of methods that can be used to explore a dataset and to identify new questions and new variables of interest. The methods can be used to describe a dataset and to identify linguistic units that are distinctive to a particular group or sub-group in the dataset. The methods can also be used to identify semantically similar topics in unstructured data. The results of exploratory analysis can be used to inform the development of a hypothesis or to inform the design of a machine learning model.
+In this chapter we surveyed a range of methods for uncovering insights from data, particularly when we do not have a predetermined hypothesis. We broke the chapter discussion along the two central branches of exploratory data analysis: descriptive analysis and unsupervised learning. Descriptive analysis offers statistical or visual summaries of datasets through frequency, dispersion, and co-occurrence measures, while unsupervised learning utilizes machine learning techniques to uncover patterns without predefining variable relationships. Here we covered a few unsupervised learning methods including clustering, diminensionality reduction, and vector space modeling. Through either descriptive or unsupervised learning methodologies, we probe questions in a data-driven fashion and apply methods to summarize, reduce, and sort complex datasets. This in turn facilitates novel, quantitative perspectives that can subsequently be evaluated qualitatively, offering us a robust approach to exploring and generating research questions.
 
 ## Activities {.unnumbered}
 
@@ -1847,7 +1831,7 @@ In this chapter we surveyed a range of descriptive and unsupervised learning met
 
 <!-- [ ] update lab -->
 
-**What**: [Exploratory Data Analysis](https://github.com/qtalr/lab-7)\
+**What**: [Exploratory Data Analysis](https://github.com/qtalr/lab-8)\
 **How**: Clone, fork, and complete the steps in Lab 8.\
 **Why**: To gain experience working with coding strategies to prepare, feature engineer, explore, and evaluate results from exploratory data analyses, practice transforming datasets into new object formats and visualizing relationships, and implement organizational strategies for organizing and reporting results in a reproducible fashion.
 :::

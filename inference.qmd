@@ -11,8 +11,8 @@ execute:
 #| cache: false
 ```
 
-::: {.callout-caution title="Caution"}
-Under development.
+::: {.callout-tip title="Draft"}
+Ready for review.
 :::
 
 <!--
@@ -33,18 +33,14 @@ Formatting:
 >
 > --- Harper Lee, To Kill a Mockingbird
 
-
-- [ ] {{< fa wrench >}} update outcomes
-
 ::: {.callout}
 **{{< fa regular list-alt >}} Outcomes**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-
-- what are the three main types of inferential analysis approaches?
-- how does the informational value of the dependent variable relate to the statistical approach adopted?
-- how to descriptive, statistical, and evaluative steps work together to produce the reliable results?
+- Identify the research goals of inferential data analysis
+- Describe the workflow for inferential data analysis
+- Indicate the importance of quantifying uncertainty in inferential data analysis
 :::
 
 ```{r}
@@ -53,16 +49,9 @@ Formatting:
 #| message: false
 # Packages
 
-pacman::p_load(broom, effectsize, report, janitor, skimr, languageR)
 ```
 
-In this chapter we consider approaches to deriving knowledge from information which can be generalized to the population from which the data is sampled. This process is known as statistical inference. The discussion here implements descriptive assessments, statistical tests, and model evaluation procedures for a series of contexts which are common in the analysis of corpus-based data. The chapter is structured into three main sections which correspond to the number of variables included in the statistical procedure. Each of these sections includes a subsection dedicated to the informational value of the dependent variable; the variable whose variation is to be explained.
-
-<!-- 
-- [ ] Add Bresnan citation for questions to interrogate `dative`?
-- [ ] Add Tottie citation for questions to interrogate `sdac_disfluencies`?
-
--->
+In this chapter, we consider approaches to deriving knowledge from information which can be generalized to the population from which the data is sampled. This process is known as statistical inference. The discussion here implements descriptive assessments, statistical tests, and evaluation procedures for a series of contexts which are common in the analysis of corpus-based data. During our treatment of these contexts, we will establish a foundational understanding of the null hypothesis signficance testing (NHST) framework using a simulation-based approach. This approach is more intuitive, easier to implement, and provides a better conceptual understanding of the statistical designs and analyses. The structure of the chapter groups significance testing scenarios by reponse and explanatory variables, highlighting the commonalities and differences that arise in the statistical designs and analyses. 
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
@@ -74,20 +63,28 @@ In this chapter we consider approaches to deriving knowledge from information wh
 - [ ] update lesson purpose
 -->
 
-**What**: {{< fa wrench >}} TBD \
+**What**: {{< fa wrench >}} [TBD](https://github.com/qtalr/lessons) \
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: {{< fa wrench >}} TBD
 :::
 
 ## Orientation {#sec-ida-orientation}
 
-The aim of this section is to provide an overview of inferential data analysis (IDA) and to introduce the three main types of inferential analysis approaches that are most common in text analysis research. 
-
-... overview of this section ... 
+The aim of this section is to provide an overview of inferential data analysis (IDA). First we consider the research goal of inferential analysis pointing to key differences with exploratory data analysis (EDA) and predictive data analysis (PDA). Next we outline the Null Hypothesis Signficance Testing (NHST) approach to IDA, highlighting the key steps in the workflow used to conduct analysis. 
 
 ### Research goal {#sec-ida-research-goal}
 
-The goal of IDA is to detect, explain, and generalize. The relationship to detect is predtermined by the hypothesis. In this situation the researcher will have identified an outcome variable (often known as a dependent variable) and often a predictor or set of predictor variables (independent variables) that are directly linked to the hypothesis in a way that the results of the statistical analysis allows to either confirm that null hypothesis or reject it. Explaining the results of the statistical analysis is key to summarizing the findings and how they relate to the hypothesis. To the extent that the text sample used is representative of the population from which the data is sampled, the results can be generalized to the population. IDA is not an exploratory endeavor and as such that anlysis is performed on the data in a much more conservative manner than is the case in exploratory data analysis (EDA) or predictive data analysis (PDA).
+In contrast to exploratory and predictive analyses, inference is not a data-driven endeavor. Rather, the goal of inferential data analysis (IDA) is to make claims about the population and assess the extent to which the data supports those claims. This implicates two key methodological restrictions which are not in play in other analysis methods. 
+
+First, the research question and expected findings are formulated *before* the data is analyzed, in fact strictly speaking this should take place even before data collection. This helps ensure that the data is aligned with the research question and that the data is representative of the population and that the analysis has a targeted focus and does not run the risk of becoming a 'just-so' story[^hark] or a 'significance-finding' mission[^phack] both of which violate the principles of significance testing. 
+
+[^hark]: "Hypothesis After Result is Known" (HARKing) involves selectively analyzing data, trying different variables or combinations until a significant p-value is obtained, or stopping data collection when a significant result is found [@Kerr1998].
+
+[^phack]: "p-hacking" is the practice of running multiple tests until a statistically significant result is found. This practice violates the principles of significance testing [@Head2015].
+
+Second, the data used in IDA is only used once. That is to say, that the entire dataset is used a single time to statistically interrogate the relationship(s) of interest. In both EDA and PDA the data can be approached in different ways and the results of the analysis can be used to inform the next steps in the analysis. In IDA, however, the data is used to test a specific hypothesis and the results of the analysis are interpreted in the context of that hypothesis.
+
+<!-- The relationship to detect is predtermined by the hypothesis. In this situation the researcher will have identified an outcome variable (often known as a dependent variable) and often a predictor or set of predictor variables (independent variables) that are directly linked to the hypothesis in a way that the results of the statistical analysis allows to either confirm that null hypothesis or reject it. Explaining the results of the statistical analysis is key to summarizing the findings and how they relate to the hypothesis. To the extent that the text sample used is representative of the population from which the data is sampled, the results can be generalized to the population. IDA is not an exploratory endeavor and as such that anlysis is performed on the data in a much more conservative manner than is the case in exploratory data analysis (EDA) or predictive data analysis (PDA). -->
 
 ### Approach {#sec-ida-approach}
 
@@ -98,159 +95,121 @@ This section should cover the following:
   - And point out the differences (use of data, results, interpretation, etc.)
 -->
 
-- The dependent variable and predictor variables are fixed (tied to hypothesis)
-- Descriptive statistics and visualizations (plots or tables) are used to summarize the data and provide a preliminary assessment of the data
-- Inferential statistics are used to test the hypothesis
+The methodological approach to inferential data analysis (IDA) is the most straightforward of the analysis types covered in this textbook. As the research goal is to test a claim, the steps necessary are fewer than in EDA or PDA, where the exploratory nature of these approaches includes various possible iterations. The workflow for IDA is shown in @tbl-ida-workflow.
 
 <!-- Workflow -->
 
 | Step | Name | Description |
 |:-----|:-----|:------------|
-| 1 | Identify | Identify the informational value of the dependent and independent variable(s). |
-| 2 | Inspect | Assess the distribution of the independent and dependent variables with the appropriate descriptive statistics and visualizations. |
-| 3 | Interrogate | Apply the appropriate statistical test to the data. |
-| 4 | Interpret | Review the results of the statistical test and interpret the results in the context of the hypothesis. |
+| 1 | Identify | Identify and map the hypothesis statement to the appropriate response and explanatory variables |
+| 2 | Inspect | Assess the distribution of the variable(s) with the appropriate descriptive statistics and visualizations. |
+| 3 | Interrogate | Apply the appropriate statistical procedure to the dataset. |
+| 4 | Interpret | Review the statistical results and interpret them in the context of the hypothesis. |
 
-: Workflow for inferential data analysis {#tbl-ida-workflow tbl-colwidths="[10, 20, 70]" .striped}
+: Workflow for inferential data analysis {#tbl-ida-workflow tbl-colwidths="[10, 15, 75]" .striped}
 
-... description of the workflow ...
+Based on the hypothesis statement, we first identify and operationalize the variables. The response variable whose variation we aim to explain. In most statistical designs, one or more explanatory variables are included in the analysis in an attempt to gauge the extent to which these variables account for the variation in the response variable. For both reponse and explanatory variables, it is key to confirm that your operationalization of the variables is well-defined and that the data is aligned with the operationalization. 
 
-<!-- 
+<!-- something about unit of analysis and observation in hypothesis statements and the mapping of variables? -->
 
-**Excerpts from Approaching Analysis:**
+::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
-Statistical power and informational value
+- [ ] Update this callout
 
-In most cases it is preferred to use the highest informational of a variable. Simplifying data results in a loss of information --which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data [@Baayen2004].
+Consider the following hypothesis statements: 
 
-Key methodological restrictions: hypothesis formulation and sample data alignment 
+- *The length of the recipient clause is related to the realization of the recipient clause.*
+- *The length of the recipient clause is related to the realization of the recipient clause in spoken language but not in written language.*
+- *The length of the recipient clause is related to the realization of the recipient clause in spoken language but not in written language when the length of the theme clause is controlled for.*
 
-Given the fact that this approach aims at making claims that can be generalized to the larger population, the IDA approach has the most rigorous set of methodological restrictions. First and foremost of these is the fact that a testable hypothesis must be formulated *before* research begins. The hypothesis guides the collection of data, the organization of the data into a dataset and the transformation, selection of the variables to be used to address the hypothesis, and the interpretation of the results. To conduct an analysis and then draw a hypothesis which conforms to the results is known as "Hypothesis After Result is Known" (HARKing) [@Kerr1998] and this practice violates the principles of significance testing. A second key stipulation is that the reliability of the sample data, the corpus in text analysis, to provide evidence to test the hypothesis must be representative of the population. A corpus used in a study which is misaligned with the hypothesis undermines the ability of the researcher to make valid claims about the population. In essence, IDA is only as good as the primary data is is based on.
+What are the explanatory and/ or response variables in each of these statements? What are the operationalizations of these variables? What are the implications for the data that is used to test these hypotheses?
+:::
 
-Use of data: p-hacking
+Next, we determine the informational values of the variables. The informational value of each variable will condition how we approach visualization, interrogation, and ultimately interpretation of the results. Note, that some informational types can be converted to other types, specifically higer-order types can be converted to lower-order types. For example, a continuous variable can be converted to a categorical variable, but not vice versa. It is preferrable, however, to use the highest informational value of a variable. Simplifying data results in a loss of information --which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data [@Baayen2004].
 
-In contrast to the other two analysis methods we will cover, the data in IDA is only used once. That is to say, that the entire dataset is used a single time to statistically interrogate the relationship(s) of interest. The resulting confidence metrics (p-values, etc.) are evaluated and the findings are interpreted. The practice of running multiple tests until a statistically significant result is found is called "p-hacking" [@Head2015] and like HARKing (described earlier) violates statistical hypothesis testing practice. For this reason it is vital to identify your statistical approach from the outset of your research project.
+With our design in place, we can now inspect the data. This involves assessing the distribution of the variables using descriptive statistics and visualizations. The goal of this step is to confirm the integrity of the data (missing data, anomalies, etc.), identify general patterns in the data, and identify potential outliers. As much as this is a verification step, it also serves to provide a sense of the data and the extent to which the data aligns with the hypothesis. This is particularly true when statistical designs are complex and involve multiple explanatory variables. An appropriate visualization provides context for interpreting the results of the statistical analysis.
 
-P-values: interpretation and problems
+Interrogating the data involves applying the appropriate statistical procedure to the dataset. In the Null Hypothesis Significance Testing (NHST) paradigm, this process includes calculating a statistic from the data, comparing it to a null hypothesis distribution, and measuring the evidence against the null hypothesis. The null hypothesis distribution is a distribution of statistic values that we would expect if the null hypothesis were true, *i.e.* that there is no difference or relationship between the explanatory and/ or response variables. By comparing the observed statistic to the null hypothesis distribution, we can determine the likelihood of observing the observed statistic if the null hypothesis were true. This likelihood is known as the p-value. When the p-value is below a pre-determined threshold, typically 0.05, the result is considered statistically significant. This means that the observed statistic is sufficiently different from the null hypothesis distribution that we can reject the null hypothesis.  
 
-Now let's consider how to approach interpreting the results from a statistical test. As I have now made reference to multiple times, the results of statistical procedure in hypothesis testing will result in a confidence metric. The most standard and widely used of these confidence metrics is the p-value. The p-value provides a probability that the results of our statistical test could be explained by the null hypothesis. When this probability crosses above the threshold of .05, the result is considered statistically significant, otherwise we have a 'null result' (i.e. non-significant). However, this sets up a binary distinction that can be problematic. On the one hand what is one to do if a test returns a p-value of .051 or something 'marginally significant'? According to standard practice these results would not be statistically significant. But it is important to note that a p-value is sensitive to the sample size. A small sample may return a non-significant result, but a larger sample size with the same underlying characteristics may very well return a significant result. On the other hand, if we get a statistically significant result, do we move on --case closed? As I just pointed out the sample size plays a role in finding statistically significant results, but that does not mean that the results are 'important' for even small effects in large samples can return a significant p-value.
+Now let's consider how to approach interpreting the results from a statistical test.  The p-value provides a probability that the results of our statistical test could be explained by the null hypothesis. When this probability crosses above the threshold of .05, the result is considered statistically significant, otherwise we have a 'null result' (i.e. non-significant). 
 
-Type I and Type II error
+However, this sets up a binary distinction that can be problematic. On the one hand, what is one to do if a test returns a p-value of .051 or something 'marginally significant'? According to standard practice these results would not be statistically significant. On the other hand, if we get a statistically significant result, do we move on --case closed? To address both of these issues, it is important to calculate a confidence interval for the test statistic. The confidence interval is the range of values for our test statistic that we would expect the true statistic value to fall within some level of uncertainty. Again, 95% is the most common level of uncertainty. The upper and lower bounds of this range are called the confidence limits for the test statistic. 
 
-It is important to underscore that the purpose of IDA is to draw conclusions from a dataset which are generalizable to the population. These conclusions require that there are rigorous measures to ensure that the results of the analysis do not overgeneralize (suggest there is a relationship when there is not one) and balance that with the fact that we don't want to undergeneralize (miss the fact that there is an relationship in the population, but our analysis was not capable of detecting it). Overgeneralization is known as **Type I error** or false positive and undergeneralization is a **Type II error** or false negative.
+Used in conjunction with p-values, confidence intervals can provide a more nuanced interpretation of the results of a statistical test. For example, if we get a p-value of .051, but the confidence interval is very narrow, we can be more confident that the results are reliable. Conversely, if we get a p-value of .049, but the confidence interval is very wide, we can be less confident that the results are reliable. If our confidence interval contains the null value, then even a significant p-value will require a more nuanced interpretation.
 
-Uncertainty measures: effect size and CIs
+It is important to underscore that the purpose of IDA is to draw conclusions from a dataset which are generalizable to the population. These conclusions require that there are rigorous measures to ensure that the results of the analysis do not overgeneralize (suggest there is a relationship when there is not one) and balance that with the fact that we don't want to undergeneralize (miss the fact that there is an relationship in the population, but our analysis was not capable of detecting it).
 
-For these reasons it is important to calculate the size and magnitude of the result to gauge the uncertainty of our result in standardized, sample size-independent way. This is performed by analyzing the **effect size** and reporting a **confidence interval (CI)** for the results. The wider the CI the more uncertainty surrounds our statistical result, and therefore the more likely that our significant p-value could be the result of Type I error. A non-significant p-value and large effect size could be the result of Type II error. In addition to vetting our p-value, the CI and effect size can help determine if a significant result is reliable and 'important'. Together effect size and CIs aid in our ability to realistically interpret confidence metrics in statistical hypothesis testing.
-
-Recap and introduction to the structure of the analysis subsection. 
-
-- Categorical dependent variable
-  - Categorical/ continuous independent variable(s)
-    - Descriptive assessment
-      - 0-1 categorical independent variable: Tables summary statistics (contingency table)
-      - Continuous independent variable(s): Plots and summary statistics (boxplots, histograms, etc.)
-    - Statistical interrogation
-      - Chi-square (dependent and one independent variable)
-      - Logistic regression (dependent and one or more independent variables)
-    - Evaluation of results
-      - p-value
-      - Confidence intervals
-      - Effect size
-- Continuous dependent variable
-  - Continuous/ categorical independent variable(s)
-    - Descriptive assessment
-      - Tables, plots, and summary statistics
-    - Statistical interrogation
-      - Correlation
-      - Linear regression
-    - Evaluation of results
-      - p-value
-      - Confidence intervals
-      - Effect size
-
--->
-
-The type of analysis that is performed depends most heavily on the informational value of the dependent variable. The informational value of the dependent variable is determined by the type of data that is collected. Secondly, the number and informational types of the independent variables (predictor variables) also play a role in determining the type of analysis that is performed. 
-
-- Categorical dependent variable
-    - Descriptive statistics
-        - Frequency
-        - Proportion
-        - Confidence intervals
-    - Inferential statistics
-        - Chi-square
-        - Logistic regression
-- Continuous dependent variable
-    - Descriptive statistics
-        - Mean
-        - Standard deviation
-        - Confidence intervals
-    - Inferential statistics
-        - Correlation
-        - Linear regression
-
-Prerequisites:
-- A testable hypothesis (covering the outcome space, i.e. null and alternative hypotheses).
-- A data set that aligns with the population targeted to generalize to. 
-- A operationalized dependent and independent variable(s) that are tied to the hypothesis. 
-
-<!--- Move the sections above (Approaching analysis)/ Keep the sections below -->
-
-- Identify the informational value of the dependent and independent variable(s).
-- Assess the distribution of the independent and dependent variables with the appropriate descriptive statistics and visualizations.
-- Choose an appropriate statistical test based on the informational value and distribution of the dependent and independent variables.
-- Apply transformations to the data as needed to meet the assumptions of the statistical tests.
-
-- Apply the appropriate statistical test to the data:
-  - Categorical dependent variable
-    - Chi-square (dependent and one independent variable)
-    - Logistic regression (dependent and one or more independent variables)
-  - Continuous dependent variable
-    - Correlation (dependent and one independent variable)
-    - Linear regression (dependent and one or more independent variables)
-- Assess the results of the statistical test (p-value, confidence intervals, effect size)
-
-Review the results of the statistical test and interpret the results in the context of the hypothesis.
 
 ## Analysis {#sec-ida-analysis}
 
 <!-- Goals of this section -->
 
+In this section, we will discuss the practical application of inferential data analysis. The discussion will be divided into two sections based on the type of response variable: categorical and numeric. We will then explore specific designs for univariate, bivariate, and multivariate tests. Throughout this process, we will focus on null hypothesis testing, covering concepts and methods that are relevant to significance testing and the interpretation of results.
 
 <!-- Research questions -->
 
+Two datasets are included in this section to provide a context for the inferential data analysis in both categorical and numeric cases. The `dative` dataset is a subset of the `languageR::dative` dataset [@R-languageR]. It contains over 3k observations describing the realization of the recipient clause in English dative constructions. The `fillers` dataset is drawn from the Switchboard Dialog Act Corpus [@SWDA2008]. This dataset contains ... observations summarizing the use of fillers by speaker in the corpus.
+
 <!-- Approach -->
 
-`infer` package. 
+We will learn and implement null significance testing using a simulation-based method. In contrast to theory-based methods, simulation-based methods tend to be more intuitive, easier to implement, and provide a better conceptual understanding of the statistical designs and analyses. The steps for implementing a simulation-based approach to significance testing are outlined in @tbl-ida-simulation.
 
-| Scenario | Dependent variable | Independent variable(s) | Statistical test |
-|:---------|:-------------------|:------------------------|:-----------------|
-| Univariate | Categorical | None | Difference in proportions |
-| Bivariate | Categorical | Categorical | Difference in proportions |
-| Bivariate | Categorical (3+) | Categorical (3+) | Chi-square |
-| Multivariate | Categorical | Categorical or Numeric (2+) | Logistic regression |
-| Univariate | Numeric | None | Mean |
-| Bivariate | Numeric | Numeric | Correlation |
-| Bivariate | Numeric | Categorical | Difference in means |
-| Multivariate | Numeric | Numeric or Categorical (2+) | Linear regression |
+<!-- Simulation-based approach -->
 
-: Statistical tests for inferential data analysis {#tbl-ida-statistical-tests tbl-colwidths="[10, 30, 30, 20]" .striped}
+| Step | Name | Description |
+|:-----|:-----|:------------|
+| 1 | Specify | Specify the variables of interest and their relationship |
+| 2 | Calculate | Calculate the observed statistic |
+| 3 | Hypothesize | Generate the null hypothesis distribution |
+| 4 | Visualize | Visualize the null hypothesis distribution |
+| 5 | Get p-value | Calculate the p-value |
+| 6 | Get confidence interval | Calculate the confidence interval |
 
-
-<!-- Datasets -->
-
-> For this discussion two datasets will be used as the base to pose various questions to submit for interrogation. It is of note that the questions in the subsequent sections are posited to highlight various descriptive, statistic, and evaluation procedures and do not reflect the standard approach to hypothesis testing which assumes that the null and alternative hypotheses are developed at the outset of the research project.
-
-- `dative` [@R-languageR]
-  - dataset contains 3,263 observations and 15 columns. 
-  - more information `?languageR::dative`
-- `fillers` [@SWDA2008]
-  - dataset contains X observations and X columns.
-
-> The process for each inferential data analysis in this section will include three steps: (1) descriptive assessment, (2) statistical interrogation, and (3) evaluation of the results.
+: Simulation-based approach to significance testing {#tbl-ida-simulation tbl-colwidths="[10, 25, 65]" .striped}
 
 <!-- Setup: packages/ options/ data -->
+
+The `infer` package [@R-infer] provides a tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the `tidyverse` [@R-tidyverse], `infer` provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution, visualize the null hypothesis distribution, calculate the p-value, and calculate the confidence interval.
+
+Let's load the necessary packages and import the datasets we will use in this section, as seen in @exm-ida-setup.
+
+::: {#exm-ida-setup}
+```{r}
+#| label: ida-setup-show
+#| eval: false
+
+# Load packages
+library(infer)      # for statistical inference
+library(skimr)      # for descriptive statistics
+library(janitor)    # for cross-tabulation
+
+# Load datasets
+dative_df <- 
+  read_csv("../data/derived/dative.csv")
+
+fillers_df <-
+  read_csv("../data/derived/fillers.csv")
+```
+
+```{r}
+#| label: ida-setup-run
+#| echo: false
+#| message: false
+
+# Load packages
+library(infer)      # for statistical inference
+library(skimr)      # for descriptive statistics
+library(janitor)    # for cross-tabulation
+
+# Load datasets
+dative_df <- 
+  read_csv("data/dative_ida.csv")
+
+fillers_df <-
+  read_csv("data/swda_fillers_ida.csv")
+```
+:::
 
 ### Categorical {#sec-ida-categorical}
 
@@ -258,9 +217,32 @@ Review the results of the statistical test and interpret the results in the cont
 set up the analysis questions, hypotheses, and datasets 
 -->
 
-In the IDA, I will need to demonstrate various statistical designs and analyses. The `dative_ida` dataset is a subset of the `dative` dataset. 
+Here we demonstrate the application of inferential data analysis (IDA) to categorical response variables. This will include various common statistical designs and analyses. In @tbl-ida-cat-design, we see common design scenarios, the variables involved, and the statistic used in the analysis.
 
-The response variable is the `realization_of_rcp` which has two levels NP and PP. PP refers to when the recipient of a ditranstive verb appears in the canonical position for English dative constructions. The NP is when the recipient appears as an NP . 
+| Scenario | Dependent variable | Independent variable(s) | Statistical test |
+|:---------|:-------------------|:------------------------|:-----------------|
+| Univariate | Categorical | None | Proportion |
+| Bivariate | Categorical | Categorical | Difference in proportions |
+| Bivariate | Categorical (>2 levels) | Categorical (>2 levels) | Chi-square |
+| Multivariate | Categorical | Categorical or Numeric (>1 variables) | Logistic regression |
+
+: Statistical test designs for categorical response variables {#tbl-ida-cat-design tbl-colwidths="[10, 30, 30, 20]" .striped}
+
+We will use the `dative_df` dataset to illustrate each of these designs and analyses. To familiarize ourselves with the dataset, let's consider the data dictionary in @tbl-ida-cat-data-dict.
+
+```{r}
+#| label: tbl-ida-cat-data-dict
+#| tbl-cap: "Data dictionary for the `dative_df` dataset."
+#| echo: false
+#| message: false
+
+# Data dictionary for the `dative_df` dataset
+read_csv("data/dative_ida_dd.csv") |> 
+  kable() |> 
+  kable_styling()
+```
+
+We see that this dataset has four variables, two categorical and two numeric. In our demonstrations we are going to use the `realization_of_rcp` as the response variable, the variable whose variation we are investigating. 
 
 For a bit more context, a dative is the phrase which reflects the entity that takes the recipient role in a ditransitive clause. In English, the recipient (dative) can be realized as either a prepositional phrase (PP) as seen in (1) or as a noun phrase (NP) as seen in (2) below. 
 
@@ -269,101 +251,41 @@ Example utterances:
 1. John gave the book [to Mary ~PP~].
 2. John gave [Mary ~NP~] the book.
 
-Together these two syntactic options are known as the Dative Alternation.
+Together these two syntactic options are known as the Dative Alternation @Bresnan2007.
 
-The predictor variables I have included in this dataset are:
+From the large set of variables in the original dataset, I've selected three explanatory variables to use in our demonstrations. These variables are:
 
 - `modality`: either written or spoken
 - `length_of_rcp`: the length of the recipient clause (in words)
 - `length_of_thm`: the length of the theme clause (in words)
 
-It will allow me to demonstrate the following statistical designs and analyses:
+In preparation for statistical analysis, we need to convert the character variables to factors. Let's do that and preview the dataset, as seen in @exm-ida-cat-setup-factors.
 
-- Univariate analysis
-  - Difference in proportion
-    - `realization_of_rcp` ~ NULL
-- Bivariate analysis
-  - Difference in proportions
-    - `realization_of_rcp` ~ `modality`
-- Multivariate analysis
-  - Logistic regression
-    - `realization_of_rcp` ~ `modality` + `length_ratio`*
-
-\* `length_ratio` is the ratio of the length of the recipient clause to the length of the theme clause.
-
-I will use a simulation-based approach to demonstrate the statistical designs and analyses using the `infer` package. The `infer` package is a tidyverse-friendly framework for statistical inference. The advantage of using simulation-based inference over theory-based inference is that it is more intuitive, easier to implement, and provides a better conceptual understanding of the statistical designs and analyses.
-
-I'll start by loading the `dative_ida` dataset and the libraries and then go through each of the statistical designs and analyses. In @exm-ida-cat-setup, we see the code. 
-
-::: {#exm-ida-cat-setup}
+::: {#exm-ida-cat-setup-factors}
 ```{r}
-#| label: ida-cat-setup-show
-#| eval: false
+#| label: ida-cat-setup-factors
 
-# Load packages
-library(infer)      # for statistical inference
-library(effectsize) # for effect size interpretation
-library(janitor)    # for cross-tabulation
-library(skimr)      # for descriptive statistics
-
-# Load dataset
+# Convert character variables to factors
 dative_df <- 
-  read_csv("../data/derived/dative.csv") |> 
-  # Convert to factors all character variables 
+  dative_df |> 
   mutate(across(where(is.character), factor))
 
 # Preview
-dative_df |> glimpse()
-```
-
-```{r}
-#| label: ida-cat-setup-run
-#| echo: false
-#| message: false
-
-# Load packages
-library(infer)      # for statistical inference
-library(effectsize) # for effect size interpretation
-library(janitor)    # for cross-tabulation
-library(skimr)      # for descriptive statistics
-
-# Load dataset
-dative_df <- 
-  read_csv("data/dative_ida.csv") |> 
-  # Convert to factors all character variables 
-  mutate(across(where(is.character), factor))
-
-# Preview
-dative_df |> glimpse()
+glimpse(dative_df)
 ```
 :::
 
-The data dictionary for this dataset can be seen in @tbl-ida-cat-dictionary.
-
-```{r}
-#| label: tbl-ida-cat-dictionary
-#| tbl-cap: "Data dictionary for the `dative_ida` dataset."
-#| echo: false
-#| message: false
-
-read_csv("data/dative_ida_dd.csv") |> 
-  kable() |> 
-  kable_styling()
-```
-
-- [ ] Add descriptive assessment? `skim()`?
-
-
+We can see that the dataset includes `r nrow(dative_df)` observations. We will take a closer look a the descriptive statistics for the variables as we prepare for each analysis.
 
 #### Univariate analysis {#sec-ida-cat-univariate}
 
-The univariate analysis is the simplest statistical design and analysis. It includes only one variable. The goal is to describe the distribution of the levles of the variable. The `realization_of_rcp` variable has two levels: NP and PP. A potential research question is: 
+The univariate analysis is the simplest statistical design and analysis. It includes only one variable. The goal is to describe the distribution of the levels of the variable. The `realization_of_rcp` variable has two levels: NP and PP. A potential research question is: 
 
 - Is there a difference in the proportion of NP and PP realizations of the recipient clause?
 
-This question can be answered using a difference in proportions test. The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause. The alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause.
+This question can be answered using a difference in proportion test. The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause. The alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause.
 
-Before we get into statistical analysis, it is always a good idea to cross-tabulate or visualize the question, depending on the complexity of the relationship. In @exm-ida-cat-univariate-tbl, we see the code the shows the distribution of the levels of the `realization_of_rcp` variable.
+Before we get into statistical analysis, it is always a good idea to cross-tabulate or visualize the question, depending on the complexity of the relationship. In @exm-ida-cat-univariate-tbl, we see the code the shows the distribution of the levels of the `realization_of_rcp` variable in a cross-table.
 
 ::: {#exm-ida-cat-univariate-tbl}
 ```{r}
@@ -418,9 +340,13 @@ dative_obs
 ```
 :::
 
-Note, that the observed statistic, proportion, is the same as the proportion we calculated in @tbl-ida-cat-univariate. In such a simple example, the summary statistic and the observed statistic are the same. But this simple example shows how choosing the 'success' level of the response variable is important. If we had chosen the 'PP' level as the 'success' level, then the observed statistic would be the proportion of PP realizations of the recipient clause. There is nothing wrong with choosing the 'PP' level as the 'success' level, but it would change the interpretation of the observed statistic.
+Note, that the observed statistic, proportion, is the same as the proportion we calculated in @tbl-ida-cat-univariate. In such a simple example, the summary statistic and the observed statistic are the same. But this simple example shows how choosing the 'success' level of the response variable is important. If we had chosen the 'PP' level as the 'success' level, then the observed statistic would be the proportion of PP realizations of the recipient clause. There is nothing wrong with choosing the 'PP' level as the 'success' level, but it would change the direction of the observed statistic.
 
-Now that we have the observed statistic, our goal will be to determine if the observed statistic is different from what we would expect if the null hypothesis were true. To do this, we need to simulate many samples where the null hypothesis is true. Simulation means that we will randomly sample from the `dative_df` data frame many times. The only addition decision we need to make is how the sampling takes place. Since `realization_of_rcp` is a binomial variable, we need to hypothesize that the null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause. This means that the proportion of NP realizations of the recipient clause is the same as the proportion of PP realizations of the recipient clause. In other words, we are expecting the proportion of NP realizations of the recipient clause to be 0.5. Then we will sample from the `dative_df` data frame many times and calculate the proportion statistic for each sample. The pipline for generating this null hypothesis distribution is seen in @exm-ida-cat-null-hypothesis.
+Now that we have the observed statistic, our goal will be to determine if the observed statistic is different from what we would expect if the null hypothesis were true. To do this, we simulate many samples where the null hypothesis is true. Simulation means that we will randomly sample from the `dative_df` data frame many times. Note that sampling the dataset in this way is much more feasible with a computer than it would be to do so by hand. This is one of the advantages of using a computer for statistical analysis.
+
+The only addition decision we need to make is how the sampling takes place. Since `realization_of_rcp` is a variable with only two levels, the null hypothesis that both levels are equally likely. In other words, in a null hypothesis world, NP and PP we would expect the proportions to roughly be 50/50. 
+
+To formulize this hypothesis with `infer` we use the `hypothesize()` function and set the null hypothesis to "point" and the proportion to 0.5. Then we can `generate()` a number of samples, say 1,000, drawn from our 50/50 world. Finally, the "prop" (proportion) statistic is `calculate()`d for each of the 1,000 samples and returned in a data frame, as seen in @exm-ida-cat-null-hypothesis.
 
 ::: {#exm-ida-cat-null-hypothesis}
 ```{r}
@@ -479,7 +405,7 @@ dative_null |>
 
 Just from a visual inspection, we can see that the observed statistic lies far away from the null distribution, far right of the right tail. This suggests that the observed statistic is not within some level of variation that we would expect if the null hypothesis were true. 
 
-But we need to quantify this. We need to calculate the probability of observing the observed statistic or a more extreme statistic if the null hypothesis were true. This is called the p-value. The p-value is calculated by counting the number of samples in the null hypothesis distribution that are more extreme than expected within some level of uncertainty. 95% is the most common level of uncertainty, which is called the alpha level. The alpha level is the probability of rejecting the null hypothesis when it is true. The alpha level is typically set to 0.05 in the social sciences. This means that if the p-value is less than 0.05, then we reject the null hypothesis. If the p-value is greater than 0.05, then we fail to reject the null hypothesis.
+But we need to quantify this. We need to calculate the probability of observing the observed statistic or a more extreme statistic if the null hypothesis were true. This is called the p-value. The p-value is calculated by counting the number of samples in the null hypothesis distribution that are more extreme than expected within some level of uncertainty. 95% is the most common level of uncertainty, which is called the alpha level. The remain 5% of the distribution is the space where the likelihood that the null hypothesis accounts for the statistic is below This means that if the p-value is less than 0.05, then we reject the null hypothesis. If the p-value is greater than 0.05, then we fail to reject the null hypothesis.
 
 The `shade_p_value()` function from the `infer` package will plot our observed statistic and shade the sample statistics that fall within the alpha level, as seen in @exm-ida-cat-null-hypothesis-obs-pval.
 
@@ -1124,77 +1050,50 @@ While the effects for `modality` and `length_ratio` are statistically significan
 
 ### Numeric {#sec-ida-numeric}
 
-There are two datasets I've created for the task of replicating the @Tottie2011 and @Tottie2014 studies. They found that men use more fillers than women, older speakers use more fillers than younger speakers, and more educated speakers use fewer fillers than less educated speakers.
+We now turn our attention to the analysis scenarios where the response variable is numeric. Just as for categorical variables, we can have univariate, bivariate, and multivariate analysis scenarios. The statistical tests for numeric variables are summarized in @tbl-ida-num-design.
 
-See also @Shriberg1994 for evidence that men use filled pauses more than women. 
+| Scenario | Dependent variable | Independent variable(s) | Statistical test |
+|:---------|:-------------------|:------------------------|:-----------------|
+| Univariate | Numeric | None | Mean |
+| Bivariate | Numeric | Numeric | Correlation |
+| Bivariate | Numeric | Categorical | Difference in means |
+| Multivariate | Numeric | Numeric or Categorical (2+) | Linear regression |
 
-The main dataset is the `swda_fillers_ida.csv` dataset and the second is the `swda_fillers_type_ida.csv` dataset.
+: Statistical test design for numeric variables {#tbl-ida-num-design}
 
-::: {#exm-ida-num-setup}
-```{r}
-#| label: ida-num-setup-show
-#| eval: false
-
-# Load datasets
-# Fillers
-fillers_df <- read_csv("../data/derived/swda_fillers.csv")
-fillers_df |> glimpse()
-
-# Fillers type
-fillers_type_df <- read_csv("../data/derived/swda_fillers_type.csv")
-fillers_type_df |> glimpse()
-```
+The dataset we will use here is `fillers_df`. The data dictionary is found in @tbl-ida-num-data-dict.
 
 ```{r}
-#| label: ida-num-setup-run
-#| message: false
+#| label: tbl-ida-num-data-dict
+#| tbl-cap: "Data dictionary for the `fillers_df` dataset"
 #| echo: false
-
-# Load datasets
-# Fillers
-fillers_df <- read_csv("data/swda_fillers_ida.csv")
-fillers_df |> glimpse()
-
-# Fillers type
-fillers_type_df <- read_csv("data/swda_fillers_type_ida.csv")
-fillers_type_df |> glimpse()
-```
-:::
-
-
-The data dictionary for the `fillers_type_df` includes all the variables in the `fillers_df` dataset, plus the `filler_type` variable, as seen in @tbl-fillers-type-dict.
-
-```{r}
-#| label: tbl-fillers-type-dict
-#| tbl-cap: "Data dictionary for the `fillers_type_df` dataset"
 #| message: false
 
-read_csv("data/swda_fillers_type_ida_dd.csv") |> 
+# [ ] consider removing `speaker_id, total_fillers, and `total_utterances` from the data dictionary?
+
+# Data dictionary for the `fillers_df` dataset
+read_csv("data/swda_fillers_ida_dd.csv") |> 
   kable() |> 
   kable_styling()
 ```
 
-The `fillers_df` has the following variables:
+We see the dataset has [FOUR FIXME] variables. The `fillers_per_100` will be used as our reponse variable and corresponds to the rate of filler usage per speaker, normalized by the number of utterances. The other variables we will consider as explanatory variables are `age`, `sex`, and `education`, providing us a mix of numeric and categorical variables.
 
-- `speaker_id`
-- `age`
-- `sex`
-- `education`
-- `fillers_per_100`
-- `total_fillers`
-- `total_utterances`
+The context for these analysis demonstrations comes from the socio-linguistic literature on the use of filled pauses. Filled pauses have often been associated with a type of disfluency; speech errors that occur during speech production. However, some authors have argued that filled pauses can act as sociolinguistic markers of socio-demographic characterstics of speakers, such as gender, age, and educational level [@Shriberg1994; @Tottie2011].
 
-The `fillers_type_df` has the additional variable:
-
-- `filler_type`
-
-Let's prepare these datasets for analysis by converting the categorical variables to factors, as seen in @exm-ida-num-factors.
+Let's prepare these datasets for analysis by converting the categorical variables to factors and ordering the `education` variable, as seen in @exm-ida-num-factors.
 
 ::: {#exm-ida-num-factors}
 ```{r}
 #| label: ida-num-factors
 
-edu_levels <- c("More Than College", "College", "Less Than College", "Less Than High School", "Unknown")
+# Establish level names and order for the `education` variable
+edu_levels <- 
+  c("More Than College", 
+    "College", 
+    "Less Than College", 
+    "Less Than High School", 
+    "Unknown")
 
 # Convert categorical variables to factors
 fillers_df <- 
@@ -1204,27 +1103,12 @@ fillers_df <-
     education = factor(education, levels = edu_levels, ordered = TRUE)
   )
 
-fillers_type_df <- 
-  fillers_type_df |> 
-  mutate(
-    sex = factor(sex),
-    education = factor(education, levels = edu_levels, ordered = TRUE)
-  )
+# Preview
+glimpse(fillers_df)
 ```
 :::
 
-Let's review the descriptive statistics with the `skim()` function, as seen in @exm-ida-num-skim.
-
-::: {#exm-ida-num-skim}
-```{r}
-#| label: ida-num-skim
-
-fillers_df |> 
-  skim()
-```
-:::
-
-- [ ] summary of the key highlights from the descriptive statistics
+Our `fillers_df` dataset has `r nrow(fillers_df)` observations. Again, we will postpone more descriptive statistics for treatment in the particular scenarios.
 
 #### Univariate analysis
 
@@ -1301,9 +1185,9 @@ fillers_df |>
 ```
 :::
 
-The distribution of `fillers_per_100` is indeed skewed to the right. We might have predicted this given that we are working with ratio based on count data. In any case, the skewing we observe tends to compress the distribution and may make it difficult to see any patterns. To mitigate this, we can log transform the variable. But we will run into a problem if we have any speakers who do not use any fillers at all as these speakers will have a value of 0, as we can see in @fig-ida-num-uni-hist-dens-2. The log of 0 is undefined. So we need to address this. 
+The distribution of `fillers_per_100` is indeed skewed to the right. We might have predicted this given that we are working with ratio based on count data, perhaps not. In any case, the skewing we observe tends to compress the distribution and may make it difficult to see any patterns. To mitigate this, we can log transform the variable. But we will run into a problem if we have any speakers who do not use any fillers at all as these speakers will have a value of zero, as we can see in @fig-ida-num-uni-hist-dens-2. The log of zero is undefined. So we need to address this. 
 
-Eliminating the speakers who do not use any fillers at all is one option. This is quite extreme as we may lose quite a few speakers and it is not clear that removing data in this way will not cause inordinate bias in the results as these speakers may be different in some way from the rest of the speakers. Looking at the speakers with 0 fillers in @exm-ida-num-uni-zero-fillers, we can see that there is some potential for bias.
+Eliminating the speakers who do not use any fillers at all is one option. This is quite extreme as we may lose quite a few speakers and it is not clear that removing data in this way will not cause inordinate bias in the results as these speakers may be different in some way from the rest of the speakers. Looking at the speakers with zero fillers in @exm-ida-num-uni-zero-fillers, we can see that there is some potential for bias.
 
 ::: {#exm-ida-num-uni-zero-fillers}
 ```{r}
@@ -1319,7 +1203,7 @@ Another approach is to add a small value to the `fillers_per_100` variable, for 
 
 Adding values can be done in one of two ways. We can add a small constant value to all speakers, or we can add a small random value to all speakers. The former is easier to implement, but means that we will still have a spike in the distribution at the value of the constant. Since we do not expect that speakers that did not use fillers at all would never do so and that when they do we would not expect them to be at exactly the same rate as other speakers, we can add a small random value to all speakers. 
 
-In R, we can use the `jitter()` function to add a small amount of random noise to the variable. Note, however, this random noise can be positive or negative. When a negative value is added to a 0 value, we are still in trouble. So we need to make sure that none of the jitter produces negative values. We can do this by simply taking the absolute value of the jittered variable with the `abs()` function. Let's see how this works in @exm-ida-num-uni-jitter.
+In R, we can use the `jitter()` function to add a small amount of random noise to the variable. Note, however, this random noise can be positive or negative. When a negative value is added to a zero value, we are still in trouble. So we need to make sure that none of the jitter produces negative values. We can do this by simply taking the absolute value of the jittered variable with the `abs()` function. Let's see how this works in @exm-ida-num-uni-jitter.
 
 ::: {#exm-ida-num-uni-jitter}
 ```{r}
@@ -1391,7 +1275,7 @@ Let's drop some of the variables we no longer need and proceed with the log-tran
 # Drop variables
 fillers_df <- 
   fillers_df |>
-    select(speaker_id, sex, education, age, fillers_per_100_log)
+    select(sex, education, age, fillers_per_100_log)
 ```
 :::
 
@@ -1399,9 +1283,9 @@ fillers_df <-
 
 When considering a numeric reponses variable and another variable, it is key to consider the nature of the other variable. If it is a categorical variable with two levels, then we can compare a statistic between the two groups (mean or median). If it is categorical with more than two levels, the F statistic is used to compare the means. Finally, if it is a numeric variable, then we can use a correlation test to see if there is an association between the two variables.
 
-Let's approach each of these scenarios in turn. 
+Let's approach each of these bivariate scenarios in turn. 
 
-The `datives_df` contains the `sex` variable which is a categorical variable with two levels. According to the literature, filled pauses are used as sociolinguistic markers [@Shriberg1994; @Tottie2011, @Tottie2014]. Sex is one of the variables associated with the rate of filled pauses. The findings suggest that men use fillers at a higher rate than women. Let's test to see if this holds for the SWDA data.
+The `datives_df` contains the `sex` variable which is a categorical variable with two levels. According to the literature, filled pauses are associated with differences between men and women [@Shriberg1994; @Tottie2011, @Tottie2014]. Sex is one of the variables associated with the rate of filled pauses. The findings suggest that men use fillers at a higher rate than women. Let's test to see if this holds for the SWDA data.
 
 Let's first explore the distribution from a descriptive point of view. With a numeric response variable `fillers_per_100_log` and a categorical explanatory variable `sex`, a boxplot is a natural fit. Let's add a density plot with a `sex` overlay in @exm-ida-num-bi-vis.
 
@@ -1432,12 +1316,12 @@ fillers_df |>
 ```
 :::
 
-Looking at the histogram in @fig-ida-num-bi-vis-1, we see that the appears to be an overall higher rate of filler use for men, compared to women. We also can see that the random noise added to 0-rate speakers appear as outliers in the left tail. The density plot in @fig-ida-num-bi-vis-2 confirms this and allows us to see the overlap between the two groups. We see that the density distribution is not as concentrated and is slightly lower than that of men. 
+Looking at the boxplot in @fig-ida-num-bi-vis-1, we see that the appears to be an overall higher rate of filler use for men, compared to women. We also can see that the random noise added to zero-rate speakers appear as outliers in the left tail. The density plot in @fig-ida-num-bi-vis-2 confirms this and allows us to see the overlap between the two groups. We see that the density distribution is not as concentrated and is slightly lower than that of men. 
 
 ::: {.callout}
 **Consider this**
 
-If we focus on the 0-speaker outliers, we see there is also a difference in the distribution. Can this difference be attributed to differences between men and women? Why or why not? 
+If we focus on the zero-rate outliers, we see there is also a difference in the distribution. Can this difference be attributed to differences between men and women? Why or why not? 
 
 Does your answer to this question have an effect on how we interpret the differences between men and women in the main distribution?
 :::
@@ -1704,6 +1588,15 @@ The confidence interval includes 0, which suggests that the observed difference 
 ```{r}
 #| label: ida-num-multi-setup
 #| include: false
+
+# Read in the data
+fillers_type_df <- 
+  read_csv("data/swda_fillers_type_ida.csv") |> 
+  mutate(
+    sex = factor(sex),
+    education = factor(education, levels = edu_levels, ordered = TRUE)
+  )
+
 
 # Set seed for reproducibility
 set.seed(1234)

@@ -16,7 +16,7 @@ Ready for review.
 :::
 
 <!--  
-[ ] Consider project naming conventions: "_main.R" vs. "-main.R", etc. Quarto doesn't work well with the underscore when using the filename environment.
+[ ] Consider project naming conventions: "Makefile" vs. "-main.R", etc. Quarto doesn't work well with the underscore when using the filename environment.
 -->
 
 > The scariest moment is always just before you start.
@@ -98,7 +98,7 @@ data/
 ├── derived/
 └── original/
     └── cedel2/
-       └── cedel2-l1-english-learners.csv
+    └── cedel2-l1-english-learners.csv
 ```
 :::
 
@@ -108,7 +108,7 @@ Now, after downloading the L2 learner and the native speaker data into the appro
 
 As discussed in @sec-ud-data-origin, all acquired data should be accompanied by a data origin file. The majority of this information can typically be identified on the resource's website and/ or the resource's documentation. In the case of the CEDEL2 corpus, the corpus homepage provides most of the information we need. 
 
-Structurally, data documentation files should be stored close to the data they describe. So for our data origin file this means adding it to the *data/original/* directory. Naming the file in a transparent way is also important. I've named the file *cedel2_do.csv* to reflect the name of the corpus, the meaning of the file as data origin with *_do*, and the file extension *.csv* to reflect the file format. CSV files reflect tabular content. It is not required that data origin files are tabular, but it makes it easier to read and display them in literate programming documents. 
+Structurally, data documentation files should be stored close to the data they describe. So for our data origin file this means adding it to the *data/original/* directory. Naming the file in a transparent way is also important. I've named the file *cedel2_do.csv* to reflect the name of the corpus, the meaning of the file as data origin with a suffixed *_do*, and the file extension *.csv* to reflect the file format. CSV files reflect tabular content. It is not required that data origin files are tabular, but it makes it easier to read and display them in literate programming documents.
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
@@ -140,7 +140,7 @@ Project structure for the CEDEL2 corpus data acquisition
 
 ```bash
 project/
-├── code/
+├── process/
 │   ├── 1_acquire_data.qmd
 │   └── ...
 ├── data/
@@ -149,15 +149,12 @@ project/
 │   └── original/
 │       ├── cedel2_do.csv
 │       └── cedel2/
-|           ├── cedel2-l1-english-learners.csv
-|           └── cedel2-native-spanish-speakers.csv
-├── output/
-│   ├── figures/
-│   ├── reports/
-│   ├── results/
-│   └── tables/
-├── README.md
-└── _main.R
+│           ├── cedel2-l1-english-learners.csv
+│           └── cedel2-native-spanish-speakers.csv
+├── reports/
+├── DESCRIPTION
+├── Makefile
+└── README
 ```
 :::
 
@@ -453,7 +450,7 @@ if (!dir_exists(extract_to_dir)) {
 ```
 :::
 
-The code in @exm-ad-swda-if-dir-exists is added to the *1_acquire_data.qmd* file we introduced in @lst-ad-swda-acquire-data-qmd. When this file is run, the SWDA corpus data will be downloaded and extracted to our project directory. If the data already exists, the download will be skipped, just as we wanted.
+The code in @exm-ad-swda-if-dir-exists is added to the *1_acquire_data.qmd* file. When this file is run, the SWDA corpus data will be downloaded and extracted to our project directory. If the data already exists, the download will be skipped, just as we wanted.
 
 Before we move on, we need to make sure to create and add the appropriate information to the data origin file. To make this easier, the `qtalrkit` package includes a function, `create_data_origin()`, to create a data origin file template in CSV format. This function takes the path for the desired file. In the SWDA Corpus case, this might be something like: *../data/original/swda_do.csv*. The function only needs to be run once and does not need to be part of the reproducible workflow. 
 
@@ -479,7 +476,7 @@ Project structure for the SWDA corpus data acquisition
 
 ```bash
 project/
-├── code/
+├── process/
 │   ├── 1_acquire_data.qmd
 │   └── ...
 ├── data/
@@ -504,13 +501,10 @@ project/
 │          ├── sw11utt/
 │          ├── sw12utt/
 │          └── sw13utt/
-├── output/
-│   ├── figures/
-│   ├── reports/
-│   ├── results/
-│   └── tables/
-├── README.md
-└── _main.R
+├── reports/
+├── DESCRIPTION
+├── Makefile
+└── README
 ```
 :::
 
@@ -536,7 +530,7 @@ In addition to popular public APIs, there are also APIs that provide access to r
 
 <!-- TalkBank -->
 
-Let's work with an R package that provides access to the [TalkBank](https://talkbank.org/) database. The TalkBank project {{< fa wrench >}} [CITATION] contains a large collection of spoken language corpora from various contexts: conversation, child language, multilinguals, *etc*. Resource information, web interfaces, and links to download data in various formats can be found by perusing individual resources linked from the main page. However, the `TBDBr` package [@R-TBDBr] provides convenient access to data using R once a data resource is identified.
+Let's work with an R package that provides access to the [TalkBank](https://talkbank.org/) database. The TalkBank project [@Macwhinney2003] contains a large collection of spoken language corpora from various contexts: conversation, child language, multilinguals, *etc*. Resource information, web interfaces, and links to download data in various formats can be found by perusing individual resources linked from the main page. However, the `TBDBr` package [@R-TBDBr] provides convenient access to data using R once a data resource is identified.
 
 <!-- CABNC -->
 
@@ -592,11 +586,11 @@ glimpse(utterances)
 
 <!-- Inspecting data  -->
 
-Inspecting the output from @exm-ad-get-utterances, we see that the data frame contains `r nrow(utterances)` observations and `r ncol(utterances)` variables. 
+Inspecting the output from @exm-ad-get-utterances, we see that the data frame contains `r format(nrow(utterances), big.mark=",")` observations and `r ncol(utterances)` variables. 
 
-The summary provided by `glimpse()` also provides other useful information. First, we see the data type of each variable. Interestingly, the data type for each variable in the data frame is `list`. Being that a list is two-dimensional data type, like a data frame, we have list-type data in each value. This is known as a **nested structure**. We will see, and create, nested structures later, but for now it will suffice to say that we would like to 'unnest' these lists and reveal the list-contained vector types at the data frame level.
+The summary provided by `glimpse()` also provides other useful information. First, we see the data type of each variable. Interestingly, the data type for each variable in the data frame is a list object. Being that a list is two-dimensional data type, like a data frame, we have two-dimensional data inside two-dimensional data. This is known as a **nested structure**. We will see, and create, nested structures later, but for now it will suffice to say that we would like to 'unnest' these lists and reveal the list-contained vector types at the data frame level.
 
-To do this we will pass the `utterances` data frame to the `unnest()` function from the `tidyr` package [@R-tidyr]. `unnest()` takes a data frame and a vector of variable names to unnest, `cols = c()`. To unnest all variables, we will use the `everything()` function from `dplyr` [@R-dplyr] to select all variables. We will use the result to overwrite the `utterances` object with the unnested data frame.
+To do this we will pass the `utterances` data frame to the, appropriately named, `unnest()` function from the `tidyr` package [@R-tidyr]. `unnest()` takes a data frame and a vector of variable names to unnest, `cols = c()`. To unnest all variables, we will use the `everything()` function from `dplyr` [@R-dplyr] to select all variables at once. We will use the result to overwrite the `utterances` object with the unnested data frame.
 
 ::: {#exm-ad-unnest}
 ```{r}
@@ -671,7 +665,7 @@ To write a function, we need to consider the following:
 4. Does the function have optional arguments?
 5. How does the function return the results?
 
-Taking each in turn, the name of the function should be descriptive of what the function does. In this case, we are acquiring and writing data from Talkbank corpora. A possible name is `get_talkbank_data()`. The required arguments of the the `get*()` functions will definitely figure in our function. In addition, we will need to specify the path to the directory to write the data.
+Taking each in turn, the name of the function should be descriptive of what the function does. In this case, we are acquiring and writing data from Talkbank corpora. A possible name is `get_talkbank_data()`. The required arguments of the the `get*()` functions will definitely figure in our function. In addition, we will need to specify the path to the directory to write the data. With these considerations, we can write the function signature in @exm-ad-get-talkbank-data-1.
 
 ::: {#exm-ad-get-talkbank-data-1}
 ```{r}
@@ -810,6 +804,8 @@ source("functions.R")
 ```
 :::
 
+It is common to source functions at the top of the code file as part of the package setup.
+
 Given the utility of this function to my projects and potentially others', I've included the `get_talkbank_data()` function in the `qtalrkit` package. You can view the source code by calling the function without parentheses `()`, or on the `qtalrkit` GitHub repository.
 
 After running the `get_talkbank_data()` function, we can see that the data has been acquired and written to the *data/original/cabnc/* directory.
@@ -850,8 +846,6 @@ At this point you have both a bird’s eye view of the data available on the web
 
 <!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-- [ ] {{< fa wrench >}} update
-
 **What**: [Collecting and documenting data](https://qtalr.github.io/qtalrkit/articles/recipe-5.html)\
 **How**: Read Recipe 5 and participate in the Hypothes.is online social annotation.\
 **Why**: To understand common strategies to collect, organize, and document data using effective, concise, and reproducible code. You will see how control statements, writing custom functions, and leveraging iteration works to these goals. These programming strategies are often useful for acquiring data but, as we will see, they are powerful concepts that can be used throughout a reproducible research project. 
@@ -862,11 +856,7 @@ At this point you have both a bird’s eye view of the data available on the web
 
 <!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-- [ ] {{< fa wrench >}} update
-
-<!-- [ ] update name of lab to something more lively -->
-
-**What**: [Control statements, custom functions, and iteration](https://github.com/qtalr/lab-5)\
+**What**: [Collecting and documenting data](https://github.com/qtalr/lab-5)\
 **How**: Clone, fork, and complete the steps in Lab 5.\
 **Why**: To gain experience working with coding strategies such as control statements, custom functions, and iteration, practice working with direct downloads and API interfaces to acquire data, and implement organizational strategies for organizing data in reproducible fashion.
 :::
@@ -880,11 +870,4 @@ At this point you have both a bird’s eye view of the data available on the web
 
 - ...
 - For many resources, information to describe the data origin is found on the resource's website. Visit the XXX resource and complete the data origin information. 
-:::
-
-::: {.callout}
-**Technical exercises**
-
-- ...
-- ...
 :::

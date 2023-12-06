@@ -46,7 +46,7 @@ Formatting:
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-<!-- [x] change to outcomes -->
+<!-- [x] change to outcomes --> 
 
 - Describe the importance of data curation in text analysis
 - Recognize the different types of data formats
@@ -74,10 +74,9 @@ In this chapter we will now look at the next step in a text analysis project: da
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-<!-- Learn how to use regular expressions to match patterns in text using the `stringr` package. Learn how to manipulate data using the `dplyr` package. -->
-**What**: [Pattern Matching and Manipulate Datasets](https://github.com/qtalr/lessons)\
+**What**: [Pattern Matching and Tidy Datasets](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
-**Why**: To familiarize yourself with the basics of using the pattern matching syntax Regular Expressions and the `dplyr` package to manipulate datasets.
+**Why**: To familiarize yourself with the basics of using the pattern matching syntax Regular Expressions and the `dplyr` package to manipulate data into Tidy datasets.
 :::
 
 ## Unstructured
@@ -103,7 +102,7 @@ Let's assuming we selected this corpus data because we are interested in researc
 ::: {#exm-cd-europarl-file-structure}
 ```bash
 project/
-├── code/
+├── process/
 │   ├── 1-acquire-data.qmd
 │   ├── 2-curate-data.qmd
 │   └── ...
@@ -115,13 +114,10 @@ project/
 │       └── europarl/
 │           ├── europarl-v7.es-en.en
 │           └── europarl-v7.es-en.es
-├── output/
-│   ├── figures/
-│   ├── reports/
-│   ├── results/
-│   └── tables/
-├── README.md
-└── _main.R
+├── reports/
+├── DESCRIPTION
+├── Makefile
+└── README
 ```
 :::
 
@@ -271,8 +267,6 @@ We see that the output from @exm-cd-europarl-readtext-str is a tibble with two c
 
 Note that the `str()` function from base R is similar to `glimpse()`. However, `glimpse()` will attempt to show you as much data as possible. In this case since our column `text` is a very long character vector it will take a long time to render. I've chosen the `str()` function as it will automatically truncate the data.
 :::
-
-<!-- [x] I need to standardize how I refer to packages `readtext` -->
 
 The fact that we only have one row for each file means that all the text in each file is contained in one cell! We want to break these cells up into rows for each line, as they appear in the original data. You may be wondering why the `readtext()` function did not do this for us, after all the original data was already separated into lines. The reason is that the `readtext()` function chose to read the files as plain text, and plain text does not have any structure. The line breaks, however, are still there, they are just represented as a special character, `\n`. Comparing @exm-cd-europarl-text-lines and @exm-cd-europarl-text-lines-raw, we can see that the text is a single long character vector, and that the line breaks are represented as `\n`.
 
@@ -606,6 +600,8 @@ The CABNC datasets are structured in a relational format, which means that the d
 
 Now, let's envision a scenario in which we want to organize a dataset that can be used in a study that aims to investigate the relationship between speaker demographics and utterances. An ideal dataset would contain information about speakers and their utterances. In their original format, the CABNC datasets separate information about utterances and speakers in separate tables, `cabnc_utterances` and `cabnc_participants`, respectively. The idealized dataset, then, will combine the variables from each of these tables into a single dataset.
 
+<!-- [ ] Add idealized dataset? -->
+
 ### Tidy the dataset
 
 With our idealized dataset in mind, let's start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the `read_csv()` function, as seen in @exm-cd-cabnc-read.
@@ -675,6 +671,12 @@ dim(cabnc_tbl)
 
 The result of @exm-cd-cabnc-join should produce a dataset with the same number of observations as the `cabnc_utterances` dataset, seen in @exm-cd-cabnc-glimpse, and a combined number of unique variables from both datasets, that is 23 minus the four common variables, seen in @exm-cd-cabnc-intersect. The output of `dim()` confirms this.
 
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
+Joins are a common operation in data analysis. The `dplyr` package provides a suite of functions for joining datasets. We will explore joins in more detail in @sec-td-merging as part of the transformation step of the text analysis workflow.
+:::
+
 Now we will consider the variables that will be useful for future analysis. Since we are creating a curated dataset, the goal will be to retain as much information as possible from the original datasets. There are cases, however, in which there may be variables that are not informative and thus, will not prove useful for any analysis. These removable variables tend to be of one of two types: variables which show no variation across observations and variables where the information is redundant.
 
 Let's get a high-level summary of the variables in the dataset. We can use the `skim()` function from the `skimr` package [@R-skimr] to get a summary of the variables in the dataset^[Note I've modified the output of `skim()` for display purposes.].
@@ -737,13 +739,6 @@ cabnc_tbl |>
   tibble() |>
   kable() |>
   kable_styling(font_size = 8)
-
-
-# cabnc_skm <- cabnc_tbl |> skim() |> partition()
-# cabnc_skm |> map_vec(kable)
-
-# skim_types <- unique(skim(cabnc_tbl)$skim_type)
-# purrr::walk(skim_types, ~ yank_tbl(cabnc_tbl, .x))
 ```
 :::
 
@@ -1379,7 +1374,7 @@ The final step is to clean up and comment the code added to the *2-curate-datase
 ::: {#exm-cd-enntt-final-directory-structure}
 ```bash
 project/
-├── code/
+├── process/
 │   ├── 1-acquire-data.qmd
 │   ├── 2-curate-data.qmd
 │   └── ...
@@ -1398,13 +1393,10 @@ project/
 │           ├── nonnatives.tok
 │           ├── translations.dat
 │           └── translations.tok
-├── output/
-│   ├── figures/
-│   ├── reports/
-│   ├── results/
-│   └── tables/
-├── README.md
-└── _main.R
+├── reports/
+├── DESCRIPTION
+├── Makefile
+└── README
 ```
 :::
 
@@ -1414,7 +1406,7 @@ In this chapter we looked at the process of structuring data into a dataset. Thi
 
 ## Activities {.unnumbered}
 
-- [ ] {{< fa wrench >}} Add description of outcomes 
+The following activities build on your skills and knowledge to use R to read, inspect, and write data and datasets in R. In these activities you will have an opportunity to learn and apply your skills and knowledge to the task of curating datasets. This is a vital component of data analysis research that uses unstructured and semi-structured data. 
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**
@@ -1425,7 +1417,7 @@ In this chapter we looked at the process of structuring data into a dataset. Thi
 
 **What**: [Organizing and documenting datasets](https://qtalr.github.io/qtalrkit/articles/recipe-6.html)\
 **How**: Read Recipe 6 and participate in the Hypothes.is online social annotation.\
-**Why**: To rehearse methods for deriving tidying datasets to use a the base for further project-specific purposes. We will explore how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to change the dimensions of a dataset to either expand or collapse columns or rows.
+**Why**: To rehearse methods for deriving tidying datasets to use a the base for further project-specific purposes. We will explore how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to organize datasets in rows and columns. We will also explore how to document datasets in a data dictionary.
 :::
 
 ::: {.callout}
@@ -1437,10 +1429,9 @@ In this chapter we looked at the process of structuring data into a dataset. Thi
 
 <!-- [ ] update name of lab to something more lively -->
 
-**What**: [Pattern Matching and Manipulate Datasets](https://github.com/qtalr/lab-6)\
+**What**: [Organizing and documenting datasets](https://github.com/qtalr/lab-6)\
 **How**: Clone, fork, and complete the steps in Lab 6.\
-**Why**: To gain experience working with coding strategies reshaping data using tidyverse functions and regular expressions, to practice reading/ writing data from/ to disk, and to
-implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
+**Why**: To gain experience working with coding strategies to manipulate data using tidyverse functions and regular expressions, to practice reading/ writing data from/ to disk, and to implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
 :::
 
 ## Questions {.unnumbered}
@@ -1451,11 +1442,4 @@ implement organizational strategies for organizing and documenting a dataset in 
 1. ...
 2. ...
 
-:::
-
-::: {.callout}
-{{< fa wrench >}} **Technical questions**
-
-1. ...
-2. ...
 :::

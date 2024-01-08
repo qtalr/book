@@ -26,6 +26,8 @@ Content:
     - Testing on another group (or groups)
 
 - [ ] Make sure to standardize the use of 'variable' and 'feature'.
+- [ ] Update/ simplify the variable names so they are shorter and more consistent.
+- [ ] IMPORTANT: I'm not liking the flow of application. It seems that I should introduce the notion of cross-validation earlier and avoid fitting the training set with `fit()` and then using `predict()`.
 
 Exercises:
 
@@ -64,17 +66,21 @@ Formatting:
 
 In this chapter, I introduce supervised learning as an approach to data analysis, specifically focusing on its applications in text analysis. Supervised learning aims to establish a relationship between a target (or outcome) variable and a set of feature variables derived from text data. By leveraging this relationship, statistical generalizations (models) can be created to accurately predict values of the target variable based on the values of the feature variables. Throughout the chapter, we explore practical tasks and theoretical applications of statistical learning in text analysis. We also cover the standard workflow for building predictive models, testing and evaluating model performance, improving model accuracy, and interpreting and reporting findings.
 
+<!--
+In the realm of text analysis, the ability to predict outcomes and classify data based on textual features is a powerful tool. This chapter delves into the world of supervised machine learning, a method that leverages labeled datasets to train models capable of making predictions or categorizing new, unseen data. Through practical examples and comparison of different algorithms such as linear regression, decision trees, random forests, and support vector machines, readers will gain insights into the process of building, tuning, and evaluating predictive models. With a focus on word frequency features and their role in predicting placement test scores, the chapter underscores the importance of feature engineering and model selection in achieving more accurate and reliable results. Whether you are a seasoned data scientist or a newcomer to machine learning, this chapter provides the foundational knowledge and coding strategies needed to embark on predictive text analytics.
+-->
+
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 <!--
-- [ ] Update lesson name,
+- [x] Update lesson name,
 - [ ] update lesson purpose
 -->
 
-**What**: [Supervised Learning](https://github.com/qtalr/lessons)\
+**What**: [Advanced Visualization](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: ... {{< fa wrench >}}
 :::
@@ -105,13 +111,6 @@ It is important to establish which aim is being taken, as this will influence th
 
 ### Approach {#sec-pda-approach}
 
-<!-- Note:
-This section should cover the following:
-- Workflow: Identify, Initial split, Integrate, Inspect, Interrogate, Interpret, (Iterate)
-  - Add a few words on the common aspects with other research approaches
-  - And point out the differences (use of data, results, interpretation, etc.)
--->
-
 The approach to conducting predictive analysis shares some commonalities with exploratory data analysis (@sec-eda-approach) (as well as inferential analysis @sec-inference), but there are also some key differences. Let's look at the workflow in @tbl-pda-workflow and then discuss these commonalities and differences.
 
 <!-- Workflow -->
@@ -123,8 +122,8 @@ The approach to conducting predictive analysis shares some commonalities with ex
 | 3 |  | Apply variable selection and engineering procedures |
 | 4 | Inspect | Inspect the data to ensure that it is in the correct format and that the training and testing sets are representative of the data |
 | 5 | Interrogate | Train and evaluate the model on the training set, adjusting models or hyperparameters as needed, to produce a final model |
-| 6 | Interpret | Interpret the results of the final model in light of the research question or hypothesis |
-| 7 | (Optional) Iterate | Repeat steps 3-6 to selecting new variables |
+| 6 | (Optional) Iterate | Repeat steps 3-5 to selecting new variables, models, hyperparameters |
+| 7 | Interpret | Interpret the results of the final model in light of the research question or hypothesis |
 
 : Workflow for predictive data analysis {#tbl-pda-workflow tbl-colwidths="[10, 20, 70]" .striped}
 
@@ -205,33 +204,33 @@ We will use data from the CEDEL2 corpus[^2]. We will include a subset of the var
 #| echo: false
 
 # Read in the datasets
-cedel2_learners_df <-
+learners_df <-
   read_csv("data/cedel2_learners.csv") |>   # read in the learners dataset outcome variable |>
   mutate(subcorpus = "Learner") |>
   select(subcorpus, placement_score = placement_test_score_percent, proficiency, text)                  # select variables
 
-cedel2_natives_df <-
+natives_df <-
   read_csv("data/cedel2_natives.csv") |>    # read in the natives dataset
   mutate(placement_score = NA) |>                       # create an outcome variable
   mutate(proficiency = "Native") |>                   # create a proficiency variable
   select(subcorpus, placement_score, proficiency, text)                  # select the text column
 
 # Combine the datasets by row
-cedel2_df <-
+df <-
   bind_rows(                                          # combine the datasets by row
-    cedel2_learners_df,
-    cedel2_natives_df
+    learners_df,
+    natives_df
   ) |>
   mutate(doc_id = row_number()) |>                    # create a document id
   select(doc_id, subcorpus, placement_score, proficiency, text)          # select variables
 
 # Write to disk
-cedel2_df |>
+df |>
   write_csv("data/cedel2_df.csv")
 
 # Create data dictionary
 create_data_dictionary(
-  data = cedel2_df,
+  data = df,
   file_path = "data/cedel2_df_dd.csv",
   model = "gpt-3.5-turbo",
   grouping = "subcorpus"
@@ -253,7 +252,7 @@ read_csv("data/cedel2_df_dd.csv") |>
 
 We will be using the `tidymodels` framework in R to perform this analysis. `tidymodels` is a metapackage, much like `tidyverse`, that provides a consistent interface for modeling and machine learning. Some key packages unique to `tidymodels` are `recipes`, `parsnip`, `workflows`, and `tune`. `recipes` includes functions for preprocessing and engineering features. `parsnip` provides a consistent interface for specifying modeling algorithms. `worflows` allows us to combine recipes and models into a single pipeline. Finally, `tune` give us the ability to evaluate and tune hyperparameters of models.
 
-Since we are using text data, we will also be using the `textrecipes` package which makes various functions available for preprocessing text and extracting and engineering features.
+Since we are using text data, we will also be using the `textrecipes` package which makes various functions available for preprocessing text including extracting and engineering features.
 
 Let's go ahead and do the setup, loading the necessary packages and data. This is seen in @exm-pda-packages-data.
 
@@ -271,11 +270,11 @@ library(janitor)      # data inspection
 tidymodels_prefer()   # prefer tidymodels functions over other functions with the same name
 
 # Read in the dataset
-cedel2_df <-
+df <-
   read_csv("../data/cedel2/cedel2_df.csv")
 
 # Preview
-cedel2_df |> glimpse()
+df |> glimpse()
 ```
 
 ```{r}
@@ -292,15 +291,15 @@ library(janitor)      # data inspection
 tidymodels_prefer()   # prefer tidymodels functions
 
 # Read in the dataset
-cedel2_df <-
+df <-
   read_csv("data/cedel2_df.csv")
 
 # Preview
-cedel2_df |> glimpse()
+df |> glimpse()
 ```
 :::
 
-The results from @exm-pda-packages-data show that we have five variables and `r nrow(cedel2_df)` observations. The primary variables for the classification task are the `subcorpus` variable and the `text` variable. The `placement_score` variable is the outcome variable for the regression task.
+The results from @exm-pda-packages-data show that we have five variables and `r nrow(df)` observations. The primary variables for the classification task are the `subcorpus` variable and the `text` variable. The `placement_score` variable is the outcome variable for the regression task.
 
 <!-- After we have a baseline model, we will compare it to the null model to see if our model is better than the null model. Depending on the results, we will either move on to a more complex model or we will stop here. A more complex model may include changing the features, using a different model, or tuning the hyperparameters of the model. We will then evaluate the final model on the testing data to see how well it generalizes to new data. We will also analyze the predictions, errors, and feature importance of the final model. -->
 
@@ -310,7 +309,7 @@ The results from @exm-pda-packages-data show that we have five variables and `r 
 
 <!-- [ ] include a rationale? citations? -->
 
-The goal of this analysis is to classify texts as either native or learner based on the writing samples. This is a binary classification problem. We will approach this problem from an exploratory perspective, and therefore our aim is to derive features from the text that best distinguish between the two classes.
+The goal of this analysis is to classify texts as either native or learner based on the writing samples. This is a binary classification problem. We will approach this problem from an exploratory perspective, and therefore our aim is to identify features from the text that best distinguish between the two classes.
 
 Let's modify the data frame to include only the variables we need for this analysis. In the process, we will rename the `subcorpus` variable to `outcome` to reflect that it is the outcome variable and convert it to a factor vector to meet requirements of the modeling functions we will use in our analysis. This is seen in @exm-pda-class-data.
 
@@ -319,13 +318,13 @@ Let's modify the data frame to include only the variables we need for this analy
 #| label: pda-class-data
 
 # Select variables and factor outcome
-cedel2_cls_df <-
-  cedel2_df |>
+cls_df <-
+  df |>
   select(outcome = subcorpus, proficiency, text) |>
   mutate(outcome = factor(outcome))
 
 # Preview
-cedel2_cls_df |> glimpse()
+cls_df |> glimpse()
 ```
 :::
 
@@ -336,7 +335,7 @@ To view the distribution of the outcome variable between the two levels we can u
 #| label: pda-class-corpus-tabyl
 
 # View the distribution of the outcome variable
-cedel2_cls_df |>
+cls_df |>
   tabyl(outcome) |>
   adorn_pct_formatting(digits = 1)
 ```
@@ -348,9 +347,7 @@ So a little less than two-thirds of the texts are from learners. It is important
 
 So in step 1 of our workflow (from @tbl-pda-workflow), we need to identify the features that we will use to classify the texts. There may be many features that we could use. These could be features derived from raw text (*e.g.* characters, words, n-grams, *etc.*), feature vectors (*e.g.* word embeddings), or meta-linguistic features (*e.g.* part-of-speech tags, syntactic parses, or semantic features) that have been derived from these through manual or automatic annotation.
 
-<!-- [ ] explain bag-of-words approach -->
-
-Let's start simple and use a bag-of-words approach to classify texts where words are the features. This is a simple approach that is often used as a baseline for more complex models. If it doesn't work well, we can try something else.
+Let's start simple and use words as the predictor features. This is a simple approach that is often used as a baseline for more complex models. If it doesn't work well, we can try something else.
 
 This provides us the linguistic unit we will use but we still need to decide how to represent these words. Do we use raw token counts? Do we use normalized frequencies? Do we use some type of weighting scheme? These are questions that we need to consider as we embark on this analysis. Since we are exploring we can use trial-and-error or consider the implications of each approach and choose the one that best fits our research question --or both.
 
@@ -358,7 +355,7 @@ As a first pass, let's use raw token counts with our word features.
 
 <!-- Step 2: Initial split -->
 
-With our features identified, we can move on to step 2 of our workflow and split the data into training and testing sets. We make the splits to our data at this point to draw a line in the sand between the data we will use to train the model and the data we will use to test the model. A typical approach in supervised machine learning is to allocate around 75-80% of the data to the training set and the remaining 20-25% to the testing set, depending on the number of observations. We have `r nrow(cedel2_cls_df)` observations in our data set, so we can allocate 80% of the data to the training set and 20% of the data to the testing set.
+With our features identified, we can move on to step 2 of our workflow and split the data into training and testing sets. We make the splits to our data at this point to draw a line in the sand between the data we will use to train the model and the data we will use to test the model. A typical approach in supervised machine learning is to allocate around 75-80% of the data to the training set and the remaining 20-25% to the testing set, depending on the number of observations. We have `r nrow(cls_df)` observations in our data set, so we can allocate 80% of the data to the training set and 20% of the data to the testing set.
 
 In @exm-pda-class-split, we will use the `initial_split()` function from the `rsample` package to split the data into training and testing sets. The `initial_split()` function takes a data frame and a proportion and returns a `split` object which contains the training and testing sets. We will use the `strata` argument to stratify the data by the `outcome` variable. This will ensure that the training and testing sets have the same proportion of native and learner texts.
 
@@ -366,19 +363,22 @@ In @exm-pda-class-split, we will use the `initial_split()` function from the `rs
 ```{r}
 #| label: pda-class-split
 
+# Set seed for reproducibility
+set.seed(123)
+
 # Split the data into training and testing sets
-cedel2_cls_split <-
+cls_split <-
   initial_split(
-    data = cedel2_cls_df,
+    data = cls_df,
     prop = 0.8,
     strata = outcome
-    )
+  )
 
 # Create training set
-cedel2_cls_train <- training(cedel2_cls_split)  # 80% of data
+cls_train <- training(cls_split)  # 80% of data
 
 # Create testing set
-cedel2_cls_test <- testing(cedel2_cls_split)    # 20% of data
+cls_test <- testing(cls_split)    # 20% of data
 ```
 :::
 
@@ -389,12 +389,12 @@ A confirmation of the distribution of the data across the training and testing s
 #| label: pda-class-split-tabyl
 
 # View the distribution of the outcome variables
-cedel2_cls_train |>
+cls_train |>
   tabyl(outcome) |>
   adorn_totals("row") |>
   adorn_pct_formatting(digits = 1)
 
-cedel2_cls_test |>
+cls_test |>
   tabyl(outcome) |>
   adorn_totals("row") |>
   adorn_pct_formatting(digits = 1)
@@ -405,9 +405,11 @@ We can see that the split was successful. The training and testing sets have ver
 
 <!-- Step 3: Integrate: plan to select and engineer features -->
 
-We are now ready to create a 'recipe', step 3 in our analysis. A recipe is a set of instructions or blueprint which specify the outcome variable and the feature variable and determines how to preprocess and engineer the feature variables.
+<!-- [ ] change the 'feature variable' to 'predictor variable' to be in line with the recipes nomenclature  -->
 
-We will use the `recipe()` function from the `recipes` package to create the recipe. The `recipe()` function minimally takes a formula and a data frame and returns a `recipe` object. The formula specifies the outcome variable ($y$) and the feature variable(s) ($x_1 .. x_n$). For example `y ~ x` can be read as "y as a function of x". In our particular case, we will use the formula `outcome ~ text` to specify that the outcome variable is the `outcome` variable and the feature variable is the `text` variable. The code is seen in @exm-pda-class-recipe.
+We are now ready to create a 'recipe', step 3 in our analysis. A recipe is a set of instructions or blueprint which specify the outcome variable and the predictor variable and determines how to preprocess and engineer the feature variables.
+
+We will use the `recipe()` function from the `recipes` package to create the recipe. The `recipe()` function minimally takes a formula and a data frame and returns a `recipe` object. The formula specifies the outcome variable ($y$) and the predictor variable(s) ($x_1 .. x_n$). For example `y ~ x` can be read as "y as a function of x". In our particular case, we will use the formula `outcome ~ text` to specify that the outcome variable is the `outcome` variable and the predictor variable is the `text` variable. The code is seen in @exm-pda-class-recipe.
 
 ::: {#exm-pda-class-recipe}
 ```{r}
@@ -415,14 +417,14 @@ We will use the `recipe()` function from the `recipes` package to create the rec
 #| results: asis
 
 # Create a recipe
-cedel2_cls_rec <-
+base_rec <-
   recipe(
-    outcome ~ text,
-    data = cedel2_cls_train
+    formula = outcome ~ text,
+    data = cls_train
     )
 
 # Preview
-cedel2_cls_rec
+base_rec
 ```
 :::
 
@@ -440,19 +442,19 @@ These step functions are great when we have selected the variables we want to us
 
 [^1]: Note that functions for meta-features require more sophisticated text analysis software to be installed on the computing environment (e.g. `spacyr` for `step_lemma()`, `step_pos()`, *etc.*). See the `textrecipes` package documentation for more information.
 
-So let's build on our basic recipe `cedel2_cls_rec` by adding steps relevant to our task. To extract our features, we will use the `step_tokenize()` function to tokenize the text into words. The default behavior of the `step_tokenize()` function is to tokenize the text into words, but other token units can be derived and various options can be added to the function call (as the `tokenizers` package is used under the hood). Adding the `step_tokenize()` function to our recipe is seen in @exm-pda-class-recipe-tokenize.
+So let's build on our basic recipe `cls_rec` by adding steps relevant to our task. To extract our features, we will use the `step_tokenize()` function to tokenize the text into words. The default behavior of the `step_tokenize()` function is to tokenize the text into words, but other token units can be derived and various options can be added to the function call (as the `tokenizers` package is used under the hood). Adding the `step_tokenize()` function to our recipe is seen in @exm-pda-class-recipe-tokenize.
 
 ::: {#exm-pda-class-recipe-tokenize}
 ```{r}
 #| label: pda-class-recipe-tokenize
 
 # Add step to tokenize the text
-cedel2_cls_rec <-
-  cedel2_cls_rec |>
+cls_rec <-
+  base_rec |>
   step_tokenize(text)
 
 # Preview
-cedel2_cls_rec
+cls_rec
 ```
 :::
 
@@ -467,12 +469,12 @@ We decided in step 1 that we will start with raw token counts, so we will add `s
 #| label: pda-class-recipe-tf
 
 # Add step to tokenize the text
-cedel2_cls_rec <-
-  cedel2_cls_rec |>
+cls_rec <-
+  cls_rec |>
   step_tf(text)
 
 # Preview
-cedel2_cls_rec
+cls_rec
 ```
 :::
 
@@ -480,42 +482,36 @@ cedel2_cls_rec
 
 To make sure things are in order and that the recipe performs as expected, we can use the functions `prep()` and `bake()` to inspect the recipe. The `prep()` function takes a recipe object and a data frame and returns a `prep` object. The `prep` object contains the recipe and the data frame with the feature variables engineered according to the recipe. The `bake()` function takes a `prep` object and an optional new dataset to apply the recipe to. If we only want to see the application to the training set, we can use the `new_data = NULL` argument.
 
-In @exm-pda-class-recipe-prep, we use the `prep()` function to create a `prep` object and then use the `bake()` function to create a data frame with the feature variables. We can then inspect the data frame to see if the recipe performed as expected.
+In @exm-pda-class-recipe-prep, we use the `prep()` and `bake()` functions to create a data frame with the feature variables. We can then inspect the data frame to see if the recipe performed as expected.
 
 ::: {#exm-pda-class-recipe-prep}
 ```{r}
 #| label: pda-class-recipe-prep
 
-# Create a prep object
-cedel2_cls_prep <-
-  prep(
-    cedel2_cls_rec,
-    training = cedel2_cls_train
-    )
-
-# Create a data frame with the feature variables
-cedel2_cls_bake <-
-  bake(
-    cedel2_cls_prep,
-    new_data = NULL
-    )
+# Prep and bake
+cls_bake <-
+  cls_rec |>
+  prep() |> # create a prep object
+  bake(new_data = NULL) # apply to training set
 
 # Preview
-cedel2_cls_bake |> dim()
+cls_bake |> dim()
 
-cedel2_cls_bake[
+cls_bake[
   c(1000:1001, 2000:2001),     # selected rows
   c(1, 1000:1001, 20000:20001) # selected columns
   ]
 ```
 :::
 
-The resulting engineered features data frame has `r nrow(cedel2_cls_bake)` observations and `r ncol(cedel2_cls_bake)` variables. The first variable is the outcome variable and the remaining variables are the engineered features. We can see that the recipe performed as expected and that the feature variables are the token counts for each word in the text.
+The resulting engineered features data frame has `r nrow(cls_bake)` observations and `r ncol(cls_bake)` variables. The first variable is the outcome variable and the remaining variables are the engineered features. We can see that the recipe performed as expected and that the feature variables are the token counts for each word in the text.
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
-When applying tokenization and feature engineering steps to text data the result is often contained in a matrix object. In the the `recipes` package a data frame with a matrix-like structure is returned.
+When applying tokenization and feature engineering steps to text data the result is often contained in a matrix object. Using the `recipes` package a data frame with a matrix-like structure is returned.
+
+Furthermore, the features are prefixed with the variable name and transformation step labels. In @exm-pda-class-recipe-prep we applied term frequency to the `text` variable. Therefore we see that our features are prefixed with `tf_text_`.
 :::
 
 But we should pause. We have a lot of features! One for every single word in the entire corpus. This is an unweildy number of features for a model and it is likely that many of these features are not useful for our classification task. Furthermore, the more features we have, the more chance these features capture the nuances of these particular writing samples, thus, we are the more likely we are to overfit the model. All in all, we need to reduce the number of features.
@@ -529,32 +525,22 @@ So just with these two considerations, we can see that we can filter out many in
 #| label: pda-class-recipe-tokenfilter
 
 # Rebuild recipe with tokenfilter step
-cedel2_cls_rec <-
-  recipe(
-    outcome ~ text,
-    data = cedel2_cls_train
-    ) |>
+cls_rec <-
+  base_rec |>
   step_tokenize(text) |>
   step_tokenfilter(text, max_tokens = 1000) |>
   step_tf(text)
 
 # Prep and bake
-cedel2_cls_prep <-
-  prep(
-    cedel2_cls_rec,
-    training = cedel2_cls_train
-    )
-
-cedel2_cls_bake <-
-  bake(
-    cedel2_cls_prep,
-    new_data = NULL
-    )
+cls_bake <-
+  cls_rec |>
+  prep() |>
+  bake(new_data = NULL)
 
 # Preview
-cedel2_cls_bake |> dim()
+cls_bake |> dim()
 
-cedel2_cls_bake[1:5, 1:10]
+cls_bake[1:5, 1:10]
 ```
 :::
 
@@ -573,11 +559,11 @@ There is one last step we should add to our recipe which concerns the skewed nat
 #| label: pda-class-recipe-log
 
 # Add log step to recipe
-cedel2_cls_rec <-
-  cedel2_cls_rec |>
+cls_rec <-
+  cls_rec |>
   step_log(all_predictors(), offset = 1) # add 1 to avoid log(0)
 
-cedel2_cls_rec
+cls_rec
 ```
 :::
 
@@ -600,17 +586,6 @@ There are many classification algorithms to choose from with their own strengths
 
 : Classification algorithms {#tbl-pda-class-algorithms .striped}
 
-
-<!--
-[ ] Model descriptions:
-
-Logistic regression is a supervised machine learning method for classification. It is a parametric method, which means that it makes assumptions about the underlying distribution of the data. It is an iterative method, which means that it uses an iterative algorithm to find the optimal parameters. To avoid overfitting it uses regularization such as ridge regression or lasso regression. These regularization methods penalize the model for having too many parameters. However, how does one know what the optimal number of parameters is? This is where cross-validation comes in.
-
-Naive Bayes is a supervised machine learning method for classification. It is a parametric method, which means that it makes assumptions about the underlying distribution of the data. It is a probabilistic method, which means that it uses Bayes' theorem to calculate the probability of a class given the predictor variables. It is a generative method, which means that it learns the joint probability distribution of the predictor variables and the outcome variable. It is a simple method, which means that it makes the assumption that the predictor variables are independent of each other. This assumption is called the naive assumption. Now this assumption does not theoretically hold for language data as words are not independent of each other. However, in practice, Naive Bayes' models still perform well on many text classification tasks.
-
--->
-
-
 <!-- Models: simple to complex  -->
 
 In the process of selecting an algorithm, simple, computationally efficient, and interpretable models are preferred over complex, computationally expensive, and uninterpretable models, all things being equal. Only if the performance of the simple model is not good enough should we move on to a more complex model.
@@ -622,39 +597,24 @@ With this end mind, we will start with a simple logistic regression model to see
 #| label: pda-class-model-spec
 
 # Create a model specification
-cedel2_cls_spec <-
+cls_spec <-
   logistic_reg() |>
   set_engine("glm") |>
   set_mode("classification")
 
 # Preview
-cedel2_cls_spec
+cls_spec
 ```
 :::
 
-In the `parsnip` package, model specifications are separate from model fitting. This allows us to specify the model once and then fit the model with different data sets. Furthermore, different algorithms will have different hyperparameters that can be tuned. The code in @exm-pda-class-model-spec uses the default hyperparameters for the logistic regression model.
+In the `parsnip` package, model specifications are separate from model fitting. This allows us to specify the model once and then fit the model with different datasets. Furthermore, different algorithms will have different hyperparameters that can be tuned. The code in @exm-pda-class-model-spec uses the default hyperparameters for the logistic regression model.
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
-You can retrieve the list of potential engines for a given model specification with the `show_engines()` function. For example,
+The `parsnip` package provides a consistent interface to many different models, `r nrow(parsnip::model_db)` at the time of writing. You can peruse the list of models by running `parsnip::model_db`.
 
-```r
-show_engines(logistic_reg())
-```
-
-```
-# A tibble: 7 × 2
-  engine    mode
-  <chr>     <chr>
-1 glm       classification
-2 glmnet    classification
-3 LiblineaR classification
-4 spark     classification
-5 keras     classification
-6 stan      classification
-7 brulee    classification
-```
+You can also retrieve the list of potential engines for a given model specification with the `show_engines()` function. For example, `show_engines("logistic_reg")` will return a tibble with the engines available for the logistic regression model specification.
 :::
 
 Now we will combine our recipe and model specification into a workflow object. The workflow object will allow us to train and evaluate the model on the training set. We will use the `workflow()` function from the `workflows` package to combine the recipe and model specification into a workflow object. The code is seen in @exm-pda-class-workflow.
@@ -664,27 +624,29 @@ Now we will combine our recipe and model specification into a workflow object. T
 #| label: pda-class-workflow
 
 # Create a workflow
-cedel2_cls_wf <-
+cls_wf <-
   workflow() |>
-  add_recipe(cedel2_cls_rec) |>
-  add_model(cedel2_cls_spec)
+  add_recipe(cls_rec) |>
+  add_model(cls_spec)
 
 # Preview
-cedel2_cls_wf
+cls_wf
 ```
 :::
 
-The worflow contains all the preprocessing and the model-specific parameters we've selected. A workflow object at this stage in the analysis is not trained. It is a blueprint for a model. We can use the `fit()` function to apply the workflow to the training data to train the model and update our workflow object with the trained model. The `fit()` function takes a workflow and a data frame and returns an updated workflow object. The code is seen in @exm-pda-class-workflow-fit.
+The worflow contains all the preprocessing and the model-specific parameters we've selected. A workflow object at this stage in the analysis is not trained. It is a blueprint for a model. We can use the `fit()` function to apply the workflow to the training data to train the model and update our workflow object with the trained model. The `fit()` function takes a workflow and a data frame and returns an updated workflow object which is trained. The code is seen in @exm-pda-class-workflow-fit.
+
+<!-- [ ] should I jump straight to 'fit()'? Maybe stress the importance of cross-validation from the get go? -->
 
 ::: {#exm-pda-class-workflow-fit}
 ```{r}
 #| label: pda-class-workflow-fit
 
 # Fit the workflow
-cedel2_cls_wf_fit <-
+cls_wf_fit <-
   fit(
-    cedel2_cls_wf,
-    data = cedel2_cls_train
+    cls_wf,
+    data = cls_train
     )
 ```
 :::
@@ -707,7 +669,9 @@ The upshot is that this model specification and/ or the feature engineering need
 
 It turns out that a regularized logistic regression model often addresses the issues this model is experiencing. We will use the `glmnet` engine to fit a regularized logistic regression model. It is a more complex complex approach, but it can often mitigate the issues of collinearity and overfitting by penalizing features that are highly correlated and by shrinking the coefficients of features that are not useful for predicting the outcome.
 
-We will build a new model specification using the `logistic_reg()` function and the `glmnet` engine. This time we will use hyperparameters in our `logistic_reg()` call to specify the penality we want to use and the strength of the penality. The penalty we will use is the lasso (L1). We now need to decide what value to use for the strength of the penalty. We either experiment with different values one by one or we can implement a range of values in tandem and then select the best value. We will use the latter approach.
+We will build a new model specification using the `logistic_reg()` function and the `glmnet` engine. This time we will use hyperparameters in our `logistic_reg()` call to specify the penality we want to use and the strength of the penality. The penalty we will use is the LASSO (L1)[^lasso]. We now need to decide what value to use for the strength of the penalty, 0 to 1, where 0 indicates no penalty and 1 indicates a maximum penalty. We either experiment with different values one by one or we can implement a range of values in tandem and then select the best value. We will use the latter approach.
+
+[^lasso]: The LASSO (least absolute shrinkage and selection operator) is a type of regularization that penalizes the absolute value of the coefficients. In essence, it smooths the coefficients by shrinking them towards zero to avoid coefficients picking up on particularities of the training data that will not generalize to new data.
 
 The `tune` package provides a number of functions for selecting, or 'tuning', hyperparameters. The first is the `tune()` function which we add as the argument of the hyperparameter we want to tune in the model specification, as seen in @exm-pda-class-model-spec-tune.
 
@@ -716,16 +680,16 @@ The `tune` package provides a number of functions for selecting, or 'tuning', hy
 #| label: pda-class-model-spec-tune
 
 # Create a model specification for tuning
-cedel2_cls_spec_tune <-
+cls_spec_tune <-
   logistic_reg(penalty = tune(), mixture = 1) |>
   set_engine("glmnet") |>
   set_mode("classification")
 
 # Create a workflow
-cedel2_cls_wf_tune <-
+cls_wf_tune <-
   workflow() |>
-  add_recipe(cedel2_cls_rec) |>
-  add_model(cedel2_cls_spec_tune)
+  add_recipe(cls_rec) |>
+  add_model(cls_spec_tune)
 ```
 :::
 
@@ -744,22 +708,20 @@ See the documentation for the `parsnip::logistic_reg()` function for more inform
 #| label: pda-class-model-spec-tune-grid-values
 
 # Create a grid of values for the penalty hyperparameter
-cedel2_cls_grid <-
+cls_grid <-
   grid_regular(
     penalty(),
     levels = 10
     )
 
 # Preview
-cedel2_cls_grid
+cls_grid
 ```
 :::
 
 The 10 values chosen to be in the grid range from nearly zero to 1, where 0 indicates no penalty and 1 indicates a strong penalty.
 
 Now to perform the tuning and arrive at an optimal value for `penalty` we need to create a tuning workflow. We do this by calling the `tune_grid()` function using our tuning model specification workflow, a resampling object, and our hyperparameter grid and returns a `tune_grid` object.
-
-<!-- [ ] explain cross-fold validation better -->
 
 Now, a resampling object is not something we've seen yet. Resampling is a strategy that allows us to generate multiple training and testing sets from a single data set --in this case the training data we split at the outset. Each variation of the training and testing sets is called a fold. Which is why this type of resampling is called k-fold cross-validation. The `vfold_cv()` function from the `rsample` package takes a data frame and a number of folds and returns a `vfold_cv` object. We will use 10 folds and include the model specification and the hyperparameter grid in the `tune_grid()` function call. The code is seen in @exm-pda-class-model-spec-tune-grid-cv.
 
@@ -771,26 +733,26 @@ Now, a resampling object is not something we've seen yet. Resampling is a strate
 set.seed(123)
 
 # Create a resampling object
-cedel2_cls_vfold <-
+cls_vfold <-
   vfold_cv(
-    cedel2_cls_train,
+    cls_train,
     v = 10
     )
 
 # Tune the model
-cedel2_cls_tune <-
+cls_tune <-
   tune_grid(
-    cedel2_cls_wf_tune,
-    resamples = cedel2_cls_vfold,
-    grid = cedel2_cls_grid
+    cls_wf_tune,
+    resamples = cls_vfold,
+    grid = cls_grid
     )
 
 # Preview
-cedel2_cls_tune
+cls_tune
 ```
 :::
 
-The `cedel2_cls_tune` object contains the results of the tuning for each fold. We can see the results of the tuning for each fold by calling the `collect_metrics()` function on the `cedel2_cls_tune` object, as seen in @exm-pda-class-model-spec-tune-grid-collect.
+The `cls_tune` object contains the results of the tuning for each fold. We can see the results of the tuning for each fold by calling the `collect_metrics()` function on the `cls_tune` object, as seen in @exm-pda-class-model-spec-tune-grid-collect.
 
 ::: {#exm-pda-class-model-spec-tune-grid-collect}
 ```{r}
@@ -799,11 +761,11 @@ The `cedel2_cls_tune` object contains the results of the tuning for each fold. W
 #| fig-width: 8
 
 # Collect the results of the tuning
-cedel2_cls_tune_metrics <-
-  collect_metrics(cedel2_cls_tune)
+cls_tune_metrics <-
+  collect_metrics(cls_tune)
 
 # Visualize metrics
-cedel2_cls_tune |> autoplot()
+cls_tune |> autoplot()
 ```
 :::
 
@@ -816,7 +778,7 @@ In the plot of the metrics, we can see that the many of the penalty values perfo
 #| label: pda-class-model-spec-tune-grid-collect-best
 
 # Show the best performing hyperparameter value
-cedel2_cls_tune |>
+cls_tune |>
   show_best(metric = "roc_auc")
 ```
 :::
@@ -828,26 +790,26 @@ We can make this selection programmatically by using the `select_best()` functio
 #| label: pda-class-model-spec-tune-grid-collect-select
 
 # Select the best performing hyperparameter value
-cedel2_cls_best <-
-  select_best(cedel2_cls_tune, metric = "roc_auc")
+cls_best <-
+  select_best(cls_tune, metric = "roc_auc")
 
 # Preview
-cedel2_cls_best
+cls_best
 ```
 :::
 
-All of that to tune a hyperparameter! Now we can update the model specification and workflow with the best performing hyperparameter value using the previous `cedel2_cls_wf_tune` workflow and the `finalize_workflow()` function. The `finalize_workflow()` function takes a workflow and the selected parameters and returns an updated `workflow` object, as seen in @exm-pda-class-tune-hyperparameters-update-workflow.
+All of that to tune a hyperparameter! Now we can update the model specification and workflow with the best performing hyperparameter value using the previous `cls_wf_tune` workflow and the `finalize_workflow()` function. The `finalize_workflow()` function takes a workflow and the selected parameters and returns an updated `workflow` object, as seen in @exm-pda-class-tune-hyperparameters-update-workflow.
 
 ::: {#exm-pda-class-tune-hyperparameters-update-workflow}
 ```{r}
 #| label: pda-class-tune-hyperparameters-update-workflow
 
 # Update model specification
-cedel2_cls_wf_lasso <-
-  cedel2_cls_wf_tune |>
-  finalize_workflow(cedel2_cls_best)
+cls_wf_lasso <-
+  cls_wf_tune |>
+  finalize_workflow(cls_best)
 
-cedel2_cls_wf_lasso
+cls_wf_lasso
 ```
 :::
 
@@ -862,10 +824,10 @@ We again fit the workflow to the training set, as seen in @exm-pda-class-tune-hy
 #| label: pda-class-tune-hyperparameters-fit
 
 # Fit the workflow
-cedel2_cls_wf_lasso_fit <-
+cls_wf_lasso_fit <-
   fit(
-    cedel2_cls_wf_lasso,
-    data = cedel2_cls_train
+    cls_wf_lasso,
+    data = cls_train
     )
 ```
 :::
@@ -879,14 +841,14 @@ Let's evaluate the performance of the model on the training data. The `predict()
 #| label: pda-class-tune-hyperparameters-evaluate
 
 # Evaluate workflow
-cedel2_cls_lasso_fit_preds <-
+cls_lasso_fit_preds <-
   bind_cols(
-    cedel2_cls_train,
-    predict(cedel2_cls_wf_lasso_fit, cedel2_cls_train)
+    cls_train,
+    predict(cls_wf_lasso_fit, cls_train)
   )
 
 # Calculate accuracy
-cedel2_cls_lasso_fit_preds |>
+cls_lasso_fit_preds |>
   metrics(truth = outcome, estimate = .pred_class)
 ```
 :::
@@ -898,10 +860,10 @@ Again, no warnings, so we have a functioning model. It also has a high accuracy,
 #| label: pda-class-tune-hyperparameters-evaluate-workflow-cv
 
 # Cross-validate workflow
-cedel2_cls_lasso_cv <-
-  cedel2_cls_wf_lasso |>
+cls_lasso_cv <-
+  cls_wf_lasso |>
   fit_resamples(
-    resamples = cedel2_cls_vfold,
+    resamples = cls_vfold,
     control = control_resamples(save_pred = TRUE)
   )
 ```
@@ -914,7 +876,7 @@ We want to aggregate the metrics across the folds to get a sense of the variabil
 #| label: pda-class-tune-hyperparameters-evaluate-workflow-cv-collect
 
 # Collect metrics
-cedel2_cls_lasso_cv |>
+cls_lasso_cv |>
   collect_metrics()
 ```
 :::
@@ -930,7 +892,7 @@ For classification tasks, a good place to start is to visualize the confusion ma
 #| fig-height: 4
 
 # Plot confusion matrix
-cedel2_cls_lasso_cv |>
+cls_lasso_cv |>
   conf_mat_resampled(tidy = FALSE) |>
   autoplot(type = "heatmap")
 ```
@@ -938,20 +900,9 @@ cedel2_cls_lasso_cv |>
 
 The top left to bottom right diagonal contains the true positives and true negatives. The top right to bottom left diagonal contains the false positives and false negatives. The convention is speak of one class being the positive class and the other class being the negative class. In our case, we will consider the positive class to be the 'learner' class and the negative class to be the 'natives' class.
 
-- [ ] interpretation has changed, with log-transformation
-
 We can see that there are more learners falsely predicted to be natives than the other way around. This may be due to the fact that there are simply more learners than natives in the data set or this could signal that there are some learners that are more similar to natives than other learners. Clearly this can't be the entire explanation as the model is not perfect, even some natives are classified falsely as learners! But may be an interesting avenue for further exploration. Maybe these are learners that are more advanced or have a particular style of writing that is more similar to natives.
 
-<!--
-[ ] Null model?
-
-Building a null model for classification we simply predict the most common class in the training data. In other words, we use central tendency measure for categorical data, the mode.
-
-For regression, the central tendency is estimated by the mean. So a null model for regression is simply the mean of the outcome variable.
--->
-
-
-Another perspective often applied to evaluate a model is the ROC curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. To produce the ROC curve, we pass the resampled fit to the `collect_preditions()` function. We then pass this result to `roc_curve()` function. But we want the results grouped by each fold, so we use `group_by(id)`. Finally, we can pass this to the `autoplot()` function to plot as in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc.
+Another perspective often applied to evaluate a model is the Reciever Operating Characteristic (ROC) curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. To produce the ROC curve, we pass the resampled fit to the `collect_preditions()` function. We then pass this result to `roc_curve()` function. But we want the results grouped by each fold, so we use `group_by(id)`. Finally, we can pass this to the `autoplot()` function to plot as in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc}
 ```{r}
@@ -960,35 +911,51 @@ Another perspective often applied to evaluate a model is the ROC curve. The ROC 
 #| fig-height: 4
 
 # Plot ROC curve
-cedel2_cls_lasso_cv |>
+cls_lasso_cv |>
   collect_predictions() |>
   group_by(id) |>
-  roc_curve(truth = outcome, .pred_Native) |>
-  autoplot()
+  roc_curve(truth = outcome, .pred_Learner) |>
+  autoplot() +
+  labs(
+    y = "True positive rate",
+    x = "False positive rate",
+    color = "Fold"
+  )
 ```
 :::
 
-<!-- [ ] research roc-auc to understand what this plot means -->
+In a ROC curve plot, each line represents a model's performance for varying classification probability thresholds (from near 0 to 1, where 0.5 equal chance). The dotted line represents the null model (*i.e.* random guessing). The further the line is from the dotted line, along the top left to bottom right diagonal, the better the model. Thus, the larger the area under the curve (AUC) implies a more robust model for distinguishing between the two classes.
 
-All signs point to a robust model.
+In @fig-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc, each fold is plotted. We can see that the AUC is quite large for most of the folds which suggests that our model is robust.
 
 <!-- Step 6: Evaluate -->
 
-We are now ready to move on to step 6, evaluating the model on the test set. We will use the `predict()` function to predict the outcome on the test set. The `metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
+We are now ready to move on to step 7, evaluating the model on the test set. We will use the `predict()` function to predict the outcome on the test set. The `metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-test}
 ```{r}
 #| label: pda-class-tune-hyperparameters-evaluate-test
 
+# [ ] update to use `last_fit()`?
+
+cls_final_fit <-
+  last_fit(
+    cls_wf_lasso,
+    split = cls_split
+  )
+
+cls_final_fit |>
+  collect_metrics()
+
 # Evaluate model on test set
-cedel2_cls_lasso_fit_preds_test <-
+cls_lasso_fit_preds_test <-
   bind_cols(
-    cedel2_cls_test,
-    predict(cedel2_cls_wf_lasso_fit, cedel2_cls_test)
+    cls_test,
+    predict(cls_wf_lasso_fit, cls_test)
   )
 
 # Calculate accuracy
-cedel2_cls_lasso_fit_preds_test |>
+cls_lasso_fit_preds_test |>
   metrics(truth = outcome, estimate = .pred_class)
 ```
 :::
@@ -1002,7 +969,12 @@ The accuracy is as good as the training set, even a tad higher. This is a good s
 #| fig-height: 4
 
 # Plot confusion matrix
-cedel2_cls_lasso_fit_preds_test |>
+cls_lasso_fit_preds_test |>
+  conf_mat(truth = outcome, estimate = .pred_class) |>
+  autoplot(type = "heatmap")
+
+cls_final_fit |>
+  collect_predictions() |>
   conf_mat(truth = outcome, estimate = .pred_class) |>
   autoplot(type = "heatmap")
 ```
@@ -1017,12 +989,12 @@ We can inspect the errors on the test set by filtering the data frame to only in
 #| label: pda-class-tune-hyperparameters-evaluate-test-errors
 
 # Inspect errors
-cedel2_cls_lasso_fit_preds_test |>
+cls_lasso_fit_preds_test |>
   filter(outcome != .pred_class) |>
   select(outcome, .pred_class, proficiency, text)
 
 # Inspect learners falsely predicted to be natives
-cedel2_cls_lasso_fit_preds_test |>
+cls_lasso_fit_preds_test |>
   filter(outcome == "Learner", .pred_class == "Native") |>
   select(outcome, .pred_class, proficiency, text) |>
   count(proficiency, sort = TRUE)
@@ -1040,7 +1012,7 @@ We can inspect the estimates for the features in the model to gain some insight 
 #| label: pda-class-tune-hyperparameters-evaluate-test-estimates
 
 # Extract estimates
-cedel2_cls_wf_lasso_fit |>
+cls_wf_lasso_fit |>
   extract_fit_parsnip() |>
   tidy()
 ```
@@ -1056,7 +1028,7 @@ The estimates are in log-odds, so we need to exponentiate them to get the odds. 
 #| label: pda-class-tune-hyperparameters-evaluate-test-estimates-probability
 
 # Calculate probability
-cedel2_cls_wf_lasso_fit |>
+cls_wf_lasso_fit |>
   extract_fit_parsnip() |>
   tidy() |>
   mutate(probability = exp(estimate) / (exp(estimate) + 1))
@@ -1078,7 +1050,7 @@ conflicted::conflicts_prefer(vip::vi)
 
 # Extract important features
 var_importance_df <-
-  cedel2_cls_wf_lasso_fit |>
+  cls_wf_lasso_fit |>
   vi()
 
 # Preview
@@ -1136,13 +1108,13 @@ We will now turn our attention to the second task in this section, text regressi
 #| label: pda-reg-data
 
 # Extract observations and relevant variables
-cedel2_reg <-
-  cedel2_df |>
+reg <-
+  df |>
   filter(proficiency != "Native") |>
   select(outcome = placement_score, proficiency, text)
 
 # Preview
-cedel2_reg |> glimpse()
+reg |> glimpse()
 ```
 :::
 
@@ -1164,20 +1136,20 @@ Let's first move to step 2, initial split. We will use the `initial_split()` fun
 set.seed(123)
 
 # Split data
-cedel2_reg_split <-
-  initial_split(cedel2_reg, prop = 0.8)
+reg_split <-
+  initial_split(reg, prop = 0.8)
 
 # Training set
-cedel2_reg_train <-
-  training(cedel2_reg_split)
+reg_train <-
+  training(reg_split)
 
 # Test set
-cedel2_reg_test <-
-  testing(cedel2_reg_split)
+reg_test <-
+  testing(reg_split)
 ```
 :::
 
-The training set has `r nrow(cedel2_reg_train)` observations and the test set has `r nrow(cedel2_reg_test)` observations.
+The training set has `r nrow(reg_train)` observations and the test set has `r nrow(reg_test)` observations.
 
 <!-- Step 3: Integrate -->
 
@@ -1188,15 +1160,15 @@ Now we can create the recipe to set up the variable relations, select the featur
 #| label: pda-reg-recipe
 
 # Create a recipe
-cedel2_reg_rec <-
-  recipe(outcome ~ text, data = cedel2_reg_train) |>
+reg_rec <-
+  recipe(outcome ~ text, data = reg_train) |>
   step_tokenize(text) |>
   step_tokenfilter(text, max_tokens = 1000) |>
   step_tf(text) |>
   step_log(all_predictors(), offset = 1)
 
 # Preview
-cedel2_reg_rec
+reg_rec
 ```
 :::
 
@@ -1244,44 +1216,44 @@ The `linear_reg()` function, just as the `logistic_reg()` function, provides arg
 #| label: pda-reg-model-spec-tune
 
 # Create model specification
-cedel2_reg_spec_lasso <-
+reg_spec_lasso <-
   linear_reg(penalty = tune(), mixture = 1) |>
   set_engine("glmnet") |>
   set_mode("regression")
 
 # Create workflow
-cedel2_reg_wf_lasso <-
+reg_wf_lasso <-
   workflow() |>
-  add_recipe(cedel2_reg_rec) |>
-  add_model(cedel2_reg_spec_lasso)
+  add_recipe(reg_rec) |>
+  add_model(reg_spec_lasso)
 
 # Create tuning grid
-cedel2_reg_grid <-
+reg_grid <-
   grid_regular(penalty(), levels = 10)
 
 # Set seed for reproducibility
 set.seed(123)
 
 # Create tuning workflow
-cedel2_reg_tune <-
+reg_tune <-
   tune_grid(
-    cedel2_reg_wf_lasso,
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
-    grid = cedel2_reg_grid,
+    reg_wf_lasso,
+    resamples = vfold_cv(reg_train, v = 10),
+    grid = reg_grid,
     control = control_resamples(save_pred = TRUE)
   )
 
 # Select best parameter
 chosen_penalty <-
-  cedel2_reg_tune |>
+  reg_tune |>
   select_best(metric = "rmse")
 
 # Update workflow
-cedel2_reg_final_wf_lasso <-
-  cedel2_reg_wf_lasso |>
+reg_final_wf_lasso <-
+  reg_wf_lasso |>
   finalize_workflow(chosen_penalty)
 
-cedel2_reg_final_wf_lasso
+reg_final_wf_lasso
 ```
 :::
 
@@ -1292,15 +1264,15 @@ Now we fit this model to the training data and evaluate the performance using cr
 #| label: pda-reg-model-spec-tune-fit-evaluate
 
 # Cross-validated workflow
-cedel2_reg_cv_lasso <-
-  cedel2_reg_final_wf_lasso |>
+reg_cv_lasso <-
+  reg_final_wf_lasso |>
   fit_resamples(
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
+    resamples = vfold_cv(reg_train, v = 10),
     control = control_resamples(save_pred = TRUE)
   )
 
 # Collect metrics
-cedel2_reg_cv_lasso |>
+reg_cv_lasso |>
   collect_metrics()
 ```
 :::
@@ -1311,7 +1283,7 @@ cedel2_reg_cv_lasso |>
 
 # Collect metrics
 estimates <-
-  cedel2_reg_cv_lasso |>
+  reg_cv_lasso |>
   collect_metrics() |>
   pull(3)
 ```
@@ -1333,10 +1305,10 @@ null_model <-
 # Cross-validate null model
 null_cv <-
   workflow() |>
-  add_recipe(cedel2_reg_rec) |>
+  add_recipe(reg_rec) |>
   add_model(null_model) |>
   fit_resamples(
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
+    resamples = vfold_cv(reg_train, v = 10),
     metrics = metric_set(rmse)
   )
 
@@ -1344,11 +1316,18 @@ null_cv <-
 null_cv |>
   collect_metrics()
 ```
+
+```{r}
+#| label: pda-reg-metrics-null-text-block-1
+#| echo: false
+
+null_estimate <- null_cv |> collect_metrics() |> pull(3)
+```
 :::
 
-Our the word features perform better than the null model which means that it is picking up on some signal in the data.
+Our regression model performs better than the null model (`r null_estimate`) which means that it is picking up on some signal in the data.
 
-Let's visualize the distribution of the predictions and the errors from our word features model to see if there are any patterns of interest. We can use the `collect_predictions()` function to extract the predictions of the cross-validation and plot the true outcome agains the predicted outcome using `ggplot()`, as in @exm-pda-reg-lr-eval-rmse.
+Let's visualize the distribution of the predictions and the errors from our model to see if there are any patterns of interest. We can use the `collect_predictions()` function to extract the predictions of the cross-validation and plot the true outcome against the predicted outcome using `ggplot()`, as in @exm-pda-reg-lr-eval-rmse.
 
 ::: {#exm-pda-reg-lr-eval-rmse}
 ```{r}
@@ -1357,7 +1336,7 @@ Let's visualize the distribution of the predictions and the errors from our word
 #| fig-height: 4
 
 # Visualize predictions
-cedel2_reg_cv_lasso |>
+reg_cv_lasso |>
   collect_predictions() |>
   ggplot(aes(outcome, .pred, shape = id)) +
   geom_point(alpha = 0.5, position = position_jitter(width = 0.5)) +
@@ -1370,7 +1349,7 @@ cedel2_reg_cv_lasso |>
 ```
 :::
 
-From this plot, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, *i.e.* outliers, in particular for test scores in the higher and lower ranges. There also seems to be a pattern in that the model predicts lower scores for higher scores and higher scores for lower scores. We can see this by the overplotted points in the higher and lower ranges.
+From this plot, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, *i.e.* outliers, in particular for test scores in the lower ranges.
 
 If the $R^2$ value is in the ballpark, this means that somewhere around 40% of the variation is not explained by the frequency of the top 1,000 words. This is not surprising, as there are many other factors that contribute to the proficiency level of a text.
 
@@ -1387,35 +1366,35 @@ To implement a new model in `tidymodels`, we need to create a new model specific
 #| label: pda-reg-model-spec-decision-tree
 
 # Create model specification
-cedel2_reg_spec_tree <-
+reg_spec_tree <-
   decision_tree() |>
   set_engine("rpart") |>
   set_mode("regression")
 
-cedel2_reg_spec_tree
+reg_spec_tree
 ```
 :::
 
-We now have a new model specification. We can now create a new workflow. We will use the same recipe as before, but we will change the model specification to `cedel2_prof_spec_tree`. We add this to a new workflow and fit the workflow to the training data. The code is seen in @exm-pda-reg-model-spec-decision-tree-workflow.
+We now have a new model specification. We can now create a new workflow. We will use the same recipe as before, but we will change the model specification to `prof_spec_tree`. We add this to a new workflow and fit the workflow to the training data. The code is seen in @exm-pda-reg-model-spec-decision-tree-workflow.
 
 ::: {#exm-pda-reg-model-spec-decision-tree-workflow}
 ```{r}
 #| label: pda-reg-model-spec-decision-tree-workflow
 
 # Create workflow
-cedel2_reg_wf_tree <-
+reg_wf_tree <-
   workflow() |>
-  add_recipe(cedel2_reg_rec) |>
-  add_model(cedel2_reg_spec_tree)
+  add_recipe(reg_rec) |>
+  add_model(reg_spec_tree)
 
 # Set seed for reproducibility
 set.seed(123)
 
 # Cross-validated workflow
-cedel2_reg_cv_tree <-
-  cedel2_reg_wf_tree |>
+reg_cv_tree <-
+  reg_wf_tree |>
   fit_resamples(
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
+    resamples = vfold_cv(reg_train, v = 10),
     control = control_resamples(save_pred = TRUE)
   )
 ```
@@ -1428,7 +1407,7 @@ We can now evaluate the performance of the model using cross-validation. The cod
 #| label: pda-reg-model-spec-decision-tree-workflow-evaluate
 
 # Collect metrics
-cedel2_reg_cv_tree |>
+reg_cv_tree |>
   collect_metrics()
 ```
 :::
@@ -1440,7 +1419,7 @@ cedel2_reg_cv_tree |>
 
 # Collect metrics
 estimates <-
-  cedel2_reg_cv_tree |>
+  reg_cv_tree |>
   collect_metrics() |>
   pull(3)
 ```
@@ -1458,12 +1437,12 @@ Let's try a random forest model. We will use the `rand_forest()` function from t
 #| label: pda-reg-model-spec-random-forest
 
 # Create model specification
-cedel2_reg_spec_rf <-
+reg_spec_rf <-
   rand_forest() |>
   set_engine("ranger", importance = "impurity") |>
   set_mode("regression")
 
-cedel2_reg_spec_rf
+reg_spec_rf
 ```
 :::
 
@@ -1474,18 +1453,18 @@ We can now update the workflow to use the new model specification. The code is s
 #| label: pda-reg-model-spec-random-forest-workflow
 
 # Update workflow
-cedel2_reg_wf_rf <-
-  cedel2_reg_wf_tree |>
-  update_model(cedel2_reg_spec_rf)
+reg_wf_rf <-
+  reg_wf_tree |>
+  update_model(reg_spec_rf)
 
 # Set seed for reproducibility
 set.seed(123)
 
 # Cross-validated workflow
-cedel2_reg_cv_rf <-
-  cedel2_reg_wf_rf |>
+reg_cv_rf <-
+  reg_wf_rf |>
   fit_resamples(
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
+    resamples = vfold_cv(reg_train, v = 10),
     control = control_resamples(save_pred = TRUE)
   )
 ```
@@ -1498,7 +1477,7 @@ We can now evaluate the performance of the model using cross-validation. The cod
 #| label: pda-reg-model-spec-random-forest-workflow-evaluate
 
 # Collect metrics
-cedel2_reg_cv_rf |>
+reg_cv_rf |>
   collect_metrics()
 ```
 :::
@@ -1509,7 +1488,7 @@ cedel2_reg_cv_rf |>
 
 # Collect metrics
 estimates <-
-  cedel2_reg_cv_rf |>
+  reg_cv_rf |>
   collect_metrics() |>
   pull(3)
 ```
@@ -1525,12 +1504,12 @@ Let's again specify the model. We will use the `svm_linear()` function from the 
 #| label: pda-reg-model-spec-svm
 
 # Create model specification
-cedel2_reg_spec_svm <-
+reg_spec_svm <-
   svm_linear() |>
   set_engine("LiblineaR") |>
   set_mode("regression")
 
-cedel2_reg_spec_svm
+reg_spec_svm
 ```
 :::
 
@@ -1542,18 +1521,18 @@ Now let's update the workflow to use the new model specification. The code is se
 #| label: pda-reg-model-spec-svm-workflow
 
 # Update workflow
-cedel2_reg_wf_svm <-
-  cedel2_reg_wf_rf |>
-  update_model(cedel2_reg_spec_svm)
+reg_wf_svm <-
+  reg_wf_rf |>
+  update_model(reg_spec_svm)
 
 # Set seed for reproducibility
 set.seed(123)
 
 # Cross-validated workflow
-cedel2_reg_cv_svm <-
-  cedel2_reg_wf_svm |>
+reg_cv_svm <-
+  reg_wf_svm |>
   fit_resamples(
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
+    resamples = vfold_cv(reg_train, v = 10),
     control = control_resamples(save_pred = TRUE)
   )
 ```
@@ -1566,7 +1545,7 @@ Let's evaluate the cross-validation performance of the model. The code is seen i
 #| label: pda-reg-model-spec-svm-workflow-evaluate
 
 # Collect metrics
-cedel2_reg_cv_svm |>
+reg_cv_svm |>
   collect_metrics()
 ```
 :::
@@ -1584,21 +1563,23 @@ So we can use the `step_tfidf()` function to update the recipe. The code is seen
 #| label: pda-reg-recipe-tfidf
 
 # Create a recipe
-cedel2_reg_rec <-
-  recipe(outcome ~ text, data = cedel2_reg_train) |>
+reg_rec <-
+  recipe(outcome ~ text, data = reg_train) |>
   step_tokenize(text) |>
   step_tokenfilter(text, max_tokens = 1000) |>
-  step_tfidf(text)
+  step_tfidf(text, smooth_idf = FALSE)
 
 # Preview
-cedel2_reg_rec
+reg_rec
 ```
 :::
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
-Note that the log-transformation is not necessary when using TF-IDF scores as normalization is built into the TF-IDF calculation.
+Two things to note about the code in @exm-pda-reg-recipe-tfidf. First, the `step_tfidf()` function by default add a smoothing term to the inverse document frequency (IDF) calculation. This setting has the effect of reducing the influence of the IDF calculation. Thus, terms that appear in many (or all) documents will not be downweighted as much as they would be if the smoothing term was not added. For our purposes, we want to downweight or eliminate the influence of the most frequent terms, so we will set `smooth_idf = FALSE`.
+
+Second, the log-transformation is not necessary when using TF-IDF scores as normalization is built into the TF-IDF calculation.
 :::
 
 Another change we can explore is to increase the number of features. But how many features should we use? We can turn to the `tune()` function to help us answer this question. Let's add the `tune()` function to the recipe and tune the `max_tokens` hyperparameter. The code is seen in @exm-pda-reg-recipe-tune.
@@ -1608,14 +1589,14 @@ Another change we can explore is to increase the number of features. But how man
 #| label: pda-reg-recipe-tune
 
 # Create a recipe
-cedel2_reg_rec <-
-  recipe(outcome ~ text, data = cedel2_reg_train) |>
+reg_rec <-
+  recipe(outcome ~ text, data = reg_train) |>
   step_tokenize(text) |>
   step_tokenfilter(text, max_tokens = tune()) |>
-  step_tfidf(text)
+  step_tfidf(text, smooth_idf = FALSE)
 
 # Preview
-cedel2_reg_rec
+reg_rec
 ```
 :::
 
@@ -1626,12 +1607,12 @@ Let's tune the `max_tokens` with the random forest model specification that we c
 #| label: pda-reg-model-spec-random-forest-workflow-tune
 
 # Create tuning workflow
-cedel2_tune_wf <-
+tune_wf <-
   workflow() |>
-  add_recipe(cedel2_reg_rec) |>
-  add_model(cedel2_reg_spec_rf)
+  add_recipe(reg_rec) |>
+  add_model(reg_spec_rf)
 
-cedel2_tune_wf
+tune_wf
 ```
 :::
 
@@ -1642,25 +1623,25 @@ The `tune_grid()` function takes a workflow, a resampling method, a tuning grid,
 #| label: pda-reg-model-spec-random-forest-workflow-tune-grid
 
 # Create tuning grid
-cedel2_tune_grid <-
+tune_grid <-
   grid_regular(max_tokens(range = c(500, 3500)), levels = 5)
 
-cedel2_tune_grid
+tune_grid
 
 # Set seed for reproducibility
 set.seed(123)
 
 # Create tuning workflow
-cedel2_tune <-
+tune <-
   tune_grid(
-    cedel2_tune_wf,
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
-    grid = cedel2_tune_grid,
+    tune_wf,
+    resamples = vfold_cv(reg_train, v = 10),
+    grid = tune_grid,
     metrics = metric_set(rmse, rsq),
     control = control_resamples(save_pred = TRUE)
   )
 
-cedel2_tune
+tune
 ```
 :::
 
@@ -1673,7 +1654,7 @@ Just as we did for the `penalty` hyperparameter, we can visualize the performanc
 #| fig-height: 4
 
 # Visualize tuning results
-cedel2_tune |>
+tune |>
   collect_metrics() |>
   ggplot(aes(max_tokens, mean)) +
   geom_point() +
@@ -1699,15 +1680,15 @@ We can now select the best hyperparameter value. The code is seen in @exm-pda-re
 
 # Select best parameter
 chosen_max_tokens <-
-  cedel2_tune |>
+  tune |>
   select_best(metric = "rmse")
 
 # Update workflow
-cedel2_reg_final_rf <-
-  cedel2_tune_wf |>
+reg_final_rf <-
+  tune_wf |>
   finalize_workflow(chosen_max_tokens)
 
-cedel2_reg_final_rf
+reg_final_rf
 ```
 :::
 
@@ -1718,15 +1699,15 @@ We can now fit the model to the training data and evaluate the performance using
 #| label: pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate
 
 # Cross-validated workflow
-cedel2_reg_cv_rf <-
-  cedel2_reg_final_rf |>
+reg_cv_rf <-
+  reg_final_rf |>
   fit_resamples(
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
+    resamples = vfold_cv(reg_train, v = 10),
     control = control_resamples(save_pred = TRUE)
   )
 
 # Collect metrics
-cedel2_reg_cv_rf |>
+reg_cv_rf |>
   collect_metrics()
 ```
 :::
@@ -1742,7 +1723,7 @@ Let's now visualize the distribution of the predictions and the errors from our 
 #| fig-height: 4
 
 # Visualize predictions
-cedel2_reg_cv_rf |>
+reg_cv_rf |>
   collect_predictions() |>
   ggplot(aes(outcome, .pred, shape = id)) +
   geom_point(alpha = 0.5, position = position_jitter(width = 0.5)) +
@@ -1764,14 +1745,14 @@ At this point we can either consider this model to be good enough or we can try 
 #| label: pda-reg-recipe-tfidf-bigrams
 
 # Create a recipe
-cedel2_reg_rec <-
-  recipe(outcome ~ text, data = cedel2_reg_train) |>
+reg_rec <-
+  recipe(outcome ~ text, data = reg_train) |>
   step_tokenize(text, token = "ngrams", options = list(n = 2, n_min = 1)) |>
   step_tokenfilter(text, max_tokens = tune()) |>
-  step_tfidf(text)
+  step_tfidf(text, smooth_idf = FALSE)
 
 # Preview
-cedel2_reg_rec
+reg_rec
 ```
 :::
 
@@ -1781,49 +1762,49 @@ Since the features have changed, we won't assume that our tuning of the `max_tok
 #| label: pda-reg-tune-bigrams
 
 # Create workflow
-cedel2_reg_wf_rf <-
+reg_wf_rf <-
   workflow() |>
-  add_recipe(cedel2_reg_rec) |>
-  add_model(cedel2_reg_spec_rf)
+  add_recipe(reg_rec) |>
+  add_model(reg_spec_rf)
 
 # Create tuning grid
-cedel2_tune_grid <-
+tune_grid <-
   grid_regular(max_tokens(range = c(500, 3500)), levels = 5)
 
 # Set seed for reproducibility
 set.seed(123)
 
 # Create tuning workflow
-cedel2_tune <-
+tune <-
   tune_grid(
-    cedel2_reg_wf_rf,
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
-    grid = cedel2_tune_grid,
+    reg_wf_rf,
+    resamples = vfold_cv(reg_train, v = 10),
+    grid = tune_grid,
     metrics = metric_set(rmse, rsq),
     control = control_resamples(save_pred = TRUE)
   )
 
 # Select best parameter
 chosen_max_tokens <-
-  cedel2_tune |>
+  tune |>
   select_best(metric = "rmse")
 
 # Update workflow
-cedel2_reg_final_rf <-
-  cedel2_reg_wf_rf |>
+reg_final_rf <-
+  reg_wf_rf |>
   finalize_workflow(chosen_max_tokens)
 
 # Cross-validated workflow
-cedel2_reg_cv_rf <-
-  cedel2_reg_final_rf |>
+reg_cv_rf <-
+  reg_final_rf |>
   fit_resamples(
-    resamples = vfold_cv(cedel2_reg_train, v = 10),
+    resamples = vfold_cv(reg_train, v = 10),
     control = control_resamples(save_pred = TRUE)
   )
 
 # Collect metrics
 estimates <-
-  cedel2_reg_cv_rf |>
+  reg_cv_rf |>
   collect_metrics() |>
   pull(3)
 ```
@@ -1834,26 +1815,26 @@ We could continue to try to improve the model, but at this point we have a model
 
 Let's now fit the 1-2 gram model to the testing data and evaluate the performance on the testing set. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test.
 
-<!-- Step 6: Interpret -->
+<!-- Step 7: Interpret -->
 
 ::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test}
 ```{r}
 #| label: pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test
 
 # Fit model on training data
-cedel2_reg_final_rf_fit <-
-  cedel2_reg_final_rf |>
-  fit(cedel2_reg_train)
+reg_final_rf_fit <-
+  reg_final_rf |>
+  fit(reg_train)
 
 # Predict on testing data
-cedel2_reg_final_rf_pred <-
+reg_final_rf_pred <-
   bind_cols(
-    cedel2_reg_test,
-    predict(cedel2_reg_final_rf_fit, cedel2_reg_test)
+    reg_test,
+    predict(reg_final_rf_fit, reg_test)
   )
 
 # Evaluate performance
-cedel2_reg_final_rf_pred |>
+reg_final_rf_pred |>
   metrics(truth = outcome, estimate = .pred)
 ```
 :::
@@ -1867,7 +1848,7 @@ We can now visualize the feature importance of the model. The code is seen in @e
 #| fig-height: 4
 
 # Extract predictions
-cedel2_reg_final_rf_fit |>
+reg_final_rf_fit |>
   vip::vi(scale = TRUE)  |>
   mutate(Variable = str_replace(Variable, "^tfidf_text_", "")) |>
   slice_max(Importance, n = 20) |>
@@ -1894,9 +1875,9 @@ In this chapter we have learned about supervised machine learning. We have learn
 
 <!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Predictive models: prep, train, test, and evaluate](https://qtalr.github.io/qtalrkit/articles/recipe-8.html)\
+**What**: [Building predictive models](https://qtalr.github.io/qtalrkit/articles/recipe-9.html)\
 **How**: Read Recipe 9 and participate in the Hypothes.is online social annotation.\
-**Why**: To illustrate some common coding strategies for preparing datasets for inferential data analysis, as well as the steps conduct descriptive assessment, statistical interrogation, and evaluation and reporting of results.
+**Why**: {{< fa wrench >}} ...
 :::
 
 ::: {.callout}
@@ -1904,9 +1885,9 @@ In this chapter we have learned about supervised machine learning. We have learn
 
 <!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Predictive Data Analysis](https://github.com/qtalr/lab-09)\
-**How**: Clone, fork, and complete the steps in Lab 10.\
-**Why**: To gain experience working with coding strategies to prepare, feature engineer, train and test a predictive model, and evaluate results from a predictive data analysis, practice transforming datasets into new object formats and visualizing relationships, and implement organizational strategies for organizing and reporting results in a reproducible fashion.
+**What**: [Text classification](https://github.com/qtalr/lab-09)\
+**How**: Clone, fork, and complete the steps in Lab 9.\
+**Why**: {{< fa wrench >}} ...
 :::
 
 ## Questions {.unnumbered}

@@ -29,14 +29,11 @@ Formatting:
 - [x] Change hand-drawn figures to drawio pngs
 - [ ] Update images to high-res, greyscale, and add alt text (see @fig-summaries-boxplots-belc)
 - [ ] Add indexing to the key terms in the book (can Quarto do HTML indexing?)
-- [ ] Fix package info listing --for all packages used in the book.
+- [x] Fix package info listing --for all packages used in the book.
 - [ ] Add a section on how to cite the book.
 - [ ] Add citations for data/ datasets used in the book.
 - [ ] Add a section on how to report errors in the book.
 - [ ] Add appropriate creative commons license for the web book.
-
-- [x] NO: stay with native pipe. (?) Change the `|>` pipe to `%>%` pipe in all code chunks
-  - Reasoning: `%>%` is more flexible to use and is more common in the R community. It does, however, require the `magrittr` package to be loaded.
 
 
 - [ ] Global: object naming conventions
@@ -126,7 +123,9 @@ pacman::p_load(
   here,
   rmarkdown,
   knitr,
-  qtalrkit
+  kableExtra,
+  qtalrkit,
+  tinytable
 )
 
 # Plots ------------------------------------------------------------------
@@ -212,6 +211,9 @@ filter <- dplyr::filter
 
 # Avoid kableextra from outputting HTML on kable tables
 options(kableExtra.auto_format = FALSE)
+
+# Avoid tinytable from outputting HTML on tinytable tables
+options(tinytable_print_output = "markdown") # for markdown
 ```
 
 This version of the textbook was built with `r sessioninfo::platform_info()[[1]]` on `r sessioninfo::os_name()` with the following packages:
@@ -229,7 +231,7 @@ df <- tibble::tibble(
   version = pkgs$ondiskversion,
   source = gsub("@", "\\\\@", pkgs$source)
 )
-knitr::kable(df, format = "markdown")
+df |> tt(width = 1)
 ```
 
 ```{r}

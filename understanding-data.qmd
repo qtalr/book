@@ -25,7 +25,7 @@ execute:
 
 In this chapter, the groundwork is laid for deriving insights from text analysis by focusing on content and structure of data and information. The concepts of populations and samples are introduced, highlighting their similarities and key differences. Connecting these topics to text analysis, language samples, or corpora, are explored, discussing their types, sources, formats, and ethical considerations. Subsequently, key concepts in creating information from corpus data, such as organization and transformation, are introduced. Documentation in quantitative research is emphasized addressing the importance of data origin files and data dictionaries.
 
-::: {.callout .activity}
+::: {.callout}
 **{{< fa terminal >}} Lessons**
 
 **What**: [Objects, Packages and functions](https://github.com/qtalr/lessons)\
@@ -410,7 +410,7 @@ masc_exm |>
   slice_head(n = 10) |> # select first 10 rows
   mutate(num_letters = nchar(word)) |> # add num_letters column
   select(title, modality, date, ref_num, word, pos, num_letters) |> # select columns
-  kable(booktabs = TRUE) # print as table
+  tt(width = 1) # print as table
 ```
 
 We have seven variables listed as headers for each of the columns. We could go one-by-one left-to-right but let's take another tack. Instead, let's identify all those variables that cannot be numeric --these are all the non-numeral variables: `title`, `modality`, `word`, and `pos`. The question to ask of these variables is whether they represent an order or rank. Since titles, modalities, words, and parts-of-speech are not ordered values, they are all categorical.
@@ -550,7 +550,7 @@ masc_recode_cat_exm <-
 
 masc_recode_cat_exm |>
   slice_head(n = 10) |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 In @tbl-ud-recode-categorical, the `pos` variable has been recoded into major grammatical classes. The `major_pos` variable is a categorical variable with 12 levels, one for each major grammatical class in the Penn Treebank tagset. While the demonstration here demonstrates the simplification of a categorical variable, recoding can also be used to transliterate categorical variables. Continuing with the theme of POS tags, the `pos` variable could be recoded into a different tagset, such as the Universal Dependencies tagset [@Nivre2016].
@@ -575,7 +575,7 @@ masc_recode_num_exm <-
 # Print table
 masc_recode_num_exm |>
   slice_head(n = 10) |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 In @tbl-ud-recode-numeric the variable `word_length` appears with the values `short`, `medium`, and `long`. This is now a categorical variable of type ordinal. Of note, is that the operational definition of used to create these word length bins should be made explicit in the documentation of the dataset.
@@ -598,7 +598,7 @@ library(tidytext)
 
 text_tbl |>
   unnest_tokens(sentence, text, token = "regex", pattern = "\\.\\s+") |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 It is important to make explicit what the operationalization of our linguistic unit is as common terms such as sentence, word, *etc.* can be defined in different ways. For example, the sentence tokenization above is based on the assumption that sentences are separated by a period followed by a space. This is a suitable definition for this text, but likely will not be for other English text or for other languages/ writing scripts. For words, a very simple operationalization is to use whitespace separation (*e.g.* "I cannot believe it." -- ["I", "cannot", "believe", "it."]). However, this approach does not handle puntuation marks (*e.g.* ["it."]) or contractions (*e.g.* ["can't"]). A more sophisticated operationalization will be necessary for these, and possibly other, cases.
@@ -612,7 +612,7 @@ Another important token unit is the $n$-gram. Words or characters can be grouped
 text_tbl |>
   unnest_tokens(word, text, token = "ngrams", n = 2) |>
   slice_head(n = 10) |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 In @tbl-ud-text-dataset-bigram we see that the first bigram is "it's a" --the first two words (based on whitespace separation) in the text. The second bigram is "a toy" --the second and third words in the text. This continues to the end of the text. $N$-gram tokenization can be useful to capture context that would otherwise would be lost from tokenizing words or characters at the unigram level.
@@ -628,7 +628,7 @@ text_tbl |>
   slice(3) |>
   unnest_tokens(word, sentence) |>
   mutate(lemma = textstem::lemmatize_words(word)) |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 ::: {.callout}
@@ -709,7 +709,7 @@ masc_annotation <-
   select(doc_id, sentence_id, token_id = tid, token, xpos, features = feats, syntactic_relation = relation)
 
 masc_annotation |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 The annotated dataset now includes the key variables `xpos` (Penn treebank tags), `features` (morphological features), and `syntactic_relation`. The results of this process can then be further transformed as need be to fit the needs of the analysis.
@@ -769,7 +769,7 @@ To illustate, consider the toy datasets in @tbl-ud-merge-dataset-written and @tb
 #| tbl-colwidths: [15, 15, 15, 55]
 
 written_tbl |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 ```{r}
@@ -778,7 +778,7 @@ written_tbl |>
 #| tbl-colwidths: [15, 15, 15, 55]
 
 spoken_tbl |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 These datasets, in @tbl-ud-merge-dataset-written and @tbl-ud-merge-dataset-spoken, contain the same variables and variable types, but different observations --one in which the sample contains written language and the other spoken. Conveniently, they can be concatenated to create a single dataset that contains all of the observations, as seen in @tbl-ud-merge-dataset-concat.
@@ -792,7 +792,7 @@ concat_tbl <-
   bind_rows(written_tbl, spoken_tbl)
 
 concat_tbl |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 Merging datasets can be performed in a column-wise manner as well. In this process, the datasets need not have the exact same variables and variable types, rather it is required that the datasets share a common variable of the same informational type that can be used to index the datasets. This process is often referred to as **joining datasets**.
@@ -816,7 +816,7 @@ participant_tbl <- tibble::tribble(
 )
 
 participant_tbl |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 This dataset provides additional information about each participant, such as their English native speaker status, age, and gender.
@@ -829,12 +829,11 @@ Since the two datasets share the `participant_id` variable, we can merge them to
 #| tbl-colwidths: [10, 10, 10, 60, 10, 10, 10]
 
 # Inner join text_tbl and participant_tbl based on participant_id
-
 text_participant_tbl <-
   inner_join(concat_tbl, participant_tbl, by = "participant_id")
 
 text_participant_tbl |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 Joining datasets is a powerful tool for enriching a dataset with additional column-wise information. It is important to note that merging datasets can also remove information in a row-wise manner. For example, when merging two datasets with a shared variable, it is possible to remove observations that do not have a match one of the two datasets. This process effectively filters out observations not shared between the two datasets. On the other hand, an anti-join explicitly removes observations that are shared between the two datasets.
@@ -875,7 +874,7 @@ tibble::tribble(
   "License", "CC BY, CC BY-NC, *etc.*",
   "Attribution", "Citation information for the data source."
 ) |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 For many corpus resources, the corpus documentation will include all or most of this information as part of the resource download or documented online. If this information is not present in the corpus resource or you compile your own, it is important to document this information yourself. This information can be documented in file, such as a plain text file or spreadsheet, that is included with the corpus resource.
@@ -898,7 +897,7 @@ tibble::tribble(
   "Variable type", "The type of information that the variable contains, *e.g.* 'categorical', 'ordinal', *etc.*",
   "Variable description", "A prose description expanding on the readable name and can include measurement units, allowed values, *etc.*"
 ) |>
-  kable(booktabs = TRUE)
+  tt(width = 1)
 ```
 
 Organizing this information in a tabular format, such as a spreadsheet, can make it easy for others to read and understand your data dictionary.
@@ -909,28 +908,20 @@ By providing a comprehensive data dictionary and using a programmatic approach t
 
 ## Activities {.unnumbered}
 
-In the following activities you will learn how to read, inspect, and write data and datasets in R using reproducible strategies.
+In the following activities, we will be tackle a common scenario in data analysis: to read, to inspect, and to write data. The recipe will discuss the necessary packages and functions to accomplish these tasks including `readr` and `dplyr`. The recipe will also refresh and expand on the elements of code blocks such as the `label`, `echo`, `message`, and `include` options.
 
-- [ ] More descriptive objectives and outcomes
-
-::: {.callout .activity}
+::: {.callout}
 **{{< fa regular file-code >}} Recipe**
-
-<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 **What**: [Reading, inspecting, and writing data](https://qtalr.github.io/qtalrkit/articles/recipe-2.html)\
 **How**: Read Recipe 2 and participate in the Hypothes.is online social annotation.\
 **Why**: To use literate programming in Quarto to work with R coding strategies for reading, inspecting, and writing datasets.
 :::
 
-::: {.callout .activity}
+::: {.callout}
 **{{< fa flask >}} Lab**
 
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-<!-- [ ] update name of lab to something more lively -->
-
-**What**: [Reading, inspecting, and writing data](https://github.com/qtalr/lab-02)\
+**What**: [Dive into datasets](https://github.com/qtalr/lab-02)\
 **How**: Clone, fork, and complete the steps in Lab 2.\
 **Why**: To read datasets from packages and from plain-text files, inspect and report characteristics of datasets, and write datasets to plain-text files.
 :::
@@ -958,10 +949,6 @@ Finally, documentation should be implemented at the acquisition, curation, and t
 ## Questions {.unnumbered}
 
 <!-- Digital literacy, Research, Programming -->
-
-<!--
-- [ ] Revise/ add  questions.
--->
 
 ::: {.callout}
 

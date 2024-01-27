@@ -11,8 +11,6 @@ execute:
 #| cache: false
 ```
 
-
-
 <!--
 
 Content:
@@ -44,8 +42,6 @@ Formatting:
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-<!-- [x] change to outcomes -->
-
 - Describe the importance of data curation in text analysis
 - Recognize the different types of data formats
 - Associate the types data formats with the appropriate R programming techniques to curate the data
@@ -58,16 +54,9 @@ Formatting:
 
 ```
 
-<!--
-- Curation: goals
-  - Maintain relationship with the original data
-  - Create a tidy dataset: one observation per row, one variable per column, one value per cell
-  - Maintain flexibility for analysis, i.e. do not remove information that may be useful for other analyses
--->
-
 In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. In this chapter we will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method(s) that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.
 
-::: {.callout .activity}
+::: {.callout}
 **{{< fa terminal >}} Lessons**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
@@ -128,8 +117,7 @@ The *europarl_do.csv* file contains the data origin information documented as pa
 
 # Read in the data origin file and display it as a table
 read_csv("data/cd-europarl_do.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 ```{r}
@@ -150,7 +138,9 @@ Now let's get familiar with the corpus directory structure and the files. In @ex
 
 Looking at the beginning of the *.es* and *.en* files, in @lst-cd-europarl-es and @lst-cd-europarl-en, we see that the files contain a series of lines in either the source or target language.
 
-```{#lst-cd-europarl-es .txt filename="data/original/europarl/europarl-v7.es-en.es" lst-cap="Spanish source text"}
+::: {#lst-cd-europarl-es}
+
+```{.txt}
 Reanudación del período de sesiones
 Declaro reanudado el período de sesiones del Parlamento Europeo, interrumpido el viernes 17 de diciembre pasado, y reitero a Sus Señorías mi deseo de que hayan tenido unas buenas vacaciones.
 Como todos han podido comprobar, el gran "efecto del año 2000" no se ha producido. En cambio, los ciudadanos de varios de nuestros países han sido víctimas de catástrofes naturales verdaderamente terribles.
@@ -158,13 +148,22 @@ Sus Señorías han solicitado un debate sobre el tema para los próximos días, 
 A la espera de que se produzca, de acuerdo con muchos colegas que me lo han pedido, pido que hagamos un minuto de silencio en memoria de todas las víctimas de las tormentas, en los distintos países de la Unión Europea afectados.
 ```
 
-```{#lst-cd-europarl-en .txt filename="data/original/europarl/europarl-v7.es-en.en" lst-cap="English target text"}
+Spanish source text
+:::
+
+
+::: {#lst-cd-europarl-en}
+
+```{.txt}
 Resumption of the session
 I declare resumed the session of the European Parliament adjourned on Friday 17 December 1999, and I would like once again to wish you a happy new year in the hope that you enjoyed a pleasant festive period.
 Although, as you will have seen, the dreaded 'millennium bug' failed to materialise, still the people in a number of countries suffered a series of natural disasters that truly were dreadful.
 You have requested a debate on this subject in the course of the next few days, during this part-session.
 In the meantime, I should like to observe a minute' s silence, as a number of Members have requested, on behalf of all the victims concerned, particularly those of the terrible storms, in the various countries of the European Union.
 ```
+
+English target text
+:::
 
 We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.
 
@@ -186,8 +185,7 @@ tribble(
   5, "Target", 2, "...",
   6, "Target", 3, "..."
 ) |>
-  kable(booktabs = TRUE) |>
-  kable_styling(latex_options = c("hold_position"))
+  tt(width = 1)
 ```
 
 The dataset structure in @tbl-cd-europarl-structure-example has four columns. The first column, `doc_id` is a unique identifier for each line in the corpus. `type`, indicates whether the line is from the source or target language. The third column, `line_id`, is a unique identifier for each line for each `type`. The last column, `line`, contains the text of the line, and maintains the structure of the original data. The observations are lines.
@@ -196,16 +194,10 @@ Our task now is to develop code that will read the original data and render the 
 
 ### Tidy the data
 
-<!--
-- [x] make clear reference to "idealized structure" table, for each of the sections (unstructured, structured, semi-structured)
--->
-
 To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. We will use the `readtext()` function from the `readtext` package. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory.
 
-```{r}
-#| label: cd-europarl-readtext-show
-#| eval: false
-
+::: {#exm-cd-europarl-readtext}
+```r
 # Load package
 library(readtext)
 
@@ -215,9 +207,8 @@ europarl_docs_tbl <-
   tibble() # convert to tibble
 ```
 
-::: {#exm-cd-europarl-readtext}
 ```{r}
-#| label: cd-europarl-readtext-run
+#| label: cd-europarl-readtext
 #| echo: false
 #| message: false
 
@@ -518,8 +509,7 @@ An example of the data dictionary for the `europarl_curated_tbl` dataset is show
 #| echo: false
 
 read_csv("data/cd-europarl_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 ## Structured
@@ -584,8 +574,7 @@ In addition to other important information, the data origin file *cabnc_do.csv* 
 #| echo: false
 
 read_csv("data/cd-cabnc_do.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 The CABNC datasets are structured in a relational format, which means that the data is stored in multiple tables that are related to each other. The tables are related by a common column or set of columns, which are called a keys. A key is used to join the tables together to create a single dataset. There are two keys in the CABNC datasets, `filename` and `who`. Each variable corresponds to recording- and/ or participant-oriented datasets.
@@ -676,10 +665,7 @@ Let's get a high-level summary of the variables in the dataset. We can use the `
 <!-- [ ] consider the capture.output, cat with comment approach -->
 
 ::: {#exm-cd-cabnc-skim}
-```{r}
-#| label: cd-cabnc-skim-show
-#| eval: false
-
+```r
 # Load package
 library(skimr)
 
@@ -687,9 +673,8 @@ library(skimr)
 skim(cabnc_tbl)
 ```
 
-
 ```{r}
-#| label: tbl-cd-cabnc-skim-run
+#| label: tbl-cd-cabnc-skim
 #| tbl-cap: "Summary of variables in the CABNC dataset"
 #| tbl-subcap:
 #|  - "Categorical variables"
@@ -716,34 +701,31 @@ cabnc_tbl |>
   yank("character") |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
-  kable() |>
-  kable_styling(font_size = 8)
+  tt(width = 1)
 
 cabnc_tbl |>
   curate_skim() |>
   yank("logical") |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
-  kable() |>
-  kable_styling(font_size = 8)
+  tt(width = 1)
 
 cabnc_tbl |>
   curate_skim() |>
   yank("numeric") |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
-  kable() |>
-  kable_styling(font_size = 8)
+  tt(width = 1)
 ```
 :::
 
-We see from the `skim()` output in @tbl-cd-cabnc-skim-run-2, that the variables `postcodes` and `gems` have no values. Therefore we can remove these variables from the dataset. On the other hand, in @tbl-cd-cabnc-skim-run-1, the variables `role` and `language` have the same value for every observation as the output shows `n_unique` is `1`. We can also remove these variables from the dataset.
+We see from the `skim()` output in @tbl-cd-cabnc-skim-2, that the variables `postcodes` and `gems` have no values. Therefore we can remove these variables from the dataset. On the other hand, in @tbl-cd-cabnc-skim-1, the variables `role` and `language` have the same value for every observation as the output shows `n_unique` is `1`. We can also remove these variables from the dataset.
 
-Another set of variables of potential interest are the `startTime` and `endTime` variables, in @tbl-cd-cabnc-skim-run-3. These each have a completion rate of less than 100%, specifically 84%. On first blush, it would seem that we would go ahead and remove them. However, we should pause and consider that these variables may still be of some use. At the curation stage, however, it is best to err on the side of caution and leave them in the dataset. We will decide later whether to keep or remove them as we explore the dataset further in the research.
+Another set of variables of potential interest are the `startTime` and `endTime` variables, in @tbl-cd-cabnc-skim-3. These each have a completion rate of less than 100%, specifically 84%. On first blush, it would seem that we would go ahead and remove them. However, we should pause and consider that these variables may still be of some use. At the curation stage, however, it is best to err on the side of caution and leave them in the dataset. We will decide later whether to keep or remove them as we explore the dataset further in the research.
 
 Another consideration is whether we have variables that are clearly redundant. For example, the variables `age` and `monthage` are both measures of age, stated in different measures, looking back at @exm-cd-cabnc-glimpse. As such, we can remove one of these variables from the dataset. In this case, we will remove the `age` variable as it is the least straightforward to interpret.
 
-Another potentially redundant set of variables are `who` and `name` --both of which are speaker identifiers. The `who` variable is a unique identifier, but there may be some redundancy with the `name` variable, that is there may be two speakers with the same name. We can check this by looking at the number of unique values in the `who` and `name` variables from the `skim()` output in @tbl-cd-cabnc-skim-run-1. `who` has 568 unique values and `name` has 269 unique values. This suggests that there are multiple speakers with the same name.
+Another potentially redundant set of variables are `who` and `name` --both of which are speaker identifiers. The `who` variable is a unique identifier, but there may be some redundancy with the `name` variable, that is there may be two speakers with the same name. We can check this by looking at the number of unique values in the `who` and `name` variables from the `skim()` output in @tbl-cd-cabnc-skim-1. `who` has 568 unique values and `name` has 269 unique values. This suggests that there are multiple speakers with the same name.
 
 Another way to explore this is to look at the number of unique values in the `who` variable for each unique value in the `name` variable. We can do this using the `group_by()` and `summarize()` functions from the `dplyr` package. For each value of `name`, we will count the number of unique values in `who` and then sort the results in descending order.
 
@@ -868,8 +850,7 @@ After running the code in @exm-cd-cabnc-create-data-dict, we can open the *cabnc
 #| echo: false
 
 read_csv("data/cd-cabnc_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 And the final directory structure for the *data/* directory is shown in @exm-cd-cabnc-final-dir.
@@ -903,7 +884,9 @@ The file formats associated with semi-structured data include a wide range. Thes
 
 The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format, as in @lst-cd-json-example. We can read the data into an R session with the `read_json()` function from the `jsonlite` package [@R-jsonlite]. For XML and HTML files, the `rvest` package provides the `read_xml()` and `read_html()` functions.
 
-```{#lst-cd-json-example .json filename="data.json" lst-cap="Example JSON file"}
+::: {#lst-cd-json-example}
+
+```{.json}
 {
     "data": [
         {
@@ -938,6 +921,10 @@ The more structured file formats use standard conventions and therefore can be r
 }
 ```
 
+Example JSON file
+
+:::
+
 Semi-structured data in TXT files can be read either as an entire file with `read_file()` or line-by-line with `read_lines()`. The choice of which approach to take depends on the structure of the data. If the data structure is line-based, then `read_lines()` often makes more sense than `read_file()`. However, in some cases, the data may be structured in a way that requires the entire file to be read into an R session and then subsequently parsed.
 
 ### Orientation
@@ -969,16 +956,21 @@ We now inspect the data origin file for the ENNTT corpus, *enntt_do.csv*, in @tb
 #| echo: false
 
 read_csv("data/cd-enntt_do.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 According to the data origin file, there are two important file types, *.dat* and *.tok*. The *.dat* files contain annotations and the *.tok* files contain the actual text. Let's inspect the first couple of lines in the *.dat* file for the native speakers, *nonnatives.dat*, in @lst-cd-enntt-nonnatives-dat.
 
-```{#lst-cd-enntt-nonnatives-dat .txt filename="../data/original/enntt/nonnatives.dat" lst-cap="Example *.dat* file for the non-native speakers."}
+::: {#lst-cd-enntt-nonnatives-dat}
+
+```xml
 <LINE STATE="Poland" MEPID="96779" LANGUAGE="EN" NAME="Danuta Hübner," SEQ_SPEAKER_ID="184" SESSION_ID="ep-05-11-17"/>
 <LINE STATE="Poland" MEPID="96779" LANGUAGE="EN" NAME="Danuta Hübner," SEQ_SPEAKER_ID="184" SESSION_ID="ep-05-11-17"/>
 ```
+
+Example *.dat* file for the non-native speakers.
+
+:::
 
 We see that the *.dat* file contains annotations for various session and speaker attributes. The format of the annotations is XML-like. XML is a form of markup language, such as YAML, JSON, *etc.* **Markup languages** are used to annotate text with additional information about the structure, meaning, and/ or presentation of text. In XML, structure is built up by nesting of nodes. The nodes are named with tags, which are enclosed in angle brackets, `<` and `>`. Nodes are opened with `<TAG>` and closed with `</TAG>`. In @exm-cd-xml we see an example of a simple XML file structure.
 
@@ -999,10 +991,16 @@ So the *.dat* file is not strict XML, but is similar in that it contains nodes a
 
 And the *.tok* file for the native speakers, *nonnatives.tok*, in @lst-cd-enntt-nonnatives-tok, shows the actual text for each line in the corpus.
 
-```{#lst-cd-enntt-nonnatives-tok .txt filename="../data/original/enntt/nonnatives.tok" lst-cap="Example *.tok* file for the non-native speakers."}
+::: {#lst-cd-enntt-nonnatives-tok}
+
+```xml
 The Commission is following with interest the planned construction of a nuclear power plant in Akkuyu , Turkey and recognises the importance of ensuring that the construction of the new plant follows the highest internationally accepted nuclear safety standards .
 According to our information , the decision on the selection of a bidder has not been taken yet .
 ```
+
+Example *.tok* file for the non-native speakers.
+
+:::
 
 In a study in which we are interested in contrasting the language of natives and non-natives, we will want to combine the *.dat* and *.tok* files for these groups of speakers and then join these datasets into one.
 
@@ -1026,10 +1024,7 @@ The general approach we will take is, for native and then non-natives, to read i
 Starting with the natives, we read in the *.dat* file as an XML file with the `read_html()` function and then extract the line nodes with the `html_elements()` function as in @exm-cd-enntt-read-xml.
 
 ::: {#exm-cd-enntt-read-xml}
-```{r}
-#| label: cd-enntt-read-xml
-#| eval: false
-
+```r
 # Load packages
 library(rvest)
 
@@ -1045,10 +1040,9 @@ length(ns_dat_lines)
 ```
 
 ```{r}
-#| cache: false
-#| label: cd-enntt-read-xml-run
-#| results: hold
+#| label: cd-enntt-read-xml
 #| echo: false
+#| results: hold
 
 # Load packages
 library(rvest)
@@ -1068,8 +1062,20 @@ length(ns_dat_lines)
 When can see that the `ns_dat_lines` object is a special type of list, `xml_nodeset` which contains 116,341 line nodes. Let's now jump out of sequence and read in the *.tok* file as a text file, in @exm-cd-enntt-read-lines, again by lines using `read_lines()`, and compare the two to make sure that our approach will work.
 
 ::: {#exm-cd-enntt-read-lines}
+```r
+# Read in *.tok* file by lines
+ns_tok_lines <-
+  read_lines("../data/enntt/original/natives.tok")
+
+# Inspect
+class(ns_tok_lines)
+typeof(ns_tok_lines)
+length(ns_tok_lines)
+```
+
 ```{r}
 #| label: cd-enntt-read-lines
+#| echo: false
 #| results: hold
 
 # Read in *.tok* file by lines
@@ -1089,7 +1095,6 @@ Let's start by listing the attributes of the first line node in the `ns_dat_line
 
 ::: {#exm-cd-enntt-list-attributes}
 ```{r}
-#| cache: false
 #| label: cd-enntt-list-attributes
 
 # List attributes of first line node
@@ -1109,7 +1114,7 @@ We can do this one attribute at a time using the `html_attr()` function and then
 
 ::: {#exm-cd-enntt-extract-attributes}
 ```{r}
-#| cache: false
+#| cache: true
 #| label: cd-enntt-extract-attributes
 
 # Extract attributes from first line node
@@ -1252,10 +1257,7 @@ combine_dat_tok <- function(dat_file, tok_file) {
 Apply the `combine_dat_tok()` function to read in the data for the native speakers and the non-native speakers in a few lines of code, as in @exm-cd-enntt-combine-dat-tok.
 
 ::: {#exm-cd-enntt-combine-dat-tok}
-```{r}
-#| label: cd-enntt-combine-dat-tok
-#| eval: false
-
+```r
 # Native speakers
 ns_dat <-
   combine_dat_tok(
@@ -1276,7 +1278,7 @@ glimpse(nns_dat)
 ```
 
 ```{r}
-#| label: cd-enntt-combine-dat-tok-run
+#| label: cd-enntt-combine-dat-tok
 #| echo: false
 
 # Native speakers
@@ -1360,8 +1362,7 @@ After editing the data dictionary file to include the appropriate information, w
 #| echo: false
 
 read_csv("data/cd-enntt_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 The final step is to clean up and comment the code added to the *2-curate-datasets.qmd* file. The final directory structure is seen in @exm-cd-enntt-final-directory-structure.
@@ -1395,15 +1396,11 @@ project/
 ```
 :::
 
-## Summary {.unnumbered}
-
-In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data --unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of metadata included. The results from data curation results in a dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. In addition to the code we use to derived the curated dataset's structure, we also include a data dictionary which documents the curated dataset.
-
 ## Activities {.unnumbered}
 
 The following activities build on your skills and knowledge to use R to read, inspect, and write data and datasets in R. In these activities you will have an opportunity to learn and apply your skills and knowledge to the task of curating datasets. This is a vital component of data analysis research that uses unstructured and semi-structured data.
 
-::: {.callout .activity}
+::: {.callout}
 **{{< fa regular file-code >}} Recipe**
 
 <!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
@@ -1415,7 +1412,7 @@ The following activities build on your skills and knowledge to use R to read, in
 **Why**: To rehearse methods for deriving tidying datasets to use a the base for further project-specific purposes. We will explore how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to organize datasets in rows and columns. We will also explore how to document datasets in a data dictionary.
 :::
 
-::: {.callout .activity}
+::: {.callout}
 **{{< fa flask >}} Lab**
 
 <!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
@@ -1428,6 +1425,10 @@ The following activities build on your skills and knowledge to use R to read, in
 **How**: Clone, fork, and complete the steps in Lab 6.\
 **Why**: To gain experience working with coding strategies to manipulate data using tidyverse functions and regular expressions, to practice reading/ writing data from/ to disk, and to implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
 :::
+
+## Summary {.unnumbered}
+
+In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data --unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of metadata included. The results from data curation results in a dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. In addition to the code we use to derived the curated dataset's structure, we also include a data dictionary which documents the curated dataset.
 
 ## Questions {.unnumbered}
 

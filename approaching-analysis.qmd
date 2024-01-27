@@ -51,20 +51,19 @@ Exercises:
 
 ```{r}
 #| label: aa-packages
-pacman::p_load(skimr, janitor, kableExtra, effectsize, tidytext)
+pacman::p_load(skimr, janitor, effectsize, tidytext)
 ```
 
+In this chapter,  I will build on the notions of data and information from the previous chapter. The aim of analysis is to derive knowledge from information, the next step in the DIKI Hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves another level of intervention. The goal is to break down complex information into simpler components which are more readily interpretable. In what follows, we will cover the main steps in the process of analysis. The first is to inspect the data to ensure its quality and understand its characteristics. The second is to interrogate the data to uncover patterns and relationships and interpret the findings. To conclude this chapter I will outline methods to and the importance of communicating the analysis results and procedure in a transparent and reproducible manner.
 
-In this chapter I will build on the notions of data and information from the previous chapter. The aim of analysis is to derive knowledge from information, the next step in the DIKI Hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves another level of intervention. The goal is to break down complex information into simpler components which are more readily interpretable. In what follows, we will cover the main steps in the process of analysis. The first is to inspect the data to ensure its quality and understand its characteristics. The second is to interrogate the data to uncover patterns and relationships and interpret the findings. To conclude this chapter I will outline methods to and the importance of communicating the analysis results and procedure in a transparent and reproducible manner.
-
-::: {.callout .activity}
+::: {.callout}
 **{{< fa terminal >}} Lessons**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Data visualization](https://github.com/qtalr/lessons)\
+**What**: [Summarizing data, Visual summaries](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
-**Why**: To explore data visually in text and in graphics.
+**Why**: To showcase methods for statistical summaries of vectors and data frames and to create informative graphics that enhance data interpretation and analysis.
 :::
 
 ## Diagnose {#sec-aa-diagnose}
@@ -153,13 +152,13 @@ In @tbl-aa-belc-dd we see the data dictionary for the BELC dataset which reflect
 ```{r}
 #| label: tbl-aa-belc-dd
 #| tbl-cap: "Data dictionary for the BELC dataset."
+#| tbl-colwidths: [13, 20, 50, 17]
 
 # Data dictionary ----
 belc_dd |>
   # reorder to match understanding data chapter
   select(everything(), description) |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 The data dictionary provides a easily accessible overview of the dataset. This includes a human-readable mapping from variable names to variable descriptions. Further, it provides information about the type of variable (e.g., categorical, ordinal, numeric). As we will see the informational type of variables is key to diagnostic measures, as well as all other components of analysis.
@@ -191,8 +190,7 @@ belc_tbl |>
     n_missing, complete_rate
   ) |>
   # print table
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 There are two primary approaches to dealing with missing data: deletion and recoding. Since these missing values account for only 1.5% and 0.4% of the data respectively, we might be safe to remove these observations. Another approach is to recode the missing values by either applying a unique value for missing values (e.g., `NULL`) or by imputing values. Imputing values is usually done by replacing missing values with some middle-of-the-road value (e.g., mean, median, mode), but other, more nuanced approaches are possible.
@@ -255,8 +253,7 @@ belc_tbl |>
     num_unique = n_unique
   ) |>
   # print table
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 From our knowledge of the data, we can gauge whether these values are expected. For example, `sex` has two values; likely corresponding to some coding of 'male' and 'female'. The variable `part_id` has 36 distinct values, which is expected since there are 36 participants and `group` has four, corresponding to the longitudinal time groups. It is also possible to gauge the expected values for `lemma` as we know that these are the base words and should be less than the number of words in the dataset.
@@ -276,8 +273,7 @@ On the other hand, coding anomalies are values that are not expected or are not 
 # Variables ----
 belc_tbl |>
   slice_head(n = 10) |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 Leaving `month_age` aside, we see that the other two numeric variables `utt_id` and `word_id` index utterances and words respectively. However, in contrast to `part_id` which is a categorical variable as it serves as a unique identifier for each participant, these variables are numeric as they serve to not only index utterances and words but also to provide a measure of how many utterances or words have been produced. Seen in this light, `0` for the first value of `utt_id` and `word_id` is unexpected. To adjust for this, we can add `1` to each value of these variables.
@@ -358,8 +354,6 @@ create_data_dictionary(belc_essay_tbl, "data/aa-belc_essay_tbl_dd.csv", model = 
 #| label: tbl-aa-belc-reconfig
 #| tbl-cap: "First 10 observations of the reconfigured BELC dataset."
 
-# [ ] `kbl()` booktabs test.
-
 # Read data ----
 belc_essay_tbl <- read_rds("data/aa-belc_essay_tbl.rds")
 
@@ -368,8 +362,7 @@ belc_essay_tbl |>
   # select first 10 observations
   slice_head(n = 10) |>
   # print table
-  kbl(booktabs = TRUE) |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 In this new configuration, the unit of observation is now `essay_id`. Each of the following variable are attributes or measures of this variable. The new variables in this dataset are aggregates of the previous BELC dataset: `tokens` is the number of total words, `types` is the number of unique words, `ttr` is the ratio of unique words to total words. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity. Finally, the proportion of L2 words (English) to the total words (tokens) is provided in `prop_l2`.
@@ -454,9 +447,9 @@ Let's now consider the relevant central tendency and dispersion of the variables
 #| label: tbl-aa-belc-descriptive-stats
 #| tbl-cap: "Central tendency and dispersion of the variables in the BELC dataset"
 #| tbl-subcap:
-#| - "Categorical variables"
-#| - "Numeric variables"
-#| layout-ncol: 2
+#|  - "Categorical variables"
+#|  - "Numeric variables"
+#| layout-ncol: 1
 
 belc_essay_tbl |>
   # custom skim function
@@ -465,7 +458,7 @@ belc_essay_tbl |>
   select(-n_missing, -complete_rate) |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
-  kable()
+  tt(width = 1, digits = 2)
 
 belc_essay_tbl |>
   aa_skim() |>
@@ -474,7 +467,7 @@ belc_essay_tbl |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
   # round to 2 digits
-  kable(digits = 2)
+  tt(width = 1, digits = 2)
 ```
 
 In @tbl-aa-belc-descriptive-stats-1 we see the measures for categorical variables. The `top_counts` variable gives us a short list of the most frequent levels of the variable. From `top_count` we can gather whether the variable has one mode or is multimodel. Both `essay_id` and `part_id` have the same most frequent value for the levels listed. On the other hand, `sex` and `group` have a single mode. We can also appreciate the dispersion of these variables based on the `norm_entropy` of each variable. `essay_id` is completely balanced across the levels, so it has a normalized entropy of 1. the other variables are not as balanced, but still quite balanced as the normalized entropy is close to 1.
@@ -504,7 +497,7 @@ belc_essay_tbl |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
   # round to 2 digits
-  kable(digits = 2)
+  tt(width = 1, digits = 2)
 ```
 
 One more caveat to keep in mind is that we need to be mindful of the nature of the data being standardized and what the standardized values mean. For example, the variables `tokens` and `types` were originally counts. But the standardized values are not interpretable as counts, they are now on a different scale --specifically a z-score scale. In the same way since the `ttr` and `prop_l2` variables were originally proportions, the standardized values are also not interpretable as proportions. One additional twist, however, is that the original scales for these pairs of variables were not the same: `tokens` and `types` were counts, but `ttr` and `prop_l2` were proportions. So, even though the standardized values are on the same scale, they are not directly comparable.
@@ -529,8 +522,7 @@ belc_essay_tbl |>
   tabyl(sex) |>
   tibble() |>
   select(sex, frequency = n, proportion = percent) |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 A **bar plot** is a type of plot where the x-axis is a categorical variable and the y-axis is the frequency of the values. The frequency is represented by the height of the bar. The variables can be ordered by frequency, alphabetically, or some other order. @fig-aa-belc-barplots is a bar chart for the variables `sex`, `group`, and `part_id`, ordered alphabetically.
@@ -703,8 +695,8 @@ Now let's consider boxplots from another angle. In @fig-aa-belc-histogram-boxplo
 #| label: fig-aa-belc-histogram-boxplot-comparison
 #| fig-cap: "Histogram and boxplot for the variable `ttr`."
 #| fig-subcap:
-#| - "Histogram"
-#| - "Boxplot (horizontal)"
+#|  - "Histogram"
+#|  - "Boxplot (horizontal)"
 #| fig-height: 3
 #| layout-ncol: 1
 
@@ -901,7 +893,7 @@ tibble(
   yank("numeric") |>
   select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |>
   tibble() |>
-  kable()
+  tt(width = 1)
 ```
 
 All things distribution are matters of degree, so there are no hard and fast rules for determining whether a distribution is normal or skewed. However, there are some general guidelines that can be used to determine the degree to which a distribution is normal or skewed, as shown in @tbl-aa-skewness-kurtosis.
@@ -910,7 +902,7 @@ All things distribution are matters of degree, so there are no hard and fast rul
 
 | Score Range | Evaluation |
 |-------------|------------|
-| -0.5 to 0.5 | Approximately symmetric |
+| -0.5 to 0.5 | Approx. symmetric |
 | -1 to -0.5 or 0.5 to 1 | Moderately skewed |
 | < -1 or > 1 | Highly skewed |
 
@@ -990,8 +982,7 @@ belc_essay_tbl |>
   select(distribution = skim_variable, mean, median, histogram = hist, skewness, kurtosis) |>
   mutate(distribution = factor(distribution, levels = c("ttr", "types", "tokens", "prop_l2"))) |>
   arrange(distribution) |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 Given the characteristics of the numeric variables in the BELC dataset, although none of them are perfectly normal, but only `prop_l2` is highly skewed. Therefore, if we intend to use these variables 'as-is' in statistical measures or tests, we now know whether to choose parametric or non-parametric alternatives.
@@ -1030,23 +1021,21 @@ In @tbl-aa-belc-contingency-tables we see contingency tables for the categorical
 #| label: tbl-aa-belc-contingency-tables
 #| tbl-cap: "Contingency tables for categorical variable `sex` and ordinal variable `group` in the BELC dataset."
 #| tbl-subcap:
-#| - "Counts"
-#| - "Percentages"
+#|  - "Counts"
+#|  - "Percentages"
 #| layout-ncol: 2
 
 belc_essay_tbl |>
   tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
-  kable() |>
-  kable_styling()
+  tt(width = 1, digits = 0)
 
 belc_essay_tbl |>
   tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
   adorn_percentages("row") |>
   adorn_pct_formatting(digits = 2) |>
-  kable() |>
-  kable_styling()
+  tt(width = 1, digits = 0)
 ```
 
 A contingency table may include only counts, as in @tbl-aa-belc-contingency-tables-1, or may include proportions or percentages in an effort to normalize the counts and make them more comparable, as in @tbl-aa-belc-contingency-tables-2.
@@ -1091,8 +1080,7 @@ In @tbl-aa-belc-pivot-table, we see a pivot table for the relationship between `
 belc_essay_tbl |>
   group_by(group) |>
   summarise(mean_tokens = mean(tokens)) |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 We see that the mean number of tokens increases from Group T1 to T4, which is consistent with the idea that the students in the higher groups are writing longer essays.
@@ -1275,7 +1263,7 @@ In line with the investigative nature of EDA, the identification of variables of
 ```{r}
 #| label: fig-eda-variables
 #| fig-cap: 'Roles of variables in EDA.'
-#| out.width: '50%'
+#| out.width: '75%'
 
 knitr::include_graphics("figures/aa-eda-variables.drawio.png")
 ```
@@ -1288,6 +1276,7 @@ For illustrative purposes let's consider the State of the Union Corpus (SOTU) [@
 #| label: tbl-eda-sotu-corpus
 #| tbl-cap: 'First ten addresses from the SOTU Corpus.'
 #| echo: false
+#| tbl-colwidths: [10, 15, 10, 15, 50]
 
 library(quanteda) # for corpus()
 sotu_corpus <-
@@ -1303,8 +1292,7 @@ sotu_tbl <-
 sotu_tbl |> # select the tibble
   slice_head(n = 10) |> # select first 10 addresses
   mutate(addresses = str_trunc(addresses, 50, "right")) |> # truncate addresses
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 A dataset such as this one could serve as a starting point to explore many different types of research questions. In order to maintain research coherence so our efforts to not careen into a free-for-all, we need to tether our feature engineering to a unit of analysis that is relevant to the research question. A **unit of analysis** is the entity that we are interested in studying. Not to be confused with the unit of observation, which is the entity that we are able to observe and measure [@Sedgwick2015].
@@ -1331,8 +1319,7 @@ eda_approaches <-
     "Co-occurence analysis", "Vector Space Models"
   )
 eda_approaches |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 The first group, **descriptive methods** can be seen as a (more robust) extenstion of the descriptive statistics covered earlier in this chapter including statistic, tabular, and visual techniques. For example, a frequency analysis of the SOTU dataset could be used to identify the most common words used by U.S. political parties in their addresses, in @fig-aa-eda-sotu-descriptive-1, or a co-occurence analysis could be used to identify the most common words the appear after the term "free", in @fig-aa-eda-sotu-descriptive-2, in the dataset.
@@ -1591,7 +1578,7 @@ Let's consider the Europarl corpus of native, non-native and translated texts (E
 #| tbl-cap: 'Data dictionary of the ENNTT corpus.'
 
 read_csv("data/aa-enntt_curated_dd.csv") |>
-  knitr::kable()
+  tt(width = 1)
 ```
 
 Now depending on our research question, we will have a different outcome variable. If we want to examine the potential linguistic differences between native and non-native speakers, we will select our outcome variable to be the  `type` (natives/ nonnatives). The features selected to use to predict `type` depend on our research question. If our research is guided by data, we will choose features that are specifically designed to boost the ability to predict. On the other hand, if our research is steered by theory, we will opt for features that are chosen due to their theoretical significance. In either case, the original dataset will likely need to be transformed.
@@ -1706,8 +1693,7 @@ swda_curated_dd <-
 
 # SWDA data dictionary ----
 read_csv("data/aa-swda_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 The Alternative Hypothesis may be formulated in this way:
@@ -1731,7 +1717,7 @@ We can now see in @fig-aa-ida-variables the variables roles assigned to variable
 ```{r}
 #| label: fig-aa-ida-variables
 #| fig-cap: 'Roles of variables in IDA.'
-#| out.width: '50%'
+#| out.width: '75%'
 
 knitr::include_graphics("figures/aa-ida-variables.drawio.png")
 ```
@@ -1769,7 +1755,8 @@ monofactorial <-
     "Numeric", "Numeric", "Pearson's correlation test"
   )
 monofactorial |>
-  knitr::kable() |>
+  kable() |>
+  kable_styling() |>
   add_header_above(c("Variable roles" = 2, " "))
 ```
 
@@ -1786,7 +1773,7 @@ multifactorial <-
     "Numeric", "varied", "varied", "Linear regression"
   )
 multifactorial |>
-  knitr::kable(booktabs = TRUE) |>
+  kable() |>
   column_spec(2:3, italic = TRUE) |>
   add_header_above(c("Variable roles" = 3, " "))
 ```
@@ -1829,6 +1816,27 @@ Together, data, code, and documentation form a **research compendium**. As you c
 
 We will have more to say about this in the next chapter but for now it will suffice to point to some key elements in a research compendium. First, the data used in the analysis should be saved as a separate file(s). As a given research project progresses to analysis, the data may be transformed and manipulated to best fit the needs of the analysis. Preserving the data at each stage adds to the complete picture of the data from collection to analysis. Second, since you are working programmatically, you can share your precise analysis step-by-step in code form. This allows others to reproduce your analysis and verify your results. Including code comments provides additional information to communicate the steps taken and your thought process. Finally, a codebook documents any additional information that helps understand the research better. This will often include guides for installing software and running the code to reproduce the analysis and an overview of the aims of the scripts and the contents of the data and datasets.
 
+## Activities {.unnumbered}
+
+In the following activies, we will build on our understanding of how to summarize data using statistics, tables, and plots. We will dive deeper into the use of the `skimr` package to summarize data and the `ggplot2` package to create plots. We also introduce producing Quarto tables and figures with appropriate code block options. We will reinforce our understanding of the `readr` package to read in data and the `dplyr` package to manipulate data.
+
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
+
+**What**: [Descriptive assessment of datasets](https://qtalr.github.io/qtalrkit/articles/recipe-3.html)\
+**How**: Read Recipe 3 and participate in the Hypothes.is online social annotation.\
+**Why**: To explore appropriate methods for summarizing variables in datasets given the number and informational values of the variable(s).
+:::
+
+::: {.callout}
+**{{< fa flask >}} Lab**
+
+**What**: [Trace the datascape](https://github.com/qtalr/lab-03)\
+**How**: Clone, fork, and complete the steps in Lab 3.\
+**Why**: To identify and apply the appropriate descriptive methods for a vector's informational value and to assess both single variables and multiple variables with the appropriate statistical, tabular, and/ or graphical summaries.
+:::
+
+
 ## Summary {.unnumbered}
 
 In this chapter we have focused on description and analysis --the third component of DIKI Hierarchy. This process is visually summarized in @fig-approaching-analysis-vis-sum.
@@ -1846,32 +1854,6 @@ Building on the strategies covered in [Chapter 2 "Understanding data"](#sec-unde
 We outlined three data analysis types in this chapter: exploratory, predictive, and inferential. Each of these embodies distinct approaches to deriving knowledge from data. Ultimately the choice of analysis type is highly dependent on the goals of the research. Inferential analysis is centered around the goal of testing a hypothesis, and for this reason it is the most highly structured approach to analysis. This structure is aimed at providing the mechanisms to draw conclusions from the results that can be generalized to the target population. Predictive analysis has a less-ambitious but at times more relevant goal of examining the extent to which a given relationship can be established from the data to provide a model of language that can accurately predict an outcome using new data. This methodology is highly effective for applying different algorithmic approaches and examining relationships between an outcome variable and various configurations of variables. The ability to explore the data in multiple ways, is also a key strength of employing an exploratory analysis. The least structured and most variable of the analysis types, exploratory analyses are a powerful approach to generating knowledge from data in an area where clear predictions cannot be made.
 
 I rounded out this chapter with a short description of the importance of communicating the analysis process and results. Reporting, in its traditional form, is documented in prose in an article. This reporting aims to provide the key information that a reader will need to understand what was done, how it was done, and why it was done. This information also provides the necessary information for reader's with a critical eye to understand the analysis in more detail. Yet even the most detailed reporting in a write-up still leaves many practical, but key, points of the analysis obscured. A programming approach provides the procedural steps taken that when shared provide the exact methods applied. Together with the write-up, a research compendium which provides the scripts to run the analysis and documentation on how to run the analysis forms an integral part of creating reproducible research.
-
-## Activities {.unnumbered}
-
-- [ ] {{< fa wrench >}} Add description of outcomes ...
-
-::: {.callout .activity}
-**{{< fa regular file-code >}} Recipe**
-
-<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-**What**: [Descriptive assessment of datasets](https://qtalr.github.io/qtalrkit/articles/recipe-3.html)\
-**How**: Read Recipe 3 and participate in the Hypothes.is online social annotation.\
-**Why**: To explore appropriate methods for summarizing variables in datasets given the number and informational values of the variable(s).
-:::
-
-::: {.callout .activity}
-**{{< fa flask >}} Lab**
-
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-<!-- [ ] update name of lab to something more lively -->
-
-**What**: [Descriptive assessment of datasets](https://github.com/qtalr/lab-03)\
-**How**: Clone, fork, and complete the steps in Lab 3.\
-**Why**: To identify and apply the appropriate descriptive methods for a vector's informational value and to assess both single variables and multiple variables with the appropriate statistical, tabular, and/ or graphical summaries.
-:::
 
 ## Questions {.unnumbered}
 

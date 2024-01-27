@@ -11,8 +11,6 @@ execute:
 #| cache: false
 ```
 
-
-
 <!--
 
 Content:
@@ -62,7 +60,7 @@ Formatting:
 
 In this chapter, we will focus on transforming a curated dataset to refine and possibly expand its relational characteristics to align with our research. I will approach the transformation process by breaking it down into five subcategories: text normalization, variable recoding, text tokenization, variable generation, and observation/ variable merging. These categories are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
 
-::: {.callout .activity}
+::: {.callout}
 **{{< fa terminal >}} Lessons**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
@@ -106,8 +104,7 @@ The contents of the data dictionary for this dataset appears in @tbl-td-europarl
 #| message: false
 
 read_csv(file = "data/cd-europarl_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation is the `lines` variable whose values are are lines of dialog.
@@ -115,10 +112,7 @@ This dataset contains transcribed source language (Spanish) and translated targe
 Let's read in the dataset CSV file with `read_csv()` and inspect the first lines of the dataset with `slice_head()` in @exm-tb-europarl-preview.
 
 ::: {#exm-tb-europarl-preview}
-```{r}
-#| label: td-europarl-read-show
-#| eval: false
-
+```r
 # Read in the dataset
 europarl_curated_tbl <-
   read_csv(file = "../data/derived/europarl_curated.csv")
@@ -129,7 +123,7 @@ europarl_curated_tbl |>
 ```
 
 ```{r}
-#| label: td-europarl-read-run
+#| label: td-europarl-read
 #| echo: false
 
 # Read in the dataset
@@ -235,7 +229,6 @@ Our test code appears in @exm-td-europarl-search-non-speech.
 ```{r}
 #| label: set-seed-sample-3
 #| echo: false
-
 
 set.seed(111)
 ```
@@ -419,7 +412,7 @@ Normalizing text can be seen as an extension of dataset curation to some extent 
 ### Orientation {#sec-td-recoding-orientation}
 
 ```{r}
-#| label: td-swda-dataset-curate-run
+#| label: td-swda-dataset-curate
 #| include: false
 
 swda_curated_tbl <-
@@ -453,17 +446,13 @@ The Switchboard dialog Act Corpus corpus contains a number of variables describi
 
 # SWDA data dictionary ----
 read_csv("data/td-swda_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
-The data dictionary gives us a sense of the variables in the dataset. Let's read in the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-td-swda-dataset-read-show.
+The data dictionary gives us a sense of the variables in the dataset. Let's read in the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-td-swda-dataset-read.
 
-::: {#exm-td-swda-dataset-read-show}
-```{r}
-#| label: td-swda-dataset-read-show
-#| eval: false
-
+::: {#exm-td-swda-dataset-read}
+```r
 # Read in the dataset
 swda_curated_tbl <-
   read_csv("data/derived/swda/swda_curated.csv")
@@ -474,7 +463,7 @@ swda_curated_tbl |>
 ```
 
 ```{r}
-#| label: td-swda-dataset-read-run
+#| label: td-swda-dataset-read
 #| echo: false
 
 swda_curated_tbl |>
@@ -666,7 +655,7 @@ For processing Chinese text, including tokenization, see the `jiebaR` package [@
 ### Orientation {#sec-td-tokenization-orientation}
 
 ```{r}
-#| label: td-cabnc-dataset-curate-run
+#| label: td-cabnc-dataset-curate
 #| include: false
 
 cabnc_curated_tbl <-
@@ -697,17 +686,13 @@ Let's look at a curated dataset from the CABNC Corpus to explore tokenization. T
 #| message: false
 
 read_csv(file = "data/td-cabnc_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
-The CABNC dataset contains a number of variables describing conversations between speakers of British English. Now let's look at the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-td-cabnc-dataset-read-show.
+The CABNC dataset contains a number of variables describing conversations between speakers of British English. Now let's look at the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in @exm-td-cabnc-dataset-read.
 
-::: {#exm-td-cabnc-dataset-read-show}
-```{r}
-#| label: td-cabnc-dataset-read-show
-#| eval: false
-
+::: {#exm-td-cabnc-dataset-read}
+```r
 # Read in the dataset
 cabnc_curated_tbl <-
   read_csv("../data/derived/cabnc/cabnc_curated.csv")
@@ -717,7 +702,7 @@ cabnc_curated_tbl |>
   slice_head(n = 10)
 ```
 ```{r}
-#| label: td-cabnc-dataset-read-run
+#| label: td-cabnc-dataset-read
 #| echo: false
 
 cabnc_curated_tbl |>
@@ -734,6 +719,8 @@ Let's assume that we are performing an exploratory analysis with this dataset an
 
 In the `cabnc_curated_tbl` data frame the `utt_text` variable contains the text we want to tokenize. We will start by tokenizing the text into words. Abstracting away from some of the metadata variables, if we envision what this should look like we might imagine something like @tbl-td-cabnc-tokenization-words-example.
 
+::: {#tbl-td-cabnc-tokenization-words-example}
+
 |  doc_id   | utt_id | utt_word |
 |----------|--------|----------|
 | KB0RE000 |      0 |      You |
@@ -742,9 +729,10 @@ In the `cabnc_curated_tbl` data frame the `utt_text` variable contains the text 
 | KB0RE000 |      0 |       in |
 | KB0RE000 |      0 |  America |
 
-: Example of tokenizing the `utt_text` variable into words. {#tbl-td-cabnc-tokenization-words-example .sm .striped}
+Example of tokenizing the `utt_text` variable into words.
+:::
 
-Comparing @tbl-td-cabnc-tokenization-words-example to the first line of the output of @exm-td-swda-dataset-read-show, we can see that we want to segment the words in the `utt_text` and then have each segment appear as a separate observation, retaining the relevant metadata variables.
+Comparing @tbl-td-cabnc-tokenization-words-example to the first line of the output of @exm-td-swda-dataset-read, we can see that we want to segment the words in the `utt_text` and then have each segment appear as a separate observation, retaining the relevant metadata variables.
 
 Before we work with tokenizing text in a data frame, let's start with a character vector to get a sense of how tokenization works and what we will need to do to achieve the output in @tbl-td-cabnc-tokenization-words-example. Let's start with a character vector which contains the first three utterances from `cabnc_curated_tbl`. I will use `slice_head(n = 3)` and then `pull()` to extract the `utt_text` character vector in @exm-td-cabnc-tokenization-words-vector.
 
@@ -889,7 +877,7 @@ In @exm-td-cabnc-tokenization-bigrams-tidytext-start-end I used `x` as the start
 
 The most common tokenization strategy is to segment text into smaller units, often words. However, there are times when we may want to segment text into larger units, effectively collapsing over rows. For example, if we are working with a curated dataset which is tokenized by words, we may want to segment the text into sentences. A couple considerations are in order, however. First, we need to be clear about what we mean by 'sentence' and how we will segment the text into sentences. In some cases key cues for sentence boundaries, such as sentencial punctuation have been stripped from the text, making a simple defnition of a sentence difficult or impossible to be performed computationally. Second, we also need to be clear how we will handle the metadata variables. In other words, when we collapse over rows, we need to be aware and intentional about how we group these new units of observation. For example, if we collapse the `cabnc_unigrams_tbl` dataset into sentences, will we group the sentences by `doc_id` or `part_id` or some other combination of metadata variables?
 
-Let's see how we might collapse text rows into larger units using the original curated CABNC data frame `cabnc_curated_tbl`. Refer back to the output in @exm-td-cabnc-dataset-read-show. The values in `utt_text` are utterances, which may map to sentences in some cases, but often not. Regardless, there is no sentential punctuation to help identify sentences, even across utterance observations. Furthermore, it may not even make sense to dicuss sentences in the context of spoken language.
+Let's see how we might collapse text rows into larger units using the original curated CABNC data frame `cabnc_curated_tbl`. Refer back to the output in @exm-td-cabnc-dataset-read. The values in `utt_text` are utterances, which may map to sentences in some cases, but often not. Regardless, there is no sentential punctuation to help identify sentences, even across utterance observations. Furthermore, it may not even make sense to dicuss sentences in the context of spoken language.
 
 A unit that may make more sense is utterances per speaker per document. Note this context 'per speaker per document'. In effect this is a grouping parameter for our approach to collapsing the text in `utt_text`. With a goal in mind we can turn to the `group_by()` function to group our dataset and then `summarize()` to collapse the text in `utt_text` with the `str_c()` and the parameter `collapse = " "`. The code is seen in @exm-td-cabnc-tokenization-utterances.
 
@@ -925,7 +913,7 @@ Second, the degree to which the resource that will be used to annotate the lingu
 ### Orientation {#sec-td-generation-orientation}
 
 ```{r}
-#| label: td-enntt-dataset-read-run
+#| label: td-enntt-dataset-read
 #| include: false
 
 enntt_natives_curated_tbl <-
@@ -948,8 +936,7 @@ The data dictionary for the curated native dataset appears in @tbl-td-enntt-nati
 #| echo: false
 
 read_csv(file = "data/enntt_natives_curated_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 Both the natives and translations datasets have the same variables. For the purposes of this investigation, the `text` and `type` variables are the most relevant. A variable to index the text, such as `doc_id`, will be useful as we move forward and will be added to the dataset.
@@ -958,6 +945,8 @@ The next step is to operationalize what we mean by syntactic simplification. The
 
 An idealized transformed dataset for this investigation would look something like @tbl-td-generation-idealized.
 
+::: {#tbl-td-generation-idealized}
+
 | doc_id | type       | t_units | word_len | text                                                                                                          |
 | ------ | ---------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------- |
 | 1      | translated | 1       | 5        | I am happy right now.                                                                                         |
@@ -965,8 +954,8 @@ An idealized transformed dataset for this investigation would look something lik
 | 3      | native     | 2       | 8        | She thinks I am not happy right now.                                                                          |
 | 4      | native     | 4       | 21       | Although she knew that the weather was bad, Mary decided to go for a walk, hoping that she would feel better. |
 
-: Idealized transformed dataset for the syntactic simplification investigation. {#tbl-td-generation-idealized .sm .striped}
-
+Idealized transformed dataset for the syntactic simplification investigation.
+:::
 To identify the main clauses and their subordinate clauses, we will need to annotate the ENNTT texts with syntactic information. Specifically, we will need to identify and count the main clauses and their subordinate clauses.
 
 ### Application {#sec-td-generation-application}
@@ -1034,11 +1023,7 @@ Parallel processing is another strategy for managing computationally expensive c
 With the `enntt_natives_tbl` object, let's execute steps 1-4, as seen in @exm-td-generation-udpipe-natives.
 
 ::: {#exm-td-generation-udpipe-natives}
-```{r}
-#| label: td-generation-udpipe-natives-show
-#| eval: false
-#| message: false
-
+```r
 # Load package
 library(udpipe)
 
@@ -1066,7 +1051,7 @@ glimpse(enntt_natives_anno)
 ```
 
 ```{r}
-#| label: td-generation-udpipe-natives-run
+#| label: td-generation-udpipe-natives
 #| echo: false
 #| message: false
 
@@ -1099,7 +1084,7 @@ glimpse(enntt_natives_ann)
 :::
 
 ```{r}
-#| label: td-generation-udpipe-translations-run
+#| label: td-generation-udpipe-translations
 #| include: false
 
 # Load package
@@ -1145,7 +1130,13 @@ library(rsyntax)
 # Plot the syntactic tree
 enntt_natives_ann |>
   filter(doc_id == 165) |>
-  plot_tree(token, upos, use_color = FALSE, viewer_mode = FALSE, textsize = 0.8)
+  plot_tree(
+    token,
+    upos,
+    use_color = FALSE,
+    viewer_mode = FALSE,
+    textsize = 0.8
+  )
 ```
 
 ::: {.callout}
@@ -1154,7 +1145,7 @@ enntt_natives_ann |>
 The plot in @fig-td-generation-udpipe-english-plot-tree was created using the `rsyntax` package [@R-rsyntax]. In addition to creating dependency tree plots, the `rsyntax` package can be used to extract syntactic patterns from the `udpipe()` annotation output. [See the documentation for more information](https://github.com/vanatteveldt/rsyntax).
 :::
 
-In @fig-td-generation-udpipe-english-plot-tree we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the `token_id` which provides the linear ordering of the sentence. Above the nodes the `dep_relation`, or dependency relationship label is provided. These labels are based on the UD project's [dependency relations](https://universaldependencies.org/u/dep/index.html). We can see that the 'ROOT' relation is at the top of the tree and corresponds to the verb 'brought'. 'ROOT' relations mark predicates in the sentence. Not seen in the example tree, 'cop' relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units. Now we need to identify the subordinate clauses. In the UD project's listings, the relations 'ccomp' (clausal complement), 'xcomp' (open clausal complement), and 'acl:relcl' (relative clause), as seen in @fig-td-generation-udpipe-english-plot-tree) are subordinate clauses.
+In @fig-td-generation-udpipe-english-plot-tree we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the `token_id` which provides the linear ordering of the sentence. Above the nodes the `dep_relation`, or dependency relationship label is provided. These labels are based on the UD project's [dependency relations](https://universaldependencies.org/u/dep/index.html). We can see that the 'ROOT' relation is at the top of the tree and corresponds to the verb 'brought'. 'ROOT' relations mark predicates in the sentence. Not seen in the example tree, 'cop' relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units. Now we need to identify the subordinate clauses. In the UD project's listings, the relations 'ccomp' (clausal complement), 'xcomp' (open clausal complement), and 'acl:relcl' (relative clause), as seen in @fig-td-generation-udpipe-english-plot-tree are subordinate clauses.
 
 To calculate the number of T-units and words per sentence we turn to the `dplyr` package. We will use the `group_by()` function to group the dataset by `doc_id` and `sentence_id` and then use the `summarize()` function to calculate the number of T-units and words per sentence, where a T-unit is the combination of the sum of main clauses and sum of subordinante clauses. The code is seen in @exm-td-generation-udpipe-natives-tunits-words.
 
@@ -1209,7 +1200,12 @@ A quick spot check of some sentences calculations `enntt_natives_ann_tunits_word
 # Preview
 enntt_natives_ann |>
   filter(doc_id == 1468) |>
-  plot_tree(token, use_color = FALSE, viewer_mode = FALSE, textsize = 0.8)
+  plot_tree(
+    token,
+    use_color = FALSE,
+    viewer_mode = FALSE,
+    textsize = 0.8
+  )
 ```
 
 Now we can drop the intermediate columns we created to calculate our key syntactic complexity measures using `select()` to indicate those that we do want to keep. I will assign the result to `enntt_natives_syn_comp` as we will be working with syntactic complexity measures for the native texts, as seen in @exm-td-generation-udpipe-natives-tunits-words-select.
@@ -1504,7 +1500,37 @@ glimpse(enntt_transformed_tbl)
 
 The output of @exm-td-merging-concatenation now looks like @tbl-td-merging-idealized. We have a dataset that has the syntactic complexity measures for both the natives and the translations. We can now write this dataset to disk and document it in the data dictionary.
 
-## Summary {-}
+
+## Activities {.unnumbered}
+
+- [ ] {{< fa wrench >}} Add description of outcomes
+
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
+
+<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] update recipe -->
+
+**What**: [Transforming and documenting datasets](https://qtalr.github.io/qtalrkit/articles/recipe-7.html)\
+**How**: Read Recipe 7 and participate in the Hypothes.is online social annotation.\
+**Why**: To work with to primary types of transformations, tokenization and joins. Tokenization is the process of recasting textual units as smaller textual units. The process of joining datasets aims to incorporate other datasets to augment or filter the dataset of interest.
+:::
+
+::: {.callout}
+**{{< fa flask >}} Lab**
+
+<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
+
+<!-- [ ] update lab -->
+
+**What**: [Transforming and documenting datasets](https://github.com/qtalr/lab-07)\
+**How**: Clone, fork, and complete the steps in Lab 7.\
+**Why**: To gain experience working with coding strategies for transforming datasets using tidyverse functions and regular expressions, practice reading/ writing data from/ to disk, and implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
+:::
+
+
+## Summary {.unnumbered}
 
 In this chapter we covered the process of transforming datasets. The goal is to manipulate the curated dataset to make it align better for analysis.
 We covered various types of transformation procedures from text normalization to data frame merges. In any given research project some or all of these steps will be employed --but not necessarily in the order presented in this chapter. It is not uncommon to mix procedures as well. The etiology of the transformation is as unique as the data that you are working with.
@@ -1520,34 +1546,6 @@ In line with the reproducible research principles, it is important to write the 
 {{< fa wrench >}} more on concluding this part and moving to the next part
 
 This chapter concludes the section on data/ dataset preparation. The next section we turn to analyzing datasets. This is the stage where we interrogate the datasets to derive knowledge and insight either through exploratory, predictive, or inferential methods.
-
-## Activities {.unnumbered}
-
-- [ ] {{< fa wrench >}} Add description of outcomes
-
-::: {.callout .activity}
-**{{< fa regular file-code >}} Recipe**
-
-<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-<!-- [ ] update recipe -->
-
-**What**: [Transforming and documenting datasets](https://qtalr.github.io/qtalrkit/articles/recipe-7.html)\
-**How**: Read Recipe 7 and participate in the Hypothes.is online social annotation.\
-**Why**: To work with to primary types of transformations, tokenization and joins. Tokenization is the process of recasting textual units as smaller textual units. The process of joining datasets aims to incorporate other datasets to augment or filter the dataset of interest.
-:::
-
-::: {.callout .activity}
-**{{< fa flask >}} Lab**
-
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-<!-- [ ] update lab -->
-
-**What**: [Transforming and documenting datasets](https://github.com/qtalr/lab-07)\
-**How**: Clone, fork, and complete the steps in Lab 7.\
-**Why**: To gain experience working with coding strategies for transforming datasets using tidyverse functions and regular expressions, practice reading/ writing data from/ to disk, and implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
-:::
 
 ## Questions {.unnumbered}
 

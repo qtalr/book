@@ -10,13 +10,6 @@ execute:
 #| child: "_common.qmd"
 #| cache: false
 ```
-<!--
-
-- [ ] (optional) Add Case studies which showcase work that falls in each category of analysis.
-- [ ] (optional) Add a table which summarizes the research goals, variable types, and methods for each type of analysis. (?)
-- [ ] Add 'Consider' callouts where appropriate
-
--->
 
 > Statistical thinking will one day be as necessary for efficient citizenship as the ability to read and write.
 >
@@ -32,12 +25,12 @@ execute:
 
 ```{r}
 #| label: aa-packages
-pacman::p_load(skimr, janitor, effectsize, tidytext)
+pacman::p_load(skimr, janitor, effectsize, tidytext, forcats)
 ```
 
 The aim of analysis is to derive knowledge from information, the next step in the DIKI Hierarchy. Where the creation of information from data involves human intervention and conscious decisions, as we have seen, deriving knowledge from information involves another level of intervention. The goal is to break down complex information into simpler components which are more readily interpretable.
 
-In what follows, we will cover the main steps in the process of analysis. The first is to inspect the data to ensure its quality and understand its characteristics. The second is to interrogate the data to uncover patterns and relationships and interpret the findings. To conclude this chapter I will outline methods to and the importance of communicating the analysis results and procedure in a transparent and reproducible manner.
+In what follows, we will cover the main steps in the process of analysis. The first is to inspect the data to ensure its quality and understand its characteristics. The second is to interrogate the data to uncover patterns and relationships and interpret the findings. To conclude this chapter, I will outline methods to and the importance of communicating the analysis results and procedure in a transparent and reproducible manner.
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
@@ -47,11 +40,7 @@ In what follows, we will cover the main steps in the process of analysis. The fi
 **Why**: To showcase methods for statistical summaries of vectors and data frames and to create informative graphics that enhance data interpretation and analysis.
 :::
 
-## Diagnose {#sec-aa-diagnose}
-
-<!-- Purpose: Organize and summarize data -->
-
-The purpose of diagnostic measures is to inspect your data to ensure its quality and understand its characteristics. There are two primary types of diagnostic measures: verfication and description. Verification methods are applied to catch missing or erroneous data while descriptive methods are used to gain a better understanding of the data. Although treated in two separate sections, in practice these methods are complementary and are often addressed in tandem.
+<!-- Set up the dataset/ dictionary -->
 
 ```{r}
 #| label: aa-belc
@@ -62,7 +51,7 @@ library(TBDBr)
 
 # Talkbank: BELC
 corpus_name <- "slabank"
-corpora <- c("slabank", "English", "BELC", "compositions")
+corpora <- c("slabank", "English", "BELC", "1-written(4t)_10-16")
 
 # Get tokens ----
 belc_tokens_tbl <-
@@ -87,14 +76,12 @@ belc_parts_tokens_tbl <-
 # Wrangling steps ----
 belc_tbl <-
   belc_parts_tokens_tbl |>
-  # remove compositions-2014/ data
-  filter(str_detect(path, "/compositions/")) |>
   # separate time_group and part_id
   separate(filename, c("time_group", "part_id"), sep = "c") |>
-  # remove 2B time group
-  filter(time_group != "2B") |>
   # replace "A" with "T" in time_group labels
   mutate(time_group = str_remove(time_group, "A")) |>
+  # filter out time_group "2B"
+  filter(time_group != "2B") |>
   mutate(time_group = str_c("T", time_group, sep = "")) |>
   # remove redundant variables
   select(-path, -who, -name, -role, -language, -age) |>
@@ -108,90 +95,9 @@ belc_tbl <-
   # subset columns
   select(part_id:month_age, utt_id:pos) |>
   # arrange observations
-  arrange(part_id, utt_id, word_id)
-
-# Save data ----
-write_rds(belc_tbl, "data/aa-belc_tbl.rds")
-
-# Create data dictionary ----
-create_data_dictionary(data = belc_tbl, file_path = "data/aa-belc_tbl_dd.csv", model = "gpt-3.5-turbo")
-```
-
-```{r}
-#| label: aa-belc-dataset-data-dictionary
-
-# Dataset
-belc_tbl <- read_rds("data/aa-belc_tbl.rds")
-# Data dictionary
-belc_dd <- read_csv("data/aa-belc_tbl_dd.csv")
-```
-
-To ground this discussion I will introduce a new dataset. This dataset is drawn from the Barcelona English Language Corpus (BELC) [@Munoz2006], which is found in the TalkBank repository. I've selected the "Written composition" task from this corpus which contains 80 writing samples from 36 second language learners of English at different ages. Participants were given the task of writing for 15 minutes on the topic of "Me: my past, present and future". Data was collected for participants from one to three times over the course of seven years (at 10, 12, 16, and 17 years of age).
-
-In @tbl-aa-belc-dd we see the data dictionary for the BELC dataset which reflects structural and transformational steps I've done so we start with a tidy dataset with `word` as the unit of observation.
-
-```{r}
-#| label: tbl-aa-belc-dd
-#| tbl-cap: "Data dictionary for the BELC dataset."
-#| tbl-colwidths: [13, 20, 50, 17]
-
-# Data dictionary ----
-belc_dd |>
-  # reorder to match understanding data chapter
-  select(everything(), description) |>
-  tt(width = 1)
-```
-
-The data dictionary provides a easily accessible overview of the dataset. This includes a human-readable mapping from variable names to variable descriptions. Further, it provides information about the type of variable (e.g., categorical, ordinal, numeric). As we will see the informational type of variables is key to diagnostic measures, as well as all other components of analysis.
-
-### Verify {#sec-aa-verfiy}
-
-<!-- Purpose: Organize and verify -->
-
-Although a dataset has undergone curation and transformation, it is still important to verify the data. This is a process of checking the data to ensure that it is accurate and complete. In the case that it is not, consideration should be given to how to address the issues.
-
-<!-- - Missing data (imputation, deletion) -->
-
-The most basic and usually the first step is to check for **missing data** to ensure that all necessary data points are present. In @tbl-aa-belc-skim-missing, there are missing values for the `lemma` and `pos` variables in the BELC dataset.
-
-```{r}
-#| label: tbl-aa-belc-skim-missing
-#| tbl-cap: "Summary output for missing values in the BELC dataset."
-
-# Skim missing data ----
-belc_tbl |>
-  # skim data
-  skim() |>
-  # create tibble
-  tibble() |>
-  # select variables
-  select(
-    variable = skim_variable,
-    type = skim_type,
-    n_missing, complete_rate
-  ) |>
-  # print table
-  tt(width = 1)
-```
-
-There are two primary approaches to dealing with missing data: deletion and recoding. Since these missing values account for only 1.5% and 0.4% of the data respectively, we might be safe to remove these observations. Another approach is to recode the missing values by either applying a unique value for missing values (e.g., `NULL`) or by imputing values. Imputing values is usually done by replacing missing values with some middle-of-the-road value (e.g., mean, median, mode), but other, more nuanced approaches are possible.
-
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
-
-For more information on missing data, see the {{< fa wrench >}} in this book.
-:::
-
-In either case, it is important to consider the implications of missing data for the analysis. For example, if the missing data is not at random or include a sizeable portion of the values of interest, then the analysis may be biased.
-
-```{r}
-#| label: aa-belc-missing-data-impute
-
-# Impute missing values
-belc_tbl <-
-  belc_tbl |>
-  # pos == n and lemma == <NA>
-  mutate(lemma = case_when(
+  arrange(part_id, utt_id, word_id) |>
+  # impute missing values
+    mutate(lemma = case_when(
     pos == "n" & is.na(lemma) ~ word,
     TRUE ~ lemma
   )) |>
@@ -205,87 +111,13 @@ belc_tbl <-
   mutate(lemma = case_when(
     is.na(lemma) ~ word,
     TRUE ~ lemma
-  ))
-```
-
-<!-- Identifying anomalies -->
-
-Value coding schemes, annotation errors, or other issues may result in **anomalies** in the data. These are values that are unusual, unexpected, or inconsistent with the rest of the data or effect the treatment of the data for the particular analysis to be performed.
-
-For categorical variables, this may include values that are not expected or are not in the set of values that are expected. A summary of the values for a given variable can be used as a first step to identify anomalies. In @tbl-aa-belc-skim-categorical, we see the minimum and maximum number of characters and the number of unique values for each categorical variable in the BELC dataset.
-
-```{r}
-#| label: tbl-aa-belc-skim-categorical
-#| tbl-cap: "Summary output for categorical variables in the BELC dataset."
-
-# Skim categorical data ----
-belc_tbl |>
-  # skim data
-  skimr::skim() |>
-  # filter to categorical variables
-  yank("character") |>
-  # create tibble
-  tibble() |>
-  # select variables
-  select(
-    variable = skim_variable,
-    min_chars = min,
-    max_chars = max,
-    num_unique = n_unique
-  ) |>
-  # print table
-  tt(width = 1)
-```
-
-From our knowledge of the data, we can gauge whether these values are expected. For example, `sex` has two values; likely corresponding to some coding of 'male' and 'female'. The variable `part_id` has 36 distinct values, which is expected since there are 36 participants and `group` has four, corresponding to the longitudinal time groups. It is also possible to gauge the expected values for `lemma` as we know that these are the base words and should be less than the number of words in the dataset.
-
-Further verfication of the categorical variables is needed, of course. This may include aggregating the data to see the distribution of values and/ or checking the values against the documentation.
-
-<!-- [ ] the point on outliers can refer to the next section -->
-
-Let's now consider numeric variables. Numeric variables, by their very nature, do not lend themselves to the same type of summary used for categorical variables (*i.e.* character lengths, number of unique values, or aggregation) to detect anomalies. For numeric variables there are two types of anomalies that we will consider: outliers and errors in coding. **Outliers** are anomalies that are extreme values that are not representative of the great majority of the data points. To determine what is extreme, we need to consider the distribution of the data, that is, the range of values and the frequency of values. It is rarely the case that we can eyeball the distribution of the data based on raw values. Instead, a combination of summary statistics and visualizations are used to determine the distribution of the data. For this reason, the detection of outliers is often carried out as part of the descriptive assessment of the data, as we will see in @sec-aa-describe.
-
-On the other hand, coding anomalies are values that are not expected or are not in the set of values that are expected. These can sometimes be detected by visual inspection of the data. For example, in @tbl-aa-belc-numeric, we see the first 10 observations for each variable in the BELC dataset.
-
-```{r}
-#| label: tbl-aa-belc-numeric
-#| tbl-cap: "First 10 observations for variables in the BELC dataset."
-
-# Variables ----
-belc_tbl |>
-  slice_head(n = 10) |>
-  tt(width = 1)
-```
-
-Leaving `month_age` aside, we see that the other two numeric variables `utt_id` and `word_id` index utterances and words respectively. However, in contrast to `part_id` which is a categorical variable as it serves as a unique identifier for each participant, these variables are numeric as they serve to not only index utterances and words but also to provide a measure of how many utterances or words have been produced. Seen in this light, `0` for the first value of `utt_id` and `word_id` is unexpected. To adjust for this, we can add `1` to each value of these variables.
-
-```{r}
-#| label: aa-belc-numeric-adjust
-
-# Adjust numeric variables ----
-belc_tbl <-
-  belc_tbl |>
-  # adjust utt_id and word_id
+  )) |>
+  # adjust numberic variables
+    # adjust utt_id and word_id
   mutate(
     utt_id = utt_id + 1,
     word_id = word_id + 1
   )
-```
-
-### Describe {#sec-aa-describe}
-
-<!-- Purpose: Summarizing data -->
-
-The goal of descriptive statistics is to summarize the data in order to understand and prepare the data for the analysis approach to be performed. This is accomplished through a combination of statistic measures and/ or tabular or graphic summaries. The choice of descriptive statistics is guided by the type of data, as well as the question(s) being asked of the data.
-
-To that end, let's consider a reconfiguration of the BELC dataset, in @tbl-aa-belc-reconfig, which will provide a more illustrative dataset.
-
-```{r}
-#| label: aa-belc-reconfig
-#| eval: false
-
-# Reconfigure BELC dataset ----
-# Unit of observation: essay
 
 belc_essay_tbl <-
   belc_tbl |>
@@ -331,22 +163,67 @@ write_rds(belc_essay_tbl, "data/aa-belc_essay_tbl.rds")
 create_data_dictionary(belc_essay_tbl, "data/aa-belc_essay_tbl_dd.csv", model = "gpt-3.5-turbo")
 ```
 
-```{r}
-#| label: tbl-aa-belc-reconfig
-#| tbl-cap: "First 10 observations of the reconfigured BELC dataset."
+<!-- Load dataset/ origin/ dictionary -->
 
-# Read data ----
+```{r}
+#| label: aa-belc-dataset-data-dictionary
+#| message: false
+
+# Dataset
 belc_essay_tbl <- read_rds("data/aa-belc_essay_tbl.rds")
+
+# Data dictionary
+belc_essay_dd <- read_csv("data/aa-belc_essay_tbl_dd.csv")
+```
+
+## Describe {#sec-aa-describe}
+
+<!-- Purpose -->
+
+The goal of descriptive statistics is to summarize the data in order to understand and prepare the data for the analysis approach to be performed. This is accomplished through a combination of statistic measures and/ or tabular or graphic summaries. The choice of descriptive statistics is guided by the type of data, as well as the question(s) being asked of the data.
+
+In descriptive statistics, there are four basic questions that are asked of each of the variables in the dataset. Each correspond to a different type of descriptive measure.
+
+1. **Central Tendency**: Where do the data points tend to be located?
+2. **Dispersion**: How spread out are the data points?
+3. **Distribution**: What is the overall shape of of the data points?
+4. **Association**: How are these data points related to other data points?
+
+<!-- Dataset used to groud the discussion -->
+
+To ground this discussion I will introduce a new dataset. This dataset is drawn from the Barcelona English Language Corpus (BELC) [@Munoz2006], which is found in the TalkBank repository. I've selected the "Written composition" task from this corpus which contains 80 writing samples from 36 second language learners of English at different ages. Participants were given the task of writing for 15 minutes on the topic of "Me: my past, present and future". Data was collected for participants from one to three times over the course of seven years (at 10, 12, 16, and 17 years of age).
+
+
+In @tbl-aa-belc-dd we see the data dictionary for the BELC dataset which reflects structural and transformational steps I've done so we start with a tidy dataset with `essay_id` as the unit of observation.
+
+```{r}
+#| label: tbl-aa-belc-dd
+#| tbl-cap: "Data dictionary for the BELC dataset."
+#| tbl-colwidths: [13, 17, 15, 55]
+
+# Data dictionary ----
+belc_essay_dd |>
+  tt(width = 1)
+```
+
+The data dictionary provides a easily accessible overview of the dataset. This includes a human-readable mapping from variable names to variable descriptions. Further, it provides information about the type of variable (e.g., categorical, ordinal, numeric). As we will see the informational type of variables is key to descriptive measures, as well as all other components of analysis.
+
+Now, let's take a look a the first few observations of the BELC dataset to get another perspective on the dataset as we view the values of the dataset.
+
+```{r}
+#| label: tbl-aa-belc-overview
+#| tbl-cap: "First 5 observations of the BELC dataset."
+#| tbl-colwidths: [12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5]
 
 # View data ----
 belc_essay_tbl |>
   # select first 10 observations
-  slice_head(n = 10) |>
+  slice_head(n = 5) |>
   # print table
   tt(width = 1)
 ```
 
-In this new configuration, the unit of observation is now `essay_id`. Each of the following variable are attributes or measures of this variable. The new variables in this dataset are aggregates of the previous BELC dataset: `tokens` is the number of total words, `types` is the number of unique words, `ttr` is the ratio of unique words to total words. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity. Finally, the proportion of L2 words (English) to the total words (tokens) is provided in `prop_l2`.
+In @tbl-aa-belc-overview, each of the variable are attributes or measures of the `essay_id` variable. `tokens` is the number of total words, `types` is the number of unique words, `ttr` is the ratio of unique words to total words. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity. Finally, the proportion of L2 words (English) to the total words (tokens) is provided in `prop_l2`.
 
 ::: {.callout}
 **{{< fa regular file-alt >}} Case study**
@@ -354,14 +231,9 @@ In this new configuration, the unit of observation is now `essay_id`. Each of th
 Type-Token Ratio is a standard metric for measuring lexical diversity, but it is not without its flaws. Most importantly, TTR is highly sensitive to the word length of the text. @Duran2004 discuss this limitation, and the limitations of other lexical diversity measures and propose a new measure $D$ which shows a stronger correlation with language proficiency in their comparative studies.
 :::
 
-In descriptive statistics, there are four basic questions that are asked of each of the variables in the dataset. Each correspond to a different type of descriptive measure.
+Let's now turn our attention to exploring descriptive measures using the BELC dataset.
 
-1. Central Tendency: Where do the data points tend to be located?
-2. Dispersion: How spread out are the data points?
-3. Distribution: What is the overall shape of of the data points?
-4. Interdependence: How are these data points related to other data points?
-
-#### Central tendency {#sec-aa-central-tendency}
+### Central tendency {#sec-aa-central-tendency}
 
 <!-- Location -->
 <!-- - Central tendency (mean, median, mode) -->
@@ -408,7 +280,7 @@ aa_skim <- skim_with(
 
 The central tendency is measure which aims to summarize the data points in a variable as the most representative, middle or most typical value. There are three common measures of central tendency: the mode, mean and median. Each differ in how they summarize the data points.
 
-<!-- <img src="figures/word-mapper.png" width="200" align="right"/>  -->
+The **mode** is the value, or values, that appears most frequently in a set of values. If there are multiple values with the highest frequency, then the variable is said to be multimodal. The most versatile of the central tendency measures as it can be applied to all levels of measurement, although the mode is not often used for numeric variables as it is not as informative as other measures.
 
 ::: {.callout}
 **{{< fa lightbulb >}} Consider this**
@@ -435,11 +307,9 @@ include_graphics("figures/ud-word-mapper.png")
 :::
 
 
-The **mode** is the value, or values, that appears most frequently in a set of values. If there are multiple values with the highest frequency, then the variable is said to be multimodal. The most versatile of the central tendency measures as it can be applied to all levels of measurement, although the mode is not often used for numeric variables as it is not as informative as other measures.
-
 The more common measures for numeric variables are the mean and the median. The **mean** is a summary statistic calculated by summing all the values and dividing by the number of values. The **median** is calculated by sorting all the values in the variable and then selecting the middle value. Given that the mean and median are calculated differently, they will not always yield the same result. Differences that appear between the mean and median will be of interest to us later in this chapter.
 
-#### Dispersion
+### Dispersion
 
 The mean, median, and mode provide summary information where data points tend to be located. However, they do not provide us with any understanding as to how representative this value is. To provide this context, the spread of the values around the central tendency, or **dispersion**, is calculated.
 
@@ -491,14 +361,14 @@ When interpreting these numeric summary values, it is important to only directly
 
 The inability to compare summary statistics across variables is a key reason why **standardization** is often applied before submiting a dataset for analysis [@Johnson2008; @Baayen2008a].
 
-Standardization is a scale-based transformation that changes the scale of the values to a common scale, or *z-scores*. The result of this transformation puts data points of each variable on the same scale and allows for direct comparison. Furthermore, standardization also mitigates the influence of variables with large values. This is particularly important in multivariate analysis where the influence of variables with large values can be magnified.
+Standardization is a scale-based transformation that changes the scale of the values to a common scale, or *z-scores*. The result of this transformation puts data points of each variable on the same scale and allows for direct comparison. Furthermore, standardization also mitigates the influence of variables with large values relative to other variables. This is particularly important in multivariate analysis where the influence of variables with large values can be magnified.
 
 The caveat is that standardization masks the original meaning of the data. That is, if we consider token frequency, before standardization, we can say that a value of 1000 tokens is 1000 tokens. After standardization, we can only say that a value of 1 is 1 standard deviation from the mean. This is why standardization is often applied after the descriptive phase of analysis.
 :::
 
 Another thing to note in @tbl-aa-belc-descriptive-stats-numeric is that the mean and median are not the same. They are both measures of central tendency, but the mean is more sensitive to extreme values than the median. The difference between the mean and median is a numeric representation that gives us a first glimpse of the distribution of the data. With this in mind, let's turn to the distribution of the variables.
 
-#### Distributions
+### Distributions
 
 <!-- - Distributions  -->
 
@@ -557,12 +427,6 @@ belc_essay_tbl |>
 # Bar plot `group` ----
 belc_essay_tbl |>
   create_barplot(group, "Time group", "Frequency")
-
-# # Bar plot `part_id` ----
-# belc_essay_tbl |>
-#   create_barplot(part_id, "Participant ID", "Frequency") +
-#   ylim(0, 4) + # add y-limits particular to part_id
-#   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 So for a frequency table or barplot, we can see the frequency of each level of a categorical variable. This gives us some knowledge about the BELC dataset: there are more girls in the dataset and more essays appear in first and third time groups. If we were to see any clearly loopsided categories, this would be a sign of imbalance in the data and we would need to consider how this might impact our analysis.
@@ -655,6 +519,8 @@ belc_essay_tbl |>
 Focusing on the details captured in the histogram we are better able to detect potential outliers. Outliers can reflect valid values that are simply extreme or they can reflect something erroneous in the data. To distinguish between these two possibilities, it is important to know the context of the data. Take, for example, @fig-aa-belc-histograms-3. We see that there is a bin near the value 1.0. Given that the type-token ratio is a ratio of the number of types to the number of tokens, it is unlikely that the type-token ratio would be exactly 1.0 as this would mean that every word in an essay is unique. Another, less dramatic, example is the bin to the far right of @fig-aa-belc-histograms-1. In this case, the bin represents the number of tokens in an essay. An uptick in the number of essays with a large number of tokens is not surprising and would not typically be considered an outlier. On the other hand, consider the bin near the value 0 in the same plot. It is unlikely that a true essay would have 0, or near 0, words and therefore a closer look at the data is warranted.
 
 It is important to recognize that outliers contribute undue influence to overall measures of central tendency and dispersion. To appreciate this, let's consider another helpful visualization called a **boxplot**. A boxplot is a visual representation which aims to represent the central tendency, dispersion, and distribution of a numeric variable in one plot.
+
+<!-- [ ] PDF chokes on this layout -->
 
 ::: {#fig-aa-belc-boxplots layout="[[ 40, 60 ]]"}
 
@@ -915,13 +781,13 @@ In the case that a variable is highly skewed, it is often useful to attempt tran
 
 It is important to note, however, that if scale-based transformations are to be applied to a variable, they should be applied after the log-transformation as the log of negative values is undefined.
 
-#### Interdependence
+### Association
 
 <!-- Purpose: nature and strength -->
 
-We have covered the first three of the four questions we are interested in asking in a descriptive analysis. The fourth, and last, question is whether there is mutual dependence between variables. If so, what is the directionality and what is the apparent magnitude of the dependence? Knowing the answers to these questions will help frame our approach to analysis.
+We have covered the first three of the four questions we are interested in asking in a descriptive analysis. The fourth, and last, question is whether there is an association between variables. If so, what is the directionality and what is the apparent magnitude of the dependence? Knowing the answers to these questions will help frame our approach to analysis.
 
-To assess interdependence, the number and information types of the variables under consideration are important. Let's start by considering two variables. If we are working with two variables, we are dealing with a **bivariate** relationship. Given there are three informational types (categorical, ordinal, and numeric), there are six logical bivariate combinations: categorical-categorical, categorical-ordinal, categorical-numeric, ordinal-ordinal, ordinal-numeric, and numeric-numeric.
+To assess association, the number and information types of the variables under consideration are important. Let's start by considering two variables. If we are working with two variables, we are dealing with a **bivariate** relationship. Given there are three informational types (categorical, ordinal, and numeric), there are six logical bivariate combinations: categorical-categorical, categorical-ordinal, categorical-numeric, ordinal-ordinal, ordinal-numeric, and numeric-numeric.
 
 The directionality of a relationship will take the form of a tabular or graphic summary depending on the informational value of the variables involved. In @tbl-aa-summary-types, we see the appropriate summary types for each of the six bivariate combinations.
 
@@ -1070,7 +936,7 @@ We see that there is an apparent positive relationship between these two variabl
 
 <!-- Assocation/ Correlation strength -->
 
-Once a sense of the directionality of a relationship can be established, the next step is to gauge the relative strength, or association. **Association** refers to any relationship in which there is a dependency between two variables. There are a number of measures of association which aim to provide a statistic which summarizes the strength of an association, seen in @tbl-aa-association-measures.
+Once a sense of the directionality of a relationship can be established, the next step is to gauge the relative strength of an association. There are a number of measures of association which aim to provide a statistic which summarizes the strength of an association, seen in @tbl-aa-association-measures.
 
 |                                 | Categorical            | Ordinal                 | Numeric<br>*Non-parametric* | Numeric<br>*Parametric*   |
 |---------------------------------|------------------------|-------------------------|-----------------------------|---------------------------|
@@ -1081,9 +947,9 @@ Once a sense of the directionality of a relationship can be established, the nex
 
 : Measures of association or correlation strength for different combinations of variable types. {#tbl-aa-association-measures tbl-colwidths="[20, 20, 20, 20, 20]" .sm .striped}
 
-At the stage of descriptive analysis, however, we tend to focus on the visual and tabular summaries to gauge the strength of the association.
+At the stage of descriptive analysis, however, we tend to focus on the visual and tabular summaries to gauge the strength of the association and let our analysis provide metrics for association strength.
 
-Before moving on to the next section, it is important to remember than through the process of diagnostic measures, we gain a thorough understanding of our data's characteristics and quality, preparing us for the analysis. The decisions we make at this stage, from handling missing data to understanding the distribution of our variables, can have significant implications on our approach and interpretation in the subsequent analysis. So, this initial step of data analysis deserves our careful attention and scrutiny.
+Before moving on to the next section, it is important to remember than through the process of descriptive measures, we gain a thorough understanding of our data's characteristics and quality, preparing us for the analysis. The decisions we make at this stage, from estimating central tendency to understanding the possible association between our variables, can have significant implications on our approach and interpretation in the subsequent analysis. So, this initial step of data analysis deserves our careful attention and scrutiny.
 
 ## Analyze {#sec-aa-analyze}
 

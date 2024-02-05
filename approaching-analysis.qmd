@@ -522,30 +522,12 @@ It is important to recognize that outliers contribute undue influence to overall
 
 <!-- [ ] PDF chokes on this layout -->
 
-::: {#fig-aa-belc-boxplots layout="[[ 40, 60 ]]"}
-
-```{r}
-#| label: fig-aa-belc-boxplot
-#| fig-cap: "Boxplot"
-#| fig-width: 4
-#| fig-height: 4.9
-
-p1 <-
-  belc_essay_tbl |>
-  ggplot(aes(y = ttr)) +
-  geom_boxplot() +
-  labs(y = "Type-Token Ratio Score", x = "") +
-  theme(axis.text.x = element_blank()) +
-  scale_y_continuous(limits = c(0.4, 1.02))
-
-p1
-```
-
 ```{r}
 #| label: fig-aa-belc-histogram-boxplot
+#| fig-cap: "Understanding boxplots"
 #| fig-subcap:
 #|  - "Histogram"
-#|  - "Boxplot (horizontal)"
+#|  - "Boxplot"
 #| fig-width: 6
 #| fig-asp: 0.283
 #| layout-nrow: 2
@@ -562,7 +544,7 @@ mean_val <-
   mean()
 
 # Histogram plot ----
-p2 <-
+p1 <-
   belc_essay_tbl |>
   ggplot(aes(x = ttr)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30, color = "#BDBDBD", fill = "white") +
@@ -575,27 +557,24 @@ p2 <-
   theme(axis.text.y = element_blank()) +
   scale_x_continuous(limits = c(0.4, 1.02))
 
-p2
+p1
 
 # Boxplot ----
-p3 <-
-  p1 +
-  # add X annotation for mean
-  geom_segment(aes(x = -0.38, xend = 0.38, y = mean(ttr), yend = mean(ttr)), linetype = "dashed", linewidth = 1) +
-  # geom_rug() +
-  coord_flip() +
+p2 <-
+  belc_essay_tbl |>
+  ggplot(aes(x = ttr)) +
+  geom_boxplot() +
+  scale_x_continuous(limits = c(0.4, 1.02)) +
+  geom_segment(aes(y = -0.38, yend = 0.38, x = mean(ttr), xend = mean(ttr)), linetype = "dashed", linewidth = 1) +
   labs(y = "", x = "") +
   theme(axis.text.y = element_blank())
 
-p3
+p2
 ```
 
-Understanding boxplots
-:::
+In @fig-aa-belc-histogram-boxplot-2 we see a boxplot for `ttr` variable. The box in the middle of the plot represents the interquartile range (IQR) which is the range of values between the first quartile and the third quartile. The solid line in the middle of the box represents the median. The lines extending from the box are called 'whiskers' and provide the range of values which are within 1.5 times the IQR. Values outside of this range are plotted as individual points.
 
-In @fig-aa-belc-boxplot we see a boxplot for `ttr` variable. The box in the middle of the plot represents the interquartile range (IQR) which is the range of values between the first quartile and the third quartile. The solid line in the middle of the box represents the median. The lines extending from the box are called 'whiskers' and provide the range of values which are within 1.5 times the IQR. Values outside of this range are plotted as individual points.
-
-Now let's consider boxplots from another angle. In @fig-aa-belc-histogram-boxplot-2 I've plotted the boxplot horizontally, right below the histogram in @fig-aa-belc-histogram-boxplot-1. In this view, we can see that a boxplot is a simplifed histogram augmented with central tendency and dispersion statistics. While histograms focus on the frequency distribution of data points, boxplots focus on the data's quartiles and potential outliers.
+Now let's consider boxplots from another angle. Just above in @fig-aa-belc-histogram-boxplot-1 I've plotted a histogram. In this view, we can see that a boxplot is a simplifed histogram augmented with central tendency and dispersion statistics. While histograms focus on the frequency distribution of data points, boxplots focus on the data's quartiles and potential outliers.
 
 I've added a dashed line in @fig-aa-belc-histogram-boxplot-1 and @fig-aa-belc-histogram-boxplot-2 to signal the mean in this set of plots, but it is not typically included. I include the dashed line to make a point: the mean is more sensitive to outliers than the median. As I pointed out in @sec-aa-central-tendency, the mean is the sum of all values divided by the number of values. If there are extreme values, the mean will be pulled in the direction of the extreme values. The median, however, is the middle value and a few extreme values have less effect. So, when central tendency is reported, if there is a sizeable difference between the mean and the median, measures of dispersion will be larger and the direction of the difference can be used to infer the presence of outliers.
 
@@ -724,6 +703,8 @@ ggplot(right_skew_data, aes(x = value)) +
   theme_qtalr(font_size = 13)
 
 ```
+
+<!-- [ ] Make note somehow that a simulation-based inference method approach will be used in this textbook @Morris2019 and @Rossman2014a -->
 
 Assessing the distribution of a variable is important for two reasons. First, the distribution of a variable can inform the choice of statistical test in theory-based hypothesis testing. Data that are normally, or near-normally distributed are often analyzed using parametric tests while data that exhibit a skewed distributed are often analyzed using non-parametric tests. Second, highly skewed distributions have the effect of compressing the range of values. This can lead to a loss of information and can make it difficult to detect patterns in the data.
 
@@ -1281,6 +1262,7 @@ Let's consider the Europarl corpus of native, non-native and translated texts (E
 ```{r}
 #| label: tbl-enntt-dd
 #| tbl-cap: 'Data dictionary of the ENNTT corpus.'
+#| tbl-colwidths: [18, 15, 15, 62]
 
 read_csv("data/aa-enntt_curated_dd.csv") |>
   tt(width = 1)

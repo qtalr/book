@@ -15,22 +15,9 @@ execute:
 
 Content:
 
-- [ ] adding a description of the importance of the 'unit of analysis' in the structuring of the curated dataset
-  - Note: this is touched upon in the 'Foundations' part, but it is important to see how this is implemented in the curation process.
-  - Also it should be mentioned that many times you want to keep the unit of observation and sometimes the unit of analysis somewhat flexible, so that you can explore different ways of framing the data (especially in the case of IDA approaches).
-- [ ] the unit of analysis is tied with the research question --so consider how to frame the curation process for the various data/ datasets so that the unit of analysis
-  - [ ] Note: the unit of observation is where we are going in the next chapter with "Transform datasets". So we need to make sure that we are clear about the distinction between the two.
-
 Exercises:
 
-- [ ] add concept questions to Activities
-- [ ] add exercises to Activities
 - [ ] add thought questions/ case studies to prose sections
-
-Formatting:
-
-- [ ] cite the packages used
-
 -->
 
 > The hardest bit of information to extract is the first piece.
@@ -54,14 +41,14 @@ Formatting:
 
 ```
 
-In this chapter we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. In this chapter we will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method(s) that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.
+In this chapter, we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. We will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
 
 <!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-**What**: [Pattern Matching and Tidy Datasets](https://github.com/qtalr/lessons)\
+**What**: [Pattern Matching, Tidy Datasets](https://github.com/qtalr/lessons)\
 **How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To familiarize yourself with the basics of using the pattern matching syntax Regular Expressions and the `dplyr` package to manipulate data into Tidy datasets.
 :::
@@ -132,8 +119,6 @@ get_compressed_data(
 )
 ```
 
-<!-- [x] Update directory structure and reference to the data -->
-
 Now let's get familiar with the corpus directory structure and the files. In @exm-cd-europarl-file-structure, we see that there are two corpus files, *europarl-v7.es-en.es* and *europarl-v7.es-en.en*, that contain the source and target language texts, respectively. The file names indicate that the files contain Spanish-English parallel texts. The *.es* and *.en* extensions indicate the language of the text.
 
 Looking at the beginning of the *.es* and *.en* files, in @lst-cd-europarl-es and @lst-cd-europarl-en, we see that the files contain a series of lines in either the source or target language.
@@ -171,32 +156,27 @@ Now, before embarking on a data curation process, it is recommendable to define 
 
 Given what we know about the data, we can define the idealized structure of the data as seen in @tbl-cd-europarl-structure-example.
 
-<!-- [ ] present this in data dictionary format. Avoids need for example values -->
-
 ```{r}
 #| label: tbl-cd-europarl-structure-example
 #| tbl-cap: "Idealized structure for the europarl Corpus dataset."
+#| tbl-colwidths: [10, 17, 19, 54]
 #| echo: false
 
 tribble(
-  ~doc_id, ~type, ~line_id, ~line,
-  1, "Source", 1, "...line from source language",
-  2, "Source", 2, "...",
-  3, "Source", 3, "...",
-  4, "Target", 1, "...line from target language",
-  5, "Target", 2, "...",
-  6, "Target", 3, "..."
+  ~variable, ~name, ~variable_type, ~description,
+  "doc_id", "Document ID", "integer", "Unique identifier for each line in the corpus.",
+  "type", "Type", "character", "Indicates whether the line is from the source or target language.",
+  "line_id", "Line ID", "integer", "Unique identifier for each line for each `type`.",
+  "line", "Line", "character", "Contains the text of the line, and maintains the structure of the original data."
 ) |>
   tt(width = 1)
 ```
-
-The dataset structure in @tbl-cd-europarl-structure-example has four columns. The first column, `doc_id` is a unique identifier for each line in the corpus. `type`, indicates whether the line is from the source or target language. The third column, `line_id`, is a unique identifier for each line for each `type`. The last column, `line`, contains the text of the line, and maintains the structure of the original data. The observations are lines.
 
 Our task now is to develop code that will read the original data and render the idealized structure as a curated dataset we will write to the *data/derived/* directory. The code we develop will be added to the *2-curate-data.qmd* file. And finally, the dataset will be documented with a data dictionary file.
 
 ### Tidy the data
 
-To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. We will use the `readtext()` function from the `readtext` package. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory.
+To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. We will use the `readtext()` function from the `readtext` package [@R-readtext]. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory.
 
 ::: {#exm-cd-europarl-readtext}
 ```r
@@ -229,7 +209,7 @@ europarl_docs_tbl <-
 In @exm-cd-europarl-readtext, the `readtext()` function reads all the files in the *../data/original/europarl/* directory and returns a tibble.
 
 ::: {.callout}
-**{{< fa exclamation-triangle >}} Warning**
+**{{< fa regular hand-point-up >}} Tip**
 
 The `readtext()` function can read many different types of file formats, from structured to unstructured. However, it depends in large part on the extension of the file to recognize what algorithm to use when reading a file. In this particular case, the Europarl files do not have a typical extension (they have `.en` and `.es`). The `readtext()` function will treat them as plain text (`.txt`), but it will throw a warning message. To suppress the warning message you can add the `verbosity = 0` argument or set `readtext_options(verbosity = 0)`.
 :::
@@ -253,7 +233,9 @@ We see that the output from @exm-cd-europarl-readtext-str is a tibble with two c
 Note that the `str()` function from base R is similar to `glimpse()`. However, `glimpse()` will attempt to show you as much data as possible. In this case since our column `text` is a very long character vector it will take a long time to render. I've chosen the `str()` function as it will automatically truncate the data.
 :::
 
-The fact that we only have one row for each file means that all the text in each file is contained in one cell! We want to break these cells up into rows for each line, as they appear in the original data. You may be wondering why the `readtext()` function did not do this for us, after all the original data was already separated into lines. The reason is that the `readtext()` function chose to read the files as plain text, and plain text does not have any structure. The line breaks, however, are still there, they are just represented as a special character, `\n`. Comparing @exm-cd-europarl-text-lines and @exm-cd-europarl-text-lines-raw, we can see that the text is a single long character vector, and that the line breaks are represented as `\n`.
+The fact that we only have one row for each file means that all the text in each file is contained in one cell! We want to break these cells up into rows for each line, as they appear in the original data. You may be wondering why the `readtext()` function did not do this for us, after all the original data was already separated into lines. The reason is that the `readtext()` function chose to read the files as plain text, and plain text does not have any structure. The line breaks, however, are still there, they are just represented as a special character, `\n`.
+
+In @exm-cd-europarl-text-lines, we can see a truncated version of the text as it is in a printed format. The `str_trunc()` function from the `stringr` package [@R-stringr] truncates the text to the first 50 characters. The `str_view()` function from the same package allows us to see the text in a viewer pane.
 
 ::: {#exm-cd-europarl-text-lines}
 ```{r}
@@ -267,6 +249,8 @@ europarl_docs_tbl |>
 ```
 :::
 
+In @exm-cd-europarl-text-lines-raw, we can see the raw text, that is, the text as it is stored in the computer. The `use_escapes = TRUE` argument tells the `str_view()` function to show the special characters as they are stored in the computer. This includes the `\n` line-feed character, which represents a line break.
+
 ::: {#exm-cd-europarl-text-lines-raw}
 ```{r}
 #| label: cd-europarl-text-lines-raw
@@ -279,17 +263,13 @@ europarl_docs_tbl |>
 ```
 :::
 
-In @exm-cd-europarl-text-lines, we can see a truncated version of the text as it is in a printed format. The `str_trunc()` function from the `stringr` package [@R-stringr] truncates the text to the first 50 characters. The `str_view()` function from the same package allows us to see the text in a viewer pane.
-
-In @exm-cd-europarl-text-lines-raw, we can see the raw text, that is, the text as it is stored in the computer. The `use_escapes = TRUE` argument tells the `str_view()` function to show the special characters as they are stored in the computer. This includes the `\n` line-feed character, which represents a line break.
+We can see that the text is a single long character vector, and that the line breaks are represented as `\n`. So our goal is to split the text for each file into lines creating a new row for each line created.
 
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
 The `str_view()` with the argument `use_escapes = TRUE` also allows you to see other special characters, such as `\t` (tab) and `\r` (carriage return) as well as Unicode characters, such as `\u00f3n` (ó), `\u00ed` (í), *etc.*. These characters are not visible in the printed version of the text, but they are there in the raw text.
 :::
-
-We can see that the text is a single long character vector, and that the line breaks are represented as `\n`. So our goal is to split the text for each file into lines creating a new row for each line created.
 
 To do this we will use another function from the `stringr` package, `str_split()`, whose function is to split a character vector into smaller character vectors based on some splitting criteria. In @exm-cd-europarl-text-lines-tbl, we use the `str_split()` function to split the text into lines based on the `\n` character and assign it to the new column `lines` using `mutate()`. Since we will not need the `text` column anymore, we can use `select()` to drop it.
 
@@ -327,7 +307,7 @@ europarl_lines_tbl |>
 ```
 :::
 
-Remember that the data in the Europarl corpus is aligned, meaning that each line in the source file is aligned with a line in the target file. So we need to make sure that the number of lines in each file is the same. We can do this by grouping the data by `doc_id` and then counting the number of lines in each file. We can do this using the `group_by()` and `count()` functions from the `dplyr` package [@R-dplyr]. We can see the output in @exm-cd-europarl-text-lines-tbl-count.
+Remember that the data in the Europarl corpus is aligned, meaning that each line in the source file is aligned with a line in the target file. So we need to make sure that the number of lines in each file is the same. We can do this by grouping the data by `doc_id` and then counting the number of lines in each file. We can do this using the `group_by()` and `count()` functions from the `dplyr` package. We can see the output in @exm-cd-europarl-text-lines-tbl-count.
 
 ::: {#exm-cd-europarl-text-lines-tbl-count}
 ```{r}
@@ -424,103 +404,13 @@ glimpse(europarl_curated_tbl)
 
 The preview output from @exm-cd-europarl-curated-tbl shows us that we now have the desired four columns, `doc_id`, `type`, `line_id`, and `lines`. The rows are sorted by `line_id`, `type`, and `doc_id`. This gives us a dataset that reads left to right from document to line oriented attributes and top to bottom by source-target line pairs.
 
-### Write dataset
-
-At this point we have the curated dataset (`europarl_curated_tbl`) in a tidy format. This dataset, however, is only in the current R session. We will want to write this dataset to disk so that in the next step of the text analysis workflow (transformation) we will be able to start work on this dataset and make changes as needed to fit our analysis needs.
-
-We will leverage the project directory structure which has distinct directories for `original/` and `derived/` data(sets), seen in @exm-cd-europarl-write-directory.
-
-::: {#exm-cd-europarl-write-directory}
-```bash
-data/
-│── analysis/
-├── derived/
-└── original/
-    │── europarl_do.csv
-    └── europarl/
-        ├── europarl-v7.es-en.es
-        └── europarl-v7.es-en.en
-```
-:::
-
-Since this is a tabular, tidy dataset we have various options for the file type to write. Many of these formats are software-specific, such as `*.xlsx` for Microsoft Excel, `*.sav` for SPSS, `*.dta` for Stata, and `*.rds` for R. We will use the `*.csv` format since it is a common format that can be read by many software packages. We will use the `write_csv()` function from the `readr` package to write the dataset to disk.
-
-Now the question is where to save our CSV file. Since our `europarl_curated_tbl` dataset is derived by our work, we will added it to the `derived/` directory. I'll create a `europarl/` directory with `dir_create()` just to keep things organized.
-
-::: {#exm-cd-unstructured-write-europarl}
-```{r}
-#| label: cd-unstructured-write-europarl
-#| eval: false
-
-# Create the europarl/ directory
-dir_create(path = "../data/derived/europarl/")
-
-# Write the curated dataset to disk
-write_csv(
-  x = europarl_curated_tbl,
-  file = "../data/derived/europarl/europarl_curated.csv"
-)
-```
-:::
-
-After running the code in @exm-cd-unstructured-write-europarl, the directory structure under the `derived/` directory should look like @exm-cd-unstructured-write-europarl-directory.
-
-::: {#exm-cd-unstructured-write-europarl-directory}
-```bash
-data/
-│── analysis/
-├── derived/
-│   └── europarl/
-│       └── europarl_curated.csv
-└── original/
-    └──europarl
-        ├── europarl-v7.es-en.en
-        └── europarl-v7.es-en.es
-```
-:::
-
-
-The final step, as always, is to document the dataset. For datasets the documentation is a data dictionary, as discussed in @sec-ud-data-dictionaries. As with data origin files, you can use spreadsheet software to create and/ or edit the data dictionary.
-
-In the `qtalrkit` package we have a function, `create_data_dictionary()` that will generate the scaffolding for a data dictionary. The function takes two arguments, `data` and `file_path`. It reads the dataset columns and provides a template for the data dictionary.
-
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
-
-The `create_data_dictionary()` function provides a rudimentary data dictionary template by default. However, you can take advantage of OpenAI's text generation models to generate a more detailed data dictionary for you to edit. To do this create [an OpenAI account](https://platform.openai.com/signup) and [an API key](https://platform.openai.com/account/api-keys) and add this key to your R environment (`Sys.setenv(OPENAI_API_KEY = "sk..."`). Then you can specify the model you would like to use in the function with the `model = ` argument. For example, `model = "gpt-3.5-turbo"` will use the GPT-3.5 Turbo model.
-:::
-
-::: {#exm-cd-unstructured-data-dictionary}
-```{r}
-#| label: cd-unstructured-data-dictionary
-#| eval: false
-
-# Create the data dictionary
-create_data_dictionary(
-  data = europarl_curated_tbl,
-  file_path <- "../data/derived/europarl/europarl_curated_dd.csv"
-)
-```
-:::
-
-An example of the data dictionary for the `europarl_curated_tbl` dataset is shown in @tbl-cd-unstructured-data-dictionary-example.
-
-```{r}
-#| label: tbl-cd-unstructured-data-dictionary-example
-#| tbl-cap: "Data dictionary for the `europarl_curated_tbl` dataset."
-#| echo: false
-
-read_csv("data/cd-europarl_curated_dd.csv") |>
-  tt(width = 1)
-```
-
 ## Structured
 
 Structured data already reflects the physical and semantic structure of a tidy dataset. This means that the data is already in a tabular format and the relationships between columns and rows are already well-defined. Therefore the heavy lifting of curating the data is already done. There are two remaining questions, however, that need to be taken into account. One, logistical question, is what file format the dataset is in and how to read it into R. And the second, more research-based, is whether the data may benefit from some additional curation and documentation to make it more amenable to analysis and more understandable to others.
 
-### Reading data
+### Reading datasets
 
-Let's consider some common formats for structured data and how to read them into R. First, we will consider R-native formats, such as package datasets and RDS files. Then will consider non-native formats, such as relational databases and datasets produced by other software. Finally, we will consider software agnostic formats, such as CSV.
+Let's consider some common formats for structured data, *i.e.* datasets, and how to read them into R. First, we will consider R-native formats, such as package datasets and RDS files. Then will consider non-native formats, such as relational databases and datasets produced by other software. Finally, we will consider software agnostic formats, such as CSV.
 
 R and some R packages provide structured datasets that are available for use directly within R. For example, the `languageR` package [@R-languageR] provides the `dative` dataset, which is a dataset containing the realization of the dative as NP or PP in the Switchboard corpus and the Treebank Wall Street Journal collection. The `janeaustenr` package [@R-janeaustenr] provides the `austen_books` dataset, which is a dataset of Jane Austen's novels. Package datasets are loaded into an R session using either the `data()` function, if the package is loaded, or the `::` operator, if the package is not loaded. For example, `data(dative)` or `languageR::dative`.
 
@@ -547,8 +437,6 @@ row 2 value 1,row 2 value 2,row 2 value 3
 Given the accessibility of delimited files, they are a common format for sharing structured data in reproducible research. It is not surprising, then, that this is the format which we have chosen for the derived datasets in this book.
 
 ### Orientation
-
-<!-- [ ] rethink the opening sentence -->
 
 With an understanding of the various structured formats, we can now turn to considerations about how the original dataset is structured and how that structure is to be used for a given research project. As an example, we will work with the CABNC datasets acquired in @sec-acquire-data. The structure of the original dataset is shown in @exm-cd-cabnc-structure.
 
@@ -581,13 +469,11 @@ read_csv("data/cd-cabnc_do.csv") |>
 
 The CABNC datasets are structured in a relational format, which means that the data is stored in multiple tables that are related to each other. The tables are related by a common column or set of columns, which are called a keys. A key is used to join the tables together to create a single dataset. There are two keys in the CABNC datasets, `filename` and `who`. Each variable corresponds to recording- and/ or participant-oriented datasets.
 
-Now, let's envision a scenario in which we want to organize a dataset that can be used in a study that aims to investigate the relationship between speaker demographics and utterances. An ideal dataset would contain information about speakers and their utterances. In their original format, the CABNC datasets separate information about utterances and speakers in separate tables, `cabnc_utterances` and `cabnc_participants`, respectively. The idealized dataset, then, will combine the variables from each of these tables into a single dataset.
-
-<!-- [ ] Add idealized dataset? -->
+Now, let's envision a scenario in which we are preparing our data for a study that aims to investigate the relationship between speaker demographics and utterances. In their original format, the CABNC datasets separate information about utterances and speakers in separate datasets, `cabnc_utterances` and `cabnc_participants`, respectively. Ideally, we would like to curate these datasets such that the information about the utterances and the speakers are ready to be joined as part of the dataset transformation process, while still retaining the relevant original structure. This usually involves removing redundant and/ or uninformative variables and/ or adjusting variable names and writing these datasets and their documentation files to disk.
 
 ### Tidy the dataset
 
-With our idealized dataset in mind, let's start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the `read_csv()` function, as seen in @exm-cd-cabnc-read.
+With these goals in mind, let's start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the `read_csv()` function, as seen in @exm-cd-cabnc-read.
 
 ::: {#exm-cd-cabnc-read}
 ```{r}
@@ -613,121 +499,43 @@ glimpse(cabnc_participants)
 ```
 :::
 
-From visual inspection of the output of @exm-cd-cabnc-glimpse we can see that there are common variables in both datasets. It is also possible to intersect the datasets to see which variables are common using the `intersect()` function to intersect the column names of each data frame with the `names()` function, as seen in @exm-cd-cabnc-intersect.
+From visual inspection of the output of @exm-cd-cabnc-glimpse we can see that there are common variables in both datasets. In particular, we see the `filename` and `who` variables mentioned in the data origin file *cabnc_do.csv*.
 
-::: {#exm-cd-cabnc-intersect}
-```{r}
-#| label: cd-cabnc-intersect
+The next step is to consider the variables that will be useful for future analysis. Since we are creating a curated dataset, the goal will be to retain as much information as possible from the original datasets. There are cases, however, in which there may be variables that are not informative and thus, will not prove useful for any analysis. These removable variables tend to be of one of two types: variables which show no variation across observations and variables where the information is redundant.
 
-# Find the common variables
-common_vars <-
-  intersect(
-    names(cabnc_utterances),
-    names(cabnc_participants)
-  )
+As an example case, let's look at the `cabnc_participants` data frame. We can use the `skim()` function from the `skimr` package [@R-skimr] to get a summary of the variables in the dataset. We can add the `yank()` function to look at variable types one at a time. We will start with the character variables, as seen in @exm-cd-cabnc-skim-character.
 
-# Print the common variables
-common_vars
-```
-:::
-
-Using both visual inspection and column name intersection, we can make sure that the variable names and the values are consistent across the datasets. For example, if the variable `filename` in one dataset is called `file_name` in another dataset, then we will need to rename the variable in one of the datasets so that the variable names are consistent. Furthermore, if the values in the `filename` variable are not consistent across the datasets, then we will need to make the values consistent, if possible, before joining the datasets.
-
-In this case, the variable names and values are consistent across the datasets. Therefore, we can join the datasets together using the `left_join()` function from the `dplyr` package, as seen in @exm-cd-cabnc-join. This function will take the dataset on the left (`x = `) and join it to the dataset on the right (`y = `). The `by` argument specifies the variables to join on. The choice of which dataset to put on the left usually depends on which dataset has the most detailed information. In this case, the `cabnc_utterances` dataset has more detailed information about the utterances so we will put this dataset on the left.
-
-::: {#exm-cd-cabnc-join}
-```{r}
-#| label: cd-cabnc-join
-
-# Join the datasets
-cabnc_tbl <-
-  left_join(
-    x = cabnc_utterances,
-    y = cabnc_participants,
-    by = common_vars
-  )
-
-# Preview the dimensions of the joined dataset
-dim(cabnc_tbl)
-```
-:::
-
-The result of @exm-cd-cabnc-join should produce a dataset with the same number of observations as the `cabnc_utterances` dataset, seen in @exm-cd-cabnc-glimpse, and a combined number of unique variables from both datasets, that is 23 minus the four common variables, seen in @exm-cd-cabnc-intersect. The output of `dim()` confirms this.
-
-::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
-
-Joins are a common operation in data analysis. The `dplyr` package provides a suite of functions for joining datasets. We will explore joins in more detail in @sec-td-merging as part of the transformation step of the text analysis workflow.
-:::
-
-Now we will consider the variables that will be useful for future analysis. Since we are creating a curated dataset, the goal will be to retain as much information as possible from the original datasets. There are cases, however, in which there may be variables that are not informative and thus, will not prove useful for any analysis. These removable variables tend to be of one of two types: variables which show no variation across observations and variables where the information is redundant.
-
-Let's get a high-level summary of the variables in the dataset. We can use the `skim()` function from the `skimr` package [@R-skimr] to get a summary of the variables in the dataset^[Note I've modified the output of `skim()` for display purposes.].
-
-<!-- [ ] consider the capture.output, cat with comment approach -->
-
-::: {#exm-cd-cabnc-skim}
+::: {#exm-cd-cabnc-skim-character}
 ```r
 # Load package
 library(skimr)
 
-# Summarize the variables in the dataset
-skim(cabnc_tbl)
+# Summarize character variables
+cabnc_participants |>
+  skim() |>
+  yank("character")
 ```
 
-```{r}
-#| label: tbl-cd-cabnc-skim
-#| tbl-cap: "Summary of variables in the CABNC dataset"
-#| tbl-subcap:
-#|  - "Categorical variables"
-#|  - "Logical variables"
-#|  - "Numeric variables"
-#| layout-nrow: 3
+```{r, comment=">"}
+#| label: skim-test
 #| echo: false
-
-# [ ] Issue with the ?caption showing up on the plots
 
 library(skimr)
 
-curate_skim <- skim_with(
-  base = sfl(complete_rate = complete_rate),
-  factor = sfl(n_unique = n_unique),
-  character = sfl(n_unique = n_unique),
-  numeric = sfl(mean = mean),
-  logical = sfl(mean = mean),
-  append = FALSE
-  )
-
-cabnc_tbl |>
-  curate_skim() |>
+cabnc_participants |>
+  skim() |>
   yank("character") |>
-  select(variable = skim_variable, everything()) |>
-  tibble() |>
-  tt(width = 1)
-
-cabnc_tbl |>
-  curate_skim() |>
-  yank("logical") |>
-  select(variable = skim_variable, everything()) |>
-  tibble() |>
-  tt(width = 1)
-
-cabnc_tbl |>
-  curate_skim() |>
-  yank("numeric") |>
-  select(variable = skim_variable, everything()) |>
-  tibble() |>
-  tt(width = 1)
+  capture.output() |>
+  cat(sep = "\n")
 ```
 :::
 
-We see from the `skim()` output in @tbl-cd-cabnc-skim-2, that the variables `postcodes` and `gems` have no values. Therefore we can remove these variables from the dataset. On the other hand, in @tbl-cd-cabnc-skim-1, the variables `role` and `language` have the same value for every observation as the output shows `n_unique` is `1`. We can also remove these variables from the dataset.
 
-Another set of variables of potential interest are the `startTime` and `endTime` variables, in @tbl-cd-cabnc-skim-3. These each have a completion rate of less than 100%, specifically 84%. On first blush, it would seem that we would go ahead and remove them. However, we should pause and consider that these variables may still be of some use. At the curation stage, however, it is best to err on the side of caution and leave them in the dataset. We will decide later whether to keep or remove them as we explore the dataset further in the research.
+We see from the output in @exm-cd-cabnc-skim-character, that the variables `role` and `language` have a single unique value. This means that these variables do not show any variation across observations. We will remove these variables from the dataset.
 
-Another consideration is whether we have variables that are clearly redundant. For example, the variables `age` and `monthage` are both measures of age, stated in different measures, looking back at @exm-cd-cabnc-glimpse. As such, we can remove one of these variables from the dataset. In this case, we will remove the `age` variable as it is the least straightforward to interpret.
+Continuing on, let's look for redundant variables. We see that the variables `filename` and `path` have the same number unique values. And if we combine this with the visual summary in @exm-cd-cabnc-glimpse, we can see that the `path` variable is redundant. We will remove this variable from the dataset.
 
-Another potentially redundant set of variables are `who` and `name` --both of which are speaker identifiers. The `who` variable is a unique identifier, but there may be some redundancy with the `name` variable, that is there may be two speakers with the same name. We can check this by looking at the number of unique values in the `who` and `name` variables from the `skim()` output in @tbl-cd-cabnc-skim-1. `who` has 568 unique values and `name` has 269 unique values. This suggests that there are multiple speakers with the same name.
+Another potentially redundant set of variables are `who` and `name` --both of which are speaker identifiers. The `who` variable is a unique identifier, but there may be some redundancy with the `name` variable, that is there may be two speakers with the same name. We can check this by looking at the number of unique values in the `who` and `name` variables from the `skim()` output in @exm-cd-cabnc-skim-character. `who` has 568 unique values and `name` has 269 unique values. This suggests that there are multiple speakers with the same name.
 
 Another way to explore this is to look at the number of unique values in the `who` variable for each unique value in the `name` variable. We can do this using the `group_by()` and `summarize()` functions from the `dplyr` package. For each value of `name`, we will count the number of unique values in `who` and then sort the results in descending order.
 
@@ -735,7 +543,7 @@ Another way to explore this is to look at the number of unique values in the `wh
 ```{r}
 #| label: cd-cabnc-who-name
 
-cabnc_tbl |>
+cabnc_participants |>
   group_by(name) |>
   summarize(n = unique(who) |> length()) |>
   arrange(desc(n))
@@ -744,40 +552,36 @@ cabnc_tbl |>
 
 It is good that we performed the check in @exm-cd-cabnc-who-name beforehand. In addition to speakers with the same name, such as 'Chris' and 'David', we also have multiple speakers with generic codes, such as 'None' and 'Unknown_speaker'. It is clear that `name` is redundant and we can safely remove it from the dataset.
 
-Another redundant variable is the `path` variable. This variable is not more informative than the `filename`, for our purposes. We will remove the `path` variable from the dataset too.
-
-In all, we will remove the following variables from the dataset: `postcodes`, `gems`, `role`, `language`, `age`, `name`, and `path`. To drop variables from a data frame we can use the `select()` function in combination with the `-` operator. The `-` operator tells the `select()` function to drop the variables that follow it.
+With this in mind, we can then safely remove the following variables from the dataset: `role`, `language`, `name`, and `path`. To drop variables from a data frame we can use the `select()` function in combination with the `-` operator. The `-` operator tells the `select()` function to drop the variables that follow it.
 
 ::: {#exm-cd-cabnc-drop-vars}
 ```{r}
 #| label: cd-cabnc-drop-vars
 
 # Drop variables
-cabnc_tbl <-
-  cabnc_tbl |>
-  select(-postcodes, -gems, -role, -language, -age, -name, -path)
+cabnc_participants <-
+  cabnc_participants |>
+  select(-role, -language, -name, -path)
 
 # Preview the dataset
-glimpse(cabnc_tbl)
+glimpse(cabnc_participants)
 ```
 :::
 
 
-Now we have a dataset with 12 informative variables which describe the utterances for each recording. There are variables about the recordings, such as the `filename`, about the speakers, such as the `sex` and `who`, and about the utterances, such as the `utterance`, `utt_num`, *etc.*. Let's organize the columns to read left to right from most general to most specific. Again we turn to the `select()` function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative.
+Now we have a frame with 9 more informative variables which describe the participants. We would then repeat this process for the `cabnc_utterances` dataset to remove redundant and uninformative variables.
+
+Another, optional step, is to rename and/ or organize the order the variables to make the dataset more understandable. Let's organize the columns to read left to right from most general to most specific. Again, we turn to the `select()` function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative.
 
 ::: {#exm-cd-cabnc-rename-vars}
 ```{r}
 #| label: cd-cabnc-rename-vars
 
 # Rename variables
-cabnc_tbl <-
-  cabnc_tbl |>
+cabnc_participants <-
+  cabnc_participants |>
   select(
     doc_id = filename,
-    utt_num,
-    utt_start = startTime,
-    utt_end = endTime,
-    utterance,
     part_id = who,
     part_age = monthage,
     part_sex = sex,
@@ -788,93 +592,28 @@ cabnc_tbl <-
   )
 
 # Preview the dataset
-glimpse(cabnc_tbl)
+glimpse(cabnc_participants)
 ```
 :::
 
-The variable order is organized after running @exm-cd-cabnc-rename-vars. Now let's sort the rows by `doc_id` and `utt_num` so that the utterances are in order. The `arrange()` function takes a data frame and a list of variables to sort by, in the order they are listed.
+The variable order is organized after running @exm-cd-cabnc-rename-vars. Now let's sort the rows by `doc_id` and `part_id` so that the dataset is sensibly organized. The `arrange()` function takes a data frame and a list of variables to sort by, in the order they are listed.
 
 ::: {#exm-cd-cabnc-sort-rows}
 ```{r}
 #| label: cd-cabnc-sort-rows
 
 # Sort rows
-cabnc_tbl <-
-  cabnc_tbl |>
-  arrange(doc_id, utt_num)
+cabnc_participants <-
+  cabnc_participants |>
+  arrange(doc_id, part_id)
 
 # Preview the dataset
-cabnc_tbl |>
+cabnc_participants |>
   slice_head(n = 10)
 ```
 :::
 
-Applying the sorting in @exm-cd-cabnc-sort-rows, we can see that the utterances are now our desired order. We have now completed the curation of the structured dataset aiming to provide a base for further analysis into the recorded utterances of speakers from the CABNC corpus.
-
-### Write dataset
-
-Let's now write this dataset to disk. Again, since this is a dataset we have created, we will store the dataset in the *data/derived/* directory. To keep the CABNC separate from any other datasets that we may need for our research project, I will create a subdirectory called *cabnc/* to store the dataset. Into this directory we can write a CSV file with our `cabnc_tbl` data frame with the `write_csv()` function, as seen in @exm-cd-cabnc-write-csv.
-
-::: {#exm-cd-cabnc-write-csv}
-```{r}
-#| label: cd-cabnc-write-csv
-#| eval: false
-
-# Create cabnc directory
-dir_create(path = "../data/derived/cabnc")
-
-# Write dataset to disk
-cabnc_tbl |>
-  write_csv(path = "../data/derived/cabnc/cabnc_curated.csv")
-```
-:::
-
-The final step is to create a data dictionary file for this dataset. We can do this using the `create_data_dictionary()` function, passing the data frame object name and a path to the directory where we want to store the data dictionary. The `create_data_dictionary()` function will create a CSV file with a data dictionary template in the specified directory.
-
-::: {#exm-cd-cabnc-create-data-dict}
-```{r}
-#| label: cd-cabnc-create-data-dict
-#| eval: false
-
-# Create data dictionary
-create_data_dictionary(
-  data = cabnc_tbl,
-  file_path = "../data/derived/cabnc_curated_dd.csv"
-)
-```
-:::
-
-After running the code in @exm-cd-cabnc-create-data-dict, we can open the *cabnc_curated_dd.csv* file in the *data/derived/cabnc/* directory and fill in the data dictionary template. An example of an edited data dictionary is shown in @tbl-cd-cabnc-dd-example.
-
-```{r}
-#| label: tbl-cd-cabnc-dd-example
-#| tbl-cap: "Data dictionary example for the curated CABNC dataset."
-#| echo: false
-
-read_csv("data/cd-cabnc_curated_dd.csv") |>
-  tt(width = 1)
-```
-
-And the final directory structure for the *data/* directory is shown in @exm-cd-cabnc-final-dir.
-
-::: {#exm-cd-cabnc-final-dir}
-```bash
-data/
-├── analysis/
-├── derived/
-│   ├── cabnc_curated_dd.csv
-│   └── cabnc/
-│       └── cabnc_curated.csv
-└── original/
-    ├── cabnc_do.csv
-    └── cabnc/
-        ├── participants.csv
-        ├── token_types.csv
-        ├── tokens.csv
-        ├── transcripts.csv
-        └── utterances.csv
-```
-:::
+Applying the sorting in @exm-cd-cabnc-sort-rows, we can see that the utterances are now our desired order, a dataset that reads left to right from document to participant-oriented attributes and top to bottom by document and participant.
 
 ## Semi-structured
 
@@ -884,48 +623,7 @@ At this point we have discussed curating unstructured data and structured datase
 
 The file formats associated with semi-structured data include a wide range. These include file formats conducive to more structured-leaning data, such as XML, HTML, and JSON, and file formats with more unstructured-leaning data, such as annotated TXT files. Annotated TXT files may in fact appear with the *.txt* extension, but may also appear with other, sometimes resource-specific, extensions, such as *.utt* for the Switchboard Dialogue Act Corpus or *.cha* for the CHILDES corpus annotation files, for example.
 
-The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format, as in @lst-cd-json-example. We can read the data into an R session with the `read_json()` function from the `jsonlite` package [@R-jsonlite]. For XML and HTML files, the `rvest` package provides the `read_xml()` and `read_html()` functions.
-
-::: {#lst-cd-json-example}
-
-```{.json}
-{
-    "data": [
-        {
-            "speaker": "Alice",
-            "age": 27,
-            "sex": "Female",
-            "word_form": "running",
-            "lemma_form": "run"
-        },
-        {
-            "speaker": "Bob",
-            "age": 35,
-            "sex": "Male",
-            "word_form": "jumped",
-            "lemma_form": "jump"
-        },
-        {
-            "speaker": "Charlie",
-            "age": 42,
-            "sex": "Male",
-            "word_form": "singing",
-            "lemma_form": "sing"
-        },
-        {
-            "speaker": "Diane",
-            "age": 32,
-            "sex": "Female",
-            "word_form": "walked",
-            "lemma_form": "walk"
-        }
-    ]
-}
-```
-
-Example JSON file
-
-:::
+The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format. We can read the data into an R session with the `read_json()` function from the `jsonlite` package [@R-jsonlite]. For XML and HTML files, the `rvest` package provides the `read_xml()` and `read_html()` functions.
 
 Semi-structured data in TXT files can be read either as an entire file with `read_file()` or line-by-line with `read_lines()`. The choice of which approach to take depends on the structure of the data. If the data structure is line-based, then `read_lines()` often makes more sense than `read_file()`. However, in some cases, the data may be structured in a way that requires the entire file to be read into an R session and then subsequently parsed.
 
@@ -955,6 +653,7 @@ We now inspect the data origin file for the ENNTT corpus, *enntt_do.csv*, in @tb
 ```{r}
 #| label: tbl-cd-enntt-do
 #| tbl-cap: "Data origin file for the ENNTT corpus."
+#| tbl-colwidths: [25, 75]
 #| echo: false
 
 read_csv("data/cd-enntt_do.csv") |>
@@ -1010,12 +709,23 @@ The question is what attributes we want to include in the curated dataset. Given
 
 An idealized version of the dataset based on this criteria is shown in @tbl-cd-enntt-ideal.
 
-| session_id | speaker_id | state | type | session_seq | text |
-|:----------:|:----------:|:-----:|:----:|:-----------:|:----|
-| ep-05-11-17 | 96779 | Poland | non-native | 184 | The Commission is following with interest the planned construction of a nuclear power plant in Akkuyu , Turkey and recognises the importance of ensuring that the construction of the new plant follows the highest internationally accepted nuclear safety standards . |
-| ... | ... | ... | ... | ... | ... |
+```{r}
+#| label: tbl-cd-enntt-ideal
+#| tbl-cap: "Idealized structure for the ENNTT Corpus dataset."
+#| tbl-colwidths: [10, 17, 19, 54]
+#| echo: false
 
-: Idealized version of the ENNTT corpus. {#tbl-cd-enntt-ideal tbl-colwidths="[10, 10, 10, 10, 10, 50]" .sm .striped}
+tibble::tribble(
+  ~variable, ~variable_name, ~variable_type, ~description,
+  "session_id", "Session ID", "character", "Unique identifier for each session.",
+  "speaker_id", "Speaker ID", "integer", "Unique identifier for each speaker.",
+  "state", "State", "character", "The political state of the speaker.",
+  "type", "Type", "character", "Indicates whether the text is native, non-native, or translated",
+  "session_seq", "Session Sequence", "integer", "The sequence of the text in the session.",
+  "text", "Text", "character", "Contains the text of the line, and maintains the structure of the original data."
+) |>
+  tt(width = 1)
+```
 
 ### Tidy the data
 
@@ -1321,82 +1031,35 @@ The `ennnt_tbl` data frame is the curated dataset. We can perform some data chec
 What data checks could we perform to ensure that the data is in the format we expect? What are some of the things we should be looking for?
 :::
 
-### Write dataset
+## Documentation
 
-As we have done for the other curated datasets, we will write our curated dataset to a *.csv* file. We will use the `write_csv()` function and name the file appropriately, as in @exm-cd-enntt-write-csv.
+After applying the curation steps to our data, we will now want to write the dataset to disk and to do our best to document the process and the resulting dataset.
 
-::: {#exm-cd-enntt-write-csv}
-```{r}
-#| label: cd-enntt-write-csv
-#| eval: false
+Since data frames are a tabular, we will have various options for the file type to write. Many of these formats are software-specific, such as `*.xlsx` for Microsoft Excel, `*.sav` for SPSS, `*.dta` for Stata, and `*.rds` for R. We will use the `*.csv` format since it is a common format that can be read by many software packages. We will use the `write_csv()` function from the `readr` package to write the dataset to disk.
 
-# Create directory
-dir_create("../data/derived/enntt")
+Now the question is where to save our CSV file. Since our dataset is derived by our work, we will added it to the `derived/` directory. If you are working with multiple data sources within the same project, it is a good idea to create a subdirectory for each dataset. This will help keep the project organized and make it easier to find and access the datasets.
 
-# Write dataset to *.csv* file
-write_csv(enntt_tbl, "../data/derived/enntt/enntt_curated.csv")
-```
+The final step, as always, is to document the dataset. For datasets the documentation is a data dictionary, as discussed in @sec-ud-data-dictionaries. As with data origin files, you can use spreadsheet software to create and/ or edit the data dictionary.
+
+In the `qtalrkit` package we have a function, `create_data_dictionary()` that will generate the scaffolding for a data dictionary. The function takes two arguments, `data` and `file_path`. It reads the dataset columns and provides a template for the data dictionary.
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+The `create_data_dictionary()` function provides a rudimentary data dictionary template by default. However, you can take advantage of OpenAI's text generation models to generate a more detailed data dictionary for you to edit. To do this create [an OpenAI account](https://platform.openai.com/signup) and [an API key](https://platform.openai.com/account/api-keys) and add this key to your R environment (`Sys.setenv(OPENAI_API_KEY = "sk..."`). Then you can specify the model you would like to use in the function with the `model = ` argument. For example, `model = "gpt-3.5-turbo"` will use the GPT-3.5 Turbo model.
 :::
 
-Document the dataset in a data dictionary using the `create_data_dictionary()` function from the `qtalrkit` package, as in @exm-cd-enntt-create-data-dictionary.
-
-::: {#exm-cd-enntt-create-data-dictionary}
-```{r}
-#| label: cd-enntt-create-data-dictionary
-#| eval: false
-
-# Load package
-library(qtalrkit)
-
-# Create data dictionary
-create_data_dictionary(
-  data = enntt_tbl,
-  file_path = "../data/derived/enntt_curated_dd.csv"
-)
-```
-:::
-
-After editing the data dictionary file to include the appropriate information, we will have something similar to @tbl-cd-enntt-data-dictionary.
+An example of a data dictionary, a data dictionary for the `europarl_curated_tbl` dataset is shown in @tbl-cd-unstructured-data-dictionary-example.
 
 ```{r}
-#| label: tbl-cd-enntt-data-dictionary
-#| tbl-cap: "Data dictionary for the curated ENNTT dataset"
+#| label: tbl-cd-unstructured-data-dictionary-example
+#| tbl-cap: "Data dictionary for the `europarl_curated_tbl` dataset."
+#| tbl-colwidths: [10, 15, 15, 60]
 #| echo: false
 
-read_csv("data/cd-enntt_curated_dd.csv") |>
+read_csv("data/cd-europarl_curated_dd.csv") |>
   tt(width = 1)
 ```
-
-The final step is to clean up and comment the code added to the *2-curate-datasets.qmd* file. The final directory structure is seen in @exm-cd-enntt-final-directory-structure.
-
-::: {#exm-cd-enntt-final-directory-structure}
-```bash
-project/
-├── process/
-│   ├── 1-acquire-data.qmd
-│   ├── 2-curate-data.qmd
-│   └── ...
-├── data/
-│   ├── analysis/
-│   ├── derived/
-│       │── enntt_curated_dd.csv
-│   │   └── enntt/
-│   │       └── enntt_curated.csv
-│   └── original/
-│       │── enntt_do.csv
-│       └── enntt/
-│           ├── natives.dat
-│           ├── natives.tok
-│           ├── nonnatives.dat
-│           ├── nonnatives.tok
-│           ├── translations.dat
-│           └── translations.tok
-├── reports/
-├── DESCRIPTION
-├── Makefile
-└── README
-```
-:::
 
 ## Activities {.unnumbered}
 
@@ -1406,8 +1069,6 @@ The following activities build on your skills and knowledge to use R to read, in
 **{{< fa regular file-code >}} Recipe**
 
 <!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-<!-- [ ] edit links and goals/ outcomes -->
 
 **What**: [Organizing and documenting datasets](https://qtalr.github.io/qtalrkit/articles/recipe-6.html)\
 **How**: Read Recipe 6 and participate in the Hypothes.is online social annotation.\
@@ -1419,11 +1080,7 @@ The following activities build on your skills and knowledge to use R to read, in
 
 <!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
-<!-- [ ] edit links and goals/ outcomes -->
-
-<!-- [ ] update name of lab to something more lively -->
-
-**What**: [Organizing and documenting datasets](https://github.com/qtalr/lab-06)\
+**What**: [Taming data](https://github.com/qtalr/lab-06)\
 **How**: Clone, fork, and complete the steps in Lab 6.\
 **Why**: To gain experience working with coding strategies to manipulate data using tidyverse functions and regular expressions, to practice reading/ writing data from/ to disk, and to implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
 :::

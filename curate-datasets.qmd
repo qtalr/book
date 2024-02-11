@@ -176,7 +176,7 @@ Our task now is to develop code that will read the original data and render the 
 
 ### Tidy the data
 
-To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. We will use the `readtext()` function from the `readtext` package [@R-readtext]. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory.
+To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. We will use the `readtext()` function from the `readtext` package. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory.
 
 ::: {#exm-cd-europarl-readtext}
 ```r
@@ -290,7 +290,7 @@ europarl_lines_tbl
 
 Previewing the output in @exm-cd-europarl-text-lines-tbl, we can see that the `lines` column contains a list of character vectors. Why is this so? `str_split()` takes a character vector and splits it, as we know. It is a vectorized function, meaning that it can take a vector of character vectors and split each one into subsegments. Since any given input character vector can have a different number of subsegments, the number of subsegments in each file could be different. The ideal object for such data is a list. So `str_split()` returns a list of character vectors.
 
-The list of character vectors, lines in our case, is still associated with the respective `doc_id` value. However, we want to create a new row for each line in the list. To do this, we will use the `unnest()` function from the `tidyr` package [@R-tidyr]. The `unnest()` function takes a list column and creates a new row for each element in the list. We use the `unnest()` function to create a new row for each line in the `lines` column. We can see the output from @exm-cd-europarl-text-lines-tbl-unnest.
+The list of character vectors, lines in our case, is still associated with the respective `doc_id` value. However, we want to create a new row for each line in the list. To do this, we will use the `unnest()` function from the `tidyr` package. The `unnest()` function takes a list column and creates a new row for each element in the list. We use the `unnest()` function to create a new row for each line in the `lines` column. We can see the output from @exm-cd-europarl-text-lines-tbl-unnest.
 
 ::: {#exm-cd-europarl-text-lines-tbl-unnest}
 ```{r}
@@ -324,7 +324,7 @@ The output of @exm-cd-europarl-text-lines-tbl-count shows that the number of lin
 
 We now have our `lines` column and the associated observations for our idealized dataset, in @tbl-cd-europarl-structure-example. Let's now leverage the existing `doc_id` to create the `type` column. The goal is to assign the value of `type` according to the `doc_id` value. Specifically, when `doc_id` is 'europarl-v7.es-en.es' type should be 'Source' and when `doc_id` is 'europarl-v7.es-en.en' type should be 'Target'.
 
-We can do this using the `case_when()` function from the `dplyr` package [@R-dplyr]. The `case_when()` function takes a series of conditions and assigns a value based on the first condition that is met. In this case, we will use `mutate()` to create the `type` column and then use the `doc_id` column to create the conditions and the `type` column to assign the values from `case_when()`. We will store the output in a new object called `europarl_lines_type_tbl`, as seen in @exm-cd-europarl-text-lines-type-tbl.
+We can do this using the `case_when()` function from the `dplyr` package. The `case_when()` function takes a series of conditions and assigns a value based on the first condition that is met. In this case, we will use `mutate()` to create the `type` column and then use the `doc_id` column to create the conditions and the `type` column to assign the values from `case_when()`. We will store the output in a new object called `europarl_lines_type_tbl`, as seen in @exm-cd-europarl-text-lines-type-tbl.
 
 ::: {#exm-cd-europarl-text-lines-type-tbl}
 ```{r}
@@ -503,7 +503,7 @@ From visual inspection of the output of @exm-cd-cabnc-glimpse we can see that th
 
 The next step is to consider the variables that will be useful for future analysis. Since we are creating a curated dataset, the goal will be to retain as much information as possible from the original datasets. There are cases, however, in which there may be variables that are not informative and thus, will not prove useful for any analysis. These removable variables tend to be of one of two types: variables which show no variation across observations and variables where the information is redundant.
 
-As an example case, let's look at the `cabnc_participants` data frame. We can use the `skim()` function from the `skimr` package [@R-skimr] to get a summary of the variables in the dataset. We can add the `yank()` function to look at variable types one at a time. We will start with the character variables, as seen in @exm-cd-cabnc-skim-character.
+As an example case, let's look at the `cabnc_participants` data frame. We can use the `skim()` function from the `skimr` package to get a summary of the variables in the dataset. We can add the `yank()` function to look at variable types one at a time. We will start with the character variables, as seen in @exm-cd-cabnc-skim-character.
 
 ::: {#exm-cd-cabnc-skim-character}
 ```r
@@ -623,7 +623,7 @@ At this point we have discussed curating unstructured data and structured datase
 
 The file formats associated with semi-structured data include a wide range. These include file formats conducive to more structured-leaning data, such as XML, HTML, and JSON, and file formats with more unstructured-leaning data, such as annotated TXT files. Annotated TXT files may in fact appear with the *.txt* extension, but may also appear with other, sometimes resource-specific, extensions, such as *.utt* for the Switchboard Dialogue Act Corpus or *.cha* for the CHILDES corpus annotation files, for example.
 
-The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format. We can read the data into an R session with the `read_json()` function from the `jsonlite` package [@R-jsonlite]. For XML and HTML files, the `rvest` package provides the `read_xml()` and `read_html()` functions.
+The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format. We can read the data into an R session with the `read_json()` function from the `jsonlite` package [@R-jsonlite]. For XML and HTML files, the `rvest` package [@R-rvest] provides the `read_xml()` and `read_html()` functions.
 
 Semi-structured data in TXT files can be read either as an entire file with `read_file()` or line-by-line with `read_lines()`. The choice of which approach to take depends on the structure of the data. If the data structure is line-based, then `read_lines()` often makes more sense than `read_file()`. However, in some cases, the data may be structured in a way that requires the entire file to be read into an R session and then subsequently parsed.
 
@@ -871,7 +871,7 @@ extract_dat_attrs(ns_dat_lines[[100]])
 ```
 :::
 
-Looks like the `extract_dat_attrs()` function is ready for prime-time. Let's now apply it to all of the line nodes in the `ns_dat_lines` object using the `map_dfr()` function from the `purrr` package as in @exm-cd-enntt-extract-attributes-all.
+Looks like the `extract_dat_attrs()` function is ready for prime-time. Let's now apply it to all of the line nodes in the `ns_dat_lines` object using the `map_dfr()` function from the `purrr` package [@R-purrr] as in @exm-cd-enntt-extract-attributes-all.
 
 ::: {#exm-cd-enntt-extract-attributes-all}
 ```{r}

@@ -51,7 +51,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
@@ -440,7 +460,7 @@ Formatting:
 <p>The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis.</p>
 <section id="sec-td-normalization-orientation" class="level3" data-number="7.1.1"><h3 data-number="7.1.1" class="anchored" data-anchor-id="sec-td-normalization-orientation">
 <span class="header-section-number">7.1.1</span> Orientation</h3>
-<p>To explore some of the strategies of normalization, we will look at the Europarl Corpus. As we are working working towards transforming a curated dataset, we will start by getting oriented to the dataset. Following the reproducible research principles, I will assume that the curated dataset and its associated data dictionary are in the <em>data/derived/</em> directory, as seen in <a href="#exm-td-europarl-curated-structure" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-curated-structure</span></a>.</p>
+<p>To explore some of the strategies of normalization, we will look at the Europarl Corpus. As we are working working towards transforming a curated dataset, we will start by getting oriented to the dataset. Following the reproducible research principles, I will assume that the curated dataset and its associated data dictionary are in the <em>data/derived/</em> directory, as seen in <a href="#exm-td-europarl-curated-structure" class="quarto-xref">Example&nbsp;<span>7.1</span></a>.</p>
 <div id="exm-td-europarl-curated-structure" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.1</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">data/</span></span>
@@ -451,7 +471,7 @@ Formatting:
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">│</span>       └── europarl_curated.csv</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="ex">└──</span> original/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The contents of the data dictionary for this dataset appears in <a href="#tbl-td-europarl-dd" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-europarl-dd</span></a>.</p>
+<p>The contents of the data dictionary for this dataset appears in <a href="#tbl-td-europarl-dd" class="quarto-xref">Table&nbsp;<span>7.1</span></a>.</p>
 <div class="cell">
 <div id="tbl-td-europarl-dd" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-europarl-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -504,7 +524,7 @@ Table&nbsp;7.1: Data dictionary for the Europarl Corpus.
 </div>
 </div>
 <p>This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation is the <code>lines</code> variable whose values are are lines of dialog.</p>
-<p>Let’s read in the dataset CSV file with <code>read_csv()</code> and inspect the first lines of the dataset with <code>slice_head()</code> in <a href="#exm-tb-europarl-preview" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-tb-europarl-preview</span></a>.</p>
+<p>Let’s read in the dataset CSV file with <code>read_csv()</code> and inspect the first lines of the dataset with <code>slice_head()</code> in <a href="#exm-tb-europarl-preview" class="quarto-xref">Example&nbsp;<span>7.2</span></a>.</p>
 <div id="exm-tb-europarl-preview" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.2</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in the dataset</span></span>
@@ -532,7 +552,7 @@ Table&nbsp;7.1: Data dictionary for the Europarl Corpus.
 </div>
 </div>
 </div>
-<p>Simply looking at the first 10 lines of this dataset gives us a clearer sense of the dataset structure, but, in terms of normalization procedures we might apply, it is likely not sufficient. We want to get a sense of any potential inconsistencies in the dataset, in particular in the <code>lines</code> variable. Since this is a large dataset with 3,931,468 observations, we will need to explore the dataset in manageable chunks. The <code>slice_sample()</code> function will allow us to randomly sample a subset of the dataset of a certain number of observations specified by the <code>n =</code> argument, as seen in <a href="#exm-td-europarl-sample-1" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-sample-1</span></a>.</p>
+<p>Simply looking at the first 10 lines of this dataset gives us a clearer sense of the dataset structure, but, in terms of normalization procedures we might apply, it is likely not sufficient. We want to get a sense of any potential inconsistencies in the dataset, in particular in the <code>lines</code> variable. Since this is a large dataset with 3,931,468 observations, we will need to explore the dataset in manageable chunks. The <code>slice_sample()</code> function will allow us to randomly sample a subset of the dataset of a certain number of observations specified by the <code>n =</code> argument, as seen in <a href="#exm-td-europarl-sample-1" class="quarto-xref">Example&nbsp;<span>7.3</span></a>.</p>
 <div id="exm-td-europarl-sample-1" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.3</strong></span> &nbsp;</p>
 <div class="cell">
@@ -551,7 +571,7 @@ Table&nbsp;7.1: Data dictionary for the Europarl Corpus.
 </div>
 </div>
 </div>
-<p>We should run the code in <a href="#exm-td-europarl-sample-1" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-sample-1</span></a> multiple times to get a sense of the variation in the dataset.</p>
+<p>We should run the code in <a href="#exm-td-europarl-sample-1" class="quarto-xref">Example&nbsp;<span>7.3</span></a> multiple times to get a sense of the variation in the dataset.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -564,7 +584,7 @@ Table&nbsp;7.1: Data dictionary for the Europarl Corpus.
 </div>
 </div>
 </div>
-<p>In the case of the Europarl corpus dataset, it may be useful to see the source and target lines in the same sample. Do do this, we can first sample from the <code>line_id</code> variable and then filter the <code>europarl_curated_tbl</code> wit the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function and the <code>%in%</code> operator to select the lines that match the sampled <code>line_id</code> values, as seen in <a href="#exm-td-europarl-sample-2" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-sample-2</span></a>.</p>
+<p>In the case of the Europarl corpus dataset, it may be useful to see the source and target lines in the same sample. Do do this, we can first sample from the <code>line_id</code> variable and then filter the <code>europarl_curated_tbl</code> wit the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function and the <code>%in%</code> operator to select the lines that match the sampled <code>line_id</code> values, as seen in <a href="#exm-td-europarl-sample-2" class="quarto-xref">Example&nbsp;<span>7.4</span></a>.</p>
 <div id="exm-td-europarl-sample-2" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.4</strong></span> &nbsp;</p>
 <div class="cell">
@@ -595,7 +615,7 @@ Table&nbsp;7.1: Data dictionary for the Europarl Corpus.
 </div>
 </div>
 </div>
-<p>After running the code in <a href="#exm-td-europarl-sample-1" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-sample-1</span></a> and <a href="#exm-td-europarl-sample-2" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-sample-2</span></a> multiple times, I identified a number of artifacts that we will want to consider addressing. These are included in <a href="#tbl-td-europarl-normalization" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-europarl-normalization</span></a>.</p>
+<p>After running the code in <a href="#exm-td-europarl-sample-1" class="quarto-xref">Example&nbsp;<span>7.3</span></a> and <a href="#exm-td-europarl-sample-2" class="quarto-xref">Example&nbsp;<span>7.4</span></a> multiple times, I identified a number of artifacts that we will want to consider addressing. These are included in <a href="#tbl-td-europarl-normalization" class="quarto-xref">Table&nbsp;<span>7.2</span></a>.</p>
 <div id="tbl-td-europarl-normalization" class="sm striped quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-europarl-normalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require normalization.
@@ -650,18 +670,18 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </figure>
 </div>
-<p>The first three items in <a href="#tbl-td-europarl-normalization" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-europarl-normalization</span></a> are relatively straightforward. Non-speech annotations most likely are not relevant for our research. Inconsistent whitespace and non-sentence punctuation may be problematic for tokenization that depends on whitespace and punctuation regularities.</p>
+<p>The first three items in <a href="#tbl-td-europarl-normalization" class="quarto-xref">Table&nbsp;<span>7.2</span></a> are relatively straightforward. Non-speech annotations most likely are not relevant for our research. Inconsistent whitespace and non-sentence punctuation may be problematic for tokenization that depends on whitespace and punctuation regularities.</p>
 <p>The other two considerations are more contingent on our research aims. The existence of various forms for the same word, abbreviated and unabreviated, introduces variability may not be of interest for our analysis. Secondly, common conventions for capitalization in prose can introduce unwanted variability. If we leave the text as is, the tokens <code>The</code> and <code>the</code> will be treated as distinct. If we convert the text to lowercase, the tokens <code>White</code> and <code>white</code> will be treated as the same, even if <code>White</code> corresponds to a proper noun (<em>e.g.</em> <code>White House</code>).</p>
 <p>These observations provide us a roadmap for the normalization process. For demonstration, let’s focus only on a couple of these cases: removing parlimentary session descriptions and extra whitespace.</p>
 </section><section id="sec-td-normalization-application" class="level3" data-number="7.1.2"><h3 data-number="7.1.2" class="anchored" data-anchor-id="sec-td-normalization-application">
 <span class="header-section-number">7.1.2</span> Application</h3>
-<p>Identifying our normalization goals is an important first step. The next step is to identify the procedures that will accomplish these goals. The majority of text normalization procedures can be accomplished with the <code>stringr</code> package <span class="citation" data-cites="R-stringr">(<a href="#ref-R-stringr" role="doc-biblioref"><strong>R-stringr?</strong></a>)</span>. This package provides a number of functions for manipulating text. The workhorse functions we will use for our tasks are the <code>str_remove()</code> and <code>str_replace()</code> functions. As the these functions give us the ability to remove or replace text. Our task is to identify the patterns we want to remove or replace.</p>
+<p>Identifying our normalization goals is an important first step. The next step is to identify the procedures that will accomplish these goals. The majority of text normalization procedures can be accomplished with the <code>stringr</code> package <span class="citation" data-cites="R-stringr">(<a href="references.html#ref-R-stringr" role="doc-biblioref">Wickham 2023</a>)</span>. This package provides a number of functions for manipulating text. The workhorse functions we will use for our tasks are the <code>str_remove()</code> and <code>str_replace()</code> functions. As the these functions give us the ability to remove or replace text. Our task is to identify the patterns we want to remove or replace.</p>
 <p>Before we modify any lines, let’s try craft a search pattern to identify the text of interest. This is done to avoid over- or under-generalizing the search pattern. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.</p>
 <!-- non-speech -->
 <p>Let’s start by identifying non-parlimentary speech. Two functions from the <code>stringr</code> package come in handy here: <code>str_detect()</code> and <code>str_extract()</code>. <code>str_detect()</code> detects a pattern in a character vector and returns a logical vector, <code>TRUE</code> if the pattern is detected and <code>FALSE</code> if it is not. <code>str_extract()</code> extracts the text in a character vector that matches a pattern.</p>
 <p><code>str_detect()</code> pairs well with the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function to return observations that match a pattern in a character vector. <code>str_extract()</code> pairs well with the <code>mutate()</code> function to create a new variable which contains character vector that match a pattern.</p>
 <p>Let’s start with the <code>str_detect()</code> function. We will use this function to identify the lines that contain the parliamentary session descriptions. From the examples above, we can see that these instances are wrapped with parentheses <code>(</code> and <code>)</code>. The text within the parentheses can vary, so we need a Regular Expression to do the heavy lifting. To start out we can match any one or multiple characters with <code>.+</code>. But it is important to recognize the <code>+</code> (and also the <code>*</code>) operators are ‘greedy’, meaning that if there are multiple matches, the longest match will be returned. In this case, we want to match the shortest match. To do this we can use the <code>?</code> operator to make the <code>+</code> operator ‘lazy’. This will match the shortest match.</p>
-<p>Our test code appears in <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-non-speech</span></a>.</p>
+<p>Our test code appears in <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span>7.5</span></a>.</p>
 <div id="exm-td-europarl-search-non-speech" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.5</strong></span> &nbsp;</p>
 <div class="cell">
@@ -686,7 +706,7 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 </div>
-<p>The results from <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-non-speech</span></a> show that we have identified the lines that contain at least one of the parliamentary session description annotations. A more targeted search to identify specific instances of the parliamentary session descriptions can be accomplished adding the <code>str_extract()</code> function as seen in <a href="#exm-td-europarl-search-non-speech-2" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-non-speech-2</span></a>.</p>
+<p>The results from <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span>7.5</span></a> show that we have identified the lines that contain at least one of the parliamentary session description annotations. A more targeted search to identify specific instances of the parliamentary session descriptions can be accomplished adding the <code>str_extract()</code> function as seen in <a href="#exm-td-europarl-search-non-speech-2" class="quarto-xref">Example&nbsp;<span>7.6</span></a>.</p>
 <div id="exm-td-europarl-search-non-speech-2" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.6</strong></span> &nbsp;</p>
 <div class="cell">
@@ -712,7 +732,7 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 </div>
-<p>The results from <a href="#exm-td-europarl-search-non-speech-2" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-non-speech-2</span></a> show that we have identified the lines that contain parliamentary session description annotations and extracted this text –or have we? What if a given line contains more than one parliamentary session description annotation? It turns out that <code>str_extract()</code> only returns the first match. To return all matches we can use the <code>str_extract_all()</code> function. Let’s try again, in <a href="#exm-td-europarl-search-non-speech-3" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-non-speech-3</span></a>.</p>
+<p>The results from <a href="#exm-td-europarl-search-non-speech-2" class="quarto-xref">Example&nbsp;<span>7.6</span></a> show that we have identified the lines that contain parliamentary session description annotations and extracted this text –or have we? What if a given line contains more than one parliamentary session description annotation? It turns out that <code>str_extract()</code> only returns the first match. To return all matches we can use the <code>str_extract_all()</code> function. Let’s try again, in <a href="#exm-td-europarl-search-non-speech-3" class="quarto-xref">Example&nbsp;<span>7.7</span></a>.</p>
 <div id="exm-td-europarl-search-non-speech-3" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.7</strong></span> &nbsp;</p>
 <div class="cell">
@@ -739,7 +759,7 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 <p>OK, that might not be what you expected. The <code>str_extract_all()</code> function returns a list of character vectors. This is because for any given line in <code>lines</code> there may be a different number of matches. To maintain the data frame as rectangular, a list is returned for each value of <code>non_speech</code>. We could expand the list into a data frame with the <code>unnest()</code> function from the <code>tidyr</code> package if our goal were to work with these matches. But that is not our aim. Rather, we want to know if we have multiple matches per line. Note that the information provided for the <code>non_speech</code> column by the tibble object tells use that we have some lines with muliple matches, as we can see in line 6 of our small sample. So good thing we checked!</p>
-<p>Let’s now remove these parliamentary session description annotations from each line in the <code>lines</code> column. We turn to <code>str_remove_all()</code>, a variant of <code>str_remove()</code>, that, as you expect, will remove multiple matches in a single line. We will use the <code>mutate()</code> function to overwrite the <code>lines</code> column with the modified text. The code is seen in <a href="#exm-td-europarl-remove-non-speech" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-remove-non-speech</span></a>.</p>
+<p>Let’s now remove these parliamentary session description annotations from each line in the <code>lines</code> column. We turn to <code>str_remove_all()</code>, a variant of <code>str_remove()</code>, that, as you expect, will remove multiple matches in a single line. We will use the <code>mutate()</code> function to overwrite the <code>lines</code> column with the modified text. The code is seen in <a href="#exm-td-europarl-remove-non-speech" class="quarto-xref">Example&nbsp;<span>7.8</span></a>.</p>
 <div id="exm-td-europarl-remove-non-speech" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.8</strong></span> &nbsp;</p>
 <div class="cell">
@@ -749,8 +769,8 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 <span>  <span class="fu">mutate</span><span class="op">(</span>lines <span class="op">=</span> <span class="fu">str_remove_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>I recommend spot checking the results of this normalization step by running the code in <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-non-speech</span></a> again, if nothing appears we’ve done our job.</p>
-<p>When you are content with the results, drop the observations that have no text in the <code>lines</code> column given the entire line was non-speech. This can be done with the <code><a href="https://rdrr.io/r/base/NA.html">is.na()</a></code> function and the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function as seen in <a href="#exm-td-europarl-drop-empty-lines" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-drop-empty-lines</span></a>.</p>
+<p>I recommend spot checking the results of this normalization step by running the code in <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span>7.5</span></a> again, if nothing appears we’ve done our job.</p>
+<p>When you are content with the results, drop the observations that have no text in the <code>lines</code> column given the entire line was non-speech. This can be done with the <code><a href="https://rdrr.io/r/base/NA.html">is.na()</a></code> function and the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function as seen in <a href="#exm-td-europarl-drop-empty-lines" class="quarto-xref">Example&nbsp;<span>7.9</span></a>.</p>
 <div id="exm-td-europarl-drop-empty-lines" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.9</strong></span> &nbsp;</p>
 <div class="cell">
@@ -761,9 +781,9 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 <!-- extra whitespace -->
-<p>The second item of business to address is the extra whitespace we observed in <a href="#tbl-td-europarl-normalization" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-europarl-normalization</span></a>. If we consider the extra whitespace cases, we can categorize them into two types: multiple spaces that should be a single space (<em>e.g.</em> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>) and single spaces that occur within a word (<em>e.g.</em> <code>5 % ,</code> or <code>Palacio' s</code>).</p>
+<p>The second item of business to address is the extra whitespace we observed in <a href="#tbl-td-europarl-normalization" class="quarto-xref">Table&nbsp;<span>7.2</span></a>. If we consider the extra whitespace cases, we can categorize them into two types: multiple spaces that should be a single space (<em>e.g.</em> <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>) and single spaces that occur within a word (<em>e.g.</em> <code>5 % ,</code> or <code>Palacio' s</code>).</p>
 <p>To deal with muliple spaces, we can turn to the <code>str_replace_all()</code> function. This function will replace a pattern with a replacement string for every pattern match. In this case, we want to replace multiple spaces with a single space. We can use the <code>\\s+</code> pattern to match one or more spaces and then replace it with <code>\\s</code> or a single whitespace character <code>" "</code>.</p>
-<p>Before we apply this normalization step, let’s assess how many instances of multiple spaces we have in the dataset. We can use the <code>str_count()</code> function to count the number of matches for a pattern. The pattern we want needs to be a bit more precise than <code>\\s+</code>, because this matches one or more. We want to match <em>two</em> or more. Using the regular expression operator <code>{,}</code> we can specify our pattern to be <code>\\s{2,}</code>, <em>i.e.</em> two or more continguous whitespaces. Let’s count and sum all these matches. The code is seen in <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-count-whitespace</span></a>.</p>
+<p>Before we apply this normalization step, let’s assess how many instances of multiple spaces we have in the dataset. We can use the <code>str_count()</code> function to count the number of matches for a pattern. The pattern we want needs to be a bit more precise than <code>\\s+</code>, because this matches one or more. We want to match <em>two</em> or more. Using the regular expression operator <code>{,}</code> we can specify our pattern to be <code>\\s{2,}</code>, <em>i.e.</em> two or more continguous whitespaces. Let’s count and sum all these matches. The code is seen in <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span>7.10</span></a>.</p>
 <div id="exm-td-europarl-count-whitespace" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.10</strong></span> &nbsp;</p>
 <div class="cell">
@@ -786,11 +806,11 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-exclamation-triangle" aria-label="exclamation-triangle"></i> Warning</strong></p>
-<p>You may be wondering what the extra parameter <code>na.rm = TRUE</code> is doing in the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function. This parameter tells R to ignore values that are <code>NA</code> (not available). This is important because if we don’t ignore <code>NA</code> values, the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function will return <code>NA</code> if there are any <code>NA</code> values in the vector. The code in <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-count-whitespace</span></a> will return <code>NA</code> when the <code>\\s{2,}</code> doesn’t match for a given line. This is because the <code>str_count()</code> function returns <code>NA</code> when there are no matches. If we don’t ignore these <code>NA</code> values, the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function will return <code>NA</code> for the entire dataset.</p>
+<p>You may be wondering what the extra parameter <code>na.rm = TRUE</code> is doing in the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function. This parameter tells R to ignore values that are <code>NA</code> (not available). This is important because if we don’t ignore <code>NA</code> values, the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function will return <code>NA</code> if there are any <code>NA</code> values in the vector. The code in <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span>7.10</span></a> will return <code>NA</code> when the <code>\\s{2,}</code> doesn’t match for a given line. This is because the <code>str_count()</code> function returns <code>NA</code> when there are no matches. If we don’t ignore these <code>NA</code> values, the <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> function will return <code>NA</code> for the entire dataset.</p>
 </div>
 </div>
 </div>
-<p>The results from <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-count-whitespace</span></a> show that we have over 130k instances of multiple spaces. Let’s replace these with a single space. The code is seen in <a href="#exm-td-europarl-remove-multiple-whitespace" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-remove-multiple-whitespace</span></a>.</p>
+<p>The results from <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span>7.10</span></a> show that we have over 130k instances of multiple spaces. Let’s replace these with a single space. The code is seen in <a href="#exm-td-europarl-remove-multiple-whitespace" class="quarto-xref">Example&nbsp;<span>7.11</span></a>.</p>
 <div id="exm-td-europarl-remove-multiple-whitespace" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.11</strong></span> &nbsp;</p>
 <div class="cell">
@@ -800,9 +820,9 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 <span>  <span class="fu">mutate</span><span class="op">(</span>lines <span class="op">=</span> <span class="fu">str_replace_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\s{2,}"</span>, <span class="st">"\\s"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>To check our work, we can run the code in <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-count-whitespace</span></a> again. We should see that there are no more instances of multiple spaces.</p>
+<p>To check our work, we can run the code in <a href="#exm-td-europarl-count-whitespace" class="quarto-xref">Example&nbsp;<span>7.10</span></a> again. We should see that there are no more instances of multiple spaces.</p>
 <p>Now let’s turn to the single spaces that occur within a word. We can use the <code>str_replace_all()</code> function again to replace these single spaces with no space –but is that what we want? Probably not, we want <em>most</em> of the single spaces to remain, otherwise we would have one very, very long string on each line.</p>
-<p>Instead, we want to narrow our scope and focus in on whitespace that occurs in particular contexts. One context we can focus on is the single quote <code>'</code>, as in <code>Palacio' s</code>. In this use, the single quote is an apostrophe in a possessive form, but we might want to see if other forms, such as contractions, that also may have this extra whitespace. Let’s check using a regular expression that matches a character string <code>\\w+</code> with single quote <code>'</code> at the end followed by whitespace <code>\\s</code>. To give some more context I will add a character string <code>\\w+</code> after the whitespace. Using the <code>str_extract_all()</code> function we can extract all the matches for this pattern. It returns a list, so we <code>unnest()</code> the list. Then we can pull the vector of matches and list the unique matches to get a sense of the context we are working with. The code is seen in <a href="#exm-td-europarl-search-apostrophe" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-apostrophe</span></a>.</p>
+<p>Instead, we want to narrow our scope and focus in on whitespace that occurs in particular contexts. One context we can focus on is the single quote <code>'</code>, as in <code>Palacio' s</code>. In this use, the single quote is an apostrophe in a possessive form, but we might want to see if other forms, such as contractions, that also may have this extra whitespace. Let’s check using a regular expression that matches a character string <code>\\w+</code> with single quote <code>'</code> at the end followed by whitespace <code>\\s</code>. To give some more context I will add a character string <code>\\w+</code> after the whitespace. Using the <code>str_extract_all()</code> function we can extract all the matches for this pattern. It returns a list, so we <code>unnest()</code> the list. Then we can pull the vector of matches and list the unique matches to get a sense of the context we are working with. The code is seen in <a href="#exm-td-europarl-search-apostrophe" class="quarto-xref">Example&nbsp;<span>7.12</span></a>.</p>
 <div id="exm-td-europarl-search-apostrophe" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.12</strong></span> &nbsp;</p>
 <div class="cell">
@@ -822,7 +842,7 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 </div>
-<p>In <a href="#exm-td-europarl-search-apostrophe" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-apostrophe</span></a> we can see that we have many singular possessive forms we want to ammend and other forms that we may want to keep –in particular when the single quote is part of a quote or a plural or irregular singular possessive. From various runs of this code, it looks safe to remove whitespace between the single quote and the <code>s</code> in the possessive form We need to be careful not to remove whitespace in other contexts where the single quote is followed by <code>s</code>. To do this we can use the word boundary pattern <code>\\b</code> after the <code>s</code> in our pattern to ensure that the <code>s</code> is not part of a following word. The code is seen in <a href="#exm-td-europarl-remove-apostrophe" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-remove-apostrophe</span></a>.</p>
+<p>In <a href="#exm-td-europarl-search-apostrophe" class="quarto-xref">Example&nbsp;<span>7.12</span></a> we can see that we have many singular possessive forms we want to ammend and other forms that we may want to keep –in particular when the single quote is part of a quote or a plural or irregular singular possessive. From various runs of this code, it looks safe to remove whitespace between the single quote and the <code>s</code> in the possessive form We need to be careful not to remove whitespace in other contexts where the single quote is followed by <code>s</code>. To do this we can use the word boundary pattern <code>\\b</code> after the <code>s</code> in our pattern to ensure that the <code>s</code> is not part of a following word. The code is seen in <a href="#exm-td-europarl-remove-apostrophe" class="quarto-xref">Example&nbsp;<span>7.13</span></a>.</p>
 <div id="exm-td-europarl-remove-apostrophe" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.13</strong></span> &nbsp;</p>
 <div class="cell">
@@ -832,14 +852,14 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 <span>  <span class="fu">mutate</span><span class="op">(</span>lines <span class="op">=</span> <span class="fu">str_replace_all</span><span class="op">(</span><span class="va">lines</span>, <span class="st">"'\\ss\\b"</span>, <span class="st">"'s"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>To check our work, we can run the code in <a href="#exm-td-europarl-search-apostrophe" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-europarl-search-apostrophe</span></a> again. We should see that there are no more instances of whitespace after the single quote in possessive forms. Once we are satisfied with our work, we can continue with subsequent transformation procedures using the <code>europarl_transformed_tbl</code> data, or save it to a CSV file, create a data dictionary, and move on to the next transformation procedure.</p>
+<p>To check our work, we can run the code in <a href="#exm-td-europarl-search-apostrophe" class="quarto-xref">Example&nbsp;<span>7.12</span></a> again. We should see that there are no more instances of whitespace after the single quote in possessive forms. Once we are satisfied with our work, we can continue with subsequent transformation procedures using the <code>europarl_transformed_tbl</code> data, or save it to a CSV file, create a data dictionary, and move on to the next transformation procedure.</p>
 <p>Normalization goals will vary from dataset to dataset but the procedures often follow a similar line of attack to those outlined in this section. There are cases, however, in which normalization procedures are more easily accomplished after subsequent transformation steps or need to be post-poned to further the goals of other transformation steps. For example, standardizing abbreviated forms may be more easily accomplished after tokenization when each token is a word. Another example is the case of case conversion. Even if we are not directly interested in the case differences between words, certain generation procedures, Named Entity Recognition (NER) for example, may use case information to identify the names of people, locations, organizations, <em>etc.</em>. In these cases, it may be better to leave the case as is until after the generation step.</p>
 </section></section><section id="sec-td-recoding" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-td-recoding">
 <span class="header-section-number">7.2</span> Recoding</h2>
 <p>Normalizing text can be seen as an extension of dataset curation to some extent in that the structure of the dataset is maintained. In the Europarl case, we saw this to be true. In the case of recoding, and other transformational steps, the aim will be to modify the dataset structure either by rows, columns, or both. Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.</p>
 <section id="sec-td-recoding-orientation" class="level3" data-number="7.2.1"><h3 data-number="7.2.1" class="anchored" data-anchor-id="sec-td-recoding-orientation">
 <span class="header-section-number">7.2.1</span> Orientation</h3>
-<p>The Switchboard dialog Act Corpus corpus contains a number of variables describing conversations between speakers of American English. A subset of this dataset provides a good example of the recoding process. The data dictionary for this dataset appears in <a href="#tbl-td-swda-curated-dd" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-swda-curated-dd</span></a>.</p>
+<p>The Switchboard dialog Act Corpus corpus contains a number of variables describing conversations between speakers of American English. A subset of this dataset provides a good example of the recoding process. The data dictionary for this dataset appears in <a href="#tbl-td-swda-curated-dd" class="quarto-xref">Table&nbsp;<span>7.3</span></a>.</p>
 <div class="cell">
 <div id="tbl-td-swda-curated-dd" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-swda-curated-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -915,7 +935,7 @@ Table&nbsp;7.3: Data dictionary for the Switchboard dialog Act Corpus.
 </figure>
 </div>
 </div>
-<p>The data dictionary gives us a sense of the variables in the dataset. Let’s read in the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in <a href="#exm-td-swda-dataset-read" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-swda-dataset-read</span></a>.</p>
+<p>The data dictionary gives us a sense of the variables in the dataset. Let’s read in the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in <a href="#exm-td-swda-dataset-read" class="quarto-xref">Example&nbsp;<span>7.14</span></a>.</p>
 <div id="exm-td-swda-dataset-read" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.14</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in the dataset</span></span>
@@ -945,8 +965,8 @@ Table&nbsp;7.3: Data dictionary for the Switchboard dialog Act Corpus.
 </div>
 <p>Considering the data dictionary and the preview of the <code>swda_curated_tbl</code> dataset, we observe a number of metadata variables, such as <code>doc_id</code>, <code>speaker_id</code>, <code>sex</code>, <code>education</code>, <code>birth_year</code>, <code>utt_id</code>, <code>utt_text</code>, and <code>damsl_tag</code>.</p>
 <p>Most of these variables and their values are readily interpretable. However, the <code>damsl_tag</code> variable and the annotation scheme that appears interleaved with the dialog in <code>utt_text</code> may require a bit more explanation. If we consult the data origin file and/ or the corpus website, we see that the <code>damsl_tag</code> is a utterance-level annotation which indicates the dialog act type (<em>e.g.</em> statement, question, backchannel, <em>etc.</em>). The annotation interleaved with the dialog in <code>utt_text</code> is a <a href="https://staff.fnwi.uva.nl/r.fernandezrovira/teaching/DM-materials/DFL-book.pdf">disfluency annotation scheme</a>. This scheme includes annotation for non-sentence elements such as filled pauses (<em>e.g.</em> <code>{F uh}</code>), discourse markers (<em>e.g.</em> <code>{D well}</code>), repetitions/ restarts (<em>e.g.</em> <code>[I think + I believe]</code>), among others.</p>
-<p>Let’s assume that we are interested in understanding the use of filled pauses in the Switchboard dialog. <span class="citation" data-cites="Tottie2011">(<a href="#ref-Tottie2011" role="doc-biblioref"><strong>Tottie2011?</strong></a>)</span> investigates the relationship between speakers’ use of filled pauses <code>uh</code> and <code>um</code> and their socio-demographic background (sex, socio-economic status, and age) in British English. An American English comparison would be insightful. To do this, however, we will need to recode some of the variables in the dataset.</p>
-<p>In this case, we will use <code>education</code> as a proxy for socio-economic status. As is, the values are numeric and are not maximally transparent. We can recode these values to be more interpretable. In the corpus documentation, the values for <code>education</code> are described in <a href="#tbl-td-swda-education" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-swda-education</span></a>.</p>
+<p>Let’s assume that we are interested in understanding the use of filled pauses in the Switchboard dialog. <span class="citation" data-cites="Tottie2011">Tottie (<a href="references.html#ref-Tottie2011" role="doc-biblioref">2011</a>)</span> investigates the relationship between speakers’ use of filled pauses <code>uh</code> and <code>um</code> and their socio-demographic background (sex, socio-economic status, and age) in British English. An American English comparison would be insightful. To do this, however, we will need to recode some of the variables in the dataset.</p>
+<p>In this case, we will use <code>education</code> as a proxy for socio-economic status. As is, the values are numeric and are not maximally transparent. We can recode these values to be more interpretable. In the corpus documentation, the values for <code>education</code> are described in <a href="#tbl-td-swda-education" class="quarto-xref">Table&nbsp;<span>7.4</span></a>.</p>
 <div id="tbl-td-swda-education" class="sm striped quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-swda-education-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.4: Values for the <code>education</code> variable in the Switchboard dialog Act Corpus.
@@ -986,8 +1006,8 @@ Table&nbsp;7.4: Values for the <code>education</code> variable in the Switchboar
 <p>Together <code>sex</code>, <code>education</code>, and <code>age</code> will provide us with the socio-demographic information we need to investigate the relationship between speakers’ use of filled pauses and their socio-demographic background. The last component we need to derive is the use of filled pauses. To do this we will need to extract the filled pauses from the <code>utt_text</code> variable. We also need to consider what we mean by ‘use’. In this case, we will operationalize the use of filled pauses as the number of times a filled pause is used per utterance.</p>
 </section><section id="sec-td-recoding-application" class="level3" data-number="7.2.2"><h3 data-number="7.2.2" class="anchored" data-anchor-id="sec-td-recoding-application">
 <span class="header-section-number">7.2.2</span> Application</h3>
-<p>The plan to transform the <code>swda_curated_tbl</code> dataset is established. Now we need to implement the plan. We will start by recoding the <code>education</code> variable. Specifically, we want to map the numeric values to the descriptions in <a href="#tbl-td-swda-education" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-swda-education</span></a>.</p>
-<p>To do this we will use the <code>case_when()</code> function from the <code>dplyr</code> package. This function allows us to specify a series of conditions and the values to return if the condition is met. <code>case_when()</code> evaluates the conditions and <code>mutate()</code> writes the variable, in this case overwrites it, as seen in <a href="#exm-td-swda-recoding-education" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-swda-recoding-education</span></a>.</p>
+<p>The plan to transform the <code>swda_curated_tbl</code> dataset is established. Now we need to implement the plan. We will start by recoding the <code>education</code> variable. Specifically, we want to map the numeric values to the descriptions in <a href="#tbl-td-swda-education" class="quarto-xref">Table&nbsp;<span>7.4</span></a>.</p>
+<p>To do this we will use the <code>case_when()</code> function from the <code>dplyr</code> package. This function allows us to specify a series of conditions and the values to return if the condition is met. <code>case_when()</code> evaluates the conditions and <code>mutate()</code> writes the variable, in this case overwrites it, as seen in <a href="#exm-td-swda-recoding-education" class="quarto-xref">Example&nbsp;<span>7.15</span></a>.</p>
 <div id="exm-td-swda-recoding-education" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.15</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1023,7 +1043,7 @@ Table&nbsp;7.4: Values for the <code>education</code> variable in the Switchboar
 </div>
 </div>
 </div>
-<p>To create the <code>age</code> variable, all we need to do is subtract the <code>birth_year</code> from the year of recording, 1992. Again we will use <code>mutate()</code> to create the <code>age</code> variable. The values are created by a subtraction operation. Since we will not need the <code>birth_year</code> variable afterwards, we will drop it from the dataset. The code is seen in <a href="#exm-td-swda-recoding-age" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-swda-recoding-age</span></a>.</p>
+<p>To create the <code>age</code> variable, all we need to do is subtract the <code>birth_year</code> from the year of recording, 1992. Again we will use <code>mutate()</code> to create the <code>age</code> variable. The values are created by a subtraction operation. Since we will not need the <code>birth_year</code> variable afterwards, we will drop it from the dataset. The code is seen in <a href="#exm-td-swda-recoding-age" class="quarto-xref">Example&nbsp;<span>7.16</span></a>.</p>
 <div id="exm-td-swda-recoding-age" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.16</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1055,7 +1075,7 @@ Table&nbsp;7.4: Values for the <code>education</code> variable in the Switchboar
 </div>
 <p>Our final recoding step is to derive the frequency of filled pauses per utterance. In other words, we want to match the ‘uh’ and ‘um’ and return the number of matches for each utterance. There are a number of ways to do this. We could use an approach which applies the <code>str_extract_all()</code> function, which returns a list of matches, and then <code>unnest()</code> the list and count the number of matches. An alternative approach is to use the <code>str_count()</code> function to count the number of matches for a pattern. The later approach is more efficient for our purposes.</p>
 <p>In either case, a pattern to match these annotations is needed. As always with pattern matching, we need to craft an expression that is as specific as possible to avoid over- or under-matching. We know from our observation and the corpus documentation that all filled pauses are wrapped by the <code>{F ...}</code> annotation. We can use this to our advantage. Before we jump into counting the filled pauses, let’s test a regular expression that matches the entire <code>{F ...}</code> annotation. An expression like <code>{F.*}</code> might be tempting, but this will be problematic for two reasons. First, since the <code>{</code> and <code>}</code> are regular expression operators we will need to escape them with the <code>\\</code> convention. Second, the <code>*</code> operator is greedy, meaning that it will match the longest possible string. So if in a given utterance there are multiple filled pauses, the <code>*</code> operator will match all of them at once, not individually. To avoid this, we can use the <code>?</code> operator to make the <code>*</code> operator lazy. With these considerations in mind, we can move forward with <code>\\{F.*?\\}</code> as our expression.</p>
-<p>We will send each utterance to the <code>str_extract_all()</code> function to match the filled pauses. This function returns a list of matches, so we will need to <code>unnest()</code> the list to get a vector of matches. Afterwards we will apply the <code>count()</code> function to summarize the number of matches for each match variation. The code is seen in <a href="#exm-td-swda-recoding-filled-pauses-test" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-swda-recoding-filled-pauses-test</span></a>.</p>
+<p>We will send each utterance to the <code>str_extract_all()</code> function to match the filled pauses. This function returns a list of matches, so we will need to <code>unnest()</code> the list to get a vector of matches. Afterwards we will apply the <code>count()</code> function to summarize the number of matches for each match variation. The code is seen in <a href="#exm-td-swda-recoding-filled-pauses-test" class="quarto-xref">Example&nbsp;<span>7.17</span></a>.</p>
 <div id="exm-td-swda-recoding-filled-pauses-test" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.17</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1089,7 +1109,7 @@ Table&nbsp;7.4: Values for the <code>education</code> variable in the Switchboar
 <p>The result from our test indicates that the <code>\\{F .*?\\}</code> pattern matches a wide variety of filled pause annotations, 120 to be exact! We can see that there are a number of filled pause annotations that we are not be interested in, <em>e.g.</em> <code>{F Oh}</code>. Furthermore, the ‘uh’ and ‘um’ we are interested in sometimes include more annotation structure, <em>e.g.</em> <code>{F + ] Um, }</code>.</p>
 <p>A more sophisticated pattern is needed. When faced with a pattern matching task such as this, I find it helpful to start with a simple pattern and then add complexity as needed. This is an iterative process. To speed up the process, I often extract the matches and use an online tool for developing regular expressions, such as <a href="https://regex101.com/">regex101.com</a>.</p>
 <p>With a (monster) regular expression that matches each of the filled pauses we are interested in, and only those filled pauses, we can move forward with counting the number of matches for each utterance.</p>
-<p>To do this we will use the <code>str_count()</code> function from the <code>stringr</code> package. This function counts the number of matches for a pattern in a character vector. We will use <code>mutate()</code> to create new variables <code>uh</code> and <code>um</code> which will contain the counts for the filled pauses <code>uh</code> and <code>um</code>, respectively. The code is seen in <a href="#exm-td-swda-recoding-filled-pauses" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-swda-recoding-filled-pauses</span></a>.</p>
+<p>To do this we will use the <code>str_count()</code> function from the <code>stringr</code> package. This function counts the number of matches for a pattern in a character vector. We will use <code>mutate()</code> to create new variables <code>uh</code> and <code>um</code> which will contain the counts for the filled pauses <code>uh</code> and <code>um</code>, respectively. The code is seen in <a href="#exm-td-swda-recoding-filled-pauses" class="quarto-xref">Example&nbsp;<span>7.18</span></a>.</p>
 <div id="exm-td-swda-recoding-filled-pauses" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.18</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1128,7 +1148,7 @@ Table&nbsp;7.4: Values for the <code>education</code> variable in the Switchboar
 </div>
 <p>Now we have two new columns, <code>uh</code> and <code>um</code> which indicate how many times the relevant pattern was matched for a given utterance. By choosing to focus on disfluencies, however, we have made a decision to change the unit of observation from the utterance to the use of filled pauses (<code>uh</code> and <code>um</code>). This means that as the dataset stands, it is not in tidy format –where each observation corresponds to the observational unit. When datasets are misaligned in this particular way, there are in what is known as ‘wide’ format. What we want to do, then, is to restructure our dataset such that each row corresponds to the unit of observation –in this case each filled pause type.</p>
 <!-- [ ] may need a graphic or more explanation here (pivot_longer) -->
-<p>To convert our current (wide) dataset to one where each filler type is listed and the counts are measured for each utterance we turn to the <code>pivot_longer()</code> function. This function creates two new columns, one in which the column names are listed and one for the values for each of the column names. The code is seen in <a href="#exm-td-swda-recoding-filled-pauses-longer" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-swda-recoding-filled-pauses-longer</span></a>.</p>
+<p>To convert our current (wide) dataset to one where each filler type is listed and the counts are measured for each utterance we turn to the <code>pivot_longer()</code> function. This function creates two new columns, one in which the column names are listed and one for the values for each of the column names. The code is seen in <a href="#exm-td-swda-recoding-filled-pauses-longer" class="quarto-xref">Example&nbsp;<span>7.19</span></a>.</p>
 <div id="exm-td-swda-recoding-filled-pauses-longer" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.19</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1202,13 +1222,13 @@ Table&nbsp;7.4: Values for the <code>education</code> variable in the Switchboar
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
-<p>For processing Chinese text, including tokenization, see the <code>jiebaR</code> package <span class="citation" data-cites="R-jiebaR">(<a href="#ref-R-jiebaR" role="doc-biblioref"><strong>R-jiebaR?</strong></a>)</span> and the <code>gibasa</code> package <span class="citation" data-cites="R-gibasa">(<a href="#ref-R-gibasa" role="doc-biblioref"><strong>R-gibasa?</strong></a>)</span>.</p>
+<p>For processing Chinese text, including tokenization, see the <code>jiebaR</code> package <span class="citation" data-cites="R-jiebaR">(<a href="references.html#ref-R-jiebaR" role="doc-biblioref">Wenfeng and Yanyi 2019</a>)</span> and the <code>gibasa</code> package <span class="citation" data-cites="R-gibasa">(<a href="references.html#ref-R-gibasa" role="doc-biblioref">Kato, Ichinose, and Kudo 2023</a>)</span>.</p>
 </div>
 </div>
 </div>
 <section id="sec-td-tokenization-orientation" class="level3" data-number="7.3.1"><h3 data-number="7.3.1" class="anchored" data-anchor-id="sec-td-tokenization-orientation">
 <span class="header-section-number">7.3.1</span> Orientation</h3>
-<p>Let’s look at a curated dataset from the CABNC Corpus to explore tokenization. The data dictionary for this dataset appears in <a href="#tbl-td-cabnc-dd" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-cabnc-dd</span></a>.</p>
+<p>Let’s look at a curated dataset from the CABNC Corpus to explore tokenization. The data dictionary for this dataset appears in <a href="#tbl-td-cabnc-dd" class="quarto-xref">Table&nbsp;<span>7.5</span></a>.</p>
 <div class="cell">
 <div id="tbl-td-cabnc-dd" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-cabnc-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1272,7 +1292,7 @@ Table&nbsp;7.5: Data dictionary for the CABNC Corpus.
 </figure>
 </div>
 </div>
-<p>The CABNC dataset contains a number of variables describing conversations between speakers of British English. Now let’s look at the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in <a href="#exm-td-cabnc-dataset-read" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-dataset-read</span></a>.</p>
+<p>The CABNC dataset contains a number of variables describing conversations between speakers of British English. Now let’s look at the dataset and preview the first 10 lines to get a sense of the values in the dataset, as in <a href="#exm-td-cabnc-dataset-read" class="quarto-xref">Example&nbsp;<span>7.20</span></a>.</p>
 <div id="exm-td-cabnc-dataset-read" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.20</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in the dataset</span></span>
@@ -1304,7 +1324,7 @@ Table&nbsp;7.5: Data dictionary for the CABNC Corpus.
 <p>Let’s assume that we are performing an exploratory analysis with this dataset and would like to consider the use of words and word sequences (<span class="math inline">\(n\)</span>-grams). In this case we will be deriving multiple datasets with different units of observation.</p>
 </section><section id="sec-td-tokenization-application" class="level3" data-number="7.3.2"><h3 data-number="7.3.2" class="anchored" data-anchor-id="sec-td-tokenization-application">
 <span class="header-section-number">7.3.2</span> Application</h3>
-<p>In the <code>cabnc_curated_tbl</code> data frame the <code>utt_text</code> variable contains the text we want to tokenize. We will start by tokenizing the text into words. Abstracting away from some of the metadata variables, if we envision what this should look like we might imagine something like <a href="#tbl-td-cabnc-tokenization-words-example" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-cabnc-tokenization-words-example</span></a>.</p>
+<p>In the <code>cabnc_curated_tbl</code> data frame the <code>utt_text</code> variable contains the text we want to tokenize. We will start by tokenizing the text into words. Abstracting away from some of the metadata variables, if we envision what this should look like we might imagine something like <a href="#tbl-td-cabnc-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.6</span></a>.</p>
 <div id="tbl-td-cabnc-tokenization-words-example" class="quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-cabnc-tokenization-words-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into words.
@@ -1346,8 +1366,8 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </figure>
 </div>
-<p>Comparing <a href="#tbl-td-cabnc-tokenization-words-example" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-cabnc-tokenization-words-example</span></a> to the first line of the output of <a href="#exm-td-swda-dataset-read" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-swda-dataset-read</span></a>, we can see that we want to segment the words in the <code>utt_text</code> and then have each segment appear as a separate observation, retaining the relevant metadata variables.</p>
-<p>Before we work with tokenizing text in a data frame, let’s start with a character vector to get a sense of how tokenization works and what we will need to do to achieve the output in <a href="#tbl-td-cabnc-tokenization-words-example" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-cabnc-tokenization-words-example</span></a>. Let’s start with a character vector which contains the first three utterances from <code>cabnc_curated_tbl</code>. I will use <code>slice_head(n = 3)</code> and then <code>pull()</code> to extract the <code>utt_text</code> character vector in <a href="#exm-td-cabnc-tokenization-words-vector" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-words-vector</span></a>.</p>
+<p>Comparing <a href="#tbl-td-cabnc-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.6</span></a> to the first line of the output of <a href="#exm-td-swda-dataset-read" class="quarto-xref">Example&nbsp;<span>7.14</span></a>, we can see that we want to segment the words in the <code>utt_text</code> and then have each segment appear as a separate observation, retaining the relevant metadata variables.</p>
+<p>Before we work with tokenizing text in a data frame, let’s start with a character vector to get a sense of how tokenization works and what we will need to do to achieve the output in <a href="#tbl-td-cabnc-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.6</span></a>. Let’s start with a character vector which contains the first three utterances from <code>cabnc_curated_tbl</code>. I will use <code>slice_head(n = 3)</code> and then <code>pull()</code> to extract the <code>utt_text</code> character vector in <a href="#exm-td-cabnc-tokenization-words-vector" class="quarto-xref">Example&nbsp;<span>7.21</span></a>.</p>
 <div id="exm-td-cabnc-tokenization-words-vector" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.21</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1365,7 +1385,7 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </div>
 </div>
-<p>We have the first three utterances in <code>cbanc_utts_chr</code>. Now we can tokenize the utterances into words using the <code><a href="https://docs.ropensci.org/tokenizers/reference/basic-tokenizers.html">tokenize_words()</a></code> function from the <code>tokenizers</code> package <span class="citation" data-cites="R-tokenizers">(<a href="#ref-R-tokenizers" role="doc-biblioref"><strong>R-tokenizers?</strong></a>)</span>. It’s only required argument is a character vector, as seen in <a href="#exm-td-cabnc-tokenization-words-tokenize" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-words-tokenize</span></a>.</p>
+<p>We have the first three utterances in <code>cbanc_utts_chr</code>. Now we can tokenize the utterances into words using the <code><a href="https://docs.ropensci.org/tokenizers/reference/basic-tokenizers.html">tokenize_words()</a></code> function from the <code>tokenizers</code> package <span class="citation" data-cites="R-tokenizers">(<a href="references.html#ref-R-tokenizers" role="doc-biblioref">Mullen 2022</a>)</span>. It’s only required argument is a character vector, as seen in <a href="#exm-td-cabnc-tokenization-words-tokenize" class="quarto-xref">Example&nbsp;<span>7.22</span></a>.</p>
 <div id="exm-td-cabnc-tokenization-words-tokenize" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.22</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1388,7 +1408,7 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </div>
 <p>The output shows that we get a list of length 3, one for each utterance. Each list element contains a character vector with different lengths based on the number of tokens created from the original utterance.</p>
-<p>Now if we add the <code><a href="https://docs.ropensci.org/tokenizers/reference/basic-tokenizers.html">tokenize_words()</a></code> function to a <code>mutate()</code> call, we can create a new variable with the tokenized utterances. However, the value for each observation will be a list. To expand the character vectors within each list into separate observations, we can use the <code>unnest()</code> function on the new variable. I will assign the result to <code>cabnc_unigrams_tbl</code> as we will have one-word tokens, as seen in <a href="#exm-td-cabnc-tokenization-words" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-words</span></a>.</p>
+<p>Now if we add the <code><a href="https://docs.ropensci.org/tokenizers/reference/basic-tokenizers.html">tokenize_words()</a></code> function to a <code>mutate()</code> call, we can create a new variable with the tokenized utterances. However, the value for each observation will be a list. To expand the character vectors within each list into separate observations, we can use the <code>unnest()</code> function on the new variable. I will assign the result to <code>cabnc_unigrams_tbl</code> as we will have one-word tokens, as seen in <a href="#exm-td-cabnc-tokenization-words" class="quarto-xref">Example&nbsp;<span>7.23</span></a>.</p>
 <div id="exm-td-cabnc-tokenization-words" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.23</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1419,7 +1439,7 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </div>
 <p>The <code>cabnc_unigrams_tbl</code> dataset is in the format we want, each row corresponds to a word token and each column contains the relevant metadata. The <code>tokenizers</code> package includes a variety of tokenization functions. For example, we can use the <code><a href="https://docs.ropensci.org/tokenizers/reference/ngram-tokenizers.html">tokenize_ngrams()</a></code> function to create <span class="math inline">\(n\)</span>-grams. The <code><a href="https://docs.ropensci.org/tokenizers/reference/ngram-tokenizers.html">tokenize_ngrams()</a></code> function takes a character vector and a value for <span class="math inline">\(n\)</span> and returns a list of <span class="math inline">\(n\)</span>-grams. Other functions can tokenize character <span class="math inline">\(n\)</span>-grams, sentences, paragraphs, lines, or even allow you to specify a custom tokenization function with a regular expression.</p>
-<p>As we have seen the <code>tokenize_*()</code> set of functions take a character vector and return a list of tokens. And if we are working with a data frame, we can then work to expand the list into separate observations. This is a common pattern in text analysis. So common, in fact, that the <code>tidytext</code> package <span class="citation" data-cites="R-tidytext">(<a href="#ref-R-tidytext" role="doc-biblioref"><strong>R-tidytext?</strong></a>)</span> includes a function, <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> that wraps the <code>tokenize_*</code> functions and expand the list of tokens into separate observations in one step. The tokenization types available are <code>character</code>, <code>word</code>, <code>ngram</code>, <code>sentence</code>, <code>regex</code>, and <code>skip_ngram</code>. We will use the <code>word</code> tokenization type to recreate the <code>cabnc_unigrams_tbl</code> dataset, as seen in <a href="#exm-td-cabnc-tokenization-words-tidytext" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-words-tidytext</span></a>.</p>
+<p>As we have seen the <code>tokenize_*()</code> set of functions take a character vector and return a list of tokens. And if we are working with a data frame, we can then work to expand the list into separate observations. This is a common pattern in text analysis. So common, in fact, that the <code>tidytext</code> package <span class="citation" data-cites="R-tidytext">(<a href="references.html#ref-R-tidytext" role="doc-biblioref">Robinson and Silge 2023</a>)</span> includes a function, <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> that wraps the <code>tokenize_*</code> functions and expand the list of tokens into separate observations in one step. The tokenization types available are <code>character</code>, <code>word</code>, <code>ngram</code>, <code>sentence</code>, <code>regex</code>, and <code>skip_ngram</code>. We will use the <code>word</code> tokenization type to recreate the <code>cabnc_unigrams_tbl</code> dataset, as seen in <a href="#exm-td-cabnc-tokenization-words-tidytext" class="quarto-xref">Example&nbsp;<span>7.24</span></a>.</p>
 <div id="exm-td-cabnc-tokenization-words-tidytext" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.24</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1454,7 +1474,7 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </div>
 </div>
-<p>The <code>utt_word</code> column in the outputs from both <a href="#exm-td-cabnc-tokenization-words" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-words</span></a> and <a href="#exm-td-cabnc-tokenization-words-tidytext" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-words-tidytext</span></a> are identical. One thing to note, however, is that the original <code>utt_text</code> variable is dropped in the <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> approach. This one of a few default values for parameters which inlcude <code>drop = TRUE</code> (dropping the original text variable) and <code>to_lower = TRUE</code>. In fact the <code>token = "words"</code> parameter is not needed as it is the default. We can change these defaults as we see fit.</p>
+<p>The <code>utt_word</code> column in the outputs from both <a href="#exm-td-cabnc-tokenization-words" class="quarto-xref">Example&nbsp;<span>7.23</span></a> and <a href="#exm-td-cabnc-tokenization-words-tidytext" class="quarto-xref">Example&nbsp;<span>7.24</span></a> are identical. One thing to note, however, is that the original <code>utt_text</code> variable is dropped in the <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> approach. This one of a few default values for parameters which inlcude <code>drop = TRUE</code> (dropping the original text variable) and <code>to_lower = TRUE</code>. In fact the <code>token = "words"</code> parameter is not needed as it is the default. We can change these defaults as we see fit.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1466,7 +1486,7 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </div>
 </div>
-<p>As we derive datasets to explore, let’s also create bigram tokens. We can do this by changing the <code>token</code> parameter to <code>"ngrams"</code> and specifying the value for <span class="math inline">\(n\)</span> with the <code>n</code> parameter. I will assign the result to <code>cabnc_bigrams_tbl</code> as we will have two-word tokens, as seen in <a href="#exm-td-cabnc-tokenization-bigrams-tidytext" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-bigrams-tidytext</span></a>.</p>
+<p>As we derive datasets to explore, let’s also create bigram tokens. We can do this by changing the <code>token</code> parameter to <code>"ngrams"</code> and specifying the value for <span class="math inline">\(n\)</span> with the <code>n</code> parameter. I will assign the result to <code>cabnc_bigrams_tbl</code> as we will have two-word tokens, as seen in <a href="#exm-td-cabnc-tokenization-bigrams-tidytext" class="quarto-xref">Example&nbsp;<span>7.25</span></a>.</p>
 <div id="exm-td-cabnc-tokenization-bigrams-tidytext" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.25</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1500,7 +1520,7 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </div>
 <p>The two-word token sequences for each uttterance appear as observations in the <code>cabnc_bigrams_tbl</code> dataset. You may notice that in row 5 the value for <code>utt_bigram</code> is <code>NA</code>. This is because the utterance only contains one word. The <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> function will not create a token for a sequence that does not exist.</p>
-<p>If we don’t want to loose this information, we can modify the original <code>utt_text</code> variable to include a placeholder, some symbol that we will use to denote that a single word utterance is present. Another strategy which accomplishes the first goal and may enrich the bigram dataset is to add a start and end token to each utterance. This will allow us to identify the first and last word in each utterance. In either case we can turn to the <code>str_c()</code> function which will allow us to concatenate strings. In <a href="#exm-td-cabnc-tokenization-bigrams-tidytext-start-end" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-bigrams-tidytext-start-end</span></a>, I will add a start and end token to each utterance and then tokenize the utterances into bigrams.</p>
+<p>If we don’t want to loose this information, we can modify the original <code>utt_text</code> variable to include a placeholder, some symbol that we will use to denote that a single word utterance is present. Another strategy which accomplishes the first goal and may enrich the bigram dataset is to add a start and end token to each utterance. This will allow us to identify the first and last word in each utterance. In either case we can turn to the <code>str_c()</code> function which will allow us to concatenate strings. In <a href="#exm-td-cabnc-tokenization-bigrams-tidytext-start-end" class="quarto-xref">Example&nbsp;<span>7.26</span></a>, I will add a start and end token to each utterance and then tokenize the utterances into bigrams.</p>
 <div id="exm-td-cabnc-tokenization-bigrams-tidytext-start-end" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.26</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1545,13 +1565,13 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-exclamation-triangle" aria-label="exclamation-triangle"></i> Warning</strong></p>
-<p>In <a href="#exm-td-cabnc-tokenization-bigrams-tidytext-start-end" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-bigrams-tidytext-start-end</span></a> I used <code>x</code> as the start and end token. My though process was that <code>x</code> will be a unique token that will not be present in the utterances. This is a good strategy, but it is not foolproof. Another, more meaningful strategy may be to encode the start and end with <code>#</code> and <code>$</code>, respectively. In this case, however, this option is not ideal as the <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> and <code><a href="https://docs.ropensci.org/tokenizers/reference/ngram-tokenizers.html">tokenize_ngrams()</a></code> functions strip punctuation by default. This means that the <code>#</code> and <code>$</code> will be removed.</p>
+<p>In <a href="#exm-td-cabnc-tokenization-bigrams-tidytext-start-end" class="quarto-xref">Example&nbsp;<span>7.26</span></a> I used <code>x</code> as the start and end token. My though process was that <code>x</code> will be a unique token that will not be present in the utterances. This is a good strategy, but it is not foolproof. Another, more meaningful strategy may be to encode the start and end with <code>#</code> and <code>$</code>, respectively. In this case, however, this option is not ideal as the <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> and <code><a href="https://docs.ropensci.org/tokenizers/reference/ngram-tokenizers.html">tokenize_ngrams()</a></code> functions strip punctuation by default. This means that the <code>#</code> and <code>$</code> will be removed.</p>
 </div>
 </div>
 </div>
 <p>The most common tokenization strategy is to segment text into smaller units, often words. However, there are times when we may want to segment text into larger units, effectively collapsing over rows. For example, if we are working with a curated dataset which is tokenized by words, we may want to segment the text into sentences. A couple considerations are in order, however. First, we need to be clear about what we mean by ‘sentence’ and how we will segment the text into sentences. In some cases key cues for sentence boundaries, such as sentencial punctuation have been stripped from the text, making a simple defnition of a sentence difficult or impossible to be performed computationally. Second, we also need to be clear how we will handle the metadata variables. In other words, when we collapse over rows, we need to be aware and intentional about how we group these new units of observation. For example, if we collapse the <code>cabnc_unigrams_tbl</code> dataset into sentences, will we group the sentences by <code>doc_id</code> or <code>part_id</code> or some other combination of metadata variables?</p>
-<p>Let’s see how we might collapse text rows into larger units using the original curated CABNC data frame <code>cabnc_curated_tbl</code>. Refer back to the output in <a href="#exm-td-cabnc-dataset-read" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-dataset-read</span></a>. The values in <code>utt_text</code> are utterances, which may map to sentences in some cases, but often not. Regardless, there is no sentential punctuation to help identify sentences, even across utterance observations. Furthermore, it may not even make sense to dicuss sentences in the context of spoken language.</p>
-<p>A unit that may make more sense is utterances per speaker per document. Note this context ‘per speaker per document’. In effect this is a grouping parameter for our approach to collapsing the text in <code>utt_text</code>. With a goal in mind we can turn to the <code>group_by()</code> function to group our dataset and then <code>summarize()</code> to collapse the text in <code>utt_text</code> with the <code>str_c()</code> and the parameter <code>collapse = " "</code>. The code is seen in <a href="#exm-td-cabnc-tokenization-utterances" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-cabnc-tokenization-utterances</span></a>.</p>
+<p>Let’s see how we might collapse text rows into larger units using the original curated CABNC data frame <code>cabnc_curated_tbl</code>. Refer back to the output in <a href="#exm-td-cabnc-dataset-read" class="quarto-xref">Example&nbsp;<span>7.20</span></a>. The values in <code>utt_text</code> are utterances, which may map to sentences in some cases, but often not. Regardless, there is no sentential punctuation to help identify sentences, even across utterance observations. Furthermore, it may not even make sense to dicuss sentences in the context of spoken language.</p>
+<p>A unit that may make more sense is utterances per speaker per document. Note this context ‘per speaker per document’. In effect this is a grouping parameter for our approach to collapsing the text in <code>utt_text</code>. With a goal in mind we can turn to the <code>group_by()</code> function to group our dataset and then <code>summarize()</code> to collapse the text in <code>utt_text</code> with the <code>str_c()</code> and the parameter <code>collapse = " "</code>. The code is seen in <a href="#exm-td-cabnc-tokenization-utterances" class="quarto-xref">Example&nbsp;<span>7.27</span></a>.</p>
 <div id="exm-td-cabnc-tokenization-utterances" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.27</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1582,7 +1602,7 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 </div>
 </div>
 </div>
-<p>Now we have a data frame where the utterances for each speaker for each document are collapsed into a single observation. Yet by collapsing the utterances in this way, we have lost the speaker metadata <code>sex</code> and <code>age</code>. We can add this information by one of two approaches. The first is to simply add <code>sex</code> and <code>age</code> to the grouping parameter in <code>group_by()</code>. Since these variables are descriptors of <code>part_id</code> they will not change the result of our collapsing the text, but will be retained in the resulting output. The second approach is to use a join operation to add the metadata back to the collapsed dataset. I won’t go into this approach here as we will cover joins head-on in <a href="#sec-td-merging" class="quarto-xref"><span class="quarto-unresolved-ref">sec-td-merging</span></a>.</p>
+<p>Now we have a data frame where the utterances for each speaker for each document are collapsed into a single observation. Yet by collapsing the utterances in this way, we have lost the speaker metadata <code>sex</code> and <code>age</code>. We can add this information by one of two approaches. The first is to simply add <code>sex</code> and <code>age</code> to the grouping parameter in <code>group_by()</code>. Since these variables are descriptors of <code>part_id</code> they will not change the result of our collapsing the text, but will be retained in the resulting output. The second approach is to use a join operation to add the metadata back to the collapsed dataset. I won’t go into this approach here as we will cover joins head-on in <a href="#sec-td-merging" class="quarto-xref"><span>Section 7.5</span></a>.</p>
 </section></section><section id="sec-td-generation" class="level2" data-number="7.4"><h2 data-number="7.4" class="anchored" data-anchor-id="sec-td-generation">
 <span class="header-section-number">7.4</span> Generation</h2>
 <p>The process of generation involves the addition of information to a dataset. This differs from the previous transformation procedures in that normalization, recoding, and tokenization involve manipulating, classifiying, and/ or deriving information based on characteristics explicit in a dataset. Instead, generation involves deriving new information based on characteristics implicit in a dataset.</p>
@@ -1591,9 +1611,9 @@ Table&nbsp;7.6: Example of tokenizing the <code>utt_text</code> variable into wo
 <p>Second, the degree to which the resource that will be used to annotate the linguistic information is aligned with the language variety and/or register is also a key consideration. As noted, automatic linguistic annotation methods are contingent on pre-trained resources. The language and language variety used to develop these resources may not be available for the language under investigation, or if it does, the language variety and/ or register may not align. The degree to which a resource does not align with the linguistic information targeted for annotation is directly related to the quality of the final annotations. To be clear, no annotation method, whether manual or automatic is guaranteed to be perfectly accurate.</p>
 <section id="sec-td-generation-orientation" class="level3" data-number="7.4.1"><h3 data-number="7.4.1" class="anchored" data-anchor-id="sec-td-generation-orientation">
 <span class="header-section-number">7.4.1</span> Orientation</h3>
-<p>As an example, we’ll posit that we are conducting translation research. Specifically, we will set up an investigation into the effect of translation on the syntactic simplification of text. The basic notion is that when translators translate text from one language to another, they subconsciously simplify the text, compared to native texts <span class="citation" data-cites="Liu2021">(<a href="#ref-Liu2021" role="doc-biblioref"><strong>Liu2021?</strong></a>)</span>.</p>
+<p>As an example, we’ll posit that we are conducting translation research. Specifically, we will set up an investigation into the effect of translation on the syntactic simplification of text. The basic notion is that when translators translate text from one language to another, they subconsciously simplify the text, compared to native texts <span class="citation" data-cites="Liu2021">(<a href="references.html#ref-Liu2021" role="doc-biblioref">Liu and Afzaal 2021</a>)</span>.</p>
 <p>To assess this hypothesis, we will need to identify comparable translated and native texts. The ENNTT corpus contains native and translated English. The texts are drawn from European Parliament proceedings ensuring that the texts are comparable in terms of register.</p>
-<p>The data dictionary for the curated native dataset appears in <a href="#tbl-td-enntt-native-dd" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-enntt-native-dd</span></a>.</p>
+<p>The data dictionary for the curated native dataset appears in <a href="#tbl-td-enntt-native-dd" class="quarto-xref">Table&nbsp;<span>7.7</span></a>.</p>
 <div class="cell">
 <div id="tbl-td-enntt-native-dd" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-enntt-native-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1658,8 +1678,8 @@ Table&nbsp;7.7: Data dictionary for the curated native ENNTT dataset.
 </div>
 </div>
 <p>Both the natives and translations datasets have the same variables. For the purposes of this investigation, the <code>text</code> and <code>type</code> variables are the most relevant. A variable to index the text, such as <code>doc_id</code>, will be useful as we move forward and will be added to the dataset.</p>
-<p>The next step is to operationalize what we mean by syntactic simplification. There are many measures of syntactic complexity <span class="citation" data-cites="Szmrecsanyi2004">(<a href="#ref-Szmrecsanyi2004" role="doc-biblioref"><strong>Szmrecsanyi2004?</strong></a>)</span>. For our purposes, let’s focus on two: number of T-units and sentence length (in words). Length is straightforward to calculate after word tokenization but a T-unit is a bit more involved. A T-unit is a main clause and all of its subordinate clauses. To calculate the number of T-units, we will need to identify the main clauses and their subordinate clauses.</p>
-<p>An idealized transformed dataset for this investigation would look something like <a href="#tbl-td-generation-idealized" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-generation-idealized</span></a>.</p>
+<p>The next step is to operationalize what we mean by syntactic simplification. There are many measures of syntactic complexity <span class="citation" data-cites="Szmrecsanyi2004">(<a href="references.html#ref-Szmrecsanyi2004" role="doc-biblioref">Szmrecsanyi 2004</a>)</span>. For our purposes, let’s focus on two: number of T-units and sentence length (in words). Length is straightforward to calculate after word tokenization but a T-unit is a bit more involved. A T-unit is a main clause and all of its subordinate clauses. To calculate the number of T-units, we will need to identify the main clauses and their subordinate clauses.</p>
+<p>An idealized transformed dataset for this investigation would look something like <a href="#tbl-td-generation-idealized" class="quarto-xref">Table&nbsp;<span>7.8</span></a>.</p>
 <div id="tbl-td-generation-idealized" class="quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-generation-idealized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.8: Idealized transformed dataset for the syntactic simplification investigation.
@@ -1716,7 +1736,7 @@ Table&nbsp;7.8: Idealized transformed dataset for the syntactic simplification i
 <p>To identify the main clauses and their subordinate clauses, we will need to annotate the ENNTT texts with syntactic information. Specifically, we will need to identify and count the main clauses and their subordinate clauses.</p>
 </section><section id="sec-td-generation-application" class="level3" data-number="7.4.2"><h3 data-number="7.4.2" class="anchored" data-anchor-id="sec-td-generation-application">
 <span class="header-section-number">7.4.2</span> Application</h3>
-<p>As fun as it would be to hand-annotate the ENNTT corpus, we will instead turn to automatic linguistic annotation. Specifically, we will use the <code>udpipe</code> package <span class="citation" data-cites="R-udpipe">(<a href="#ref-R-udpipe" role="doc-biblioref"><strong>R-udpipe?</strong></a>)</span> which provides an interface for annotating text using pre-trained models from the <a href="https://universaldependencies.org/">Universal Dependencies</a> (UD) project <span class="citation" data-cites="Nivre2020">(<a href="#ref-Nivre2020" role="doc-biblioref"><strong>Nivre2020?</strong></a>)</span>. The UD project is an effort to develop cross-linguistically consistent treebank annotation for a variety of languages.</p>
+<p>As fun as it would be to hand-annotate the ENNTT corpus, we will instead turn to automatic linguistic annotation. Specifically, we will use the <code>udpipe</code> package <span class="citation" data-cites="R-udpipe">(<a href="references.html#ref-R-udpipe" role="doc-biblioref">Wijffels 2023</a>)</span> which provides an interface for annotating text using pre-trained models from the <a href="https://universaldependencies.org/">Universal Dependencies</a> (UD) project <span class="citation" data-cites="Nivre2020">(<a href="references.html#ref-Nivre2020" role="doc-biblioref">Nivre et al. 2020</a>)</span>. The UD project is an effort to develop cross-linguistically consistent treebank annotation for a variety of languages.</p>
 <p>Our first step, then, is to peruse the available pre-trained models for the languages we are interested in and selected the most register-aligned models. The models, model names, and licensing information are documented in the <code>udpipe</code> package and can be accessed by running <code>?udpipe::udpipe_download_model()</code> in the R console. For illustrative purposes, the <code>english</code> treebank model from the <em>https://github.com/bnosac/udpipe.models.ud</em> repository which is released under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA license</a>. This model is trained on various sources including news, Wikipedia, and web data of various genres.</p>
 <p>Let’s set the stage by providing an overview of the annotation process.</p>
 <ol type="1">
@@ -1725,7 +1745,7 @@ Table&nbsp;7.8: Idealized transformed dataset for the syntactic simplification i
 <li>Prepare the dataset to be annotated (if necessary). This includes ensuring that the dataset has a column of text to be annotated and a grouping column. By default, the names of these columns are expected to be <code>text</code> and <code>doc_id</code>, respectively. The <code>text</code> column needs to be a character vector and the <code>doc_id</code> column needs to be a unique index for each text to be annotated.</li>
 <li>Annotate the dataset. The result returns a data frame.</li>
 </ol>
-<p>Steps 3 and 4 are repeated for the <code>enntt_natives_curated</code> and the <code>enntt_translations_curated</code> datasets. For brevity, I will only show the code for the dataset for the natives. Additionally, I will subset the dataset to 10,000 randomly selected lines for both dataset, as in <a href="#exm-td-generation-subset-natives" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-generation-subset-natives</span></a> for the natives. Syntactic annotation is a computationally expensive operation and the natives and translations datasets contain 116,341 and 738,597 observations, respectively.</p>
+<p>Steps 3 and 4 are repeated for the <code>enntt_natives_curated</code> and the <code>enntt_translations_curated</code> datasets. For brevity, I will only show the code for the dataset for the natives. Additionally, I will subset the dataset to 10,000 randomly selected lines for both dataset, as in <a href="#exm-td-generation-subset-natives" class="quarto-xref">Example&nbsp;<span>7.28</span></a> for the natives. Syntactic annotation is a computationally expensive operation and the natives and translations datasets contain 116,341 and 738,597 observations, respectively.</p>
 <div id="exm-td-generation-subset-natives" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.28</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1744,11 +1764,11 @@ Table&nbsp;7.8: Idealized transformed dataset for the syntactic simplification i
 <p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong> Computational Performance</p>
 <p>In your own research computationally expensive cannot be avoided, but it can be managed. One strategy is to work with a subset of the data until your code is working as expected. Once you are confident that your code is working as expected, then you can scale up to the full dataset.</p>
 <p>If you are using Quarto, you can use the <code>cache: true</code> metadata field in your code blocks to cache the results of computationally expensive code blocks. This will allow you to run your code once and then use the cached results for subsequent runs.</p>
-<p>Parallel processing is another strategy for managing computationally expensive code. Some packages, such as <code>udpipe</code>, have built-in support for parallel processing. Other packages, such as <code>tidytext</code>, do not. In these cases, you can use the <code>future</code> package <span class="citation" data-cites="R-future">(<a href="#ref-R-future" role="doc-biblioref"><strong>R-future?</strong></a>)</span> to parallelize your code.</p>
+<p>Parallel processing is another strategy for managing computationally expensive code. Some packages, such as <code>udpipe</code>, have built-in support for parallel processing. Other packages, such as <code>tidytext</code>, do not. In these cases, you can use the <code>future</code> package <span class="citation" data-cites="R-future">(<a href="references.html#ref-R-future" role="doc-biblioref">Bengtsson 2023</a>)</span> to parallelize your code.</p>
 </div>
 </div>
 </div>
-<p>With the <code>enntt_natives_tbl</code> object, let’s execute steps 1-4, as seen in <a href="#exm-td-generation-udpipe-natives" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-generation-udpipe-natives</span></a>.</p>
+<p>With the <code>enntt_natives_tbl</code> object, let’s execute steps 1-4, as seen in <a href="#exm-td-generation-udpipe-natives" class="quarto-xref">Example&nbsp;<span>7.29</span></a>.</p>
 <div id="exm-td-generation-udpipe-natives" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.29</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
@@ -1800,7 +1820,7 @@ Table&nbsp;7.8: Idealized transformed dataset for the syntactic simplification i
 </div>
 </div>
 <p>There is quite a bit of information which is returned from <code><a href="https://rdrr.io/pkg/udpipe/man/udpipe.html">udpipe()</a></code>. Note that the input lines have been tokenized by word. Each token includes the <code>token</code>, <code>lemma</code>, part of speech (<code>upos</code> and <code>xpos</code>), morphological features (<code>feats</code>), and syntactic relationships (<code>head_token_id</code> and <code>dep_rel</code>). The <code>token_id</code> keeps track of the token’s position in the sentence and the <code>sentence_id</code> keeps track of the sentence’s position in the original text. In the case of the Europarl dataset, most values of <code>lines</code> are just one sentence, but there are some cases where the <code>lines</code> variable contains multiple sentences in which the <code>sid</code> will be incremented. Finally, the <code>doc_id</code> column and its values correspond to the <code>doc_id</code> in the <code>enntt_natives_tbl</code> dataset.</p>
-<p>The number of variables in the <code><a href="https://rdrr.io/pkg/udpipe/man/udpipe.html">udpipe()</a></code> annotation output is quite overwhelming. However, these attributes come in handy for manipulating, extracting, and plotting information based on lexical and syntactic patterns. See the dependency tree in <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-td-generation-udpipe-english-plot-tree</span></a> for an example of the syntactic information that can be extracted from the <code><a href="https://rdrr.io/pkg/udpipe/man/udpipe.html">udpipe()</a></code> annotation output.</p>
+<p>The number of variables in the <code><a href="https://rdrr.io/pkg/udpipe/man/udpipe.html">udpipe()</a></code> annotation output is quite overwhelming. However, these attributes come in handy for manipulating, extracting, and plotting information based on lexical and syntactic patterns. See the dependency tree in <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> for an example of the syntactic information that can be extracted from the <code><a href="https://rdrr.io/pkg/udpipe/man/udpipe.html">udpipe()</a></code> annotation output.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-td-generation-udpipe-english-plot-tree" class="quarto-figure quarto-figure-center quarto-float anchored">
@@ -1820,12 +1840,12 @@ Figure&nbsp;7.1: Plot of the syntactic tree for a sentence in the ENNTT natives 
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
-<p>The plot in <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-td-generation-udpipe-english-plot-tree</span></a> was created using the <code>rsyntax</code> package <span class="citation" data-cites="R-rsyntax">(<a href="#ref-R-rsyntax" role="doc-biblioref"><strong>R-rsyntax?</strong></a>)</span>. In addition to creating dependency tree plots, the <code>rsyntax</code> package can be used to extract syntactic patterns from the <code><a href="https://rdrr.io/pkg/udpipe/man/udpipe.html">udpipe()</a></code> annotation output. <a href="https://github.com/vanatteveldt/rsyntax">See the documentation for more information</a>.</p>
+<p>The plot in <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> was created using the <code>rsyntax</code> package <span class="citation" data-cites="R-rsyntax">(<a href="references.html#ref-R-rsyntax" role="doc-biblioref">Welbers and van Atteveldt 2022</a>)</span>. In addition to creating dependency tree plots, the <code>rsyntax</code> package can be used to extract syntactic patterns from the <code><a href="https://rdrr.io/pkg/udpipe/man/udpipe.html">udpipe()</a></code> annotation output. <a href="https://github.com/vanatteveldt/rsyntax">See the documentation for more information</a>.</p>
 </div>
 </div>
 </div>
-<p>In <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-td-generation-udpipe-english-plot-tree</span></a> we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the <code>token_id</code> which provides the linear ordering of the sentence. Above the nodes the <code>dep_relation</code>, or dependency relationship label is provided. These labels are based on the UD project’s <a href="https://universaldependencies.org/u/dep/index.html">dependency relations</a>. We can see that the ‘ROOT’ relation is at the top of the tree and corresponds to the verb ‘brought’. ‘ROOT’ relations mark predicates in the sentence. Not seen in the example tree, ‘cop’ relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units. Now we need to identify the subordinate clauses. In the UD project’s listings, the relations ‘ccomp’ (clausal complement), ‘xcomp’ (open clausal complement), and ‘acl:relcl’ (relative clause), as seen in <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-td-generation-udpipe-english-plot-tree</span></a> are subordinate clauses.</p>
-<p>To calculate the number of T-units and words per sentence we turn to the <code>dplyr</code> package. We will use the <code>group_by()</code> function to group the dataset by <code>doc_id</code> and <code>sentence_id</code> and then use the <code>summarize()</code> function to calculate the number of T-units and words per sentence, where a T-unit is the combination of the sum of main clauses and sum of subordinante clauses. The code is seen in <a href="#exm-td-generation-udpipe-natives-tunits-words" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-generation-udpipe-natives-tunits-words</span></a>.</p>
+<p>In <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the <code>token_id</code> which provides the linear ordering of the sentence. Above the nodes the <code>dep_relation</code>, or dependency relationship label is provided. These labels are based on the UD project’s <a href="https://universaldependencies.org/u/dep/index.html">dependency relations</a>. We can see that the ‘ROOT’ relation is at the top of the tree and corresponds to the verb ‘brought’. ‘ROOT’ relations mark predicates in the sentence. Not seen in the example tree, ‘cop’ relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units. Now we need to identify the subordinate clauses. In the UD project’s listings, the relations ‘ccomp’ (clausal complement), ‘xcomp’ (open clausal complement), and ‘acl:relcl’ (relative clause), as seen in <a href="#fig-td-generation-udpipe-english-plot-tree" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> are subordinate clauses.</p>
+<p>To calculate the number of T-units and words per sentence we turn to the <code>dplyr</code> package. We will use the <code>group_by()</code> function to group the dataset by <code>doc_id</code> and <code>sentence_id</code> and then use the <code>summarize()</code> function to calculate the number of T-units and words per sentence, where a T-unit is the combination of the sum of main clauses and sum of subordinante clauses. The code is seen in <a href="#exm-td-generation-udpipe-natives-tunits-words" class="quarto-xref">Example&nbsp;<span>7.30</span></a>.</p>
 <div id="exm-td-generation-udpipe-natives-tunits-words" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.30</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1855,7 +1875,7 @@ Figure&nbsp;7.1: Plot of the syntactic tree for a sentence in the ENNTT natives 
 </div>
 </div>
 </div>
-<p>A quick spot check of some sentences calculations <code>enntt_natives_ann_tunits_words_tbl</code> dataset against the <code>enntt_natives_ann</code> is good to ensure that the calculation is working as expected. In <a href="#fig-td-generation-udpipe-natives-tunits" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-td-generation-udpipe-natives-tunits</span></a> we see a sentence that has a word length of 13 and a T-unit value of 5.</p>
+<p>A quick spot check of some sentences calculations <code>enntt_natives_ann_tunits_words_tbl</code> dataset against the <code>enntt_natives_ann</code> is good to ensure that the calculation is working as expected. In <a href="#fig-td-generation-udpipe-natives-tunits" class="quarto-xref">Figure&nbsp;<span>7.2</span></a> we see a sentence that has a word length of 13 and a T-unit value of 5.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-td-generation-udpipe-natives-tunits" class="quarto-figure quarto-figure-center quarto-float anchored">
@@ -1868,7 +1888,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 </div>
 </div>
-<p>Now we can drop the intermediate columns we created to calculate our key syntactic complexity measures using <code>select()</code> to indicate those that we do want to keep. I will assign the result to <code>enntt_natives_syn_comp</code> as we will be working with syntactic complexity measures for the native texts, as seen in <a href="#exm-td-generation-udpipe-natives-tunits-words-select" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-generation-udpipe-natives-tunits-words-select</span></a>.</p>
+<p>Now we can drop the intermediate columns we created to calculate our key syntactic complexity measures using <code>select()</code> to indicate those that we do want to keep. I will assign the result to <code>enntt_natives_syn_comp</code> as we will be working with syntactic complexity measures for the native texts, as seen in <a href="#exm-td-generation-udpipe-natives-tunits-words-select" class="quarto-xref">Example&nbsp;<span>7.31</span></a>.</p>
 <div id="exm-td-generation-udpipe-natives-tunits-words-select" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.31</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1883,7 +1903,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <span class="header-section-number">7.5</span> Merging</h2>
 <p>One final class of transformations that can be applied to curated datasets to enhance their informativeness for a research project is the process of merging two or more datasets. There are two primary types of merging: joins and concatenation. <strong>Joins</strong> can be row- or column-wise operations that combine datasets based on a common attribute or set of attributes. <strong>Concatenation</strong> is exclusively a row-wise operation that combines datasets that share the same attributes.</p>
 <p>Of the two types of merges, joins are the most powerful and sometimes more difficult to understand. When two datasets are joined at least one common variable must be shared between the two datasets. The common variable(s) are referred to as <strong>keys</strong>. The keys are used to match observations in one dataset with observations in another dataset by serving as an index.</p>
-<p>There are a number of join types. The most common are left, full, semi, and anti. The type of join determines which observations are retained in the resulting dataset. Let’s see this in practice. First, let’s create two datasets to join with a common variable <code>key</code>, as seen in <a href="#exm-td-merging-join-dfs" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-dfs</span></a>.</p>
+<p>There are a number of join types. The most common are left, full, semi, and anti. The type of join determines which observations are retained in the resulting dataset. Let’s see this in practice. First, let’s create two datasets to join with a common variable <code>key</code>, as seen in <a href="#exm-td-merging-join-dfs" class="quarto-xref">Example&nbsp;<span>7.32</span></a>.</p>
 <div id="exm-td-merging-join-dfs" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.32</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">a_tbl</span> <span class="op">&lt;-</span></span>
@@ -1934,7 +1954,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 </div>
 <p>The <code>a_tbl</code> and the <code>b_tbl</code> datasets share the <code>key</code> variable, but the values in the <code>key</code> variable are not identical. The two datasets share values <code>1</code>, <code>2</code>, and <code>8</code>. The <code>a_tbl</code> dataset has values <code>3</code> and <code>5</code> in the <code>key</code> variable and the <code>b_tbl</code> dataset has values <code>4</code> and <code>6</code> in the <code>key</code> variable.</p>
-<p>If we apply a left join to the <code>a_tbl</code> and <code>b_tbl</code> datasets, the result will be a dataset that retains all of the observations in the <code>a_tbl</code> dataset and only those observations in the <code>b_tbl</code> dataset that have a match in the <code>a_tbl</code> dataset. The result is seen in <a href="#exm-td-merging-join-left" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-left</span></a>.</p>
+<p>If we apply a left join to the <code>a_tbl</code> and <code>b_tbl</code> datasets, the result will be a dataset that retains all of the observations in the <code>a_tbl</code> dataset and only those observations in the <code>b_tbl</code> dataset that have a match in the <code>a_tbl</code> dataset. The result is seen in <a href="#exm-td-merging-join-left" class="quarto-xref">Example&nbsp;<span>7.33</span></a>.</p>
 <div id="exm-td-merging-join-left" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.33</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1952,7 +1972,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 </div>
 <p>Now, if the key variable has the same name, R will recognize and assume that this is the variable to join on and we don’t need the <code>by =</code> argument, but if there are multiple potential key variables, we use <code>by =</code> to specify which one to use.</p>
-<p>A full join retains all observations in both datasets, as seen in <a href="#exm-td-merging-join-full" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-full</span></a>.</p>
+<p>A full join retains all observations in both datasets, as seen in <a href="#exm-td-merging-join-full" class="quarto-xref">Example&nbsp;<span>7.34</span></a>.</p>
 <div id="exm-td-merging-join-full" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.34</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1971,7 +1991,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 </div>
 </div>
-<p>Left and full joins maintain or increase the number of observations. On the other hand, semi and anti joins aim to decrease the number of observations. A semi join retains only those observations in the left dataset that have a match in the right dataset, as seen in <a href="#exm-td-merging-join-semi" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-semi</span></a>.</p>
+<p>Left and full joins maintain or increase the number of observations. On the other hand, semi and anti joins aim to decrease the number of observations. A semi join retains only those observations in the left dataset that have a match in the right dataset, as seen in <a href="#exm-td-merging-join-semi" class="quarto-xref">Example&nbsp;<span>7.35</span></a>.</p>
 <div id="exm-td-merging-join-semi" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.35</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1986,7 +2006,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 </div>
 </div>
-<p>And an anti join retains only those observations in the left dataset that do not have a match in the right dataset, as seen in <a href="#exm-td-merging-join-anti" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-anti</span></a>.</p>
+<p>And an anti join retains only those observations in the left dataset that do not have a match in the right dataset, as seen in <a href="#exm-td-merging-join-anti" class="quarto-xref">Example&nbsp;<span>7.36</span></a>.</p>
 <div id="exm-td-merging-join-anti" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.36</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2008,7 +2028,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-lightbulb" aria-label="lightbulb"></i> Consider this</strong></p>
-<p>In addition to datasets that are part of an acquired resource or derived from a corpus resource, there are also a number of datasets that are included in R packages that are particularly relevant for text analysis. For example, the <code>tidytext</code> package includes <code>sentiments</code> and <code>stop_words</code> datasets. The <code>lexicon</code> package <span class="citation" data-cites="R-lexicon">(<a href="#ref-R-lexicon" role="doc-biblioref"><strong>R-lexicon?</strong></a>)</span> includes large number of datasets that include sentiment lexicons, stopword lists, contractions, and more.</p>
+<p>In addition to datasets that are part of an acquired resource or derived from a corpus resource, there are also a number of datasets that are included in R packages that are particularly relevant for text analysis. For example, the <code>tidytext</code> package includes <code>sentiments</code> and <code>stop_words</code> datasets. The <code>lexicon</code> package <span class="citation" data-cites="R-lexicon">(<a href="references.html#ref-R-lexicon" role="doc-biblioref">Rinker 2019</a>)</span> includes large number of datasets that include sentiment lexicons, stopword lists, contractions, and more.</p>
 </div>
 </div>
 </div>
@@ -2016,7 +2036,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <span class="header-section-number">7.5.1</span> Orientation</h3>
 <p>With this in mind, let’s return to our syntactic simplification investigation. Recall that we started with two curated ENNTT datasets: the natives and translations. We manipulated these datasets subsetting them to 10,000 randomly selected lines, prepped them for annotation by adding a <code>doc_id</code> column and dropping all columns except <code>text</code>, and then annotated them using the <code>udpipe</code> package. We then calculated the number of T-units and words per sentence.</p>
 <p>These steps produced two datasets for both the natives and for the translations. The first dataset for each is the annotated data frame. The second is the data frame with the sytactic complexity measures we calculated. The annotated data frames are named <code>enntt_natives_ann</code> and <code>enntt_translations_ann</code>. The data frames with the syntactic complexity measures are named <code>enntt_natives_syn_comp</code> and <code>enntt_translations_syn_comp</code>.</p>
-<p>In the end, we want a dataset that looks something like <a href="#tbl-td-merging-idealized" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-merging-idealized</span></a>.</p>
+<p>In the end, we want a dataset that looks something like <a href="#tbl-td-merging-idealized" class="quarto-xref">Table&nbsp;<span>7.9</span></a>.</p>
 <div id="tbl-td-merging-idealized" class="sm striped quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-merging-idealized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification investigation.
@@ -2059,7 +2079,7 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 <p>To create this unified dataset, we will need to apply joins and concatenation. First, we will join the prepped datasets with the annotated datasets. Then we will concatenate the two resulting datasets.</p>
 </section><section id="sec-td-merging-application" class="level3" data-number="7.5.2"><h3 data-number="7.5.2" class="anchored" data-anchor-id="sec-td-merging-application">
 <span class="header-section-number">7.5.2</span> Application</h3>
-<p>Let’s start by joining the annotated datasets (<code>enntt_natives_ann</code> and <code>enntt_translations_ann</code>) with the datasets with the syntactic complexity calculations (<code>enntt_natives_syn_comp</code> and <code>enntt_translations_syn_comp</code>). In these joins, we can see that the prepped and calculated datasets share a couple variables, <code>doc_id</code> and <code>sentence_id</code>, in <a href="#exm-td-merging-join-prepped-syn-comp" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-prepped-syn-comp</span></a>.</p>
+<p>Let’s start by joining the annotated datasets (<code>enntt_natives_ann</code> and <code>enntt_translations_ann</code>) with the datasets with the syntactic complexity calculations (<code>enntt_natives_syn_comp</code> and <code>enntt_translations_syn_comp</code>). In these joins, we can see that the prepped and calculated datasets share a couple variables, <code>doc_id</code> and <code>sentence_id</code>, in <a href="#exm-td-merging-join-prepped-syn-comp" class="quarto-xref">Example&nbsp;<span>7.37</span></a>.</p>
 <div id="exm-td-merging-join-prepped-syn-comp" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.37</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2088,8 +2108,8 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 </div>
 </div>
 </div>
-<p>The <code>doc_id</code> and <code>sentence_id</code> variables are both keys that we will use to join the datasets. The reason being that if we only use one of the two we will not align the two datasets at the sentence level. Only the combination of <code>doc_id</code> and <code>sentence_id</code> isolates the sentences for which we have syntactic complexity measures. Beyond a having common variable (or variables in our case), we must also ensure that join key variables are of the same vector type in both data frames and that we are aware of any differences in the values. From the output in <a href="#exm-td-merging-join-prepped-syn-comp" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-prepped-syn-comp</span></a>, we can see that the <code>doc_id</code> and <code>sentence_id</code> variables aligned in terms of vector type; <code>doc_id</code> is character and <code>sentence_id</code> is integer in both data frames. If they happened not to be, there types would need to be adjusted.</p>
-<p>Now, we need to check for differences in the values. We can do this by using the <code><a href="https://rdrr.io/r/base/sets.html">setequal()</a></code> function. This function returns <code>TRUE</code> if the two vectors are equal and <code>FALSE</code> if they are not. If the two vectors are not equal, the function will return the values that are in one vector but not the other. So if one has <code>10001</code> and the other doesn’t we will get <code>FALSE</code>. Let’s see this in practice, as seen in <a href="#exm-td-merging-join-prepped-syn-comp-check" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-prepped-syn-comp-check</span></a>.</p>
+<p>The <code>doc_id</code> and <code>sentence_id</code> variables are both keys that we will use to join the datasets. The reason being that if we only use one of the two we will not align the two datasets at the sentence level. Only the combination of <code>doc_id</code> and <code>sentence_id</code> isolates the sentences for which we have syntactic complexity measures. Beyond a having common variable (or variables in our case), we must also ensure that join key variables are of the same vector type in both data frames and that we are aware of any differences in the values. From the output in <a href="#exm-td-merging-join-prepped-syn-comp" class="quarto-xref">Example&nbsp;<span>7.37</span></a>, we can see that the <code>doc_id</code> and <code>sentence_id</code> variables aligned in terms of vector type; <code>doc_id</code> is character and <code>sentence_id</code> is integer in both data frames. If they happened not to be, there types would need to be adjusted.</p>
+<p>Now, we need to check for differences in the values. We can do this by using the <code><a href="https://rdrr.io/r/base/sets.html">setequal()</a></code> function. This function returns <code>TRUE</code> if the two vectors are equal and <code>FALSE</code> if they are not. If the two vectors are not equal, the function will return the values that are in one vector but not the other. So if one has <code>10001</code> and the other doesn’t we will get <code>FALSE</code>. Let’s see this in practice, as seen in <a href="#exm-td-merging-join-prepped-syn-comp-check" class="quarto-xref">Example&nbsp;<span>7.38</span></a>.</p>
 <div id="exm-td-merging-join-prepped-syn-comp-check" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.38</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2110,7 +2130,7 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 </div>
 </div>
 </div>
-<p>So the values are the same. The final check is to see if the vectors are of the same length. We know the values are the same, but we don’t know if the values are repeated. We do this by simply comparing the length of the vectors, as seen in <a href="#exm-td-merging-join-prepped-syn-comp-length" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-prepped-syn-comp-length</span></a>.</p>
+<p>So the values are the same. The final check is to see if the vectors are of the same length. We know the values are the same, but we don’t know if the values are repeated. We do this by simply comparing the length of the vectors, as seen in <a href="#exm-td-merging-join-prepped-syn-comp-length" class="quarto-xref">Example&nbsp;<span>7.39</span></a>.</p>
 <div id="exm-td-merging-join-prepped-syn-comp-length" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.39</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2128,7 +2148,7 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 </div>
 </div>
 <p>So they are not the same length. Using the <code><a href="https://rdrr.io/r/base/nrow.html">nrow()</a></code> function, I can see that the annotated dataset has 264,124 observations and the calculated dataset has 10,199 observations. The annotation data frames will have many more observations due to the fact that the unit of observations is word tokens. The calculated data frames’ unit of observation is the sentence.</p>
-<p>To appreciate the difference in the number of observations, let’s look at the first 10 observations of the natives annotated frame for just the columns of interest, as seen in <a href="#exm-td-merging-join-prepped-syn-comp-ann" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-prepped-syn-comp-ann</span></a>.</p>
+<p>To appreciate the difference in the number of observations, let’s look at the first 10 observations of the natives annotated frame for just the columns of interest, as seen in <a href="#exm-td-merging-join-prepped-syn-comp-ann" class="quarto-xref">Example&nbsp;<span>7.40</span></a>.</p>
 <div id="exm-td-merging-join-prepped-syn-comp-ann" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.40</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2153,7 +2173,7 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 </div>
 </div>
 </div>
-<p>The annotated data frames have a lot of redundancy in for the join variables and the <code>sentence</code> variable that we want to add to the calculated data frames. We can reduce the redundancy by using the <code>distinct()</code> function from the <code>dplyr</code> package. In this case we want all observations where <code>doc_id</code>, <code>sentence_id</code> and <code>sentence</code> are distinct. We then select these variables with <code>distinct()</code>, as seen in <a href="#exm-td-merging-annotation-distinct" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-annotation-distinct</span></a>.</p>
+<p>The annotated data frames have a lot of redundancy in for the join variables and the <code>sentence</code> variable that we want to add to the calculated data frames. We can reduce the redundancy by using the <code>distinct()</code> function from the <code>dplyr</code> package. In this case we want all observations where <code>doc_id</code>, <code>sentence_id</code> and <code>sentence</code> are distinct. We then select these variables with <code>distinct()</code>, as seen in <a href="#exm-td-merging-annotation-distinct" class="quarto-xref">Example&nbsp;<span>7.41</span></a>.</p>
 <div id="exm-td-merging-annotation-distinct" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.41</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2167,7 +2187,7 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 <span>  <span class="fu">distinct</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">sentence_id</span>, <span class="va">sentence</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>We now have two datasets that are ready to be joined with the calculated datasets. The next step is to join the two. We will employ a left join where the syntactic complexity data frames are on the left and the join variables will be both the <code>doc_id</code> and <code>sentence_id</code> variables. The code is seen in <a href="#exm-td-merging-join-left-syn-comp" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-join-left-syn-comp</span></a>.</p>
+<p>We now have two datasets that are ready to be joined with the calculated datasets. The next step is to join the two. We will employ a left join where the syntactic complexity data frames are on the left and the join variables will be both the <code>doc_id</code> and <code>sentence_id</code> variables. The code is seen in <a href="#exm-td-merging-join-left-syn-comp" class="quarto-xref">Example&nbsp;<span>7.42</span></a>.</p>
 <div id="exm-td-merging-join-left-syn-comp" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.42</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2213,7 +2233,7 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 </div>
 <!-- Concatenation -->
 <p>The two data frames now have the same columns and we are closer to our final dataset. The next step is to move toward concatenating the two datasets. Before we do that, we need to do some preparation. First, and most important, we need to add a <code>type</code> column to each dataset. This column will indicate whether the sentence is a native or a translation. The second is that our <code>doc_id</code> does not serve as a unique identifier for the sentences. Only in combination with <code>sentence_id</code> can we uniquely identify a sentence.</p>
-<p>So our plan will be to add a <code>type</code> column to each dataset specifying the values for all the observations in the respective dataset. Then we will concatenate the two datasets. Note, if we combine them before, distiguishing the type will be more difficult. After we concatenate the two datasets, we will add a <code>doc_id</code> column that will serve as a unique identifier for the sentences and drop the <code>sentence_id</code> column. OK, that’s the plan. Let’s execute it in <a href="#exm-td-merging-concatenation" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-concatenation</span></a>.</p>
+<p>So our plan will be to add a <code>type</code> column to each dataset specifying the values for all the observations in the respective dataset. Then we will concatenate the two datasets. Note, if we combine them before, distiguishing the type will be more difficult. After we concatenate the two datasets, we will add a <code>doc_id</code> column that will serve as a unique identifier for the sentences and drop the <code>sentence_id</code> column. OK, that’s the plan. Let’s execute it in <a href="#exm-td-merging-concatenation" class="quarto-xref">Example&nbsp;<span>7.43</span></a>.</p>
 <div id="exm-td-merging-concatenation" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.43</strong></span> &nbsp;</p>
 <div class="cell">
@@ -2252,7 +2272,7 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 </div>
 </div>
 </div>
-<p>The output of <a href="#exm-td-merging-concatenation" class="quarto-xref">Example&nbsp;<span class="quarto-unresolved-ref">exm-td-merging-concatenation</span></a> now looks like <a href="#tbl-td-merging-idealized" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-td-merging-idealized</span></a>. We have a dataset that has the syntactic complexity measures for both the natives and the translations. We can now write this dataset to disk and document it in the data dictionary.</p>
+<p>The output of <a href="#exm-td-merging-concatenation" class="quarto-xref">Example&nbsp;<span>7.43</span></a> now looks like <a href="#tbl-td-merging-idealized" class="quarto-xref">Table&nbsp;<span>7.9</span></a>. We have a dataset that has the syntactic complexity measures for both the natives and the translations. We can now write this dataset to disk and document it in the data dictionary.</p>
 </section></section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
 <ul class="task-list">
 <li><label><input type="checkbox"><i class="fa-solid fa-wrench" aria-label="wrench"></i> Add description of outcomes</label></li>
@@ -2292,6 +2312,47 @@ Table&nbsp;7.9: Idealized merged dataset for the syntactic simplification invest
 <p>This chapter concludes the section on data/ dataset preparation. The next section we turn to analyzing datasets. This is the stage where we interrogate the datasets to derive knowledge and insight either through exploratory, predictive, or inferential methods.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-R-future" class="csl-entry" role="listitem">
+Bengtsson, Henrik. 2023. <em>Future: Unified Parallel and Distributed Processing in r for Everyone</em>. <a href="https://future.futureverse.org">https://future.futureverse.org</a>.
+</div>
+<div id="ref-R-gibasa" class="csl-entry" role="listitem">
+Kato, Akiru, Shogo Ichinose, and Taku Kudo. 2023. <em>Gibasa: An Alternative Rcpp Wrapper of MeCab</em>. <a href="https://paithiov909.github.io/gibasa/">https://paithiov909.github.io/gibasa/</a>.
+</div>
+<div id="ref-Liu2021" class="csl-entry" role="listitem">
+Liu, Kanglong, and Muhammad Afzaal. 2021. <span>“Syntactic Complexity in Translated and Non-Translated Texts: A Corpus-Based Study of Simplification.”</span> Edited by Diego Raphael Amancio. <em>PLOS ONE</em> 16 (6): e0253454. <a href="https://doi.org/10.1371/journal.pone.0253454">https://doi.org/10.1371/journal.pone.0253454</a>.
+</div>
+<div id="ref-R-tokenizers" class="csl-entry" role="listitem">
+Mullen, Lincoln. 2022. <em>Tokenizers: Fast, Consistent Tokenization of Natural Language Text</em>. <a href="https://docs.ropensci.org/tokenizers/">https://docs.ropensci.org/tokenizers/</a>.
+</div>
+<div id="ref-Nivre2020" class="csl-entry" role="listitem">
+Nivre, Joakim, Marie-Catherine De Marneffe, Filip Ginter, Jan Hajič, Christopher D. Manning, Sampo Pyysalo, Sebastian Schuster, Francis Tyers, and Daniel Zeman. 2020. <span>“Universal Dependencies V2: An Evergrowing Multilingual Treebank Collection.”</span> <em>arXiv Preprint arXiv:2004.10643</em>. <a href="https://arxiv.org/abs/2004.10643">https://arxiv.org/abs/2004.10643</a>.
+</div>
+<div id="ref-R-lexicon" class="csl-entry" role="listitem">
+Rinker, Tyler. 2019. <em>Lexicon: Lexicons for Text Analysis</em>. <a href="https://github.com/trinker/lexicon">https://github.com/trinker/lexicon</a>.
+</div>
+<div id="ref-R-tidytext" class="csl-entry" role="listitem">
+Robinson, David, and Julia Silge. 2023. <em>Tidytext: Text Mining Using Dplyr, Ggplot2, and Other Tidy Tools</em>. <a href="https://github.com/juliasilge/tidytext">https://github.com/juliasilge/tidytext</a>.
+</div>
+<div id="ref-Szmrecsanyi2004" class="csl-entry" role="listitem">
+Szmrecsanyi, Benedikt. 2004. <span>“On Operationalizing Syntactic Complexity.”</span> In <em>Le Poids Des Mots. Proceedings of the 7th International Conference on Textual Data Statistical Analysis. Louvain-La-Neuve</em>, 2:1032–39.
+</div>
+<div id="ref-Tottie2011" class="csl-entry" role="listitem">
+Tottie, Gunnel. 2011. <span>“Uh and Um as Sociolinguistic Markers in British English.”</span> <em>International Journal of Corpus Linguistics</em> 16 (2): 173–97.
+</div>
+<div id="ref-R-rsyntax" class="csl-entry" role="listitem">
+Welbers, Kasper, and Wouter van Atteveldt. 2022. <em>Rsyntax: Extract Semantic Relations from Text by Querying and Reshaping Syntax</em>.
+</div>
+<div id="ref-R-jiebaR" class="csl-entry" role="listitem">
+Wenfeng, Qin, and Wu Yanyi. 2019. <em>jiebaR: Chinese Text Segmentation</em>. <a href="https://github.com/qinwf/jiebaR/">https://github.com/qinwf/jiebaR/</a>.
+</div>
+<div id="ref-R-stringr" class="csl-entry" role="listitem">
+Wickham, Hadley. 2023. <em>Stringr: Simple, Consistent Wrappers for Common String Operations</em>. <a href="https://stringr.tidyverse.org">https://stringr.tidyverse.org</a>.
+</div>
+<div id="ref-R-udpipe" class="csl-entry" role="listitem">
+Wijffels, Jan. 2023. <em>Udpipe: Tokenization, Parts of Speech Tagging, Lemmatization and Dependency Parsing with the UDPipe ’NLP’ Toolkit</em>. <a href="https://bnosac.github.io/udpipe/en/index.html">https://bnosac.github.io/udpipe/en/index.html</a>.
+</div>
+</div>
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

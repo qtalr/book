@@ -921,7 +921,16 @@ Before moving on to the next section, it is important to remember than through t
 
 The goal of analysis, generally, is to generate knowledge from information. The type of knowledge generated and the process by which it is generated, however, differ and can be broadly grouped into three analysis types: exploratory, predictive, and inferential.
 
-In this section I will provide an overview of how each of these analysis types are tied to research aims and how the general purpose of each type affect: (1) how to *identify* the variables of interest, (2) how to *interrogate* these variables, and (3) how to *interpret* the results. I will structure the discussion of these analysis types moving from the least structured (inductive) to most structured (deductive) approach to deriving knowledge from information with the aim to provide enough information for you to identify these research approaches in the literature and to make appropriate decisions as to which approach your research should adopt.
+
+| Type | Aims | Approach | Methods | Evaluation |
+|------|------|----------|---------|------------|
+| Exploratory | Explore: gain insight | Inductive, data-driven, and iterative | Descriptive, pattern detection with machine learning (unsupervised) | Associative |
+| Predictive | Examine: validate associations | Semi-deductive, data-/ theory-driven, and iterative | Predictive modeling with machine learning (supervised) | Model performance, feature importance, and associative |
+| Inferential | Explain: test hypotheses | Deductive, theory-driven, and non-iterative | Hypothesis testing with statistical tests | Causal |
+
+: Overview of analysis types. {#tbl-aa-analysis-types}{tbl-colwidths="[10, 15, 15, 20, 20]" .striped}
+
+In this section, I will elaborate briefly on the distinctions between analysis types seen in @tbl-aa-analysis-types. I will structure the discussion moving from the least structured (inductive) to most structured (deductive) approach to deriving knowledge from information with the aim to provide enough information for you to identify these research approaches in the literature and to make appropriate decisions as to which approach your research should adopt.
 
 ### Explore {#sec-aa-explore}
 
@@ -939,42 +948,8 @@ In line with the investigative nature of EDA, the identification of variables of
 knitr::include_graphics("figures/aa-eda-variables.drawio.png")
 ```
 
-For illustrative purposes let's consider the State of the Union Corpus (SOTU) [@R-quanteda.corpora]. The presidential addresses and a set of metadata variables are included in the corpus. I've subsetted this corpus to only include U.S. presidents since 1946. A tabular preview of the first 10 addresses (truncated for display) can be found in @tbl-eda-sotu-corpus.
 
-<!-- [ ] Change to data dictionary view?  -->
-
-```{r}
-#| label: tbl-eda-sotu-corpus
-#| tbl-cap: 'First ten addresses from the SOTU Corpus.'
-#| echo: false
-#| tbl-colwidths: [10, 15, 10, 15, 50]
-
-library(quanteda) # for corpus()
-sotu_corpus <-
-  quanteda.corpora::data_corpus_sotu |> # load the corpus
-  corpus_subset(Date > "1946-01-01") # subset to only include presidents since 1946
-
-sotu_tbl <-
-  sotu_corpus |> # select the corpus
-  tidy() |> # convert to tibble
-  select(president = President, date = Date, delivery, party, addresses = text) |> # select variables
-  mutate(addresses = str_squish(addresses)) # remove line breaks
-
-sotu_tbl |> # select the tibble
-  slice_head(n = 10) |> # select first 10 addresses
-  mutate(addresses = str_trunc(addresses, 50, "right")) |> # truncate addresses
-  tt(width = 1)
-```
-
-A dataset such as this one could serve as a starting point to explore many different types of research questions. In order to maintain research coherence so our efforts to not careen into a free-for-all, we need to tether our feature engineering to a unit of analysis that is relevant to the research question. A **unit of analysis** is the entity that we are interested in studying. Not to be confused with the unit of observation, which is the entity that we are able to observe and measure [@Sedgwick2015].
-
-To demonstrate the distinction, let's look consider different approaches to analyzing the SOTU dataset. For example, the unit of analysis could be the language of particular presidents, party ideology, or political rhetoric in general and the unit of observation could be individual words, phrases, sentences, etc. In some cases the unit of analysis and the unit of observation are the same. For example, if we were interested in potential changes use of the word "terrorist" over time in SOTU addresses, the unit of analysis and the unit of observation would be the same --individual addresses. So, depending on the perspective we are interested in investigating, the choice of how to approach engineering features to gain insight will vary.
-
-<!--
-- Methods
-  - Categorical: Distributions (frequency, co-occurrence) and groupings (clustering)
-  - Numeric: Dimensions (PCA, t-SNE, Topic modeling) and groupings (vector space models)
--->
+Any given dataset could serve as a starting point to explore many different types of research questions. In order to maintain research coherence so our efforts to not careen into a free-for-all, we need to tether our feature engineering to a unit of analysis that is relevant to the research question. A **unit of analysis** is the entity that we are interested in studying. Not to be confused with the unit of observation, which is the entity that we are able to observe and measure [@Sedgwick2015]. Depending on the perspective we are interested in investigating, the choice of how to approach engineering features to gain insight will vary.
 
 By the same token, approaches for interrogating the dataset can differ significantly, between research projects and within the same project, but for instructive purposes, let's draw a distinction between descriptive methods and unsupervised learning methods, as seen in @tbl-eda-methods.
 
@@ -986,247 +961,21 @@ eda_approaches <-
   tribble(
     ~"Descriptive methods", ~"Unsupervised learning methods",
     "Frequency analysis", "Cluster analysis",
+    "Co-occurence analysis", "Principal component analysis",
     "Keyness analysis", "Topic Modeling",
-    "Co-occurence analysis", "Vector Space Models"
+    "", "Vector space models"
   )
 eda_approaches |>
   tt(width = 1)
 ```
 
-The first group, **descriptive methods** can be seen as a (more robust) extenstion of the descriptive statistics covered earlier in this chapter including statistic, tabular, and visual techniques. For example, a frequency analysis of the SOTU dataset could be used to identify the most common words used by U.S. political parties in their addresses, in @fig-aa-eda-sotu-descriptive-1, or a co-occurence analysis could be used to identify the most common words the appear after the term "free", in @fig-aa-eda-sotu-descriptive-2, in the dataset.
-
-<!-- Descriptive methods graphics -->
-
-```{r}
-#| label: aa-eda-sotu-freq
-
-library(quanteda.textstats) # for textstat_frequency()
-library(quanteda.textplots) # for plot_frequency()
-
-sotu_freq_p <- # Frequency plots
-  sotu_corpus |>
-  tokens(remove_punct = TRUE) |> # remove punctuation
-  tokens_remove(pattern = stopwords("en")) |> # remove stopwords
-  dfm() |> # convert to dfm
-  textstat_frequency(n = 20, groups = party) |> # get top 20 terms for each party
-  ggplot(aes(x = reorder(feature, frequency), y = frequency, color = group)) + # plot
-  geom_point() + # point plot
-  labs(
-    x = "Terms", y = "Term frequency", color = "Party"
-  ) +
-  # place legend below plot
-  theme(legend.position = "bottom", legend.box = "horizontal") +
-  coord_flip() # flip axes
-```
-
-```{r }
-#| label: aa-eda-sotu-cooccurence
-
-# Co-occurence analysis
-# network graph
-
-library(igraph) # for graph_from_data_frame()
-library(ggraph) # for ggraph()
-
-bigrams <-
-  sotu_tbl |>
-  unnest_tokens(bigram, addresses, token = "ngrams", n = 2) |>
-  separate(bigram, c("word1", "word2"), sep = " ") |>
-  filter(
-    !word1 %in% stopwords::stopwords("en"),
-    !word2 %in% stopwords::stopwords("en")
-  ) |>
-  count(word1, word2, sort = TRUE) |>
-  filter(word1 == "free", n > 1)
-
-# set.seed(2016)
-a <- grid::arrow(type = "closed", length = unit(.05, "inches"))
-
-sotu_free_p <-
-  bigrams |>
-  graph_from_data_frame() |>
-  ggraph(layout = "fr") +
-  geom_edge_link(aes(edge_alpha = log(n), label_size = log(n)), show.legend = FALSE, arrow = a) +
-  geom_node_text(aes(label = name), vjust = 1, hjust = 1, size = 3) +
-  theme_void()
-```
-
-```{r}
-#| label: aa-eda-sotu-keyness
-#| eval: false
-
-sotu_keyness_p <- # Barplot: keyness
-  sotu_corpus |>
-  tokens(remove_punct = TRUE) |>
-  tokens_remove(pattern = stopwords("en")) |>
-  dfm() |>
-  textstat_keyness(target = docvars(sotu_corpus, "Date") > "2001-09-10") |>
-  mutate(period = case_when(
-    n_reference > n_target ~ "Pre 9-11",
-    n_target > n_reference ~ "Post 9-11"
-  )) |>
-  filter(!is.na(period)) |>
-  group_by(period) |>
-  slice_head(n = 10) |>
-  ggplot(aes(x = reorder(feature, chi2), y = chi2)) +
-  geom_col(width = .5) +
-  labs(
-    x = "Terms", y = "Keyness statistic (Chi-squared)",
-    title = "Term keyness"
-  ) +
-  facet_wrap(~ reorder(period, desc(period)), scales = "free_y") +
-  coord_flip()
-```
-
-```{r}
-#| label: fig-aa-eda-sotu-descriptive
-#| fig-cap: "Example of descriptive methods applied to the SOTU dataset."
-#| fig-subcap:
-#| - "Frequency analysis of the 20 most frequent terms by party."
-#| - "Co-occurence analysis of the terms that appear after the term 'free'."
-#| fig-height: 3
-#| layout-ncol: 2
-
-sotu_freq_p # Frequency plots
-sotu_free_p # Co-occurence analysis
-```
-
-The second group, **unsupervised learning**, is a subtype of machine learning in which an algorithm is used to find patterns within and between variables in the data without any guidance (supervision). In this way, the algorithm, or machine learner, is left to make connections and associations wherever they may appear in the input data. If we were interested in finding word-use continuities and discontinuities between presidents, we could use a clustering algorithm, seen in @fig-aa-eda-sotu-unsupervised-1. Or if we wanted to uncover semantic relatedness we could use a vector space model, as in @fig-aa-eda-sotu-unsupervised-2.
-
-<!-- Add unsupervised learning graphics -->
-
-```{r}
-#| label: aa-eda-sotu-clustering
-#| warning: false
-
-# Clustering (hierarchical) analysis
-# dendrogram
-
-library(factoextra) # for fviz_dend()
-
-sotu_hclust <-
-  sotu_corpus |>
-  tokens() |>
-  dfm() |>
-  dfm_remove(pattern = stopwords("en")) |>
-  dfm_group(groups = President) |>
-  textstat_dist() |>
-  as.dist() |>
-  hclust()
-
-sotu_pres_p <-
-  fviz_dend(sotu_hclust,
-    cex = .5,
-    k = 2,
-    k_colors = c("black", "darkgrey")
-  ) + labs(title = "")
-```
-
-```{r}
-#| label: aa-eda-sotu-word-embeddings
-
-# Word embeddings ----
-
-library(word2vec) # for word2vec()
-library(Rtsne) # for Rtsne()
-library(ggrepel)
-
-# Extract texts from corpus
-sotu_texts <-
-  sotu_corpus |>
-  as.character() |>
-  tolower()
-
-# Train word2vec model
-sotu_model <-
-  word2vec(sotu_texts, stopwords = stopwords("en"))
-
-# Extract word vectors and vocabulary
-sotu_vectors <-
-  sotu_model |>
-  as.matrix()
-
-sotu_vocab <-
-  sotu_model |>
-  summary(type = "vocabulary")
-
-# Reduce dimensionality of word vectors w/ t-SNE
-sotu_tsne <- Rtsne(sotu_vectors)
-
-# Create data frame of word vectors and vocabulary
-sotu_tsne_tbl <-
-  sotu_tsne$Y |>
-  as.data.frame() |>
-  as_tibble() |>
-  mutate(label = sotu_vocab)
-
-# Cluster word vectors
-set.seed(1234)
-
-sotu_tsne_clusters <-
-  sotu_tsne_tbl |>
-  mutate(cluster = kmeans(sotu_tsne_tbl[, 1:2], centers = 5)$cluster) |>
-  mutate(cluster = as.factor(cluster))
-
-# Sample 20 words from each cluster
-sotu_tsne_sampled <-
-  sotu_tsne_clusters |>
-  group_by(cluster) |>
-  sample_n(20)
-
-# Plot word vectors
-sotu_tsne_p <-
-  sotu_tsne_clusters |>
-  ggplot(aes(x = V1, y = V2, color = cluster)) +
-  geom_point(alpha = 0.75) +
-  geom_text_repel(data = sotu_tsne_sampled, aes(label = label), color = "black", min.segment.length = 0, size = 3) +
-  theme_minimal() +
-  labs(x = "Component 1", y = "Component 2", color = "Cluster") +
-  scale_color_brewer(palette = "Greys", direction = -1, type = "qual")
-```
-
-
-```{r}
-#| label: fig-aa-eda-sotu-unsupervised
-#| fig-cap: "Example of unsupervised learning methods applied to the SOTU dataset."
-#| fig-subcap:
-#| - "Hierarchical clustering of the SOTU corpus."
-#| - "Word embedding space in the SOTU corpus."
-#| fig-height: 3
-#| layout-ncol: 2
-
-sotu_pres_p # clustering analysis
-sotu_tsne_p # word embeddings
-```
-
-<!--
-- Results
-  - Data-driven hypotheses
--->
+The first group, **descriptive methods** can be seen as an extenstion of the descriptive statistics covered earlier in this chapter including statistic, tabular, and visual techniques. The second group, **unsupervised learning**, is a subtype of machine learning in which an algorithm is used to find patterns within and between variables in the data without any guidance (supervision). In this way, the algorithm, or machine learner, is left to make connections and associations wherever they may appear in the input data.
 
 Either through descriptive, unsupervised learning methods, or a combination of both, EDA employs quantitative methods to summarize, reduce, and sort complex datasets in order to provide the researcher novel perspective to be qualitatively assessed. Exploratory methods produce results that require associative thinking and pattern detection. Speculative as they are, the results from exploratory methods can be highly informative and lead to new insight and inspire further study in directions that may not have been expected.
 
 ### Predict {#sec-aa-predict}
 
-<!--
-- Purpose
-  - Predicting future outcomes based on past data
-  - Assessing the likelihood of a hypothesis
-  - data-driven/ theory-driven (make educated guesses about the relationships between variables)
--->
-
 **Predictive Data Analysis (PDA)** employs a variety of techniques to examine and evaluate the association strength between a variable or set of variables, with a specific focus on predicting a target variable. The aim of PDA is to construct models that can accurately forecast future outcomes, using either data-driven or theory-driven approaches. In this process, **supervised learning** methods, where the machine learning algorithm is guided (supervised) by a target outcome variable, are used. This means we don't begin PDA with a completely open-ended exploration, but rather with an objective - accurate predictions. However, the path to achieving this objective can be flexible, allowing us freedom to adjust our models and methods. Unlike EDA, where the entire dataset can be reused for different approaches, PDA requires a portion of the data to be reserved for evaluation, enhancing the validity of our predictive models. Thus, PDA is an iterative process that combines the flexibility of exploratory analysis with the rigor of confirmatory analysis.
-
-<!-- [ ] 'confirmatory analysis', right language? -->
-
-<!--
-Previous:
-
-PDA is a versatile method that often employed to derive intelligent action from data, but it can also be used for hypothesis generation and even hypothesis testing, under certain conditions. If a researcher's aim is to create model that can perform a language related task, explore association strength between a target variable and various types and combinations of features, or to perform emerging alternative approaches to hypothesis testing [^4], this is the analysis approach a researcher will take.
-
-[^4]: see @Deshors2016 and @Baayen2011 for examples of hypothesis testing using PDA.
-
--->
 
 <!-- Identification of variables -->
 
@@ -1241,19 +990,6 @@ knitr::include_graphics("figures/aa-pda-variables.drawio.png")
 ```
 
 Feature selection can be either data-driven or theory-driven. Data-driven features are those that are engineered to enhance predictive power, while theory-driven features are those that are selected based on theoretical relevance.
-
-Let's consider the Europarl corpus of native, non-native and translated texts (ENNTT) [@Nisioi2016]. This is a monolingual English corpus of translated and non-translated texts from the European Parliament.
-
-```{r}
-#| label: tbl-enntt-dd
-#| tbl-cap: 'Data dictionary of the ENNTT corpus.'
-#| tbl-colwidths: [18, 15, 15, 62]
-
-read_csv("data/aa-enntt_curated_dd.csv") |>
-  tt(width = 1)
-```
-
-Now depending on our research question, we will have a different outcome variable. If we want to examine the potential linguistic differences between native and non-native speakers, we will select our outcome variable to be the  `type` (natives/ nonnatives). The features selected to use to predict `type` depend on our research question. If our research is guided by data, we will choose features that are specifically designed to boost the ability to predict. On the other hand, if our research is steered by theory, we will opt for features that are chosen due to their theoretical significance. In either case, the original dataset will likely need to be transformed.
 
 The approach to interrogating the dataset includes three main steps: feature engineering, model selection, and model evaluation. We've discussed feature engineering, so what is model selection and model evaluation? And how do we go about performing these steps?
 
@@ -1271,118 +1007,32 @@ The approach to interrogating the dataset includes three main steps: feature eng
 
 The elephant in the room is, what type of machine learning algorithm do I use? Well, there are many different types of machine learning algorithms, each with their own strengths and weaknesses. The first rough cut is to decide what type of outcome variable we are predicting: categorical or numeric. If the outcome variable is categorical, we are performing a **classification** task, and if the outcome variable is numeric, we are performing a **regression** task. As we see in @tbl-pda-algorithms, there are various algorithms that can be used for each task.
 
-| Classification         | Regression                | Learner type  |
-|:-----------------------|:--------------------------|:--------------|
-| Logistic Regression    | Linear Regression         | Interpretable |
-| Decision Tree          | Regression Tree           | Interpretable |
-| Support Vector Machine | Support Vector Regression | Black box     |
-| Multilayer Perceptron  | Multilayer Perceptron     | Black box     |
+| Classification         | Regression                |
+|:-----------------------|:--------------------------|
+| Logistic Regression    | Linear Regression         |
+| Random Forest Classifier         | Random Forest Regressor           |
+| Support Vector Machine | Support Vector Regression |
+| Neural Network Classifier  | Neural Network Regressor     |
 
 : Some common supervised learning algorithms used in PDA. {#tbl-pda-algorithms tbl-colwidths="[33, 33, 33]" .sm .striped}
 
-I've included a column in @tbl-pda-algorithms that charaterizes a second consideration which is whether we want an interpretable model or a black box model. When talking about whether a model is interpretable or not, we are not referring to the evaluation of the accuracy of the model. Rather, we are referring to the inner workings of the model itself that allow us to understand how the model is making its predictions. An **interpretable model** is one that can be understood and explored by humans, while a **black box model** is one whose inner workings are not trivially unraveled. The advantage of an interpretable model is that it researchers can go beyond evaluating prediction accuracy and probe feature-outcome associations. On the other hand, if the goal is to simply boost prediction accuracy, interpretability may not be a concern.
+There are a number of algorithm-specific strengths and weaknesses to be considered in the process of model selection. These hinge on characteristics of the data, such as the size of the dataset, the number of features, the type of features, and the expected type of relationships between features or on computing resources, such as the amount of time available to train the model or the amount of memory available to store the model.
 
-
-<!--
-
-- [ ] Incorporate the previous text with the above text, modifying the table so that it is not so cluttered as it includes 'Interpretable' out of nowhere.
-
-Previous:
-
-Another consideration to take into account is the whether the researcher aims to go beyond simply using an algorithm to make accurate predictions, but also wants to understand how the algorithm made its predictions and what contribution features made in the process. There are algorithms that produce models that allow the researcher to peer into and understand its inner workings (e.g. logistic regression, naïve bayes classifiers, inter alia) and those that do not (e.g. neural networks, support vector machines, inter alia). Those that do not are called **'black-box' algorithms**. Neither type assures the best prediction accuracy. Important trade-offs need to be considered, however, if the best prediction comes from a black-box method, but the goal of the research is to understand the contribution of the features to the model's predictions.
-
--->
-
-Finally, there are a number of algorithm-specific strengths and weaknesses to be considered in the process of model selection. These hinge on characteristics of the data, such as the size of the dataset, the number of features, the type of features, and the expected type of relationships between features or on computing resources, such as the amount of time available to train the model or the amount of memory available to store the model.
-
-<!--
-- Results
-  - Predictive accuracy
-    - Accuracy, precision, recall, F1-score
-    - MSE, RMSE, MAE, R2
--->
-
-**Model evaluation** is the process of assessing the accuracy of the model on the test set, which is a proxy for how well the model will generalize to new data. Model evaluation is performed quantitatively by calculating the accuracy of the model on the training, to develop the model, and ultimately, the test set. The accuracy of a model is calculated by comparing the predicted values to the actual values. For the results of classification tasks, this results in a contingency table, known as a confusion matrix. A **confusion matrix** juxtaposes predicted and actual values allowing various metrics to be calculated, for example in @tbl-aa-confusion-matrix.
-
-<!-- [ ] Add second 'metrics' table beside -->
-
-|                        | Predicted: natives   | Predicted: nonnatives |
-|:-----------------------|:---------------------|:----------------------|
-| **Actual: natives**    | 26294 (90% of 29215) | 2921 (10% of 29215)   |
-| **Actual: nonnatives** | 730 (10% of 7304)    | 6574 (90% of 7304)    |
-
-: Confusion matrix for the utterance type classification task. {#tbl-aa-confusion-matrix}{.sm .striped}
-
-Since regression tasks predict numeric values, the accuracy of the model is calculated by comparing the difference between the predicted and actual values.
-
-It is important to note that whether the accuracy metrics are good is to some degree qualitative judgment. For example, classification accuracy overall may be relatively high, but the model may be performing poorly on one of the classes. In this case, the model may not be useful for the task at hand, despite the overall accuracy.
+**Model evaluation** is the process of assessing the accuracy of the model on the test set, which is a proxy for how well the model will generalize to new data. Model evaluation is performed quantitatively by calculating the accuracy of the model on the training, to develop the model, and ultimately, the test set. It is important to note that whether the accuracy metrics are good is to some degree qualitative judgment.
 
 In the end, PDA offers a versitle path to discover data-driven insights, to probe theory-driven associations, or even simply to perform tasks that are too complex or time-consuming for humans to perform.
 
 ### Infer {#sec-aa-infer}
 
-<!--
-- Purpose
-  - Generalizing from a sample to a population
-  - theory-driven, hypothesis-testing
-  - test relationships between variables based on theory
-  - draw conclusions about the population (extrapolate - from the sample)
--->
-
-The most commonly recognized of the three data analysis approaches, **Inferential data analysis (IDA)** is the bread-and-butter of science. IDA is a deductive, theory-driven approach in which all aspects of analysis stem from a pre-determined premise, or hypothesis, about the nature of a relationship in the world and then aims to test whether this relationship is statistically supported given the evidence. Since the goal is to infer conclusions about a certain relationship in the population based on a statistical evaluation of a (corpus) sample, the representativeness of the sample is of utmost importance. Furthermore, the use of the data is limited to the scope of the hypothesis --that is, the data cannot be used for exploratory purposes.
-
-
-<!-- So, if a researcher's aim is to draw conclusions that generalize, then, this is the analysis approach a researcher will take. -->
+The most commonly recognized of the three data analysis approaches, **Inferential data analysis (IDA)** is the bread-and-butter of science. IDA is a deductive, theory-driven approach in which all aspects of analysis stem from a pre-determined premise, or hypothesis, about the nature of a relationship in the world and then aims to test whether this relationship is statistically supported given the evidence. Since the goal is to infer conclusions about a certain relationship in the population based on a statistical evaluation of a (corpus) sample, the representativeness of the sample is of utmost importance. Furthermore, the use of the data is limited to the scope of the hypothesis --that is, the data cannot be used iteratively for exploratory purposes.
 
 <!-- Identify variables -->
 
 The selection of variables and the roles they play in the analysis are determined by the hypothesis. In a nutshell, a **hypothesis** is a formal statement about the state of the world. This statement is theory-driven meaning that it is predicated on previous research. We are not exploring or examining relationships, rather we are testing a specific relationship. In practice, however, we are in fact proposing two mutally exclusive hypotheses. The first is the **Alternative Hypothesis**, or $H_1$. This is the hypothesis I just described --the statement grounded in the previous literature outlining a predicted relationship. The second is the **Null Hypothesis**, or $H_0$. This is the flip-side of the hypothesis testing coin and states that there is no difference or relationship. Together $H_1$ and $H_0$ cover all logical outcomes.
 
-To connect hypotheses to variable selection and variable roles, let's consider a study in which a researcher is investigating the claim that men and women differ in terms of the number of questions they use in spontaneous conversations. The unit of analysis is individuals (i.e. men and women) and the unit of observation is (sponteanous) conversations.
+Now, in standard IDA one variable is the response variable and one or more variables are explanatory variables. The **response variable**, sometimes referred to as the outcome or dependent variable, is the variable which contains the information which is hypothesized to depend on the information in the explanatory variable(s). It is the variable whose variation a research study seeks to explain. An **explanatory variable**, sometimes referred to as a independent or predictor variable, is a variable whose variation is hypothesized to explain the variation in the response variable.
 
-A dataset based on the Switchboard Dialog Act Corpus (SWDA) [@SWDA2008], seen in @tbl-aa-ida-swda-dataset, aligns well with this investigation. It is a large collection of transcribed telephone conversations between strangers. The dataset includes gender information for each participant and dialog act annotation for each utterance, including a range of question types.
-
-```{r}
-#| label: tbl-aa-ida-swda-dataset
-#| tbl-cap: 'Data dictionary of the SWDA dataset.'
-
-swda_curated_tbl <-
-  read_csv("data/swda_curated.csv") |>
-  select(
-    doc_id,
-    speaker_id,
-    sex,
-    damsl_tag,
-    utterance_text
-  )
-
-swda_curated_dd <-
-  create_data_dictionary(
-  data = swda_curated_tbl,
-  file_path = "data/aa-swda_curated_dd.csv",
-  model = "gpt-3.5-turbo"
-)
-
-# SWDA data dictionary ----
-read_csv("data/aa-swda_curated_dd.csv") |>
-  tt(width = 1)
-```
-
-The Alternative Hypothesis may be formulated in this way:
-
-$H_1$: Men and women differ in the frequency of the use of questions in spontaneous conversations.
-
-The Null Hypothesis, then, would be a statement describing the remaining logical outcomes. Specifically:
-
-$H_0$: Men and women do *not* differ in the frequency of the use of questions in spontaneous conversations.
-
-Now, in standard IDA one variable is the dependent variable and one or more variables are predictor variables. The **dependent variable**, sometimes referred to as the outcome or response variable, is the variable which contains the information which is hypothesized to depend on the information in the predictor variable(s). It is the variable whose variation a research study seeks to explain. A **predictor variable**, sometimes referred to as a independent or explanatory variable, is a variable whose variation is hypothesized to explain the variation in the dependent variable.
-
-Returning to our hypothetical study and the hypotheses presented, we can identify the variables in our study and map them to their roles. The frequency of questions used by each speaker would be our dependent variable and the biological sex of the speakers our predictor variable. This is so because $H_1$ states the proposition that a speaker's sex will predict the frequency of questions used. The next step would be to operationalize what we mean by 'frequency of questions' and then transform the dataset to reflect this definition.
-
-In our hypothetical study we've identified two variables, one dependent and one predictor. It is important keep in mind that there can be multiple predictor variables in cases where the dependent variable's variation is predicted to be related to multiple variables. This relationship would need to be explicitly part of the original hypothesis, however. Due to the increasing difficulty for interpretation, in practice, IDA studies rarely include more than two or three predictor variables in the same analysis.
-
-Predictor variables add to the complexity of a study because they are part of our research focus, specifically our hypothesis. It is, however, common to include other variables which are not of central focus, but are commonly assumed to contribute to the explanation of the variation of the dependent variable. Let's assume that the background literature suggests that the age of speakers also plays a role in the number of questions that men and women use in spontaneous conversation. Let's also assume that the data we have collected includes information about the age of speakers. If we would like to factor out the potential influence of age on the use of questions and focus on the particular predictor variables we've defined in our hypothesis, we can include the age of speakers as a **control variable**. A control variable will be added to the statistical analysis and documented in our report but it will not be included in the hypothesis nor interpreted in our results.
+Explanatory variables add to the complexity of a study because they are part of our research focus, specifically our hypothesis. It is, however, common to include other variables which are not of central focus, but are commonly assumed to contribute to the explanation of the variation of the response variable. These are known as **control variables**. Control variables are included in the analysis to account for the influence of other variables on the relationship between the response and explanatory variables, but will not be included in the hypothesis nor interpreted in our results.
 
 We can now see in @fig-aa-ida-variables the variables roles assigned to variables in a hypothesis-driven study.
 
@@ -1392,74 +1042,16 @@ We can now see in @fig-aa-ida-variables the variables roles assigned to variable
 #| out.width: '75%'
 
 knitr::include_graphics("figures/aa-ida-variables.drawio.png")
+
 ```
 
-<!--
-- Methods
-  - Hypothesis testing
-    - Univariate
-      - Categorical: Chi-square test
-      - Numeric: T-test, Mann-Whitney U test
-    - Monofactorial:
-      - Categorical: Chi-square test, logistic regression
-      - Numeric: T-test, Kruskal-Wallis test, linear regression
-    - Multifactorial:
-      - Categorical: Logistic regression
-      - Numeric: Linear regression
--->
+At this point let's look at the main characteristics that need to be taken into account to statistically interrogate the variables we have chosen to test our hypothesis. The type of statistical test that one chooses is based on (1) the informational value of the dependent variable and (2) the number of predictor variables included in the analysis. Together these two characteristics go a long way in determining the appropriate class of statistical test (see @Gries2013a and @Paquot2020a for a more exhaustive description).
 
+IDA relies heavily on quantitative evaluation methods to draw conclusions that can be generalized to the target population. It is key to understand that our goal in hypothesis testing is not to find evidence in support of $H_1$, but rather to assess the likelihood that we can reliably reject $H_0$.
 
-At this point let's look at the main characteristics that need to be taken into account to statistically interrogate the variables we have chosen to test our hypothesis. The type of statistical test that one chooses is based on (1) the informational value of the dependent variable and (2) the number of predictor variables included in the analysis. Together these two characteristics go a long way in determining the appropriate class of statistical test, but other considerations about the distribution of particular variables (i.e. normality), relationships between variables (i.e. independence), and expected directionality of the predicted effect may condition the appropriate method to be applied.
+The metric used to determine if there is sufficient evidence is based on the probability that given the nature of the relationship and the characteristics of the data, the likelihood of there being no difference or relationship is low. The threshold for likelihood has traditionally been summarized in the $p$-value statistic. In the Social Sciences, a $p$-value lower than .05 is considered *statistically significant* which when interpreted correctly means that there is more than a 95% chance that the observed relationship would not be predicted by $H_0$.
 
-As you can imagine, there are a host of combinations and statistical tests that apply in particular scenarios, too many to consider in given the scope of this coursebook (see @Gries2013a and @Paquot2020a for a more exhaustive description). Below I've summarized some common statistical scenarios and their associated tests which focus on the juxtaposition of informational values and the number of variables, leaving aside alternative tests which deal with non-normal distributions, ordinal variables, *etc.*
-
-
-[ ] change these to simulation-based tests (diff in means, diff in proportions, etc. )
-
-In @tbl-ida-methods-monofactorial we see **monofactorial tests**, tests with only one predictor variable.
-
-```{r}
-#| label: tbl-ida-methods-monofactorial
-#| tbl-cap: 'Common monofactorial tests used in IDA.'
-
-monofactorial <-
-  tribble(
-    ~"Dependent", ~"Predictor", ~"Test",
-    "Categorical", "Categorical", "Pearson's Chi-squared test",
-    "Numeric", "Categorical", "Student's t-Test",
-    "Numeric", "Numeric", "Pearson's correlation test"
-  )
-monofactorial |>
-  kable() |>
-  kable_styling() |>
-  add_header_above(c("Variable roles" = 2, " "))
-```
-
-@tbl-ida-methods-multifactorial includes a listing of **multifactorial tests**, tests with more than one predictor and/ or control variables.
-
-```{r}
-#| label: tbl-ida-methods-multifactorial
-#| tbl-cap: 'Common multifactorial tests used in IDA.'
-
-multifactorial <-
-  tribble(
-    ~"Dependent", ~"Predictor", ~"Control", ~"Test",
-    "Categorical", "varied", "varied", "Logistic regression",
-    "Numeric", "varied", "varied", "Linear regression"
-  )
-multifactorial |>
-  kable() |>
-  column_spec(2:3, italic = TRUE) |>
-  add_header_above(c("Variable roles" = 3, " "))
-```
-
-<!--
-- Results
-  - Statistical significance
-    - P-value
--->
-
-IDA relies heavily on quantitative evaluation methods to draw conclusions that can be generalized to the target population. It is key to understand that our goal in hypothesis testing is not to find evidence in support of $H_1$, but rather to assess the likelihood that we can reliably reject $H_0$. The metric used to determine if there is sufficient evidence is based on the probability that given the nature of the relationship and the characteristics of the data, the likelihood of there being no difference or relationship is low. The threshold for likelihood has traditionally been summarized in the $p$-value statistic. In the Social Sciences, a $p$-value lower than .05 is considered *statistically significant* which when interpreted correctly means that there is more than a 95% chance that the observed relationship would not be predicted by $H_0$. Note that we are working in the realm of probability, not in absolutes, therefore an analysis that produces a significant result does not prove $H_1$ is correct or that $H_0$ is incorrect, for that matter. A margin of error is always present. For this reason, other metrics such as effect size and confidence intervals are also used to interpret the results of statistical tests.
+Note that we are working in the realm of probability, not in absolutes, therefore an analysis that produces a significant result does not prove $H_1$ is correct or that $H_0$ is incorrect, for that matter. A margin of error is always present. For this reason, other metrics such as effect size and confidence intervals are also used to interpret the results of statistical tests.
 
 ## Communicate {#sec-aa-communicate}
 
@@ -1475,21 +1067,17 @@ The most widely recognized form of communicating research is through a report. A
 
 <!-- Components -->
 
-The audience for your report will determine the level of detail and the type of information you will need to include in your report but there are some common elements to reference in any report. First, the research question and/ or hypothesis should be clearly stated and the motivation for the question should be explained. This will help the reader understand the context of the analysis and the importance of the results. Second, diagnostic procedures to verifiy or describe the data should be explained. This may include anomaly correction, missing data, data transformation, etc. and/ or descriptive summaries of the data including assessments of individual variables (central tendency, dispersion, distribution) and/ or relationships between variables (association strength). Third, a blueprint of the methods used will describe the variable selection process, how the variables are operationalized, what analysis methods are employed, and how the variables are used in the statistical analysis. Fourth, the results from the analysis are reported. Reporting details will depend on the type of analysis and the particular method(s) employed. For inferential analyses this will include the test statistic(s) and some measure of confidence. In predictive analyses, accuracy results will be reported. For exploratory analyses, the reporting of results will vary and often include visualizations and metrics that require more human interpretation than the other analysis types. Finally, the results are interpreted in light of the research question and/ or hypothesis. This will include a discussion of the limitations of the analysis and a discussion of the implications of the results for future research.
+The audience for your report will determine the level of detail and the type of information you will need to include in your report but there are some common elements to reference in any report. First, the research question and/ or hypothesis should be clearly stated and the motivation for the question should be explained. This will help the reader understand the context of the analysis and the importance of the results. Second, diagnostic procedures to verifiy or describe the data should be explained. This may include anomaly correction, missing data, data transformation, etc. and/ or descriptive summaries of the data including assessments of individual variables (central tendency, dispersion, distribution) and/ or relationships between variables (association strength). Third, a blueprint of the methods used will describe the variable selection process, how the variables are operationalized, what analysis methods are employed, and how the variables are used in the statistical analysis. Fourth, the results from the analysis are reported. Reporting details will depend on the type of analysis and the particular method(s) employed. Finally, the results are interpreted in light of the research question and/ or hypothesis. This will include a discussion of the limitations of the analysis and a discussion of the implications of the results for future research.
 
 ### Document {#sec-aa-document}
 
 <!-- Purpose -->
 
-While a good report will include the most vital information to understand the procedures, results, and findings of an analysis, there is much more information generated in the course of an analysis which does not traditionally appear in prose. If a research project is conducted programmatically, however,  data, code, and documentation can be made available to others as part of the communication process. Increasingly, researchers are sharing their data and code as part of the publication process. This allows others to reproduce the analysis and verify the results contributing to the collaborative nature of the scientific process. {{< fa wrench >}} [CITATION]
+While a good report will include the most vital information to understand the procedures, results, and findings of an analysis, there is much more information generated in the course of an analysis which does not traditionally appear in prose. If a research project is conducted programmatically, however, data, code, and documentation can be made available to others as part of the communication process. Increasingly, researchers are sharing their data and code as part of the publication process. This allows others to reproduce the analysis and verify the results contributing to the collaborative nature of the scientific process.
 
 <!-- Research compendium -->
 
-Together, data, code, and documentation form a **research compendium**. As you can imagine the research process can quickly become complex and unwieldy as the number of files and folders grows. If not organized properly, it can be difficult to find the information you need. Furthermore, if not documented, decisions made in the course of the analysis can be difficult or impossible to trace. For this reason it is recommendable to follow a set of best practices for organizing and documenting your research compendium.
-
-<!-- Components -->
-
-We will have more to say about this in the next chapter but for now it will suffice to point to some key elements in a research compendium. First, the data used in the analysis should be saved as a separate file(s). As a given research project progresses to analysis, the data may be transformed and manipulated to best fit the needs of the analysis. Preserving the data at each stage adds to the complete picture of the data from collection to analysis. Second, since you are working programmatically, you can share your precise analysis step-by-step in code form. This allows others to reproduce your analysis and verify your results. Including code comments provides additional information to communicate the steps taken and your thought process. Finally, a codebook documents any additional information that helps understand the research better. This will often include guides for installing software and running the code to reproduce the analysis and an overview of the aims of the scripts and the contents of the data and datasets.
+Together, data, code, and documentation form a **research compendium**. As you can imagine the research process can quickly become complex and unwieldy as the number of files and folders grows. If not organized properly, it can be difficult to find the information you need. Furthermore, if not documented, decisions made in the course of the analysis can be difficult or impossible to trace. For this reason, it is recommendable to follow a set of best practices for organizing and documenting your research compendium. We will cover this in more detail in subsequent chapters.
 
 ## Activities {.unnumbered}
 

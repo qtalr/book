@@ -55,15 +55,15 @@ In this chapter, we will now look at the next step in a text analysis project: d
 
 ## Unstructured
 
-The bulk of text ever created is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable. Remember that text in itself is not information. Only when given explicit context does text become informative. The explicit contextual information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data. This information needs to be added or derived for the purposes of the research, either through manual inspection or (semi-)automatic processes. For now, however, our job is just to get the unstructured data into a structured format with a minimal set of metadata that we can derive from the resource.
+The bulk of text ever created is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable. Remember that text in itself is not information. Only when given explicit context does text become informative. The explicit contextual information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data. This information needs to be added or derived for the purposes of the research, either through manual inspection or (semi-)automatic processes. For now, however, our job is just to get the unstructured data into a structured format with as much metadata as we can derive from the resource.
 
 ### Reading data
 
-Let's consider some of the common file formats which contain unstructured data, such as TXT, PDF, and DOCX, and how to read these formats into an R session.
+Some of the common file formats which contain unstructured data include TXT, PDF, and DOCX. Although these formats are unstructured, they are not all the same. Reading these files into R requires different techniques and tools.
 
-It is very common for unstructured data resources to include data that is in TXT files. These are the simplest of file formats which contain no formatting or explicit metadata. Many times TXT files have the *.txt* extension, but it is not required. There are many ways to read TXT files into R and many packages that can be used to do so. For example, using the `readr` package, we can choose to read the entire file into a single vector of character strings with `read_file()` or read the file by lines with `read_lines()` in which each line is a character string in a vector.
+Many times TXT files have the *.txt* extension, but it is not required. There are many ways to read TXT files into R and many packages that can be used to do so. For example, using the `readr` package, we can choose to read the entire file into a single vector of character strings with `read_file()` or read the file by lines with `read_lines()` in which each line is a character string in a vector.
 
-Less commonly used in prepared data resources, PDF and DOCX files are also formats for unstructured data. These formats are often more complex than TXT files as they contain formatting and embedded metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Therefore, we need to use packages and functions that can extract the text content from these files and potentially some of the metadata. For example, using the `readtext` package [@R-readtext], we can read the text content from PDF and DOCX files into a single vector of character strings with `readtext()`.
+Less commonly used in prepared data resources, PDF and DOCX files are more complex than TXT files as they contain formatting and embedded metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Needless to say, we need an alternate strategy to extract the text content from these files and potentially some of the metadata. For example, using the `readtext` package [@R-readtext], we can read the text content from PDF and DOCX files into a single vector of character strings with `readtext()`.
 
 Whether in TXT, PDF, or DOCX format, the resulting data structure will require further processing to convert the data into a tidy dataset. For example, we may need to split the data into multiple columns or rows, or extract metadata from the text content.
 
@@ -71,7 +71,7 @@ Whether in TXT, PDF, or DOCX format, the resulting data structure will require f
 
 As an example of curating an unstructured source of corpus data, let's take a look at the [Europarl Parallel Corpus](https://www.statmt.org/europarl/) [@Koehn2005]. This corpus contains parallel texts (source and translated documents) from the European Parliamentary proceedings between 1996-2011 for some 21 European languages.
 
-Let's assuming we selected this corpus data because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the compressed file, and inspecting the decompressed structure, we have the the file structure seen in @exm-cd-europarl-file-structure.
+Let's assume we selected this corpus because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the compressed file, and inspecting the decompressed structure, we have the the file structure seen in @exm-cd-europarl-file-structure.
 
 ::: {#exm-cd-europarl-file-structure}
 ```bash
@@ -152,257 +152,117 @@ English target text
 
 We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of character strings separated by lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.
 
-Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the "idealized structure" of the data. For a curated dataset there are two considerations. First, we want to maintain the original structure of the data as much as possible. This provides a link to the original data and gives us a default dataset structure from which we can derive other structures that fit subsequent analysis needs. Second, we want to add structure to the data that makes it easier to work with. This is the 'tidy' part of the data curation process. The aim is to imbue the dataset with as much of the metadata the data resource makes available.
+Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the "idealized structure" of the data. For a curated dataset, we want to maintain the original structure of the data as much as possible to maintain the integrity of the data and create a transparent and reproducible dataset.
 
 Given what we know about the data, we can define the idealized structure of the data as seen in @tbl-cd-europarl-structure-example.
 
 ```{r}
 #| label: tbl-cd-europarl-structure-example
-#| tbl-cap: "Idealized structure for the europarl Corpus dataset."
+#| tbl-cap: "Idealized structure for the curated Europarl Corpus datasets."
 #| tbl-colwidths: [10, 17, 19, 54]
 #| echo: false
 
 tribble(
   ~variable, ~name, ~variable_type, ~description,
-  "doc_id", "Document ID", "integer", "Unique identifier for each line in the corpus.",
-  "type", "Type", "character", "Indicates whether the line is from the source or target language.",
-  "line_id", "Line ID", "integer", "Unique identifier for each line for each `type`.",
-  "line", "Line", "character", "Contains the text of the line, and maintains the structure of the original data."
+  "type", "Document type", "character", "Contains the type of document, either 'Source' or 'Target'",
+  "line", "Line", "character", "Contains the text of each line in the document",
 ) |>
   tt(width = 1)
 ```
 
-Our task now is to develop code that will read the original data and render the idealized structure as a curated dataset we will write to the *data/derived/* directory. The code we develop will be added to the *2-curate-data.qmd* file. And finally, the dataset will be documented with a data dictionary file.
+Our task now is to develop code that will read the original data and render the idealized structure as a curated dataset for each corpus file. We will then write the datasets to the *data/derived/* directory. The code we develop will be added to the *2-curate-data.qmd* file. And finally, the datasets will be documented with a data dictionary file.
 
 ### Tidy the data
 
-To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files into R. We will use the `readtext()` function from the `readtext` package. `readtext()` is a versatile function that can read many different types of text files (*e.g.* *.txt*, *.csv*, *xml*, *etc.*). It can also read multiple files at once using wildcard matching. We will use it to read the *.es* and *.en* files by passing the path to the directory where the files are located, and then use the `*` wildcard to read all the files in the directory.
+To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files by lines into R. We will use the `read_lines()` function from the `readr` package.
 
-::: {#exm-cd-europarl-readtext}
+::: {#exm-cd-europarl-readr}
 ```r
 # Load package
-library(readtext)
+library(readr)
 
 # Read Europarl files .es and .en
-europarl_docs_tbl <-
-  readtext("../data/original/europarl/*") |> # read in files
-  tibble() # convert to tibble
+europarl_es_chr <-
+  read_lines("../data/original/europarl-v7.es-en.es")
+
+europarl_en_chr <-
+  read_lines("../data/original/europarl-v7.es-en.en")
 ```
 
 ```{r}
-#| label: cd-europarl-readtext
+#| label: cd-europarl-readr
 #| echo: false
 #| message: false
 
 # Load package
-library(readtext)
-
-readtext_options(verbosity = 0) # no messages from readtext
+library(readr)
 
 # Read Europarl files .es and .en
-europarl_docs_tbl <-
-  readtext("data/europarl/original/*") |>
-  tibble()
+europarl_es_chr <-
+  read_lines("data/europarl/original/europarl-v7.es-en.es")
+
+europarl_en_chr <-
+  read_lines("data/europarl/original/europarl-v7.es-en.en")
 ```
 :::
 
-In @exm-cd-europarl-readtext, the `readtext()` function reads all the files in the *../data/original/europarl/* directory and returns a tibble.
+Using the `read_lines()` function, we read each line of the files into a character vector. Since the Europarl corpus is a parallel corpus, the lines in the source and target files are aligned. This means that the first line in the source file corresponds to the first line in the target file, the second line in the source file corresponds to the second line in the target file, and so on. This alignment is important for the analysis of parallel corpora, as it allows us to compare the source and target texts line by line.
 
-::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
+Let's inspect our character vectors to ensure that they are of the length and appear to be structured as we expect. We can use the `length()` function to get the number of lines in each file and the `head()` function to preview the first few lines of each file.
 
-The `readtext()` function can read many different types of file formats, from structured to unstructured. However, it depends in large part on the extension of the file to recognize what algorithm to use when reading a file. In this particular case, the Europarl files do not have a typical extension (they have `.en` and `.es`). The `readtext()` function will treat them as plain text (`.txt`), but it will throw a warning message. To suppress the warning message you can add the `verbosity = 0` argument or set `readtext_options(verbosity = 0)`.
-:::
-
-Let's inspect the `europarl_docs_tbl` object with the `str()` function, in @exm-cd-europarl-readtext-str.
-
-::: {#exm-cd-europarl-readtext-str}
+::: {#exm-cd-europarl-inspect-chr}
 ```{r}
-#| label: cd-europarl-readtext-str
+#| label: cd-europarl-inspect-chr
+#| results: hold
 
-# Preview data
-str(europarl_docs_tbl)
+# Inspect Spanish character vector
+length(europarl_es_chr)
+head(europarl_es_chr, 5)
+
+# Inspect English character vector
+length(europarl_en_chr)
+head(europarl_en_chr, 5)
 ```
 :::
 
-We see that the output from @exm-cd-europarl-readtext-str is a tibble with two columns, `doc_id` and `text`. The `doc_id` column contains the name of the file from which the text was read. The `text` column contains the text of the file. There are two observations, one for each file.
+The output of @exm-cd-europarl-inspect-chr shows that the number of lines in each file is the same. This is good. If the number of lines in each file was different, we would need to figure out why and fix it. We also see that the content of the files is aligned as expected.
 
-::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
+Let's now create a dataset for each of the character vectors. We will use the `tibble()` function from the `tibble` package to create a data frame object with the character vectors as the `line` column and add a `type` column with the value 'Source' for the Spanish file and 'Target' for the English file. We will assign the output two new objects `europarl_source_df` and `europarl_target_df`, respectively, as seen in @exm-cd-europarl-df.
 
-Note that the `str()` function from base R is similar to `glimpse()`. However, `glimpse()` will attempt to show you as much data as possible. In this case since our column `text` is a very long character vector it will take a long time to render. I've chosen the `str()` function as it will automatically truncate the data.
-:::
-
-The fact that we only have one row for each file means that all the text in each file is contained in one cell! We want to break these cells up into rows for each line, as they appear in the original data. You may be wondering why the `readtext()` function did not do this for us, after all the original data was already separated into lines. The reason is that the `readtext()` function chose to read the files as plain text, and plain text does not have any structure. The line breaks, however, are still there, they are just represented as a special character, `\n`.
-
-In @exm-cd-europarl-text-lines, we can see a truncated version of the text as it is in a printed format. The `str_trunc()` function from the `stringr` package [@R-stringr] truncates the text to the first 50 characters. The `str_view()` function from the same package allows us to see the text in a viewer pane.
-
-::: {#exm-cd-europarl-text-lines}
+::: {#exm-cd-europarl-df}
 ```{r}
-#| label: cd-europarl-text-lines
+#| label: cd-europarl-df
 
-# Preview first 50 characters
-europarl_docs_tbl |>
-  pull(text) |>
-  str_trunc(50) |>
-  str_view()
+# Create source data frame
+europarl_source_df <-
+  tibble(
+    type = "Source",
+    lines = europarl_es_chr
+  )
+# Create target data frame
+europarl_target_df <-
+  tibble(
+    type = "Target",
+    lines = europarl_en_chr
+  )
 ```
 :::
 
-In @exm-cd-europarl-text-lines-raw, we can see the raw text, that is, the text as it is stored in the computer. The `use_escapes = TRUE` argument tells the `str_view()` function to show the special characters as they are stored in the computer. This includes the `\n` line-feed character, which represents a line break.
+Inspecting these data frames with `glimpse()` in @exm-cd-europarl-glimpse, we can see if the data frames have the structure we expect.
 
-::: {#exm-cd-europarl-text-lines-raw}
+::: {#exm-cd-europarl-glimpse}
 ```{r}
-#| label: cd-europarl-text-lines-raw
+#| label: cd-europarl-glimpse
 
-# Preview first 50 raw characters
-europarl_docs_tbl |>
-  pull(text) |>
-  str_trunc(50) |>
-  str_view(use_escapes = TRUE)
+# Preview source
+glimpse(europarl_source_df)
+
+# Preview target
+glimpse(europarl_target_df)
 ```
 :::
 
-We can see that the text is a single long character vector, and that the line breaks are represented as `\n`. So our goal is to split the text for each file into lines creating a new row for each line created.
-
-::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
-
-The `str_view()` with the argument `use_escapes = TRUE` also allows you to see other special characters, such as `\t` (tab) and `\r` (carriage return) as well as Unicode characters, such as `\u00f3n` (ó), `\u00ed` (í), *etc.*. These characters are not visible in the printed version of the text, but they are there in the raw text.
-:::
-
-To do this we will use another function from the `stringr` package, `str_split()`, whose function is to split a character vector into smaller character vectors based on some splitting criteria. In @exm-cd-europarl-text-lines-tbl, we use the `str_split()` function to split the text into lines based on the `\n` character and assign it to the new column `lines` using `mutate()`. Since we will not need the `text` column anymore, we can use `select()` to drop it.
-
-::: {#exm-cd-europarl-text-lines-tbl}
-```{r}
-#| label: cd-europarl-text-lines-tbl
-
-# Split text into lines
-europarl_lines_tbl <-
-  europarl_docs_tbl |>
-  mutate(lines = str_split(text, "\n")) |>
-  select(-text)
-
-# Preview
-europarl_lines_tbl
-```
-:::
-
-Previewing the output in @exm-cd-europarl-text-lines-tbl, we can see that the `lines` column contains a list of character vectors. Why is this so? `str_split()` takes a character vector and splits it, as we know. It is a vectorized function, meaning that it can take a vector of character vectors and split each one into subsegments. Since any given input character vector can have a different number of subsegments, the number of subsegments in each file could be different. The ideal object for such data is a list. So `str_split()` returns a list of character vectors.
-
-The list of character vectors, lines in our case, is still associated with the respective `doc_id` value. However, we want to create a new row for each line in the list. To do this, we will use the `unnest()` function from the `tidyr` package. The `unnest()` function takes a list column and creates a new row for each element in the list. We use the `unnest()` function to create a new row for each line in the `lines` column. We can see the output from @exm-cd-europarl-text-lines-tbl-unnest.
-
-::: {#exm-cd-europarl-text-lines-tbl-unnest}
-```{r}
-#| label: cd-europarl-text-lines-tbl-unnest
-
-# Create a new row for each line
-europarl_lines_tbl <-
-  europarl_lines_tbl |>
-  unnest(lines)
-
-# Preview
-europarl_lines_tbl |>
-  slice_head(n = 5)
-```
-:::
-
-Remember that the data in the Europarl corpus is aligned, meaning that each line in the source file is aligned with a line in the target file. So we need to make sure that the number of lines in each file is the same. We can do this by grouping the data by `doc_id` and then counting the number of lines in each file. We can do this using the `group_by()` and `count()` functions from the `dplyr` package. We can see the output in @exm-cd-europarl-text-lines-tbl-count.
-
-::: {#exm-cd-europarl-text-lines-tbl-count}
-```{r}
-#| label: cd-europarl-text-lines-tbl-count
-
-# Count the number of lines in each file
-europarl_lines_tbl |>
-  group_by(doc_id) |>
-  count()
-```
-:::
-
-The output of @exm-cd-europarl-text-lines-tbl-count shows that the number of lines in each file is the same. This is good. If the number of lines in each file was different, we would need to figure out why and fix it.
-
-We now have our `lines` column and the associated observations for our idealized dataset, in @tbl-cd-europarl-structure-example. Let's now leverage the existing `doc_id` to create the `type` column. The goal is to assign the value of `type` according to the `doc_id` value. Specifically, when `doc_id` is 'europarl-v7.es-en.es' type should be 'Source' and when `doc_id` is 'europarl-v7.es-en.en' type should be 'Target'.
-
-We can do this using the `case_when()` function from the `dplyr` package. The `case_when()` function takes a series of conditions and assigns a value based on the first condition that is met. In this case, we will use `mutate()` to create the `type` column and then use the `doc_id` column to create the conditions and the `type` column to assign the values from `case_when()`. We will store the output in a new object called `europarl_lines_type_tbl`, as seen in @exm-cd-europarl-text-lines-type-tbl.
-
-::: {#exm-cd-europarl-text-lines-type-tbl}
-```{r}
-#| label: cd-europarl-text-lines-type-tbl
-
-# Create `type` column
-europarl_lines_type_tbl <-
-  europarl_lines_tbl |>
-  mutate(type = case_when(
-    doc_id == "europarl-v7.es-en.es" ~ "Source",
-    doc_id == "europarl-v7.es-en.en" ~ "Target"
-  ))
-
-# Preview dataset
-glimpse(europarl_lines_type_tbl)
-```
-:::
-
-The preview output from @exm-cd-europarl-text-lines-type-tbl shows us that we now have three columns, `doc_id`, `lines`, and `type`. The `type` column has been created and the values have been assigned according to the `doc_id` values.
-
-We can now overwrite the `doc_id` column with a unique identifier for each line. A numeric identifier makes sense. We can do this by using the `mutate()` function to assign `doc_id` a sequential number with `row_number()`, which increments by 1 for each row. We will store the output in a new object called `europarl_lines_type_id_tbl`, as seen in @exm-cd-europarl-text-lines-type-id-tbl.
-
-::: {#exm-cd-europarl-text-lines-type-id-tbl}
-```{r}
-#| label: cd-europarl-text-lines-type-id-tbl
-
-# Create new `doc_id` column
-europarl_lines_type_id_tbl <-
-  europarl_lines_type_tbl |>
-  mutate(doc_id = row_number())
-
-# Preview dataset
-glimpse(europarl_lines_type_id_tbl)
-```
-:::
-
-The preview output from @exm-cd-europarl-text-lines-type-id-tbl shows us that we now have the same three columns, `doc_id`, `lines`, and `type`. However, the values in the `doc_id` column now reflect a unique identifier for each line.
-
-The last step to get to our envisioned dataset structure is to add the `line_id` column which will be calculated by grouping the data by `type` and then assigning a row number to each of the lines in each group. We use the `group_by()` function to perform the grouping as seen in @exm-cd-europarl-text-lines-type-id-line-id-tbl.
-
-::: {#exm-cd-europarl-text-lines-type-id-line-id-tbl}
-```{r}
-#| label: cd-europarl-text-lines-type-id-line-id-tbl
-
-# Create `line_id` column
-europarl_lines_type_id_line_id_tbl <-
-  europarl_lines_type_id_tbl |>
-  group_by(type) |>
-  mutate(line_id = row_number()) |>
-  ungroup()
-
-# Preview dataset
-glimpse(europarl_lines_type_id_line_id_tbl)
-```
-:::
-
-The preview output from @exm-cd-europarl-text-lines-type-id-line-id-tbl shows us that we now have the desired four columns, `doc_id`, `lines`, `type`, and `line_id`.
-
-Before we get to writing the dataset to disk, let's organized it in a way that the columns are in the order we want and the rows are sorted in a way that makes sense.
-
-Reordering the columns involves using the `select()` function and list the order of the columns. To sort by columns, we will use `arrange()` and specify the columns to order by. We store the results in a more legible object, `europarl_curated_tbl`, as seen in @exm-cd-europarl-curated-tbl.
-
-::: {#exm-cd-europarl-curated-tbl}
-```{r}
-#| label: cd-europarl-text-lines-type-id-line-id-tbl-reorder
-
-# Reorder columns and sort rows
-europarl_curated_tbl <-
-  europarl_lines_type_id_line_id_tbl |>
-  select(doc_id, type, line_id, lines) |>
-  arrange(line_id, type, doc_id)
-
-# Preview dataset
-glimpse(europarl_curated_tbl)
-```
-:::
-
-The preview output from @exm-cd-europarl-curated-tbl shows us that we now have the desired four columns, `doc_id`, `type`, `line_id`, and `lines`. The rows are sorted by `line_id`, `type`, and `doc_id`. This gives us a dataset that reads left to right from document to line oriented attributes and top to bottom by source-target line pairs.
+We now have our `type` and `lines` columns and the associated observations for our idealized dataset, in @tbl-cd-europarl-structure-example. We can now write these datasets to the *data/derived/* directory using `write_csv()` and create corresponding data dictionary files.
 
 ## Structured
 
@@ -617,7 +477,7 @@ Applying the sorting in @exm-cd-cabnc-sort-rows, we can see that the utterances 
 
 ## Semi-structured
 
-At this point we have discussed curating unstructured data and structured datasets. Between these two extremes falls semi-structured data. And as the name suggests, it is a hybrid between unstructured and structured data. This means that there will be important structured metadata included with unstructured elements. The file formats and approaches to encoding the structured aspects of the data vary widely from resource to resource and therefore often requires more detailed attention to the structure of the data and often includes more sophisticated programming strategies to curate the data to produce a tidy dataset.
+Between unstructured and structured data falls semi-structured data. And as the name suggests, it is a hybrid data format. This means that there will be important structured metadata included with unstructured elements. The file formats and approaches to encoding the structured aspects of the data vary widely from resource to resource and therefore often requires more detailed attention to the structure of the data and often includes more sophisticated programming strategies to curate the data to produce a tidy dataset.
 
 ### Reading data
 
@@ -625,7 +485,7 @@ The file formats associated with semi-structured data include a wide range. Thes
 
 The more structured file formats use standard conventions and therefore can be read into an R session with format-specific functions. Say, for example, we are working with data in a JSON file format. We can read the data into an R session with the `read_json()` function from the `jsonlite` package [@R-jsonlite]. For XML and HTML files, the `rvest` package [@R-rvest] provides the `read_xml()` and `read_html()` functions.
 
-Semi-structured data in TXT files can be read either as an entire file with `read_file()` or line-by-line with `read_lines()`. The choice of which approach to take depends on the structure of the data. If the data structure is line-based, then `read_lines()` often makes more sense than `read_file()`. However, in some cases, the data may be structured in a way that requires the entire file to be read into an R session and then subsequently parsed.
+Semi-structured data in TXT files can be read either as a file or by lines. The choice of which approach to take depends on the structure of the data. If the data structure is line-based, then `read_lines()` often makes more sense than `read_file()`. However, in some cases, the data may be structured in a way that requires the entire file to be read into an R session and then subsequently parsed.
 
 ### Orientation
 
@@ -703,15 +563,15 @@ Example *.tok* file for the non-native speakers.
 
 :::
 
-In a study in which we are interested in contrasting the language of natives and non-natives, we will want to combine the *.dat* and *.tok* files for these groups of speakers and then join these datasets into one.
+In a study in which we are interested in contrasting the language of natives and non-natives, we will want to combine the *.dat* and *.tok* files for these groups of speakers.
 
 The question is what attributes we want to include in the curated dataset. Given the research focus, we will not need the `LANGUAGE` or `NAME` attributes. We may want to modify the attribute names so they are a bit more descriptive.
 
-An idealized version of the dataset based on this criteria is shown in @tbl-cd-enntt-ideal.
+An idealized version of the curated dataset based on this criteria is shown in @tbl-cd-enntt-ideal.
 
 ```{r}
 #| label: tbl-cd-enntt-ideal
-#| tbl-cap: "Idealized structure for the ENNTT Corpus dataset."
+#| tbl-cap: "Idealized structure for the curated ENNTT Corpus datasets."
 #| tbl-colwidths: [10, 17, 19, 54]
 #| echo: false
 
@@ -720,7 +580,7 @@ tibble::tribble(
   "session_id", "Session ID", "character", "Unique identifier for each session.",
   "speaker_id", "Speaker ID", "integer", "Unique identifier for each speaker.",
   "state", "State", "character", "The political state of the speaker.",
-  "type", "Type", "character", "Indicates whether the text is native, non-native, or translated",
+  "type", "Type", "character", "Indicates whether the text is native or non-native",
   "session_seq", "Session Sequence", "integer", "The sequence of the text in the session.",
   "text", "Text", "character", "Contains the text of the line, and maintains the structure of the original data."
 ) |>
@@ -729,9 +589,9 @@ tibble::tribble(
 
 ### Tidy the data
 
-Now that we have a better understanding of the corpus data and our target curated dataset structure, let's work to extract and organize the data from the native and non-native files into one dataset.
+Now that we have a better understanding of the corpus data and our target curated dataset structure, let's work to extract and organize the data from the native and non-native files.
 
-The general approach we will take is, for native and then non-natives, to read in the *.dat* file as an HTML file and then extract the line nodes and their attributes combining them into a data frame. Then we'll read in the *.tok* file as a text file and then combine the two into a single data frame. After producing a native and non-native data frame, we will combine them into one data frame to write and document as our curated dataset.
+The general approach we will take is, for native and then non-natives, to read in the *.dat* file as an HTML file and then extract the line nodes and their attributes combining them into a data frame. Then we'll read in the *.tok* file as a text file and then combine the two into a single data frame.
 
 Starting with the natives, we read in the *.dat* file as an XML file with the `read_html()` function and then extract the line nodes with the `html_elements()` function as in @exm-cd-enntt-read-xml.
 
@@ -771,7 +631,7 @@ length(ns_dat_lines)
 ```
 :::
 
-When can see that the `ns_dat_lines` object is a special type of list, `xml_nodeset` which contains 116,341 line nodes. Let's now jump out of sequence and read in the *.tok* file as a text file, in @exm-cd-enntt-read-lines, again by lines using `read_lines()`, and compare the two to make sure that our approach will work.
+When can see that the `ns_dat_lines` object is a special type of list, `xml_nodeset` which contains `r format(length(ns_dat_lines), big.mark = ",")` line nodes. Let's now jump out of sequence and read in the *.tok* file as a text file, in @exm-cd-enntt-read-lines, again by lines using `read_lines()`, and compare the two to make sure that our approach will work.
 
 ::: {#exm-cd-enntt-read-lines}
 ```r
@@ -794,7 +654,7 @@ length(ns_tok_lines)
 ns_tok_lines <-
   read_lines("data/enntt/original/natives.tok")
 
-# Inspect
+# Inspect object
 class(ns_tok_lines)
 typeof(ns_tok_lines)
 length(ns_tok_lines)
@@ -803,14 +663,18 @@ length(ns_tok_lines)
 
 We do, in fact, have the same number of lines in the *.dat* and *.tok* files. So we can proceed with extracting the attributes from the line nodes and combining them with the text from the *.tok* file.
 
-Let's start by listing the attributes of the first line node in the `ns_dat_lines` object. We use the `html_attrs()` function to get the attribute names and the values, as in @exm-cd-enntt-list-attributes.
+Let's start by listing the attributes of the first line node in the `ns_dat_lines` object. To do this we will draw on the `pluck()` function from the `purrr` package [@R-purrr] to extract the first line node. Then we use the `html_attrs()` function to get the attribute names and the values, as in @exm-cd-enntt-list-attributes.
 
 ::: {#exm-cd-enntt-list-attributes}
 ```{r}
 #| label: cd-enntt-list-attributes
 
+# Load package
+library(purrr)
+
 # List attributes of first line node
-ns_dat_lines[[1]] |>
+ns_dat_lines |>
+  pluck(1) |>
   html_attrs()
 ```
 :::
@@ -830,10 +694,10 @@ We can do this one attribute at a time using the `html_attr()` function and then
 #| label: cd-enntt-extract-attributes
 
 # Extract attributes from first line node
-session_id <- ns_dat_lines[[1]] |> html_attr("session_id")
-speaker_id <- ns_dat_lines[[1]] |> html_attr("mepid")
-state <- ns_dat_lines[[1]] |> html_attr("state")
-session_seq <- ns_dat_lines[[1]] |> html_attr("seq_speaker_id")
+session_id <- ns_dat_lines |> pluck(1) |> html_attr("session_id")
+speaker_id <- ns_dat_lines |> pluck(1) |> html_attr("mepid")
+state <- ns_dat_lines |> pluck(1) |> html_attr("state")
+session_seq <- ns_dat_lines |> pluck(1) |> html_attr("seq_speaker_id")
 
 # Combine into data frame
 tibble(session_id, speaker_id, state, session_seq)
@@ -865,13 +729,13 @@ It's a good idea to test out the function to verify that it works as expected. W
 #| label: cd-enntt-test-extract-attributes-function
 
 # Test function
-extract_dat_attrs(ns_dat_lines[[1]])
-extract_dat_attrs(ns_dat_lines[[20]])
-extract_dat_attrs(ns_dat_lines[[100]])
+ns_dat_lines |> pluck(1) |> extract_dat_attrs()
+ns_dat_lines |> pluck(20) |> extract_dat_attrs()
+ns_dat_lines |> pluck(100) |> extract_dat_attrs()
 ```
 :::
 
-Looks like the `extract_dat_attrs()` function is ready for prime-time. Let's now apply it to all of the line nodes in the `ns_dat_lines` object using the `map_dfr()` function from the `purrr` package [@R-purrr] as in @exm-cd-enntt-extract-attributes-all.
+Looks like the `extract_dat_attrs()` function is ready for prime-time. Let's now apply it to all of the line nodes in the `ns_dat_lines` object using the `map_dfr()` function from the `purrr` package as in @exm-cd-enntt-extract-attributes-all.
 
 ::: {#exm-cd-enntt-extract-attributes-all}
 ```{r}
@@ -894,7 +758,7 @@ glimpse(ns_dat_attrs)
 The `map*()` functions from the `purrr` package are a family of functions that apply a function to each element of a vector, list, or data frame. The `map_dfr()` function is a variant of the `map()` function that returns a data frame that is the result of row-binding the results, hence `_dfr`.
 :::
 
-We can see that the `ns_dat_attrs` object is a data frame with 116,341 rows and 4 columns, just has we expected. We can now combine the `ns_dat_attrs` data frame with the `ns_tok_lines` vector to create a single data frame with the attributes and the text. This is done with the `mutate()` function assigning the `ns_tok_lines` vector to a new column named `text` as in @exm-cd-enntt-combine-attributes-text.
+We can see that the `ns_dat_attrs` object is a data frame with `r format(nrow(ns_dat_attrs), big.mark = ",")` rows and `r ncol(ns_dat_attrs)` columns, just has we expected. We can now combine the `ns_dat_attrs` data frame with the `ns_tok_lines` vector to create a single data frame with the attributes and the text. This is done with the `mutate()` function assigning the `ns_tok_lines` vector to a new column named `text` as in @exm-cd-enntt-combine-attributes-text.
 
 ::: {#exm-cd-enntt-combine-attributes-text}
 ```{r}
@@ -912,17 +776,18 @@ glimpse(ns_dat)
 
 This is the data for the native speakers. We can now repeat this process for the non-native speakers, *or* we can create a function to do it for us. Let's explore the later option.
 
-This is the data for the native speakers. We can now repeat this process for the non-native speakers, or we can create a function to do it for us. Let's explore the later option.
-
 I will name this function `combine_dat_tok()` and it will take two arguments: `dat_file` and `tok_file`. The `dat_file` argument will be the path to the *.dat* file and the `tok_file` argument will be the path to the *.tok* file. The function first reads both the files into R as lines. Then it extracts the attributes from the *.dat* file using the `extract_dat_attrs()` function we created earlier. Finally, it combines the attributes with the text from the *.tok* file and returns a data frame.
 
-Note that there is at least one tweak we need to make to our existing code base if we plan on combining the native and non-native data. As our function stands, it will return a data frame with the same column names for both the native and non-native data. We will need to add a column to which we will indicate what type of data it is (native or non-native). This is where the `type` column we planned earlier comes in. There are multiple ways to do this. We could add a column to the data frame before we return it, or we could add a column to the data frame after we return it. I will opt for the former and embed it inside of our function `combine_dat_tok()`.
+Note that there is at least one tweak we need to make to our existing code base to generate our idealized curated structure. We will need to add a column `type` to which we will indicate what type of data it is (native or non-native).
+
+There are multiple ways to do this. We could add a column to the data frame in the function before we return it, or we could add a column to the data frame after we return it. I will opt for the former and embed it inside of our function `combine_dat_tok()`, as seen in @exm-cd-enntt-combine-dat-tok-function.
 
 ::: {#exm-cd-enntt-combine-dat-tok-function}
 ```{r}
 #| label: cd-enntt-combine-dat-tok-function
 
 # Load packages
+library(dplyr) # for data manipulation
 library(rvest) # for reading/parsing HTML
 library(purrr) # for mapping functions
 library(fs) # for working with files
@@ -953,12 +818,14 @@ combine_dat_tok <- function(dat_file, tok_file) {
   # Combine attrs and text into data frame
   dataset <-
     dat_attrs |>
-    bind_cols(text = tok)
+    mutate(text = tok)
 
   # Add type column with value of file name (w/o extension)
+  type_name <- path_file(dat_file) |> path_ext_remove()
+
   dataset <-
     dataset |>
-    mutate(type = path_file(dat_file) |> path_ext_remove())
+    mutate(type = type_name)
 
   # Return data frame
   return(dataset)
@@ -971,22 +838,22 @@ Apply the `combine_dat_tok()` function to read in the data for the native speake
 ::: {#exm-cd-enntt-combine-dat-tok}
 ```r
 # Native speakers
-ns_dat <-
+enntt_ns_df <-
   combine_dat_tok(
     dat_file = "../data/original/enntt/natives.dat",
     tok_file = "../data/original/enntt/natives.tok"
   )
 # Preview
-glimpse(ns_dat)
+glimpse(enntt_ns_df)
 
 # Non-native speakers
-nns_dat <-
+enntt_nns_df <-
   combine_dat_tok(
     dat_file = "../data/original/enntt/nonnatives.dat",
     tok_file = "../data/original/enntt/nonnatives.tok"
   )
 # Preview
-glimpse(nns_dat)
+glimpse(enntt_nns_df)
 ```
 
 ```{r}
@@ -994,42 +861,26 @@ glimpse(nns_dat)
 #| echo: false
 
 # Native speakers
-ns_dat <-
+enntt_ns_df <-
   combine_dat_tok(
     dat_file = "data/enntt/original/natives.dat",
     tok_file = "data/enntt/original/natives.tok"
   )
 # Preview
-glimpse(ns_dat)
+glimpse(enntt_ns_df)
 
 # Non-native speakers
-nns_dat <-
+enntt_nns_df <-
   combine_dat_tok(
     dat_file = "data/enntt/original/nonnatives.dat",
     tok_file = "data/enntt/original/nonnatives.tok"
   )
 # Preview
-glimpse(nns_dat)
+glimpse(enntt_nns_df)
 ```
 :::
 
-The last step to curate the dataset is to combine the native and non-native data into a single data frame. We can do this using the `bind_rows()` function from the `dplyr` package, as essentially we are just stacking the rows from each data frame on top of each other.
-
-```{r}
-#| label: combine-ns-dat-nns-dat
-
-# Combine native and non-native data
-enntt_tbl <-
-  bind_rows(ns_dat, nns_dat)
-```
-
-The `ennnt_tbl` data frame is the curated dataset. We can perform some data checks to make everything looks good and then proceed to writing and documenting the dataset.
-
-::: {.callout}
-**{{< fa regular lightbulb >}} Consider this**
-
-What data checks could we perform to ensure that the data is in the format we expect? What are some of the things we should be looking for?
-:::
+We now have met the idealized structure for the curated ENNTT Corpus datasets, as shown in @tbl-cd-enntt-ideal. The `enntt_ns_df` and `enntt_nns_df` data frames are ready to be written to disk and documented.
 
 ## Documentation
 
@@ -1049,21 +900,21 @@ In the `qtalrkit` package we have a function, `create_data_dictionary()` that wi
 The `create_data_dictionary()` function provides a rudimentary data dictionary template by default. However, you can take advantage of OpenAI's text generation models to generate a more detailed data dictionary for you to edit. To do this create [an OpenAI account](https://platform.openai.com/signup) and [an API key](https://platform.openai.com/account/api-keys) and add this key to your R environment (`Sys.setenv(OPENAI_API_KEY = "sk..."`). Then you can specify the model you would like to use in the function with the `model = ` argument. For example, `model = "gpt-3.5-turbo"` will use the GPT-3.5 Turbo model.
 :::
 
-An example of a data dictionary, a data dictionary for the `europarl_curated_tbl` dataset is shown in @tbl-cd-unstructured-data-dictionary-example.
+An example of a data dictionary, a data dictionary for the `enntt_ns_df` dataset is shown in @tbl-cd-unstructured-data-dictionary-example.
 
 ```{r}
 #| label: tbl-cd-unstructured-data-dictionary-example
-#| tbl-cap: "Data dictionary for the `europarl_curated_tbl` dataset."
+#| tbl-cap: "Data dictionary for the `enntt_ns_df` dataset."
 #| tbl-colwidths: [10, 15, 15, 60]
 #| echo: false
 
-read_csv("data/cd-europarl_curated_dd.csv") |>
+read_csv("data/cd-enntt_curated_dd.csv") |>
   tt(width = 1)
 ```
 
 ## Activities {.unnumbered}
 
-The following activities build on your skills and knowledge to use R to read, inspect, and write data and datasets in R. In these activities you will have an opportunity to learn and apply your skills and knowledge to the task of curating datasets. This is a vital component of data analysis research that uses unstructured and semi-structured data.
+The following activities build on your skills and knowledge to use R to read, inspect, and write data and datasets in R. In these activities you will have an opportunity to learn and apply your skills and knowledge to the task of curating datasets. This is a vital component of text analysis research that uses unstructured and semi-structured data.
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**
@@ -1071,7 +922,7 @@ The following activities build on your skills and knowledge to use R to read, in
 <!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 **What**: [Organizing and documenting datasets](https://qtalr.github.io/qtalrkit/articles/recipe-6.html)\
-**How**: Read Recipe 6 and participate in the Hypothes.is online social annotation.\
+**How**: Read Recipe 6, complete comprehension check, and prepare for Lab 6.\
 **Why**: To rehearse methods for deriving tidying datasets to use a the base for further project-specific purposes. We will explore how regular expressions are helpful in developing strategies for matching, extracting, and/ or replacing patterns in character sequences and how to organize datasets in rows and columns. We will also explore how to document datasets in a data dictionary.
 :::
 

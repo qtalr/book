@@ -5,6 +5,8 @@ execute:
   cache: false
 ---
 
+
+
 <!--
 
 Content:
@@ -89,145 +91,46 @@ The development of this book has benefited from the generous feedback from the f
 
 This textbook was built with the `quarto` package [@R-quarto] and the `bookdown` package [@R-bookdown] for R. The source code for this book is available on [GitHub](https://github.com/qtalr/book).
 
-```{r}
-#| label: common
-#| include: false
 
-# Description: Common settings
 
-# Packages ---------------------------------------------------------------
-pacman::p_load(
-  ggplot2,
-  scales,
-  tibble,
-  dplyr,
-  tidyr,
-  readr,
-  stringr,
-  reprex,
-  rstudioapi,
-  here,
-  rmarkdown,
-  knitr,
-  kableExtra,
-  qtalrkit,
-  tinytable
-)
 
-# Plots ------------------------------------------------------------------
 
-# Plot theme
-theme_qtalr <-
-  function(font = "", font_size = 9) {
-    ggplot2::theme_minimal() %+replace%
+This version of the textbook was built with R version 4.3.2 (2023-10-31) on macOS Ventura 13.6.3 with the following packages:
 
-      ggplot2::theme(
-        plot.title = ggplot2::element_text(
-          family = font,
-          size = font_size * 1.5
-        ),
-        plot.subtitle = ggplot2::element_text(
-          family = font,
-          size = font_size * 1.25
-        ),
-        plot.caption = ggplot2::element_text(
-          family = font,
-          size = font_size * 0.75
-        ),
-        axis.title = ggplot2::element_text(
-          family = font,
-          size = font_size
-        ),
-        axis.text = ggplot2::element_text(
-          family = font,
-          size = font_size * 0.75
-        ),
-        legend.title = ggplot2::element_text(
-          family = font,
-          size = font_size
-        ),
-        legend.text = ggplot2::element_text(
-          family = font,
-          size = font_size * 0.75
-        )
-      )
-  }
 
-# Set theme
-ggplot2::theme_set(theme_qtalr())
 
-# Color palettes
++------------+---------+-------------------------------------------------------------------+
+| package    | version | source                                                            |
++============+=========+===================================================================+
+| dplyr      | 1.1.4   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| ggplot2    | 3.4.4   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| here       | 1.0.1   | CRAN (R 4.3.0)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| kableExtra | 1.4.0   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| knitr      | 1.45    | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| qtalrkit   | 0.9.2   | Github (qtalr/qtalrkit\@e6c0ee871482c503bd8b159c5ea4dd562383fa66) |
++------------+---------+-------------------------------------------------------------------+
+| readr      | 2.1.5   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| reprex     | 2.1.0   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| rmarkdown  | 2.25    | CRAN (R 4.3.1)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| rstudioapi | 0.15.0  | CRAN (R 4.3.1)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| scales     | 1.3.0   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| stringr    | 1.5.1   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| tibble     | 3.2.1   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| tidyr      | 1.3.1   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
+| tinytable  | 0.0.5   | CRAN (R 4.3.2)                                                    |
++------------+---------+-------------------------------------------------------------------+
 
-if (knitr::is_latex_output()) {
-  # if output is latex, use greyscale palette
-  custom_pal <- c("#000000", "#525252", "#717171", "#929292", "#BABABA", "#DADADA") # print palette
-} else {
-  # if output is not latex, use colorblind palette
-  custom_pal <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") # colorblind palette
-}
 
-# Set color palettes
-scale_color_discrete <- function(...) {
-  ggplot2::scale_color_manual(..., values = custom_pal)
-}
-
-# Set fill palettes
-scale_fill_discrete <- function(...) {
-  ggplot2::scale_fill_manual(..., values = custom_pal)
-}
-
-# Set linetype
-scale_linetype_discrete <- function(...) {
-  ggplot2::scale_linetype_manual(..., values = c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash"))
-}
-
-# Geom defaults
-
-update_geom_defaults("smooth", list(colour = "#525252"))
-update_geom_defaults("point", list(colour = "#929292"))
-
-# Options ----------------------------------------------------------------
-
-options(digits = 3) # number of digits to print
-
-# Misc -------------------------------------------------------------------
-
-# Avoid conflict with stats::filter
-filter <- dplyr::filter
-
-# Avoid kableextra from outputting HTML on kable tables
-options(kableExtra.auto_format = FALSE)
-
-# Avoid tinytable from outputting HTML on tinytable tables
-options(tinytable_print_output = "markdown") # for markdown
-```
-
-This version of the textbook was built with `r sessioninfo::platform_info()[[1]]` on `r sessioninfo::os_name()` with the following packages:
-
-```{r}
-#| label: session-packages
-#| echo: false
-#| results: asis
-#| eval: true
-#| cache: false
-
-pkgs <- sessioninfo::package_info(dependencies = FALSE, pkgs = "attached")
-df <- tibble::tibble(
-  package = pkgs$package,
-  version = pkgs$ondiskversion,
-  source = gsub("@", "\\\\@", pkgs$source)
-)
-df |> tt(width = 1)
-```
-
-```{r}
-#| label: bib-packages
-#| include: false
-
-# [ ] check these packages to make sure they are all used in the textbook
-
-# automatically create a bib database for R packages
-knitr::write_bib(c(
-  .packages(), "magrittr", "quarto", "bookdown", "knitr", "rmarkdown", "languageR", "infer", "rvest", "rsyntax", "rtweet", "tidymodels", "textrecipes", "tidytext", "quanteda.corpora", "qtalrkit", "tinytex", "devtools", "usethis", "swirl", "tidyverse", "broom", "forcats", "purrr", "tibble", "ggplot2", "dplyr", "reprex", "tidyr", "lubridate", "readr", "stringr", "xml2", "stopwords", "workflowr", "ProjectTemplate", "targets", "fs", "rtoot", "effectsize", "sessioninfo", "renv", "devtools", "pkgdown", "TBDBr", "wordbankr", "lingtypology", "pacman", "robotstxt", "readtext", "janeaustenr", "DBI", "dbplyr", "haven", "skimr", "jsonlite", "tokenizers", "cleanNLP", "udpipe", "lexicon", "future", "scales", "word2vec", "wordVectors", "janitor", "ggrepel", "dials", "rsample", "workflows", "parsnip", "tune", "yardstick", "remotes", "textrecipes", "PsychWordVec", "tidyr", "jiebaR", "gibasa"
-), "packages.bib")
-```

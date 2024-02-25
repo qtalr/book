@@ -899,12 +899,13 @@ With these considerations in mind, let's start by identifying the linguistic fea
 
 Each of these engineered feature sets represents a different aspect of the lexical nature of the documents. The relative frequency of lemmas represents the lexical diversity of the documents, the dispersion-weighted $tf$-$idf$ of lemmas represents the distinctiveness of the lemmas in the documents, and the relative frequency of POS tags represents the grammatical diversity of the documents [@Petrenz2011].
 
+Let's focus on the grammatical diversity of the documents. With this approach, we aim to distinguish between documents in a way that may allow us to use consider whether genre- and/ or modality-document categories are meaningful, for use as a feature in our ELL textbook.
 
-<!-- [ ] Let's focus on Lemma-POS, and not consider the others -->
+The next question to address in any analysis is how to represent the features. In our case, we want to represent the features in each document. In machine learning, the most common way to represent features is in a matrix. In our case, we want to create a matrix with the documents in the rows and the features in the columns. The values in the matrix will be the operationalization of grammatical diversity in each document. This configuration is known as a **document-term matrix** (DTM).
 
-The next question to address in any analysis is how to represent the features. In our case, we want to represent the features in each document. In machine learning, the most common way to represent features is in a matrix. In our case, we want to create a matrix with the documents in the rows and the features in the columns. The values in the matrix will be the operationalization of lexical use in each document for each of our three candidate measures. This configuration is known as a **document-term matrix** (DTM).
+To recast a data frame into a DTM, we can use the `cast_dtm()` function from the `tidytext` package. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of POS tags into a matrix and then normalize the matrix by documents.
 
-To recast a data frame into a DTM, we can use the `cast_dtm()` function from the `tidytext` package. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of lemmas and POS tags into a matrix and then normalize the matrix by documents. For the $tf$-$idf$ measure we use the `bind_tf_idf()` function from the `tidytext` package. This function takes a data frame with a document, feature, and frequency column (`n`) and calculates the $tf$-$idf$ measure for each feature in each document. This is a normalized measure, so we do not need to normalize the matrix by documents. Let's see how this works with the MASC dataset in @exm-eda-masc-dtms.
+Let's see how this works with the MASC dataset in @exm-eda-masc-dtms.
 
 ```{r}
 #| label: exm-eda-masc-filter-us
@@ -920,13 +921,6 @@ masc_tbl <-
 ```{r}
 #| label: eda-masc-dtms
 
-# Create a document-term matrix of lemmas
-masc_lemma_dtm <-
-  masc_tbl |>
-  count(doc_id, lemma) |>
-  cast_dtm(doc_id, lemma, n) |>
-  as.matrix()
-
 # Create a document-term matrix of POS tags
 masc_pos_dtm <-
   masc_tbl |>
@@ -934,51 +928,32 @@ masc_pos_dtm <-
   cast_dtm(doc_id, pos, n) |>
   as.matrix()
 
-# Create a document-term matrix of tf-idf weighted lemmas
-masc_lemma_tfidf_dtm <-
-  masc_tbl |>
-  count(doc_id, lemma) |>
-  bind_tf_idf(doc_id, lemma, n) |>
-  cast_dtm(doc_id, lemma, tf_idf) |>
-  as.matrix()
-```
-:::
-
-Note preview the a subset of the contents of a matrix, such as in @exm-eda-masc-dtms, we use bracket syntax `[]` instead of the `head()` function. Let's take a look at the first 5 rows and 5 columns of the matrices, as seen in @exm-eda-masc-dtms-preview.
-
-::: {#exm-eda-masc-dtms-preview}
-```{r}
-#| label: eda-masc-dtms-preview
-
 # Preview
-masc_lemma_dtm[1:5, 1:5]
 masc_pos_dtm[1:5, 1:5]
-masc_lemma_tfidf_dtm[1:5, 1:5]
 ```
 :::
 
-Now we can normalize the lemma and pos matrices by documents. We can do this by dividing each feature count by the total count in each document. This is a row-wise transformation, so we can use the `rowSums()` function from base R to calculate the total count in each document. Then each count divided by its row's total count, as seen in @exm-eda-masc-dtms-normalized.
+Note preview the a subset of the contents of a matrix, such as in @exm-eda-masc-dtms, we use bracket syntax `[]` instead of the `head()` function.
+
+Now we can normalize the matrix by documents. We can do this by dividing each feature count by the total count in each document. This is a row-wise transformation, so we can use the `rowSums()` function from base R to calculate the total count in each document. Then each count divided by its row's total count, as seen in @exm-eda-masc-dtms-normalized.
 
 ::: {#exm-eda-masc-dtms-normalized}
 ```{r}
 #| label: eda-masc-dtms-normalized
 
-# Normalize lemma and pos matrices by documents
-masc_lemma_dtm <-
-  masc_lemma_dtm / rowSums(masc_lemma_dtm)
-
+# Normalize pos matrix by documents
 masc_pos_dtm <-
   masc_pos_dtm / rowSums(masc_pos_dtm)
 ```
 :::
 
-There are two concerns to address before we can proceed with clustering. First, clustering algorithm performance tends to degrade with the number of features. If we consider either the relative frequency of lemmas or the dispersion-weighted $tf$-$idf$ of lemmas, we are looking at nearly 20k features! Second, clustering algorithms perform better with more informative features. That is to say, features that are more distinct across the documents provide better information for deriving useful clusters.
+There are two concerns to address before we can proceed with clustering. First, clustering algorithm performance tends to degrade with the number of features. Second, clustering algorithms perform better with more informative features. That is to say, features that are more distinct across the documents provide better information for deriving useful clusters.
 
 We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use **dimensionality reduction**. Dimensionality reduction is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is **principle component analysis** (PCA). PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principle components. The principle components are ordered by the amount of variance that they explain in the data. The first principle component explains the most variance, the second principle component explains the second most variance, and so on.
 
-We can apply PCA to each of these feature matrices and assess how well each accounts for the variation in the data. We can then select the feature approach that accounts for the most variation in the data for clustering. The `prcomp()` function from base R can be used to perform PCA.
+We can apply PCA to the matrix and assess how well it accounts for the variation in the data and how the variation is distributed across components. The `prcomp()` function from base R can be used to perform PCA.
 
-Let's apply PCA to each of our candidate feature matrices, as seen in @exm-eda-masc-dtms-pca.
+Let's apply PCA to the matrix, as seen in @exm-eda-masc-dtms-pca.
 
 ::: {#exm-eda-masc-dtms-pca}
 ```{r}
@@ -987,22 +962,16 @@ Let's apply PCA to each of our candidate feature matrices, as seen in @exm-eda-m
 # Set seed
 set.seed(123)
 
-# Apply PCA to each feature matrix
-masc_lemma_pca <-
-  masc_lemma_dtm |>
-  prcomp()
-
+# Apply PCA to matrix
 masc_pos_pca <-
   masc_pos_dtm |>
-  prcomp()
-
-masc_lemma_tfidf_pca <-
-  masc_lemma_tfidf_dtm |>
   prcomp()
 ```
 :::
 
-We can visualize the amount of variance explained by each principle component with a scree plot. The `fviz_eig()` function from the `factoextra` package can be used to create a scree plot. The `fviz_eig()` function takes the output of the `prcomp()` function as its argument and an argument `ncp = 10` to specify the number of principle components to include in the plot. Let's create a scree plot for each of our candidate feature matrices, as seen in @exm-eda-masc-dtms-pca-scree.
+We can visualize the amount of variance explained by each principle component with a scree plot. The `fviz_eig()` function from the `factoextra` package implements a scree plot on a PCA object. We can set the number of number of components to visualize with `ncp =`.
+
+Let's create a scree plot for the matrix, as seen in @exm-eda-masc-dtms-pca-scree.
 
 ::: {#exm-eda-masc-dtms-pca-scree}
 
@@ -1010,44 +979,26 @@ We can visualize the amount of variance explained by each principle component wi
 # Load package
 library(factoextra)
 
-# Scree plot: lemma relative frequency
-fviz_eig(masc_lemma_pca, ncp = 10)
-
 # Scree plot: POS relative frequency
 fviz_eig(masc_pos_pca, ncp = 10)
-
-# Scree plot: lemma dispersion-weighted tf-idf
-fviz_eig(masc_lemma_tfidf_pca, ncp = 10)
 ```
 
 ```{r}
 #| label: fig-eda-masc-dtms-pca-scree
-#| fig-cap: "Scree plot of the principle components of the MASC dataset"
-#| fig-subcap:
-#|  - "Lemma relative frequency"
-#|  - "POS relative frequency"
-#|  - "Lemma dispersion-weighted tf-idf"
+#| fig-cap: "Scree plot of the principle components of the POS relative frequency"
 #| echo: false
-#| fig-height: 4
-#| layout-ncol: 3
+#| fig-width: 8
+#| fig-asp: 0.35
 
 # Load package
 library(factoextra)
 
-# Scree plot: lemma relative frequency
-fviz_eig(masc_lemma_pca, ncp = 10) + labs(title = "")
-
 # Scree plot: POS relative frequency
 fviz_eig(masc_pos_pca, ncp = 10) + labs(title = "")
-
-# Scree plot: lemma dispersion-weighted tf-idf
-fviz_eig(masc_lemma_tfidf_pca, ncp = 10) + labs(title = "")
 ```
 :::
 
-From @fig-eda-masc-dtms-pca-scree, we can see the plots are different. All trend toward less variance explained as the number of dimensions increase. But for our purposes, we are interested in the largest variance explained with the fewest dimensions. To that end, the @fig-eda-masc-dtms-pca-scree-2 plot is the most reduced and most informative. The amount of variance explained is over 30% for the first dimension alone, however, the variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
-
-Therefore, all else being equal, we should use the POS features. As with all things exploratory, however, it is important to consider the implications of our feature selection for our interpretation of the results. In this case, the POS features approximate grammatical diversity of the documents, more so than lexical diversity. This means that the clusters that we identify will be based on a particular measure of grammatical diversity of the documents. If, for example, we want to identify clusters based on the lexical diversity of the documents, we may opt to use the lemma features, or some other operationalized measure of lexical diversity.
+From @fig-eda-masc-dtms-pca-scree, we can see that the first component shows the most variance explained, around %30, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears hhe variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
 
 Let's go ahead and create a matrix of the first four principle components for the POS data, as seen in @exm-eda-masc-pos-pca-pc.
 
@@ -1061,7 +1012,7 @@ masc_pos_pca_pc <-
 ```
 :::
 
-Now that we have identified the features that we want to use for clustering and we have represented the features in a way that can be used for clustering, we can apply a clustering algorithm to the data. Since we are exploring the usefulness of the 18 genre labels used in the MASC dataset we have a good idea of how many clusters we want to start with. This is a good case to employ the K-means clustering algorithm.
+Now that we have identified assessed the features that we want to use for clustering and we have represented the features in a way that can be used for clustering, we can apply a clustering algorithm to the data. Since we are exploring the usefulness of the 18 genre labels used in the MASC dataset we have a good idea of how many clusters we want to start with. This is a good case to employ the K-means clustering algorithm.
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
@@ -1071,7 +1022,7 @@ As with many modeling techniques we will encounter, it is possible to extract th
 
 In K-means clustering, we specify the number of clusters that we want to identify. For each cluster number, a random center is generated. Then each observation is assigned to the cluster with the nearest center. The center of each cluster is then recalculated based on the distribution of the observations in the cluster. This process is iterates either a pre-defined number of times, or until the centers converge (*i.e* observations stop switching clusters).
 
-We can use the `kmeans()` function from base R to apply the K-means clustering algorithm. The `kmeans()` function takes the matrix of features as its first argument and the number of clusters as its second argument. We can specify the number of clusters with the `centers` argument. The `kmeans()` function also takes an argument `nstart` to specify the number of random starts. The K-means algorithm is sensitive to the initial starting points, so it is a good idea to run the algorithm multiple times with different starting points. The `nstart` argument specifies the number of random starts. The default value is 1, but we can increase this to 10 or 20 to increase the likelihood of finding a good solution.
+The `kmeans()` function from base R takes the matrix of features as its first argument and the number of clusters as its second argument. We can specify the number of clusters with the `centers` argument. Other arguments `nstart` and `iter.max` can be used to specify the number of random starts and the maximum number of iterations, respectively. Since the starting point for centers is random, it is a good idea to run the algorithm multiple times with different starting points. And we limit the interations to avoid the algorithm running indefinitely.
 
 Our goal, then, will be to assess how well this number of clusters fits the data. After finding the optimal number of clusters, we can then compare the results with the genre or modality variables to see how well the clusters map to these variables.
 
@@ -1100,39 +1051,11 @@ masc_pos_pca_pc |>
 
 It is clear that there is significant gains in cluster fit from 1 to 4 clusters, but the gains begin to level off after 5-7 clusters.
 
-Now we can skip ahead and set our $k$ to 4 clusters in the `kmeans()` function. We can then visualize the results of the clustering algorithm with the `fviz_cluster()` function from the `factoextra` package. This function takes the output of the `kmeans()` function as its first argument and the matrix of features as its second argument, as seen in @exm-eda-masc-pos-kmeans-fit.
+Now we have an informed selection for $k$. Let's use 4 clusters in the `kmeans()` function and collect the results, as seen in @exm-eda-masc-pos-kmeans-fit.
 
 ::: {#exm-eda-masc-pos-kmeans-fit}
-```r
-# Set seed
-set.seed(123)
-
-# K-means: for 4 clusters
-masc_pos_kmeans_fit <-
-  masc_pos_pca_pc |>
-  kmeans(
-    centers = 4,
-    nstart = 25,
-    iter.max = 20
-  )
-
-# Visualize
-masc_pos_kmeans_fit |>
-  fviz_cluster(
-    data = masc_pos_pca_pc,
-    ellipse.type = "norm",
-    ellipse.alpha = 0,
-    geom = "point",
-    pointsize = 1
-  )
-```
-
 ```{r}
-#| label: fig-eda-masc-pos-kmeans-fit
-#| fig-cap: "K-means clustering of the MASC dataset with 4 clusters"
-#| fig-width: 6
-#| fig-asp: 1
-#| echo: false
+#| label: eda-masc-pos-kmeans-fit
 
 # Set seed
 set.seed(123)
@@ -1146,24 +1069,12 @@ masc_pos_kmeans_fit <-
     iter.max = 20
   )
 
-# Visualize
-masc_pos_kmeans_fit |>
-  fviz_cluster(
-    data = masc_pos_pca_pc,
-    ellipse.type = "norm",
-    ellipse.alpha = 0,
-    geom = "point",
-    pointsize = 1,
-    palette = "grey",
-    main = "",
-    ggtheme = theme_qtalr()
-  )
+# Preview
+masc_pos_kmeans_fit$cluster[1:10]
 ```
 :::
 
-The ellipses in a k-means plot represent the 95% confidence interval for each cluster. The ellipses are based on the multivariate normal distribution of the data in each cluster. The size and shape of the ellipses tell us about the variance of the data in each cluster. The larger the ellipse the greater the dispersion of values. A wide ellipse suggests high within cluster variability. The distance between the clusters also tells us about the similarity between the clusters. The closer the clusters are to each other, the more similar they are. The further the clusters are from each other, the more dissimilar they are.
-
-Overall, we can see that the clusters are relatively hetrogeneous and overlap with each other. There are some clusters that are more distinct than others, but there is no clear separation between the clusters. This is a good indication that the clusters are not well defined. This is not necessarily a bad thing, but it is something to consider when interpreting the results.
+The preview from @exm-eda-masc-pos-kmeans-fit shows the cluster assignments for the first 10 documents (`doc_id`) in the dataset.
 
 From this point we can join document-cluster pairings produced by the k-means algorithm with the original dataset. We can then explore the clusters in terms of the original features. We can also explore the clusters in terms of the original labels.
 
@@ -1208,15 +1119,17 @@ masc_meta_tbl <-
   masc_cluster_tbl |>
   distinct(modality, genre, cluster)
 
-# Tabulate: cluster by modality
+# Tabulate: cluster by genre
 masc_meta_tbl |>
-  tabyl(cluster, modality) |>
+  tabyl(cluster, genre) |>
   adorn_percentages("row") |>
   adorn_pct_formatting(digits = 1)
 ```
 :::
 
-From @exm-eda-masc-pos-kmeans-modality, we can see that the clusters are not evenly distributed across the modalities. In particular, cluster 1 is where the great majority of the spoken modality appears. We can also appreciate that there may be some written genres that are more similar to spoken genres than other written genres. This, among many other possibilities, may be something we could like to explore further. This is a good example of how exploratory data analysis can be used to identify new questions and new variables of interest.
+From @exm-eda-masc-pos-kmeans-modality, we can see that the clusters are not evenly distributed across the genres. In particular, cluster 2 tends to be more associated with 'blog', 'email', 'letters', 'twitter', and 'news'. Another interesting cluster is cluster 4, which is more associated with 'newspaper', 'non-fiction', and interestingly, 'email'. This suggest that the clusters are capturing some of the variation in the across the genres and potential within some of the genres.
+
+We could continue to explore genre, but we could also entertain the possibility that the clusters may capture differences between modality --even some interaction between modality and genre! This highlights how exploratory data analysis through clustering can be used to identify new questions and new variables of interest.
 
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
@@ -1240,7 +1153,7 @@ Let's assume in our textbook project we are interested in gathering information 
 
 We can use vector space modeling to attempt to represent the distribution of verbs in the MASC dataset and then target the concepts of manner and motion to then explore how English encodes these concepts. The question will be what will our features be. They could be terms, lemmas, POS tags, *etc*. Or they could be some combination. Considering the task at hand which we will ultimately want to know something about verbs, it makes sense to include the POS information in combination with either the term or the lemma.
 
-If we include term and POS then we have a feature for every morphological variant of the term (*e.g.* house_VB, housed_VBD, housing_VBG). This can make the model more sizeable than it needs to be. If we include lemma and POS then we have a feature for every lemma with a distinct grammatical category (*e.g.* house_NN, house_VB). Note that as the POS tags are from the Penn tagset, many morphological variants appear in the tag itself (*e.g.* house_VB, houses_VBZ, housing_VBG). This is a good example of how the choice of features can impact the size of the model. In our case, it is not clear that we need to include the morphological variants of the verbs, so we will use lemma and a simplified POS as our features.
+If we include term and POS then we have a feature for every morphological variant of the term (*e.g.* house_VB, housed_VBD, housing_VBG). This can make the model more sizeable than it needs to be. If we include lemma and POS then we have a feature for every lemma with a distinct grammatical category (*e.g.* house_NN, house_VB). Note that as the POS tags are from the Penn tagset, many morphological variants appear in the tag itself (*e.g.* house_VB, houses_VBZ, housing_VBG). This is a good example of how the choice of features can impact the size of the model. In our case, it is not clear that we need to include the morphological variants of the verbs, so I will use lemmas and recode the POS variables as a simplified tagset.
 
 ::: {#exm-eda-masc-vsm-lemma-pos}
 ```{r}
@@ -1288,8 +1201,7 @@ masc_tbl <-
 ```
 :::
 
-
-After we have our features, we can then apply the vector space model to the MASC dataset. When VSM is applied to words, it is known as **word embedding**. To calculate word embeddings there are various algorithms that can be used (BERT, word2vec, GloVe, *etc.*) We will use the **word2vec** [@Mikolov2013b] algorithm. Word2vec is a neural network-based algorithm that learns word embeddings from a large corpus of text. In the word2vec algorithm, the researcher can choose to learn embeddings from a **Continuous Bag of Words** (CBOW) or a **Skip-gram model**. The CBOW model predicts a target word based on the context words. The Skip-gram model predicts the context words based on the target word. The CBOW model is faster to train and is better for frequent words. The Skip-gram model is slower to train and is better for infrequent words.
+After simplifying the features, we can then apply the vector space model to the MASC dataset. When VSM is applied to words, it is known as **word embedding**. To calculate word embeddings there are various algorithms that can be used (BERT, word2vec, GloVe, *etc.*) We will use the **word2vec** [@Mikolov2013b] algorithm. Word2vec is a neural network-based algorithm that learns word embeddings from a large corpus of text. In the word2vec algorithm, the researcher can choose to learn embeddings from a **Continuous Bag of Words** (CBOW) or a **Skip-gram model**. The CBOW model predicts a target word based on the context words. The Skip-gram model predicts the context words based on the target word. The CBOW model is faster to train and is better for frequent words. The Skip-gram model is slower to train and is better for infrequent words.
 
 Another consideration to take into account is the size of the corpus used to train the model. VSM provide more reliable results when trained on larger corpora. The MASC dataset is relatively small. We've simplified our features in order to have a smaller vocabulary in hopes to offset this limitation to a degree. But the choice of either CBOW or Skip-gram can also help to offset this limitation. CBOW can be better for smaller corpora as it aggregates context infomation. Skip-gram can be better for larger corpora as it can capture more nuanced relationships between words.
 
@@ -1625,7 +1537,7 @@ I've randomly sampled 50 verbs from the dataset and plotted them as text labels.
 
 ## Activities {.unnumbered}
 
-<!-- [ ] Add description of the activites -->
+Exploratory analysis is a wide-ranging term that encompasses many different methods. In these activities, we will focus on the methods that are most commonly used in the analysis of textual data. These include frequency and distributional analysis, clustering, and word embedding models. We will model how to explore iteratively using the output of one method to inform the next and ultimately to address a research question.
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**
@@ -1638,10 +1550,6 @@ I've randomly sampled 50 verbs from the dataset and plotted them as text labels.
 ::: {.callout}
 **{{< fa flask >}} Lab**
 
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-<!-- [ ] update lab -->
-
 **What**: [Pattern discovery](https://github.com/qtalr/lab-08)\
 **How**: Clone, fork, and complete the steps in Lab 08.\
 **Why**: To gain experience working with coding strategies to prepare, feature engineer, explore, and evaluate results from exploratory data analyses, practice transforming datasets into new object formats and visualizing relationships, and implement organizational strategies for organizing and reporting results in a reproducible fashion.
@@ -1649,6 +1557,4 @@ I've randomly sampled 50 verbs from the dataset and plotted them as text labels.
 
 ## Summary {.unnumbered}
 
-In this chapter we surveyed a range of methods for uncovering insights from data, particularly when we do not have a predetermined hypothesis. We broke the chapter discussion along the two central branches of exploratory data analysis: descriptive analysis and unsupervised learning. Descriptive analysis offers statistical or visual summaries of datasets through frequency, dispersion, and co-occurrence measures, while unsupervised learning utilizes machine learning techniques to uncover patterns without predefining variable relationships. Here we covered a few unsupervised learning methods including clustering, diminensionality reduction, and vector space modeling. Through either descriptive or unsupervised learning methodologies, we probe questions in a data-driven fashion and apply methods to summarize, reduce, and sort complex datasets. This in turn facilitates novel, quantitative perspectives that can subsequently be evaluated qualitatively, offering us a robust approach to exploring and generating research questions.
-
-
+In this chapter, we surveyed a range of methods for uncovering insights from data, particularly when we do not have a predetermined hypothesis. We broke the chapter discussion along the two central branches of exploratory data analysis: descriptive analysis and unsupervised learning. Descriptive analysis offers statistical or visual summaries of datasets through frequency, dispersion, and co-occurrence measures, while unsupervised learning utilizes machine learning techniques to uncover patterns without predefining variable relationships. Here we covered a few unsupervised learning methods including clustering, diminensionality reduction, and vector space modeling. Through either descriptive or unsupervised learning methodologies, we probe questions in a data-driven fashion and apply methods to summarize, reduce, and sort complex datasets. This in turn facilitates novel, quantitative perspectives that can subsequently be evaluated qualitatively, offering us a robust approach to exploring and generating research questions.

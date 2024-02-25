@@ -42,13 +42,11 @@ In this chapter, we examine a wide range of strategies for deriving insight from
 
 ## Orientation {#sec-eda-orientation}
 
-The aim of this section is to provide an overview of exploratory data analysis (EDA). We will delve into various descriptive methods, such as frequency analysis and co-occurrence analysis, which are fundamental tools in linguistic research. However, our exploration won't stop there. We will also integrate modern exploratory methods from unsupervised learning approaches, including clustering, dimensionality reduction, and vector space modeling. This may sound overwhelming, but I will strive to keep explanations clear and concise, ensuring their practicality and relevance to your linguistic inquiries is apparent. To this end, we will provide real-world examples to exemplify the applicability of these methodologies.
+The aim of this section is to provide a brief orientation to exploratory data analysis, including descriptive and unsupervised learning methods. We will discuss the goals and approach of exploratory data analysis, and then outline the general workflow for conducting exploratory data analysis.
 
 ### Goals and approach {#sec-eda-goals-approach}
 
 As discussed in @sec-aa-explore and @sec-fr-aim, the goal of exploratory data analysis is to discover, describe, and posit new hypotheses. This analysis approach is best-suited for research where the literature on a research question is limited, or where the researcher is interested in exploring a new research question.
-
-Since the researcher does not start with a preconceived hypothesis, the researcher is not able to test a hypothesis and generalize to a population, but rather the researcher is able to describe the data and provide a new perspective to be qualitatively assessed. This is achieved through an iterative and inductive process of data exploration, where the researcher uses quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset letting the data guide the analysis.
 
 To reign in the analysis, however, it is important to have a research question to guide the analysis. The research question will often be broad and exploratory in nature, but it will provide a framework for the analysis including the unit of analysis and sometimes the units of observation. Yet the units of observation can be modified as needed to address the research question. Furthermore, the methods applied to the data can evolve as the research unfolds. The researcher may start with a descriptive analysis and then move to an unsupervised learning approach, or vice versa. The researcher may also pivot the approach to explore new questions and new variables.
 
@@ -317,7 +315,6 @@ Another key observation is that among the most frequency content words (*e.g.* n
 
 Take for example the adjective 'good'. It can be used to describe a wide range of nouns, such as 'good food', 'good people', 'good times', *etc*. A sometimes near-synonym of 'good', for example 'good student', is the word 'studious'. Yet, 'studious' is not as frequent as 'good' as it is used to describe a narrower range of nouns, such as 'studious student', 'studious scholar', 'studious researcher', *etc*. In this way, 'studious' is more semantically specific than 'good'.
 
-
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
 
@@ -325,7 +322,6 @@ Based on what you now know about the expected distribution of words in a corpus,
 :::
 
 So common across corpus samples, in some analyses these usual suspects of the most common words are considered irrelvant and are filtered out. In our ELL materials task, however, we might exclude them for this simple fact that it will be a given that we will teach these words given their grammatical importance. If we want to focus on the most common content words, we can filter out the function words.
-
 
 One approach to filtering out these words is to use a pre-determined list of **stopwords**. The `tidytext` package includes a data frame `stop_words` of stopword lexicons for English. We can select a lexicon from `stop_words` and use `anti_join()` to filter out the words that appear in the `word` variable from the `lemma` variable in the `masc_tbl` data frame.
 
@@ -439,7 +435,7 @@ masc_lemma_disp |>
 ```
 :::
 
-What we are looking for is an elbow in the distribution of dispersion measures. In @fig-eda-masc-dp-density, we can see that there is distinctive bend in the distribution between 0.85 and 0.97. This bend is called an elbow, and using this approach to make informed decisions about thresholds is called the **elbow method**. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In @exm-eda-masc-dp-filter, I filter out lemmas that have a dispersion measure less than 0.91. Then in @tbl-eda-masc-dp-filter, I preview the top and bottom 50 lemmas in the dataset.
+What we are looking for is a distinctive bend in the distribution of dispersion measures. In @fig-eda-masc-dp-density, we can see one between 0.85 and 0.97. This bend is called an elbow, and using this approach to make informed decisions about thresholds is called the **elbow method**. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed. In @exm-eda-masc-dp-filter, I filter out lemmas that have a dispersion measure less than 0.91. Then in @tbl-eda-masc-dp-filter, I preview the top and bottom 50 lemmas in the dataset.
 
 ::: {#exm-eda-masc-dp-filter}
 ```{r}
@@ -599,7 +595,7 @@ As much as the frequency and dispersion measures can provide us with a good star
 
 The **log odds ratio** is a measure that quantifies the difference between the frequencies of a type in two corpora or sub-corpora. In spirit and in name, it compares the odds of a type occurring in one corpus versus the other. The values range from negative to positive infinity, with negative values indicating that the type is more frequent in the first corpus and positive values indicating that the lemma is more frequent in the second corpus. The magnitude of the value indicates the strength of the association.
 
-The `tidylo` package provides a convenient function `bind_log_odds()` to calculate the log odds ratio, and a weighed variant, for each type in each sub-corpus. The weighted log odds ratio measure provides a more robust and interpretable measure for comparing term frequencies across corpora, especially when term frequencies are low or when corpora are of different sizes. The weighting (or standardization) also makes it easier to identify terms that are particularly distinctive or characteristic of one corpus over another. Note that the weighted measure's interpretation is slightly different that the log odds's. The larger positive values in each corpus indicate that the type is more indicative of that (sub-)corpus, and the larger negative values indicate that the type is less indicative.
+The `tidylo` package provides a convenient function `bind_log_odds()` to calculate the log odds ratio, and a weighed variant, for each type in each sub-corpus. The weighted log odds ratio measure provides a more robust and interpretable measure for comparing term frequencies across corpora, especially when term frequencies are low or when corpora are of different sizes. The weighting (or standardization) also makes it easier to identify terms that are particularly distinctive or characteristic of one corpus over another.
 
 Let's calculate the weighted log odds ratio for each lemma in each modality and preview the top 10 lemmas in each modality, as seen in @exm-eda-masc-log-odds-weighted.
 
@@ -651,85 +647,29 @@ In cases such as this, we are aiming to do a co-occurrence analysis. Co-occurren
 
 <!-- Concordances -->
 
-An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). This is a table that displays the target word in the center of the table and the words that appear before and after the target word. This is a useful approach for spot identifying collocations of a target word or phrase.
+An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). This is a table that displays the target word in the center of the table and the words that appear before and after the target word. This is a useful approach for spot identifying collocations of a target word or phrase, however it can be time-consuming and is not suitable for large datasets.
 
-The `quanteda` package includes a function `kwic()` that can be used to create a KWIC table. It does require some transformation to the data, however. We need to collapse the `lemma` column into a single string for each document from the original transformed dataset, `masc_tbl`. Then we can apply the `corpus()` and then `tokens` function to create a quanteda tokens object. Then we can apply the `kwic()` function to create a KWIC table based on a search pattern.
+::: {.callout .halfsize}
+**{{< fa regular hand-point-up >}} Tip**
 
-::: {#exm-eda-masc-kwic}
-```{r}
-#| label: eda-masc-kwic
-
-# Collapse lemma, pos into a single string
-masc_text_tbl <-
-  masc_tbl |>
-  mutate(lemma_pos = str_c(lemma, pos, sep = "_")) |>
-  group_by(doc_id, modality, genre) |>
-  summarize(text = str_c(lemma_pos, collapse = " ")) |>
-  ungroup()
-
-# Load package
-library(quanteda)
-
-masc_corpus <-
-  masc_text_tbl |>
-  corpus(
-    text_field = "text",
-    docid_field = "doc_id"
-  )
-
-masc_corpus |>
-  tokens() |>
-  kwic(
-    pattern = phrase("*_V* *_IN*"),
-    window = 3
-  ) |>
-  as_tibble() |>
-  select(docname, pre, keyword, post) |>
-  slice_sample(n = 10)
-```
+KWIC tables are a common tool in corpus linguistics and can be used either before or after a quantitative analysis. If you are interested, the `quanteda` package includes a function `kwic()` that can be used to create a KWIC table.
 :::
-
-The output of a KWIC table, as in @exm-eda-masc-kwic, is a useful, qualitative, way to identify collocations of a target word or phrase.
 
 <!-- N-grams -->
 
-A straightforward quantitative way to explore co-occurrence is to set the unit of observation to an $n$-gram of terms. Then, the frequency and dispersion metrics can be calculated for each $n$-gram.
+A straightforward quantitative way to explore co-occurrence is to set the unit of observation to an $n$-gram of terms. Then, the frequency and dispersion metrics can be calculated for each $n$-gram. Yet, there is an issue with this approach. The frequency and dispersion of $n$-grams does not necessarily relate to whether the two words form a semantic unit.
 
-In general, deriving $n$-grams from a corpus is a straightforward process. The `tidytext` package includes a function `unnest_tokens()` that can be used to create $n$-grams from a corpus. The function can take a single column of untokenized text or a tokenized column in combination with a variable to use as the grouping variable. In the `masc_tbl` dataset, we have tokenized text in the `lemma` column and a grouping variable in the `doc_id` column. We can use the `unnest_tokens()` function to create a new data frame with a row for each $n$-gram in each document by setting `collapse = "doc_id"`, as seen in @exm-eda-masc-bigrams-tidytext.
+<!-- Collocation -->
 
-::: {#exm-eda-masc-bigrams-tidytext}
-```{r}
-#| label: eda-masc-bigrams-tidytext
+To address better address our question, we can use a statistical measures to estimate collocational strength between two words. A **collocation** is a sequence of words that co-occur more often than would be expected by chance. A common measure of collocation is the **pointwise mutual information** (PMI) measure. The PMI measure is calculated as the log ratio of the observed frequency of two words co-occurring to the expected frequency of the two words co-occurring. The expected frequency is calculated as the product of the frequency of each word. The PMI measure is a log ratio, the direction indicates relatedness and the magnitude of the value indicates the strength of the association.
 
-# Load package
-library(tidytext)
-
-# Create bigrams
-masc_tbl |>
-  unnest_tokens(
-    output = bigrams,
-    input = lemma,
-    token = "ngrams",
-    n = 2,
-    collapse = "doc_id"
-    ) |>
-  slice_head(n = 10)
-```
-:::
-
-The result of this operation can be joined with the original dataset using the `doc_id` as the key variable. Then we can calculate the frequency and dispersion metrics for each $n$-gram in each modality. However, this approach is not ideal for our task, as we've lost access to POS information.
-
-Another, more informative approach is to create a new variable that combines the lemma and POS for each observation before using `unnest_tokens()` to generate the bigrams. We can use the `str_c()` function from the `stringr` package to join the `lemma` and `pos` columns into a single string, so that we have a variable `lemma_pos` with the lemma and POS joined by an underscore.
-
-One consideration that we need to take for our goal to identify verb particle constructions, is how we ultimately want to group our `lemma_pos` values. This is particularly important given the fact that our `pos` tags for verbs include information about the verb's tense and person. This means that a verb in a verb particle bigram, such as 'look after', will be represented by multiple `lemma_pos` values, such as `look_VB`, `look_VBP`, `look_VBD`, and `look_VBG`. If we want this level of detail, we just proceed as described above. However, if we want to group the verb particle bigrams by a single verb value, we need to recode the `pos` values for verbs. We can do this with the `case_when()` function from the `dplyr` package.
+One consideration that we need to take for our goal to identify verb particle constructions, is how we ultimately want to group our `lemma_pos` values. This is particularly important given the fact that our `pos` tags for verbs include information about the verb's tense and person. This means that a verb in a verb particle bigram, such as 'look after', will be represented by multiple `lemma_pos` values, such as `look_VB`, `look_VBP`, `look_VBD`, and `look_VBG`. We want to group the verb particle bigrams by a single verb value, so we need to recode the `pos` values for verbs. We can do this with the `case_when()` function from the `dplyr` package.
 
 In @exm-eda-masc-lemma-pos, I recode the `pos` values for verbs to `V` and then join the `lemma` and `pos` columns into a single string.
 
 ::: {#exm-eda-masc-lemma-pos}
 ```{r}
-#| label: eda-masc-lemma-pos
-
-# Collapse lemma into a single string
+#| label: eda-masc-bigrams-prep
 masc_lemma_pos_tbl <-
   masc_tbl |>
   mutate(pos = case_when(
@@ -739,36 +679,8 @@ masc_lemma_pos_tbl <-
   group_by(doc_id) |>
   mutate(lemma_pos = str_c(lemma, pos, sep = "_")) |>
   ungroup()
-
-# Preview
-masc_lemma_pos_tbl |>
-  slice_head(n = 10)
-
-masc_lemma_pos_tbl |>
-  unnest_tokens(
-    output = bigrams,
-    input = lemma_pos,
-    token = "ngrams",
-    n = 2,
-    to_lower = FALSE,
-    collapse = "doc_id"
-  ) |>
-  filter(str_detect(bigrams, "_V.*_IN")) |>
-  calc_type_metrics(
-    type = bigrams,
-    documents = doc_id,
-    frequency = "rf",
-    dispersion = "dp"
-  ) |>
-  arrange(desc(rf))
 ```
 :::
-
-We have identified and derived frequency and dispersion metrics for $n$-grams that include verb particle construction candidates. Yet, there is an issue with this approach. The frequency and dispersion of $n$-grams does not necessarily relate to whether the two words form a semantic unit.
-
-<!-- Collocation -->
-
-To address this issue, we can use a statistical measures to estimate collocational strength between two words. A **collocation** is a sequence of words that co-occur more often than would be expected by chance. A common measure of collocation is the **pointwise mutual information** (PMI) measure. The PMI measure is calculated as the log ratio of the observed frequency of two words co-occurring to the expected frequency of the two words co-occurring. The expected frequency is calculated as the product of the frequency of each word. The PMI measure is a log ratio, the direction indicates relatedness and the magnitude of the value indicates the strength of the association.
 
 Let's calculate the PMI for all the bigrams in the MASC dataset. We can use the `calc_assoc_metrics()` function from `qtalrkit`. We need to specify the `association` argument to `pmi` and the `type` argument to `bigrams`, as seen in @exm-eda-masc-bigrams-pmi.
 
@@ -792,38 +704,20 @@ masc_lemma_pos_assoc |>
 ```
 :::
 
-One caveat to using the PMI measure is that it is sensitive to the frequency of the words. If the words in a bigram pair are infrequent, and especially if they only occur once, then the PMI measure will be inflated. To mitigate this issue, we can apply a frequency threshold to the bigrams before calculating the PMI measure. Let's filter out bigrams that occur less than 10 times, as seen in @exm-eda-masc-bigrams-pmi-filtered.
+One caveat to using the PMI measure is that it is sensitive to the frequency of the words. If the words in a bigram pair are infrequent, and especially if they only occur once, then the PMI measure will be inflated. To mitigate this issue, we can apply a frequency threshold to the bigrams before calculating the PMI measure. Let's filter out bigrams that occur less than 10 times, and while we are at it, let's also filter `x` and `y` for the appropriate forms we are targeting that have a positive PMI value, as seen @exm-eda-masc-bigrams-pmi-filtered.
 
 ::: {#exm-eda-masc-bigrams-pmi-filtered}
 ```{r}
 #| label: eda-masc-bigrams-pmi-filtered
 
-# Filter for bigrams that occur >= 10 times
-masc_lemma_pos_assoc_thr <-
+# Filter for target bigrams
+masc_verb_part_assoc <-
   masc_lemma_pos_assoc |>
   filter(n >= 10) |>
-  arrange(desc(pmi))
-
-# Preview
-masc_lemma_pos_assoc_thr |>
-  slice_head(n = 10)
-```
-:::
-
-Now we are in a position to identify verb particle constructions. We can filter for bigrams that include a verb and a particle and that have a PMI measure greater than 0, as seen in @exm-eda-masc-bigrams-pmi-filtered-vpc.
-
-::: {#exm-eda-masc-bigrams-pmi-filtered-vpc}
-```{r}
-#| label: eda-masc-bigrams-pmi-filtered-vpc
-
-# Filter for bigrams that include a verb and a particle
-# and that have a PMI measure greater than 0
-masc_verb_part_assoc <-
-  masc_lemma_pos_assoc_thr |>
   filter(str_detect(x, "_V")) |>
   filter(str_detect(y, "_IN")) |>
   filter(pmi > 0) |>
-  arrange(x)
+  arrange(desc(pmi), x)
 
 # Preview
 masc_verb_part_assoc |>
@@ -831,7 +725,7 @@ masc_verb_part_assoc |>
 ```
 :::
 
-We can clean up the results a bit by removing the POS tags from the `x` and `y` variables, up our minimum PMI value, and create a network plot to visualize the results in @exm-eda-masc-verb-part-network.
+We have a working method for identify verb particle constructions. We can clean up the results a bit by removing the POS tags from the `x` and `y` variables, up our minimum PMI value, and create a network plot to visualize the results in @exm-eda-masc-verb-part-network.
 
 ::: {#exm-eda-masc-verb-part-network}
 ```{r}
@@ -839,7 +733,7 @@ We can clean up the results a bit by removing the POS tags from the `x` and `y` 
 #| fig-cap: "Network plot of verb particle constructions in the MASC dataset"
 #| fig-width: 8
 
-# Clean up results
+# Clean up results removing POS tags
 masc_verb_part_assoc_plot <-
   masc_verb_part_assoc |>
   filter(pmi >= 2) |>
@@ -869,6 +763,7 @@ masc_verb_part_assoc_plot |>
   theme_void()
 ```
 :::
+
 From @fig-eda-masc-verb-part-network, and from the underlying data, we can explore verb particle constructions. We could go further and apply our co-occurrence methods to each modality separately, if we wanted to identify verb particle constructions that are distinctive to each modality. We could also apply our co-occurrence methods to other parts-of-speech, such as adjectives and nouns, to identify collocations of these parts-of-speech. There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be addressed.
 
 ### Unsupervised learning {#sec-eda-unsupervised}

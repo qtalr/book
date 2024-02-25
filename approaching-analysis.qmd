@@ -368,7 +368,7 @@ The caveat is that standardization masks the original meaning of the data. That 
 
 Another thing to note in @tbl-aa-belc-descriptive-stats-numeric is that the mean and median are not the same. They are both measures of central tendency, but the mean is more sensitive to extreme values than the median. The difference between the mean and median is a numeric representation that gives us a first glimpse of the distribution of the data. With this in mind, let's turn to the distribution of the variables.
 
-### Distributions
+### Distributions {#sec-aa-distributions}
 
 <!-- - Distributions  -->
 
@@ -708,10 +708,41 @@ ggplot(right_skew_data, aes(x = value)) +
 
 Assessing the distribution of a variable is important for two reasons. First, the distribution of a variable can inform the choice of statistical test in theory-based hypothesis testing. Data that are normally, or near-normally distributed are often analyzed using parametric tests while data that exhibit a skewed distributed are often analyzed using non-parametric tests. Second, highly skewed distributions have the effect of compressing the range of values. This can lead to a loss of information and can make it difficult to detect patterns in the data.
 
+Interestingly, a key feature of the distribution of linguistic units (phonemes, words, morphemes, *etc*) is that they tend to be highly skewed. This is due to the fact that a small number of linguistic units are used frequently and a large number of linguistic units are used infrequently. This is known as Zipf's Law [@Zipf1949]. **Zipf's Law** is a statistical principle that states that the frequency of a word (other other linguistic units) is inversely proportional to its rank in the frequency table. In other words, the most frequent units will appear twice as often as the second most frequent unit, three times as often as the third most frequent unit, and so on.
+
+The plot in @fig-aa-zipf-distribution-1 is simulated data that fits a Zipfian distribution.
+
+```{r}
+#| label: fig-aa-zipf-distribution
+#| fig-cap: "Zipfian distribution"
+#| fig-subcap:
+#|  - "Zipfian distribution"
+#|  - "Log-transformed Zipfian distribution"
+#| fig-height: 3
+#| layout-ncol: 2
+
+set.seed(123)
+zipf_data <- tibble(rank = 1:100, frequency = 100 / (1:100))
+
+# Zipfian distribution
+zipf_data |>
+  ggplot(aes(x = rank, y = frequency)) +
+  geom_line() +
+  labs(x = "Rank", y = "Frequency")
+
+# Log-transformed Zipfian distribution
+zipf_data |>
+  ggplot(aes(x = rank, y = log(frequency))) +
+  geom_line() +
+  labs(x = "Rank", y = "Frequency (log)")
+```
+
+Zipf's law describes a theoretical distribution, and the actual distribution of units in a corpus is affected by various sampling factors, including the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.
+
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
 
-Another approach for visually summarizing a single numeric variable is the Empirical Cumulative Distribution Function, or *ECDF*. An ECDF plot is a summary of the cummulative proportion of each of the values of a numeric variable. In addition to providing insight into the distribution of a variable, ECDF plots can be useful in determing what proportion of the values fall above or below a certain percentage of the data.
+As stated above, Zipfian distributions are typical of natural language and are observed a various linguistic levels. This is because natural language is a complex system, and complex systems tend to exhibit Zipfian distributions. Other examples of complex systems that exhibit Zipfian distributions include the size of cities, the frequency of species in ecological communities, the frequency of links in the World Wide Web, *etc.*
 :::
 
 Let's return to the BELC dataset and assess the distribution of the variables `tokens`, `types` and `ttr` in @fig-aa-belc-histogram-density-trimmed to the three distributions in @fig-aa-distributions, we see that all three numeric variables in the BELC dataset are skewed to some degree, but not as extreme as the simulated data.
@@ -758,7 +789,7 @@ belc_essay_tbl |>
 
 @fig-aa-belc-histogram-density-trimmed-1 and [-@fig-aa-belc-histogram-density-trimmed-2] for `tokens` and `types` has a bit more right skewing than `ttr` seen in @fig-aa-belc-histogram-density-trimmed-3. This is consistent with the summary statistics for the central tendency in @tbl-aa-belc-descriptive-stats-numeric. The mean and median for `tokens` and `types` are not the same and the mean is larger than the median. For `ttr`, the mean and median is much closer.
 
-In the case that a variable is highly skewed, it is often useful to attempt transform the variable to reduce the skewness. In contrast to scale-based transformations (*e.g.* centering and scaling), shape-based transformations change the scale and the shape of the distribution. The most common shape-based transformation is the logarithmic transformation. The **logarithmic transformation** (log-transformation) takes the log (typically base 10) of each value in a variable. The log-transformation is useful for reducing the skewness of a variable as it compresses large values and expands small values. If the skewness is due to these factors, the log-transformation can help.
+In the case that a variable is highly skewed, it is often useful to attempt transform the variable to reduce the skewness. In contrast to scale-based transformations (*e.g.* centering and scaling), shape-based transformations change the scale and the shape of the distribution. The most common shape-based transformation is the logarithmic transformation. The **logarithmic transformation** (log-transformation) takes the log (typically base 10) of each value in a variable. The log-transformation is useful for reducing the skewness of a variable as it compresses large values and expands small values. If the skewness is due to these factors, the log-transformation can help, as in the case of the Zipfian distribution in @fig-aa-zipf-distribution-2.
 
 It is important to note, however, that if scale-based transformations are to be applied to a variable, they should be applied after the log-transformation as the log of negative values is undefined.
 

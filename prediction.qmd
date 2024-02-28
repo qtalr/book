@@ -11,32 +11,15 @@ execute:
 #| cache: false
 ```
 
-
-
 <!--
-
-Content:
-
-- [x] Note on hypothesis testing?
-  - Confidence intervals?
-  - MuPDAR approach (Multifactorial Prediction and Deviation Analysis with Regressions) [@Deshors2016; @Gries2014] and @Baayen2011
-    - Training on group
-    - Testing on another group (or groups)
-
-- [ ] Make sure to standardize the use of 'variable' and 'feature'.
-- [ ] Update/ simplify the variable names so they are shorter and more consistent.
-- [ ] IMPORTANT: I'm not liking the flow of application. It seems that I should introduce the notion of cross-validation earlier and avoid fitting the training set with `fit()` and then using `predict()`.
 
 Exercises:
 
-- [ ] add concept questions to Activities
-- [ ] add exercises to Activities
 - [ ] add thought questions/ case studies to prose sections
 
 Formatting:
 
 - [ ] add citations
-  - [ ] for study rationale
   - [ ] for packages
 
 -->
@@ -120,11 +103,11 @@ The evaluation of the model is quantitative on the one hand, but it is also qual
 
 <!-- Goals of this section -->
 
-In this section we now turn to the practical application of predictive data analysis. The dicussion will be separated into classification and regression tasks, as model selection and evaluation procedures differ between the two. For each task, we will frame a research goal and work through the process of building a predictive model to address that goal. Along the way we will cover concepts and methods that are common to both classification and regression tasks and specific to each.
+In this section, we now turn to the practical application of predictive data analysis. The discussion will be separated into classification and regression tasks, as model selection and evaluation procedures differ between the two. For each task, we will frame a research goal and work through the process of building a predictive model to address that goal. Along the way we will cover concepts and methods that are common to both classification and regression tasks and specific to each.
 
 <!-- Research questions -->
 
-To frame our analyses, we will posit research aimed at identifying language usage patterns in second language use, one for a classification task and one for a regression task. Our first research question will be to identify potential salient differences in Spanish language use between natives and L1 English learners (categorical). Our second research question will be to gauge the extent to which the the L1 English learners' Spanish language placement test scores (numeric) can be predicted based on their language use.
+To frame our analyses, we will posit research aimed at identifying language usage patterns in second language use, one for a classification task and one for a regression task. Our first research question will be to assess whether we Spanish language use can be used to predict natives and L1 English learners (categorical). Our second research question will be to gauge the extent to which the the L1 English learners' Spanish language placement test scores (numeric) can be predicted based on their language use.
 
 We will use data from the CEDEL2 corpus[^2]. We will include a subset of the variables from this data that are relevant to our research questions. The data dictionary for this dataset is seen in @tbl-pda-cedel2-data-dictionary.
 
@@ -191,7 +174,7 @@ cedel_tbl<-
   read_csv("../data/cedel2/cedel2_transformed.csv")
 
 # Preview
-cedel_tbl|> glimpse()
+cedel_tbl |> glimpse()
 ```
 
 ```{r}
@@ -204,7 +187,7 @@ cedel_tbl<-
   read_csv("data/cedel2_transformed.csv")
 
 # Preview
-cedel_tbl|> glimpse()
+cedel_tbl |> glimpse()
 ```
 :::
 
@@ -261,7 +244,9 @@ cedel_tbl |>
 
 # Looks like our two peaks are due to the lower and upper proficiency levels. This is good to know and will be useful for our analysis.
 
-# Let's gauge the variablity of the placement_score variable by proficiency. A boxplot will be useful for this. Before we do that, let's make proficiency a factor variable in the order we want.
+# Let's gauge the variablity of the placement_score variable by proficiency. A boxplot will be useful for this.
+
+# Before we do that, let's make proficiency and subscorpus a factor variable in the order we want.
 
 cedel_tbl <-
   cedel_tbl |>
@@ -295,9 +280,9 @@ cedel_tbl |>
 
 ```
 
-After performing some diagnostics, the dataset is in good order to proceed with the analysis. I updated the variables `subcorpus` and `proficiency` as factor variables and ordered them in a way that makes sense for the analysis. The `placement_score` variable is distributed well across the proficiency levels. The `subcorpus` variable is less balanced, with around 65% of the texts being from learners. This is not a problem, but it is something to keep in mind when interpreting the results of the analysis.
+After I performed some diagnostics and made some adjustments, the dataset is in good order to proceed with the analysis. I updated the variables `subcorpus` and `proficiency` as factor variables and ordered them in a way that makes sense for the analysis. The `placement_score` variable is distributed well across the proficiency levels. The `subcorpus` variable is less balanced, with around 65% of the texts being from learners. This is not a problem, but it is something to keep in mind when building and interpreting the predictive models.
 
-We will be using the `tidymodels` framework in R to perform this analysis. `tidymodels` is a metapackage, much like `tidyverse`, that provides a consistent interface for modeling and machine learning. Some key packages unique to `tidymodels` are `recipes`, `parsnip`, `workflows`, and `tune`. `recipes` includes functions for preprocessing and engineering features. `parsnip` provides a consistent interface for specifying modeling algorithms. `worflows` allows us to combine recipes and models into a single pipeline. Finally, `tune` give us the ability to evaluate and tune hyperparameters of models.
+We will be using the `tidymodels` framework in R to perform these analyses. `tidymodels` is a metapackage, much like `tidyverse`, that provides a consistent interface for machine learning modeling. Some key packages unique to `tidymodels` are `recipes`, `parsnip`, `workflows`, and `tune`. `recipes` includes functions for preprocessing and engineering features. `parsnip` provides a consistent interface for specifying modeling algorithms. `worflows` allows us to combine recipes and models into a single pipeline. Finally, `tune` give us the ability to evaluate and tune hyperparameters of models.
 
 Since we are using text data, we will also be using the `textrecipes` package which makes various functions available for preprocessing text including extracting and engineering features.
 
@@ -309,8 +294,8 @@ Let's go ahead and do the setup, loading the necessary packages, seen in @exm-pd
 library(tidymodels)   # modeling metapackage
 library(textrecipes)  # text preprocessing
 
-# Set global options
-tidymodels_prefer()   # prefer tidymodels functions over other functions with the same name
+# Prefer tidymodels functions
+tidymodels_prefer()
 ```
 
 ```{r}
@@ -323,8 +308,8 @@ library(tidymodels)   # modeling metapackage
 library(textrecipes)  # text preprocessing
 library(janitor)      # data inspection
 
-# Set global options
-tidymodels_prefer()   # prefer tidymodels functions
+# Prefer tidymodels functions
+tidymodels_prefer()
 ```
 :::
 
@@ -332,7 +317,7 @@ tidymodels_prefer()   # prefer tidymodels functions
 
 <!-- Research question: outcome and features -->
 
-The goal of this analysis is to classify texts as either native or learner based on the writing samples. This is a binary classification problem. We will approach this problem from an exploratory perspective, and therefore our aim is to identify features from the text that best distinguish between the two classes.
+The goal of this analysis is to classify texts as either native or learner based on the writing samples in the dataset. This is a binary classification problem. We will approach this problem from an exploratory perspective, and therefore our aim is to identify features from the text that best distinguish between the two classes.
 
 Let's modify the data frame to include only the variables we need for this analysis, assigning it to `cls_tbl`. In the process, we will rename the `subcorpus` variable to `outcome` to reflect that it is the outcome variable. This is seen in @exm-pda-class-data.
 
@@ -351,13 +336,13 @@ cls_tbl <-
 
 Let's begin the workflow from @tbl-pda-workflow by identifying the features that we will use to classify the texts. There may be many features that we could use. These could be features derived from raw text (*e.g.* characters, words, n-grams, *etc.*), feature vectors (*e.g.* word embeddings), or meta-linguistic features (*e.g.* part-of-speech tags, syntactic parses, or semantic features) that have been derived from these through manual or automatic annotation.
 
-Let's start simple and use words as the predictor features. This is a simple approach that is often used as a baseline for more complex models. If it doesn't work well, we can always try something else.
+If as part of our research question the types of features is included, then we should proceed toward deriving those features. If not, a simple approach is to use words as the predictor features. This will serve as a baseline for more complex models, if necessary.
 
-This provides us the linguistic unit we will use but we still need to decide how to represent these words. Do we use raw token counts? Do we use normalized frequencies? Do we use some type of weighting scheme? These are questions that we need to consider as we embark on this analysis. Since we are exploring we can use trial-and-error or consider the implications of each approach and choose the one that best fits our research question --or both.
+This provides us the linguistic unit we will use but we still need to decide how to operationalize what we mean by 'use' in our research statement. Do we use raw token counts? Do we use normalized frequencies? Do we use some type of weighting scheme? These are questions that we need to consider as we embark on this analysis. Since we are exploring, we can use trial-and-error or consider the implications of each approach and choose the one that best fits our research question --or both.
 
-Let's approach this with a bit more nuance as we already have some domain knowledge about language use. First, we know that in the distribution of linguistic units is highly skewed, meaning that a few words occur very frequently and most words occur very infrequently. Second, we know that the most frequent words in a language are often function words (*e.g.* 'the', 'and', 'of', *etc.*) and that these words are tend not very informative for distinguishing between classes of texts. Third, we know that comparing raw counts across texts conflates the influence text class lengths.
+Let's approach this with a bit more nuance as we already have some domain knowledge about word use. First, we know that in the frequency distribution of words is highly skewed, meaning that a few words occur very frequently and most words occur very infrequently. Second, we know that the most frequent words in a language are often function words (*e.g.* 'the', 'and', 'of', *etc.*) and that these words are tend not very informative for distinguishing between classes of texts. Third, we know that comparing raw counts across texts conflates the influence text class lengths.
 
-With these considerations in mind, we will tokenize the text into words and then use the term frequency-inverse document frequency (TF-IDF) weighting scheme to represent the words. This scheme will down weight words that are common across all documents and up weight words that are unique to a document. It also mitigates the varying lengths of the documents. This is a common approach in text classification and is a good starting point for our analysis.
+With these considerations in mind, we will tokenize the text into words and then use the term frequency-inverse document frequency (TF-IDF) weighting scheme to represent word use. This scheme will down weight words that are common across all documents and up weight words that are unique to a document. It also mitigates the varying lengths of the documents. This is a common approach in text classification and is a good starting point for our analysis.
 
 <!-- Step 2: Initial split -->
 
@@ -370,7 +355,7 @@ In @exm-pda-class-split, we will use the `initial_split()` function from the `rs
 #| label: pda-class-split
 
 # Set seed for reproducibility
-
+set.seed(123)
 
 # Split the data into training and testing sets
 cls_split <-
@@ -388,18 +373,20 @@ cls_test <- testing(cls_split)    # 20% of data
 ```
 :::
 
-A confirmation of the distribution of the data across the training and testing sets as well as a break down of the outcome variable can be seen in @exm-pda-class-split-tabyl.
+A confirmation of the distribution of the data across the training and testing sets as well as a break down of the outcome variable, created by the `janitor` packages `tabyl()` function, can be seen in @exm-pda-class-split-tabyl.
 
 ::: {#exm-pda-class-split-tabyl}
 ```{r}
 #| label: pda-class-split-tabyl
 
-# View the distribution of the outcome variables
+# View the distribution
+# Training set
 cls_train |>
   tabyl(outcome) |>
   adorn_totals("row") |>
   adorn_pct_formatting(digits = 1)
 
+# Testing set
 cls_test |>
   tabyl(outcome) |>
   adorn_totals("row") |>
@@ -411,42 +398,37 @@ We can see that the split was successful. The training and testing sets have ver
 
 <!-- Step 3: Integrate: plan to select and engineer features -->
 
-<!-- [ ] change the 'feature variable' to 'predictor variable' to be in line with the recipes nomenclature  -->
-
-<!-- CONTINUE HERE: 2024-02-25
-
-Remember, I've adjusted the starting point for our features to: tf-idf weighting scheme. This will affect a significant portion of the following content.
-
-- leave the tokenfilter at a hardcoded number to start, start low (100) and then increase it to see how it affects the model's performance
-- point out that we use L1 normalization to avoid particular words dominating the feature space, this is analogous to the standardization of numeric features, such as those used in PCA or regression analysis where the magnitude of the features can affect the model's performance.
-- Note the `step_tokenize()` uses the `tokenizers` package function, which can customize the tokenization process. This is useful for languages with non-standard tokenization rules.
--->
-
-
-We are now ready to create a 'recipe', step 3 in our analysis. A recipe is a set of instructions or blueprint which specify the outcome variable and the predictor variable and determines how to preprocess and engineer the feature variables.
+We are now ready to create a 'recipe', step 3 in our analysis. A recipe is `tidymodels` terminology for a set of instructions or blueprint which specify the outcome variable and the predictor variable and determines how to preprocess and engineer the feature variables.
 
 We will use the `recipe()` function from the `recipes` package to create the recipe. The `recipe()` function minimally takes a formula and a data frame and returns a `recipe` object. The formula specifies the outcome variable ($y$) and the predictor variable(s) ($x_1 .. x_n$). For example `y ~ x` can be read as "y as a function of x". In our particular case, we will use the formula `outcome ~ text` to specify that the outcome variable is the `outcome` variable and the predictor variable is the `text` variable. The code is seen in @exm-pda-class-recipe.
 
 ::: {#exm-pda-class-recipe}
 ```{r}
 #| label: pda-class-recipe
-#| results: asis
 
 # Create a recipe
 base_rec <-
   recipe(
-    formula = outcome ~ text,
+    formula = outcome ~ text, # formula
     data = cls_train
     )
 
 # Preview
 base_rec
 ```
+```txt
+── Recipe ─────────────────────────────────────────
+
+── Inputs
+Number of variables by role
+outcome:   1
+predictor: 1
+```
 :::
 
 The recipe object at this moment contains just one instruction, what the variables are and what their relationship is.
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 R formulas are a powerful way to specify relationships between variables and are used extensively in data modeling including exploratory, predictive, and inferential analysis. The basic formula syntax is `y ~ x` where `y` is the outcome variable and `x` is the feature variable. The formula syntax can be extended to include multiple feature variables, interactions, and transformations. For more information on R formulas, see [R for Data Science](https://r4ds.github.io/bookclub-tmwr/r-formula-syntax.html).
@@ -454,9 +436,11 @@ R formulas are a powerful way to specify relationships between variables and are
 
 The `recipes` package provides a wide range of `step_*()` functions which can be applied to the recipe to specify how to engineer the variables in our recipe call. These include functions to scale (*e.g* `step_center()`, `step_scale()`, *etc.*) and transform (*e.g.* `step_log()`, `step_pca()`, *etc.*) numeric variables, and functions to encode (*e.g.* `step_dummy()`, `step_labelencode()`, *etc.*) categorical variables.
 
-These step functions are great when we have selected the variables we want to use in our model and we want to engineer them in a particular way. In our case, however, we need to derive features from the text in the `text` column of datasets before we engineer them. To ease this process, the `textrecipes` package provides a number of step functions for preprocessing text data. These include functions to tokenize (*e.g.* `step_tokenize()`), remove stop words (*e.g.* `step_stopwords()`), and to derive meta-features (*e.g.* `step_lemma()`, `step_stem()`, *etc.*) [^1]. Furthermore, there are functions to engineer features in ways that are particularly relevant to text data, such as feature frequencies and weights (*e.g.* `step_tf()`, `step_tfidf()`, *etc.*) and token filtering (*e.g.* `step_tokenfilter()`).
+These step functions are great when we have selected the variables we want to use in our model and we want to engineer them in a particular way. In our case, however, we need to derive features from the text in the `text` column of datasets before we engineer them.
 
-::: {.callout}
+To ease this process, the `textrecipes` package provides a number of step functions for preprocessing text data. These include functions to tokenize (*e.g.* `step_tokenize()`), remove stop words (*e.g.* `step_stopwords()`), and to derive meta-features (*e.g.* `step_lemma()`, `step_stem()`, *etc.*) [^1]. Furthermore, there are functions to engineer features in ways that are particularly relevant to text data, such as feature frequencies and weights (*e.g.* `step_tf()`, `step_tfidf()`, *etc.*) and token filtering (*e.g.* `step_tokenfilter()`).
+
+::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
 For text processing steps for Japanese, see the `washoku` package [@R-washoku].
@@ -473,30 +457,51 @@ So let's build on our basic recipe `cls_rec` by adding steps relevant to our tas
 # Add step to tokenize the text
 cls_rec <-
   base_rec |>
-  step_tokenize(text)
+  step_tokenize(text) # tokenize
 
 # Preview
 cls_rec
 ```
+```txt
+── Recipe ─────────────────────────────────────────
+
+── Inputs
+Number of variables by role
+outcome:   1
+predictor: 1
+
+── Operations
+• Tokenization for: text
+```
 :::
 
-The recipe object now contains two instructions, one for the outcome variable and one for the feature variable. The feature variable instruction specifies that the text should be tokenized into words.
+The recipe object `cls_rec` now contains two instructions, one for the outcome variable and one for the feature variable. The feature variable instruction specifies that the text should be tokenized into words.
 
-We now need to consider how to engineer the word features. If we add `step_tf()` we will get a matrix of token counts by default. We also have the option to add `step_tfidf()` to get a matrix of term frequencies weighted by inverse document frequency, which effectively down weights words that are common across all documents.
+We now need to consider how to engineer the word features. If we add `step_tf()` we will get a matrix of token counts by default, with the option to specifiy other weights. The step function `step_tfidf()` creates a matrix of term frequencies weighted by inverse document frequency.
 
-We decided in step 1 that we will start with raw token counts, so we will add `step_tf()` to our recipe. This is seen in @exm-pda-class-recipe-tf.
+We decided in step 1 that we will start with $tf$-$idf$, so we will add `step_tfidf()` to our recipe. This is seen in @exm-pda-class-recipe-tfidf.
 
-::: {#exm-pda-class-recipe-tf}
+::: {#exm-pda-class-recipe-tfidf}
 ```{r}
-#| label: pda-class-recipe-tf
+#| label: pda-class-recipe-tfidf
 
 # Add step to tokenize the text
 cls_rec <-
   cls_rec |>
-  step_tf(text)
+  step_tfidf(text)
 
 # Preview
 cls_rec
+```
+```txt
+── Recipe ─────────────────────────────────────────
+Number of variables by role
+outcome:   1
+predictor: 1
+
+── Operations
+• Tokenization for: text
+• Term frequency-inverse document frequency with: text
 ```
 :::
 
@@ -518,29 +523,24 @@ cls_bake <-
 
 # Preview
 cls_bake |> dim()
-
-cls_bake[
-  c(1000:1001, 2000:2001),     # selected rows
-  c(1, 1000:1001, 20000:20001) # selected columns
-  ]
 ```
 :::
 
-The resulting engineered features data frame has `r nrow(cls_bake)` observations and `r ncol(cls_bake)` variables. The first variable is the outcome variable and the remaining variables are the engineered features. We can see that the recipe performed as expected and that the feature variables are the token counts for each word in the text.
+The resulting engineered features data frame has `r nrow(cls_bake)` observations and `r ncol(cls_bake)` variables. That is a lot of features! Given the the fact that for each writing sample, only a small subset of them will actually appear, most of our cells will be filled with zeros. This is a sparse matrix.
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 When applying tokenization and feature engineering steps to text data the result is often contained in a matrix object. Using the `recipes` package a data frame with a matrix-like structure is returned.
 
-Furthermore, the features are prefixed with the variable name and transformation step labels. In @exm-pda-class-recipe-prep we applied term frequency to the `text` variable. Therefore we see that our features are prefixed with `tf_text_`.
+Furthermore, the features are prefixed with the variable name and transformation step labels. In @exm-pda-class-recipe-prep we applied term frequency - inverse document frequency to the `text` variable. Therefore we see that our features are prefixed with `tfidf_text_`.
 :::
 
-But we should pause. We have a lot of features! One for every single word in the entire corpus. This is an unweildy number of features for a model and it is likely that many of these features are not useful for our classification task. Furthermore, the more features we have, the more chance these features capture the nuances of these particular writing samples, thus, we are the more likely we are to overfit the model. All in all, we need to reduce the number of features.
+But we should pause. This is an unweildy number of features, on for every single word, for a model and it is likely that many of these features are not useful for our classification task. Furthermore, the more features we have, the more chance these features will capture the nuances of these particular writing samples increasing the likelihood we overfit the model. All in all, we need to reduce the number of features.
 
-Our domain knowledge about language can be of help us decide on how to approach reducing the feature set. On the one hand, we know that most tokens occur rarely in any sizable corpus. And the lower the frequency, the more likely that the token may reflect nuances of the speaker or the content of particular texts rather than generalizable trends. On the other hand, we know that a relatively small number of the most frequent words quickly account for a large proportion of the tokens in a corpus.
+We can filter out features by stopword list or by frequency of occurrence. Let's start by frequency of occurrence. We can set the maximum number of the top features with an arbitrary threshold to start. The `step_tokenfilter()` function can filters out features on a number of criteria. Let's use the `max_tokens` argument to set the maximum number of features to 100.
 
-So just with these two considerations, we can see that we can filter out many infrequent words and likely have quite a few viable features. Let's start with an arbitrary threshold of the top 1,000 words by frequency. We can use the `step_tokenfilter()` function to filter out the top 1,000 words by frequency. This particular step needs to be applied before the `step_tf()` step, so we will add it to our recipe before the `step_tf()` step. This is seen in @exm-pda-class-recipe-tokenfilter.
+This particular step needs to be applied before the `step_tfidf()` step, so we will add it to our recipe before the `step_tfidf()` step. This is seen in @exm-pda-class-recipe-tokenfilter.
 
 ::: {#exm-pda-class-recipe-tokenfilter}
 ```{r}
@@ -550,8 +550,8 @@ So just with these two considerations, we can see that we can filter out many in
 cls_rec <-
   base_rec |>
   step_tokenize(text) |>
-  step_tokenfilter(text, max_tokens = 1000) |>
-  step_tf(text)
+  step_tokenfilter(text, max_tokens = 100) |>
+  step_tfidf(text)
 
 # Prep and bake
 cls_bake <-
@@ -562,31 +562,16 @@ cls_bake <-
 # Preview
 cls_bake |> dim()
 
-cls_bake[1:5, 1:10]
+cls_bake[1:5, 1:5]
 ```
 :::
 
-We now have a manageable set of features. Only during the interrogation step will we know if they are useful.
+We now have a manageable set of features, and fewer of which will have a as many zeros. Only during the interrogation step will we know if they are useful.
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 The `prep()` and `bake()` functions are useful for inspecting the recipe and the engineered features, but they are not required to build a recipe. When a recipe is added to a workflow, the `prep()` and `bake()` functions are called automatically as part of the process.
-:::
-
-There is one last step we should add to our recipe which concerns the skewed nature of word frequency distributions. The magnitude of the token counts will be highly skewed with a few words having very high counts and most words having relatively low counts, even for the top 1,000 words. This skew can be problematic for some models, so we will add a step to log normalize the token counts. This will not change the rank order, only the magnitude of the differences. Note that we use `all_predictors()` to apply the log transformation to all the word features, as seen in @exm-pda-class-recipe-log.
-
-::: {#exm-pda-class-recipe-log}
-```{r}
-#| label: pda-class-recipe-log
-
-# Add log step to recipe
-cls_rec <-
-  cls_rec |>
-  step_log(all_predictors(), offset = 1) # add 1 to avoid log(0)
-
-cls_rec
-```
 :::
 
 <!-- Step 5: Interrogate -->
@@ -597,41 +582,23 @@ We are now ready to turn our attention to step 5 of our workflow, interrogating 
 
 There are many classification algorithms to choose from with their own strengths and shortcomings. In @tbl-pda-class-algorithms, we list some of the most common classification algorithms and their characteristics.
 
-| Algorithm | Strengths | Shortcomings |
-|-----------|-----------|--------------|
-| Logistic regression | Simple, interpretable, fast | Assumes linear relationship between features and outcome |
-| Naive Bayes | Simple, interpretable, fast | Assumes independence between features |
-| Decision trees | Nonlinear relationships, interpretable | Prone to overfitting |
-| Random forest | Nonlinear relationships, interpretable | Prone to overfitting |
-| Support vector machines | Nonlinear relationships, interpretable | Prone to overfitting |
-| Neural networks | Nonlinear relationships, fast | Prone to overfitting, difficult to interpret |
+| Algorithm | Strengths | Shortcomings | Tuning Recommendation |
+|-----------|-----------|--------------|-----------------------|
+| Logistic regression | Interpretable, fast, high-dimensional data | Linear relationship, not for complex tasks | Cross-validate regularization strength |
+| Naive Bayes | Interpretable, fast, high-dimensional data, multi-class | Assumes feature (naive) independence, poor with small data | None |
+| Decision trees | Nonlinear, interpretable, numerical/ categorical data | Overfitting, high variance | Cross-validate maximum tree depth |
+| Random forest | Nonlinear, numerical/ categorical data, less overfitting | Less interpretable, poor with high-dimensional data | Cross-validate number of trees |
+| Support vector machines | Nonlinear, high-dimensional data, numerical/ categorical | Requires parameter tuning, memory intensive | Cross-validate regularization parameter |
+| Neural networks | Nonlinear, large data, auto feature learning | Overfitting, difficult to interpret, expensive | Cross-validate learning rate |
 
-: Classification algorithms {#tbl-pda-class-algorithms .striped}
+: Common classification algorithms {#tbl-pda-class-algorithms tbl-colwidths="[15, 28, 28, 29]" .striped}
 
 <!-- Models: simple to complex  -->
 
 In the process of selecting an algorithm, simple, computationally efficient, and interpretable models are preferred over complex, computationally expensive, and uninterpretable models, all things being equal. Only if the performance of the simple model is not good enough should we move on to a more complex model.
 
-With this end mind, we will start with a simple logistic regression model to see how well we can classify the texts in the training set with the features we have engineered. We will use the `logistic_reg()` function from the `parsnip` package to specify the logistic regression model. We then select the implementation engine (`glm` General Linear Model) and the mode of the model (`classification`). The implementation engine is the software that will be used to fit the model. The mode is the type of model, either classification or regression. The code is seen in @exm-pda-class-model-spec.
 
-::: {#exm-pda-class-model-spec}
-```{r}
-#| label: pda-class-model-spec
-
-# Create a model specification
-cls_spec <-
-  logistic_reg() |>
-  set_engine("glm") |>
-  set_mode("classification")
-
-# Preview
-cls_spec
-```
-:::
-
-In the `parsnip` package, model specifications are separate from model fitting. This allows us to specify the model once and then fit the model with different datasets. Furthermore, different algorithms will have different hyperparameters that can be tuned. The code in @exm-pda-class-model-spec uses the default hyperparameters for the logistic regression model.
-
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 The `parsnip` package provides a consistent interface to many different models, `r nrow(parsnip::model_db)` at the time of writing. You can peruse the list of models by running `parsnip::model_db`.
@@ -639,11 +606,98 @@ The `parsnip` package provides a consistent interface to many different models, 
 You can also retrieve the list of potential engines for a given model specification with the `show_engines()` function. For example, `show_engines("logistic_reg")` will return a tibble with the engines available for the logistic regression model specification.
 :::
 
-Now we will combine our recipe and model specification into a workflow object. The workflow object will allow us to train and evaluate the model on the training set. We will use the `workflow()` function from the `workflows` package to combine the recipe and model specification into a workflow object. The code is seen in @exm-pda-class-workflow.
+With this end mind, we will start with a simple logistic regression model to see how well we can classify the texts in the training set with the features we have engineered. We will use the `logistic_reg()` function from the `parsnip` package to specify the logistic regression model. We then select the implementation engine (`glmnet` General Linear Model) and the mode of the model (`classification`). The implementation engine is the software that will be used to fit the model. The code to set up the model specification is seen in @exm-pda-class-model-spec.
+
+::: {#exm-pda-class-model-spec}
+```r
+# Create a model specification
+cls_spec <-
+  logistic_reg() |>
+  set_engine("glmnet")
+
+# Preview
+cls_spec
+```
+```{r}
+#| label: pda-class-model-spec
+#| include: false
+
+# Create a model specification
+cls_spec <-
+  logistic_reg() |>
+  set_engine("glmnet")
+
+# Preview
+cls_spec
+```
+```txt
+Logistic Regression Model Specification (classification)
+
+Computational engine: glmnet
+```
+:::
+
+Now, different algorithms will have different hyperparameters that can be tuned which can affect the performance of the model (see @tbl-pda-class-algorithms). The process of **hyperparameter tuning** involves fitting the model to the training set with different hyperparameters and evaluating the model's performance to determine the best hyperparameter values to use for the model.
+
+For example, the logistic regression model using `glmnet` can be tuned to prevent overfitting. The regularization typically applied is the LASSO (L1) penalty[^lasso]. The `logistic_reg()` function takes the arguments `penalty` and `mixture`. We set `mixture = 1`, but we now need to decide what value to use for the strength of the `penalty` argument. Values can range from 0 to 1, where 0 indicates no penalty and 1 indicates a maximum penalty.
+
+[^lasso]: The LASSO (least absolute shrinkage and selection operator) is a type of regularization that penalizes the absolute value of the coefficients. In essence, it smooths the coefficients by shrinking them towards zero to avoid coefficients picking up on particularities of the training data that will not generalize to new data.
+
+Instead of guessing, we will use the `tune` package to tune the hyperparameters of the model. The `tune()` functions serves as a placeholder for the hyperparameters we want to tune. We can add the `tune()` function to our model specification to specify the hyperparameters we want to tune. The code is seen in @exm-pda-class-model-spec-tune.
+
+::: {#exm-pda-class-model-spec-tune}
+```r
+# Create a model specification (with tune)
+cls_spec <-
+  logistic_reg(penalty = tune(), mixture = 1) |>
+  set_engine("glmnet")
+
+# Preview
+cls_spec
+```
+```{r}
+#| label: pda-class-model-spec-tune-lasso
+#| include: false
+
+# Create a model specification (with tune)
+cls_spec <-
+  logistic_reg(penalty = tune(), mixture = 1) |>
+  set_engine("glmnet")
+
+# Preview
+cls_spec
+```
+```txt
+Logistic Regression Model Specification (classification)
+
+Main Arguments:
+  penalty = tune()
+  mixture = 1
+
+Computational engine: glmnet
+```
+:::
+
+We can see now that the `cls_spec` model specification now includes the `tune()` function as the value for the `penalty` argument.
+
+<!-- Combine recipe and model specification -->
+
+To tune our model, we will need to combine our recipe and model specification into a workflow object. The workflow object will allow us to train and evaluate the model on the training set. We will use the `workflow()` function from the `workflows` package to combine the recipe and model specification into a workflow object. The code is seen in @exm-pda-class-workflow.
 
 ::: {#exm-pda-class-workflow}
+```r
+# Create a workflow
+cls_wf <-
+  workflow() |>
+  add_recipe(cls_rec) |>
+  add_model(cls_spec)
+
+# Preview
+cls_wf
+```
 ```{r}
 #| label: pda-class-workflow
+#| include: false
 
 # Create a workflow
 cls_wf <-
@@ -654,76 +708,30 @@ cls_wf <-
 # Preview
 cls_wf
 ```
-:::
+```txt
+══ Workflow ═══════════════════════════════════════
+Preprocessor: Recipe
+Model: logistic_reg()
 
-The worflow contains all the preprocessing and the model-specific parameters we've selected. A workflow object at this stage in the analysis is not trained. It is a blueprint for a model. We can use the `fit()` function to apply the workflow to the training data to train the model and update our workflow object with the trained model. The `fit()` function takes a workflow and a data frame and returns an updated workflow object which is trained. The code is seen in @exm-pda-class-workflow-fit.
+── Preprocessor ───────────────────────────────────
+3 Recipe Steps
 
-<!-- [ ] should I jump straight to 'fit()'? Maybe stress the importance of cross-validation from the get go? -->
+• step_tokenize()
+• step_tokenfilter()
+• step_tfidf()
 
-::: {#exm-pda-class-workflow-fit}
-```{r}
-#| label: pda-class-workflow-fit
+── Model ──────────────────────────────────────────
+Logistic Regression Model Specification (classification)
 
-# Fit the workflow
-cls_wf_fit <-
-  fit(
-    cls_wf,
-    data = cls_train
-    )
+Main Arguments:
+  penalty = tune()
+  mixture = 1
+
+Computational engine: glmnet
 ```
 :::
 
-The workflow object now contains the trained model. But things did not go off without a hitch. We receive two warning messages when fitting the workflow to the training data:
-
-```
-Warning messages:
-1: glm.fit: algorithm did not converge
-2: glm.fit: fitted probabilities numerically 0 or 1 occurred
-```
-
-Warning messages are a sign that something may be amiss with the features we have choosen, the model we have selected, or both! Warning messages can sometimes be cryptic and steeped in the jargon of the algorithm. When in doubt it is best to consult the documentation of the algorithm and/ or seek help from the R community.
-
-The first warning, the 'algorithm did not converge', means that given the data and the model, the algorithm could not estimate a stable solution. The reason or reasons for this can be varied, but it typically due to extreme outliers, collinearity, or a small sample size. Collinearity is when two or more features are highly correlated. Given we are using words as features, it is likely that there is collinearity in the data. We will need to address this.
-
-The second warning is 'fitted probabilities numerically 0 or 1 occurred'. This means that the model is overfitting the data, (i.e. there are one or more features that perfectly predict the outcome). This very well could be related to the first warning, as a small set of features may be perfectly predicting the outcome in a way that will likely not generalize to new data.
-
-The upshot is that this model specification and/ or the feature engineering needs to be changed. So we step back in the workflow and make changes that will cascade downstream.
-
-It turns out that a regularized logistic regression model often addresses the issues this model is experiencing. We will use the `glmnet` engine to fit a regularized logistic regression model. It is a more complex complex approach, but it can often mitigate the issues of collinearity and overfitting by penalizing features that are highly correlated and by shrinking the coefficients of features that are not useful for predicting the outcome.
-
-We will build a new model specification using the `logistic_reg()` function and the `glmnet` engine. This time we will use hyperparameters in our `logistic_reg()` call to specify the penality we want to use and the strength of the penality. The penalty we will use is the LASSO (L1)[^lasso]. We now need to decide what value to use for the strength of the penalty, 0 to 1, where 0 indicates no penalty and 1 indicates a maximum penalty. We either experiment with different values one by one or we can implement a range of values in tandem and then select the best value. We will use the latter approach.
-
-[^lasso]: The LASSO (least absolute shrinkage and selection operator) is a type of regularization that penalizes the absolute value of the coefficients. In essence, it smooths the coefficients by shrinking them towards zero to avoid coefficients picking up on particularities of the training data that will not generalize to new data.
-
-The `tune` package provides a number of functions for selecting, or 'tuning', hyperparameters. The first is the `tune()` function which we add as the argument of the hyperparameter we want to tune in the model specification, as seen in @exm-pda-class-model-spec-tune.
-
-::: {#exm-pda-class-model-spec-tune}
-```{r}
-#| label: pda-class-model-spec-tune
-
-# Create a model specification for tuning
-cls_spec_tune <-
-  logistic_reg(penalty = tune(), mixture = 1) |>
-  set_engine("glmnet") |>
-  set_mode("classification")
-
-# Create a workflow
-cls_wf_tune <-
-  workflow() |>
-  add_recipe(cls_rec) |>
-  add_model(cls_spec_tune)
-```
-:::
-
-We now have a workflow that includes the `tune()` function as a placeholder for a range of values for the penalty hyperparameter. We use the `grid_regular()` function from the `dials` package to specify a grid of values for the penalty hyperparameter. Let's choose a random set of 10 values, as seen in @exm-pda-class-model-spec-tune-grid-values.
-
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
-
-The hyperparameters `penalty` and `mixture` control which type(s) of regularization to apply and if there is a mixing of the types. In the model specification in @exm-pda-class-model-spec-tune, the `penalty` is set to be tuned and the `mixture` is set to 1, which means that only a lasso penalty will be applied.
-
-See the documentation for the `parsnip::logistic_reg()` function for more information.
-:::
+We now have a workflow `cls_wf` that includes the `tune()` function as a placeholder for a range of values for the penalty hyperparameter. We use the `grid_regular()` function from the `dials` package to specify a grid of values for the penalty hyperparameter. Let's choose a random set of 10 values, as seen in @exm-pda-class-model-spec-tune-grid-values.
 
 ::: {#exm-pda-class-model-spec-tune-grid-values}
 ```{r}
@@ -731,15 +739,13 @@ See the documentation for the `parsnip::logistic_reg()` function for more inform
 
 # Create a grid of values for the penalty hyperparameter
 cls_grid <-
-  grid_regular(
-    penalty(),
-    levels = 10
-    )
+  grid_regular(penalty(), levels = 10)
 
 # Preview
 cls_grid
 ```
 :::
+
 
 The 10 values chosen to be in the grid range from nearly zero to 1, where 0 indicates no penalty and 1 indicates a strong penalty.
 
@@ -755,16 +761,12 @@ Now, a resampling object is not something we've seen yet. Resampling is a strate
 set.seed(123)
 
 # Create a resampling object
-cls_vfold <-
-  vfold_cv(
-    cls_train,
-    v = 10
-    )
+cls_vfold <- vfold_cv(cls_train, v = 10)
 
 # Tune the model
 cls_tune <-
   tune_grid(
-    cls_wf_tune,
+    cls_wf,
     resamples = cls_vfold,
     grid = cls_grid
     )
@@ -781,6 +783,8 @@ The `cls_tune` object contains the results of the tuning for each fold. We can s
 #| label: fig-pda-class-model-spec-tune-grid-collect
 #| fig-cap: "Metrics for each fold of the tuning process."
 #| fig-width: 8
+#| fig-asp: 0.5
+#| layout-nrow: 2
 
 # Collect the results of the tuning
 cls_tune_metrics <-
@@ -791,7 +795,7 @@ cls_tune |> autoplot()
 ```
 :::
 
-The most common metrics for model performance in classification are accuracy and the area under the receiver operating characteristic curve (ROC-AUC). Accuracy is the proportion of correct predictions. The ROC-AUC is a measure of the trade-off between sensitivity and specificity. Sensitivity is the proportion of true positives that are correctly identified. Specificity is the proportion of true negatives that are correctly identified. The ROC-AUC is a measure of how well the model can distinguish between the two classes.
+The most common metrics for model performance in classification are accuracy and the area under the receiver operating characteristic curve (ROC-AUC). Accuracy is the proportion of correct predictions. The ROC-AUC is a measure of how well the model can distinguish between the two classes.
 
 In the plot of the metrics, we can see that the many of the penalty values performed similarly, with a drop off in performance at the higher values. Conveniently, the `show_best()` function from the `tune` package takes a `tune_grid` object and returns the best performing hyperparameter values. The code is seen in @exm-pda-class-model-spec-tune-grid-collect-best.
 
@@ -828,54 +832,43 @@ All of that to tune a hyperparameter! Now we can update the model specification 
 
 # Update model specification
 cls_wf_lasso <-
-  cls_wf_tune |>
+  cls_wf |>
   finalize_workflow(cls_best)
 
+# Preview
 cls_wf_lasso
 ```
-:::
+```txt
+══ Workflow ═══════════════════════════════════════
+Preprocessor: Recipe
+Model: logistic_reg()
 
-Our model specification and the worflow are updated with the parameters.
+── Preprocessor ───────────────────────────────────
 
-Let's now return to fitting the workflow to the training set as we did before for the vanilla logistic regression model. As a reminder we are still working in step 5 of our workflow, interrogating the data. We identified and addressed potential issues in the model specification, leaving the feature selection the same.
+• step_tokenize()
+• step_tokenfilter()
+• step_tfidf()
 
-We again fit the workflow to the training set, as seen in @exm-pda-class-tune-hyperparameters-fit.
+── Model ──────────────────────────────────────────
+Logistic Regression Model Specification (classification)
 
-::: {#exm-pda-class-tune-hyperparameters-fit}
-```{r}
-#| label: pda-class-tune-hyperparameters-fit
+Main Arguments:
+  penalty = 0.000464158883361278
+  mixture = 1
 
-# Fit the workflow
-cls_wf_lasso_fit <-
-  fit(
-    cls_wf_lasso,
-    data = cls_train
-    )
+Computational engine: glmnet
 ```
 :::
 
-No warnings, so that is a good sign! --Or at least a better sign than before.
+Our model specification and the worflow are updated with the tuned hyperparameter.
 
-Let's evaluate the performance of the model on the training data. The `predict()` function takes a trained model specification and a data frame and returns a data frame with the predicted outcome. We can join these predicted outcomes with the actual outcomes in the training data. The `metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate.
+As a reminder we are still working in step 5 of our workflow, interrogating the data. So far we have selected and engineered the features, split the data into training and testing sets, and selected a classification algorithm. We have also tuned the hyperparameters of the model and updated the model specification and workflow with the best performing hyperparameter value.
 
-::: {#exm-pda-class-tune-hyperparameters-evaluate}
-```{r}
-#| label: pda-class-tune-hyperparameters-evaluate
+The next step is to assess the performance of the model on the training set given the features we have engineered, the algorithm we have selected, and the hyperparameters we have tuned. Instead of evaluating the model on the training set directly, we will use cross-validation to gauge the variability of the model.
 
-# Evaluate workflow
-cls_lasso_fit_preds <-
-  bind_cols(
-    cls_train,
-    predict(cls_wf_lasso_fit, cls_train)
-  )
+The reason for this is that the model's performance on the training set is not a reliable indicator of the model's performance on new data --just imagine if you were to take a test on the same material over and over again, you would get better and better at the test, but that doesn't mean you've learned the material any better. Cross-validation is a technique that allows us to estimate the model's performance on new data by simulating the process of training and testing the model on different subsets of the training data.
 
-# Calculate accuracy
-cls_lasso_fit_preds |>
-  metrics(truth = outcome, estimate = .pred_class)
-```
-:::
-
-Again, no warnings, so we have a functioning model. It also has a high accuracy, but we know that this is not the most reliable metric for the robustness of the model on new data. Similar to what we did to tune the hyperparameters, we can use cross-validation to gauge the variability of the model. The `fit_resamples()` function takes a workflow and a resampling object and returns metrics for each fold. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv.
+Similar to what we did to tune the hyperparameters, we can use cross-validation to gauge the variability of the model. The `fit_resamples()` function takes a workflow and a resampling object and returns metrics for each fold. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-workflow-cv}
 ```{r}
@@ -886,6 +879,7 @@ cls_lasso_cv <-
   cls_wf_lasso |>
   fit_resamples(
     resamples = cls_vfold,
+    # save predictions for confusion matrix
     control = control_resamples(save_pred = TRUE)
   )
 ```
@@ -903,9 +897,15 @@ cls_lasso_cv |>
 ```
 :::
 
-The accuracy has dropped, but is still very high. From these metrics it appears we have a good candidate model. In many cases, however, there may be further room for improvement. A good next step to in these cases is to evaluate the model errors and see if there are any patterns that can be addressed before evaluating the model on the test set.
+From the metrics in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-collect it appears we have a decent candidate model, but there is room for potential improvement. A good next step is to evaluate the model errors and see if there are any patterns that can be addressed before considering what approach to take to improve the model.
 
-For classification tasks, a good place to start is to visualize the confusion matrix to assess false negatives and false positives. The `conf_mat_resampled()` function takes a `fit_resamples` object and returns a table (`tidy = FALSE`) with the confusion matrix for the aggregated folds. We can pass this to the `autoplot()` function to plot as in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-confusion.
+::: {.callout .halfsize}
+**{{< fa regular hand-point-up >}} Tip**
+
+To provide context in terms of what is a good model performance, it is useful to compare the model's performance to a null model. A null (or baseline) model is a simple model that is easy to implement and provides a benchmark for the model's performance. For classification tasks, a common null model is to predict the most frequent class. In modeling, this is the minimal benchmark we want to beat, if we are doing better than this, we are doing better than chance.
+:::
+
+For classification tasks, a good place to start is to visualize a confusion matrix. A confusion matrix is a cross-tabulation of the predicted and actual outcomes. The `conf_mat_resampled()` function takes a `fit_resamples` object (with predictions saved) and returns a table (`tidy = FALSE`) with the confusion matrix for the aggregated folds. We can pass this to the `autoplot()` function to plot as in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-confusion.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-confusion}
 ```{r}
@@ -920,69 +920,167 @@ cls_lasso_cv |>
 ```
 :::
 
-The top left to bottom right diagonal contains the true positives and true negatives. The top right to bottom left diagonal contains the false positives and false negatives. The convention is speak of one class being the positive class and the other class being the negative class. In our case, we will consider the positive class to be the 'learner' class and the negative class to be the 'natives' class.
+The top left to bottom right diagonal contains the true positives and true negatives, these are the correct predictions. The top right to bottom left diagonal contains the false positives and false negatives --our errors. The convention is speak of one class being the positive class and the other class being the negative class. In our case, we will consider the positive class to be the 'learner' class and the negative class to be the 'natives' class.
 
 We can see that there are more learners falsely predicted to be natives than the other way around. This may be due to the fact that there are simply more learners than natives in the data set or this could signal that there are some learners that are more similar to natives than other learners. Clearly this can't be the entire explanation as the model is not perfect, even some natives are classified falsely as learners! But may be an interesting avenue for further exploration. Maybe these are learners that are more advanced or have a particular style of writing that is more similar to natives.
 
-Another perspective often applied to evaluate a model is the Reciever Operating Characteristic (ROC) curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. To produce the ROC curve, we pass the resampled fit to the `collect_preditions()` function. We then pass this result to `roc_curve()` function. But we want the results grouped by each fold, so we use `group_by(id)`. Finally, we can pass this to the `autoplot()` function to plot as in @exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc.
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
 
-::: {#exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc}
+Another perspective often applied to evaluate a model is the Reciever Operating Characteristic (ROC) curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. This metric, and visualization, can be useful to gauge the model's ability to distinguish between the two classes. The `yardstick` package provides the `roc_curve()` function to calculate the ROC curve on a `fit_resamples` object.
+:::
+
+<!-- Model improvement: tune max tokens -->
+
+To improve supervised learning models, one should consider a number of possibilities:
+
+1. Change the algorithm
+2. Select different (or additional) features
+3. Engineer the features differently
+4. Tune the hyperparameters differently
+
+Of these options, adjusting the feature engineering features process is the option that diverges least from our current workflow `cls_wf_lasso`. Recall that in our recipe specification we set a token filter to limit the number of features to 100. We can adjust this number to see if it has an effect on the model's performance.
+
+To avoid help select the optimimal number of tokens, we again can use the tuning process we explored for the hyperparameters. This time, however, the `tune()` placeholder will be included as the argument to the `max_tokens` argument in the `step_tokenfilter()` function.
+
+I repeat the recipe with the tuning placeholder in @exm-pda-class-tune-hyperparameters-tokenfilter.
+
+::: {#exm-pda-class-tune-hyperparameters-tokenfilter}
 ```{r}
-#| label: fig-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc
-#| fig-cap: "ROC curve for the aggregated folds of the cross-validation."
-#| fig-height: 4
+#| label: pda-class-tune-hyperparameters-tokenfilter
 
-# Plot ROC curve
-cls_lasso_cv |>
-  collect_predictions() |>
-  group_by(id) |>
-  roc_curve(truth = outcome, .pred_Learner) |>
-  autoplot() +
-  labs(
-    y = "True positive rate",
-    x = "False positive rate",
-    color = "Fold"
-  )
+# Create a recipe with a token filter step
+cls_rec <-
+  recipe(
+    formula = outcome ~ text,
+    data = cls_train
+    ) |>
+  step_tokenize(text) |>
+  step_tokenfilter(text, max_tokens = tune()) |>
+  step_tfidf(text)
 ```
 :::
 
-In a ROC curve plot, each line represents a model's performance for varying classification probability thresholds (from near 0 to 1, where 0.5 equal chance). The dotted line represents the null model (*i.e.* random guessing). The further the line is from the dotted line, along the top left to bottom right diagonal, the better the model. Thus, the larger the area under the curve (AUC) implies a more robust model for distinguishing between the two classes.
+With the updated recipe, we can update the `cls_wf_lasso` and tune the `max_tokens` hyperparameter. The code is seen in @exm-pda-class-tune-hyperparameters-update-rec.
 
-In @fig-pda-class-tune-hyperparameters-evaluate-workflow-cv-roc, each fold is plotted. We can see that the AUC is quite large for most of the folds which suggests that our model is robust.
+::: {#exm-pda-class-tune-hyperparameters-update-rec}
+```{r}
+#| label: pda-class-tune-hyperparameters-update-rec
+
+# Update workflow with token filter tuning
+cls_wf_lasso <-
+  cls_wf_lasso |>
+  update_recipe(cls_rec)
+```
+:::
+
+One thing to note is that we will want to consider what values of `max_tokens` we want to use to tune the hyperparameter. So instead of only specifying the levels in the `grid_regular()` function, we are best off to provide a range of values that we think are reasonable. Let's add a range of values between our current value 100 and 2000 to start. And let's tell the grid to select 5 values from this range.
+
+The code is seen in @exm-pda-class-tune-hyperparameters-tokenfilter-grid.
+
+::: {#exm-pda-class-tune-hyperparameters-tokenfilter-grid}
+```{r}
+#| label: pda-class-tune-hyperparameters-tokenfilter-grid
+
+# Create a grid of values for the max tokens hyperparameter
+cls_grid <-
+  grid_regular(max_tokens(range = c(100, 2000)), levels = 5)
+
+# Preview
+cls_grid
+```
+:::
+
+From here, the process is the same as before. We will use the `tune_grid()` function to tune the `max_tokens` hyperparameter, select the best value, and finalize the workflow, as seen from @exm-pda-class-model-spec-tune-grid-cv through @exm-pda-class-tune-hyperparameters-update-workflow.
+
+```{r}
+#| label: pda-class-tune-hyperparameters-tokenfilter-tune
+#| include: false
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Tune the model
+cls_tune <-
+  tune_grid(
+    cls_wf_lasso,
+    resamples = cls_vfold,
+    grid = cls_grid
+    )
+
+# Select the best performing hyperparameter value
+cls_best <-
+  select_best(cls_tune, metric = "roc_auc")
+
+# Update model specification
+cls_wf_lasso_tokens <-
+  cls_wf_lasso |>
+  finalize_workflow(cls_best)
+```
+:::
+
+After tuning the `max_tokens` hyperparameter, the best performing value is 1050. We now used the updated `cls_wf_lasso_tokens` workflow to cross-validate the model and collect the metrics. The code is seen in @exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect.
+
+::: {#exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect}
+```{r}
+#| label: pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect
+
+# Cross-validate workflow
+cls_lasso_tokens_cv <-
+  cls_wf_lasso_tokens |>
+  fit_resamples(
+    resamples = cls_vfold,
+    # save predictions for confusion matrix
+    control = control_resamples(save_pred = TRUE)
+  )
+
+# Collect metrics
+cls_lasso_tokens_cv |>
+  collect_metrics()
+```
+:::
+
+The metrics from @exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect show that the model's performance has improved for both the accuracy and the ROC-AUC. The confusion matrix from @exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion shows that the number of false positives and false negatives has decreased. This is a good sign that the model is more robust.
+
+::: {#exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion}
+```{r}
+#| label: fig-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion
+#| fig-cap: "Confusion matrix for the aggregated folds of the cross-validation."
+
+# Plot confusion matrix
+cls_lasso_tokens_cv |>
+  conf_mat_resampled(tidy = FALSE) |>
+  autoplot(type = "heatmap")
+```
+:::
+
+It appears that the model is more robust with the updated `max_tokens` hyperparameter. We could continue to explore other model improvement strategies, but for now we will move on to the next step in our workflow.
 
 <!-- Step 6: Evaluate -->
 
-We are now ready to move on to step 7, evaluating the model on the test set. We will use the `predict()` function to predict the outcome on the test set. The `metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
+We are now ready to move on to step 7, evaluating the model on the test set. To do this we need to fit the tuned workflow to the training set, which is the actual training phase. We will use the `last_fit()` function from the `workflows` package to fit the workflow to the training set. The `last_fit()` function takes a workflow and a split object and returns a `last_fit` object. The `last_fit` object contains the results of the model fit on the training set and the results of the model evaluation on the test set. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
+
+We will use the `predict()` function to predict the outcome on the test set. The `metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-test}
 ```{r}
 #| label: pda-class-tune-hyperparameters-evaluate-test
 
-# [ ] update to use `last_fit()`?
-
+# Fit the model to the training set and
+# evaluate on the test set
 cls_final_fit <-
   last_fit(
-    cls_wf_lasso,
+    cls_wf_lasso_tokens,
     split = cls_split
   )
 
+# Evaluate model on testing set
 cls_final_fit |>
   collect_metrics()
-
-# Evaluate model on test set
-cls_lasso_fit_preds_test <-
-  bind_cols(
-    cls_test,
-    predict(cls_wf_lasso_fit, cls_test)
-  )
-
-# Calculate accuracy
-cls_lasso_fit_preds_test |>
-  metrics(truth = outcome, estimate = .pred_class)
 ```
 :::
 
-The accuracy is as good as the training set, even a tad higher. This is a good sign that the model is robust as it performs well on both training and test sets. We can evaluate the confusion matrix on the test set as well. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test-confusion.
+The performance metrics are very close to those we achieved on the training set in @exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect. This is a good sign that the model is robust as it performs well on both training and test sets. We can evaluate the confusion matrix on the test set as well. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test-confusion.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-test-confusion}
 ```{r}
@@ -991,10 +1089,6 @@ The accuracy is as good as the training set, even a tad higher. This is a good s
 #| fig-height: 4
 
 # Plot confusion matrix
-cls_lasso_fit_preds_test |>
-  conf_mat(truth = outcome, estimate = .pred_class) |>
-  autoplot(type = "heatmap")
-
 cls_final_fit |>
   collect_predictions() |>
   conf_mat(truth = outcome, estimate = .pred_class) |>
@@ -1002,9 +1096,30 @@ cls_final_fit |>
 ```
 :::
 
-On the test set the false instances look similar to the distribution on the training set, with the exception that learners are more likely to be falsely predicted to be natives than the other way around.
+On the test set the false instances are balanced, which is a good sign that the model is robust. Ideally, there would be no errors, but this is not realistic. The model is not perfect, but it is useful.
 
-We can inspect the errors on the test set by filtering the data frame to only include the false instances. I will then select the columns with the actual outcome, the predicted outcome, the proficiency level, and the text and separate the predicted outcome to inspect them separately, as seen in @exm-pda-class-tune-hyperparameters-evaluate-test-errors.
+Now a model that can predict the proficiency level of a writer based on their writing sample is useful, as a task. You could imagine that this could be a preprocessing step for a language learning application, for example. The model could be used to filter out writing samples that are not at the right proficiency level for the user. This is a simple example, but the model could be used in many different ways.
+
+But for a study that is more interested in learning about what features are most important for predicting the proficiency level of a writer, we still have some work to do. We can inspect the errors on the test set to gain some insight into what what writing samples, and the proficiency levels of the writers, are most difficult to predict. We can also inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes.
+
+Let's first approach this from a document-proficiency point of view. First, we will want to integrate the predictions with the test set to inspect the errors. We can use the `collect_predictions()` function to collect the predictions from the `last_fit` object and attach them with the test set `cls_test` with `bind_cols`. Note, we can drop the `outcome` variable from `cls_test` as we have this column in our fitted model. The code is seen in @exm-pda-class-tune-hyperparameters-integrate-test.
+
+::: {#exm-pda-class-tune-hyperparameters-integrate-test}
+```{r}
+#| label: pda-class-tune-hyperparameters-integrate-test
+
+# Collect predictions
+cls_lasso_fit_preds_test <-
+  cls_final_fit |>
+  collect_predictions() |>
+  bind_cols(cls_test[, -1])
+
+# Preview
+glimpse(cls_lasso_fit_preds_test)
+```
+:::
+
+I will then select the columns with the actual outcome, the predicted outcome, the proficiency level, and the text and separate the predicted outcome to inspect them separately, as seen in @exm-pda-class-tune-hyperparameters-evaluate-test-errors.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-test-errors}
 ```{r}
@@ -1023,18 +1138,19 @@ cls_lasso_fit_preds_test |>
 ```
 :::
 
-- Majority of misclassified learners are advanced, which could be expected as they are more similar to natives. There are some beginners that are misclassified as natives, which is interesting, and not expected. But all models are wrong, but some are useful --George Box.
+- Majority of misclassified learners are advanced, which could be expected as they are more similar to natives. There are some beginners that are misclassified as natives, but this is not as common.
 
 - Still an open question as to why some natives are classified as learners.
 
-We can inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes. The `extract_fit_parsnip()` function takes a trained model specification and returns a data frame with the estimated coefficients for each feature. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test-estimates.
+We can inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes. The `extract_fit_parsnip()` function takes a trained model specification `cls_final_fit` and returns a data frame with the estimated coefficients for each feature. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test-estimates.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-test-estimates}
 ```{r}
 #| label: pda-class-tune-hyperparameters-evaluate-test-estimates
 
 # Extract estimates
-cls_wf_lasso_fit |>
+cls_final_fit_features <-
+  cls_final_fit |>
   extract_fit_parsnip() |>
   tidy()
 ```
@@ -1050,14 +1166,12 @@ The estimates are in log-odds, so we need to exponentiate them to get the odds. 
 #| label: pda-class-tune-hyperparameters-evaluate-test-estimates-probability
 
 # Calculate probability
-cls_wf_lasso_fit |>
-  extract_fit_parsnip() |>
-  tidy() |>
+cls_final_fit_features |>
   mutate(probability = exp(estimate) / (exp(estimate) + 1))
 ```
 :::
 
-So just looking at the snippet of the features returned from @exm-pda-class-tune-hyperparameters-evaluate-test-estimates-probability, we can see that the features 'a' and 'abandonado' are slightly associated with the "Native" outcome nd the other features are neutral (`probability` = 0.5).
+So just looking at the snippet of the features returned from @exm-pda-class-tune-hyperparameters-evaluate-test-estimates-probability, we can see that the features 'a' and 'abandonado' are associated with the "Native" outcome, 'abuela' is associated with "Learners", and the other features are neutral (`probability` = 0.5).
 
 A quick way to extract the most important features for predicting the each outcome is to use the `vi()` function from the `vip` package. It takes a trained model specification and returns a data frame with the most important features. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test-vip.
 
@@ -1068,11 +1182,13 @@ A quick way to extract the most important features for predicting the each outco
 # Load package
 library(vip)
 
+# Avoid conflicts for function names from other packages
 conflicted::conflicts_prefer(vip::vi)
 
 # Extract important features
 var_importance_tbl <-
-  cls_wf_lasso_fit |>
+  cls_final_fit |>
+  extract_fit_parsnip() |>
   vi()
 
 # Preview
@@ -1080,22 +1196,21 @@ var_importance_tbl
 ```
 :::
 
-The `Variable` column contains each feature (with the feature type and corresponding variable `tf_text_`), `Importance` provides the absolute log-odds value, and the `Sign` column indicates whether the feature is associated with the "NEG" ("Learner") or the "POS" ("Native") outcome. We can recode the `Variable` and `Sign` columns to make them more interpretable and exponentiate the log-odds to get probabilites and then plot them using `ggplot()`, as in @exm-pda-class-tune-hyperparameters-evaluate-test-vip-plot.
+The `Variable` column contains each feature (with the feature type and corresponding variable `tfidf_text_`), `Importance` provides the absolute log-odds value, and the `Sign` column indicates whether the feature is associated with the "NEG" ("Learner") or the "POS" ("Native") outcome. We can recode the `Variable` and `Sign` columns to make them more interpretable and then plot them using `ggplot()`, as in @exm-pda-class-tune-hyperparameters-evaluate-test-vip-plot.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-test-vip-plot}
 ```{r}
 #| label: fig-pda-class-tune-hyperparameters-evaluate-test-vip-plot
 #| fig-cap: "Most important features for predicting the outcome."
-#| fig-height: 4
 #| fig-width: 8
+#| fig-asp: 0.5
 
 # Recode variable and sign
 var_importance_tbl <-
   var_importance_tbl |>
   mutate(
-    Feature = str_remove(Variable, "tf_text_"),
+    Feature = str_remove(Variable, "tfidf_text_"),
     Outcome = case_when(Sign == "NEG" ~ "Learner", Sign == "POS" ~ "Native"),
-    Importance = exp(Importance) / (exp(Importance) + 1)
     ) |>
   select(Outcome, Feature, Importance)
 
@@ -1113,13 +1228,7 @@ var_importance_tbl |>
 
 We can inspect @fig-pda-class-tune-hyperparameters-evaluate-test-vip-plot, and qualitatively assess what these features may be telling us about the differences between the learners and the natives.
 
-<!--
-In a supervised text classification task, you can use parallel coordinate plots to visualize the distribution of class labels across different feature dimensions. This can help identify which features are most informative for distinguishing between classes and inform feature selection or dimensionality reduction techniques.
--->
-
-In this section we've build a text classifier using a regularized logistic regression model. We've tuned the hyperparameters to arrive at a robust model that performs well on both the training and test sets. We've also evaluated the model errors and inspected the most important features for predicting the outcome.
-
-The `tidymodels` package provides a framework for building and evaluating supervised machine learning models that is modular in nature. This means, that we can quickly and easily change the model specification, the features, feature engineering, and the hyperparameters to arrive at a robust model. If the model is not robust, we can change models in the model specification. If the features are not robust, we can change the recipe. If the model is overfitting, we can tune the hyperparameters.
+In this section, we've build a text classifier using a regularized logistic regression model. We've tuned the hyperparameters to arrive at a robust model that performs well on both the training and test sets. We've also evaluated the model errors and inspected the most important features for predicting the outcome.
 
 ### Text regression {#sec-pda-text-regression}
 
@@ -1130,21 +1239,19 @@ We will now turn our attention to the second task in this section, text regressi
 #| label: pda-reg-data
 
 # Extract observations and relevant variables
-reg <-
-  df |>
+reg_tbl <-
+  cedel_tbl |>
   filter(proficiency != "Native") |>
   select(outcome = placement_score, proficiency, text)
 
 # Preview
-reg |> glimpse()
+reg_tbl |> glimpse()
 ```
 :::
 
 <!-- Step 1: Identify variables -->
 
-In this task, our outcome variable is numeric so we do not need, or want, to convert it to a factor. Our predictor variable `text` is the same as before. We have already weighed the options for feature engineering and decided to use the term frequency method (raw counts) for the top 1,000. Since we are setting up the same recipe as before, essentially, we can use the same code as before.
-
-<!-- [ ] different features? bigrams? tf-idf weighting? -->
+In this task, our outcome variable is numeric so we do not need, or want, to convert it to a factor. Our predictor variable `text` is the same as before. We have already weighed the options for feature engineering and decided to use the term frequency - inverse document frequency method ($tf$-$idf$) for the top 1,050 words. Since we are setting up the same recipe as before, essentially, we can use the same code as before.
 
 <!-- Step 2: Initial split -->
 
@@ -1159,7 +1266,7 @@ set.seed(123)
 
 # Split data
 reg_split <-
-  initial_split(reg, prop = 0.8)
+  initial_split(reg_tbl, prop = 0.8)
 
 # Training set
 reg_train <-
@@ -1185,9 +1292,8 @@ Now we can create the recipe to set up the variable relations, select the featur
 reg_rec <-
   recipe(outcome ~ text, data = reg_train) |>
   step_tokenize(text) |>
-  step_tokenfilter(text, max_tokens = 1000) |>
-  step_tf(text) |>
-  step_log(all_predictors(), offset = 1)
+  step_tokenfilter(text, max_tokens = 1050) |>
+  step_tfidf(text)
 
 # Preview
 reg_rec
@@ -1202,6 +1308,8 @@ At this point we would inspect our recipe to make sure that it looks as expected
 
 We can now proceed to interrogate the data. As before we will want to start with a simple model and then build up to more complex models. Let's consider some common algorithms for regression tasks in @tbl-pda-reg-algorithms.
 
+<!-- update with Tuning recommendation, much overlap --just refer to previous table? -->
+
 | Algorithm | Strengths | Shortcomings |
 |-----------|-----------|--------------|
 | Linear regression | Simple, interpretable, fast | Assumes linear relationship between features and outcome |
@@ -1211,23 +1319,7 @@ We can now proceed to interrogate the data. As before we will want to start with
 
 : Regression algorithms {#tbl-pda-reg-algorithms .striped}
 
-<!--
-[ ] Model descriptions:
-
-Linear regression can be used to predict a numeric outcome variable from a set of features. It is a parametric method, which means that it makes assumptions about the underlying distribution of the data. It is an iterative method, which means that it uses an iterative algorithm to find the optimal parameters. To avoid overfitting it uses regularization such as ridge regression or lasso regression. These regularization methods penalize the model for having too many parameters. However, how does one know what the optimal number of parameters is? This is where cross-validation comes in.
-
-Decision trees for text classification are a supervised machine learning method for classification. They are a non-parametric method, which means that they do not make any assumptions about the underlying distribution of the data. They are a greedy method, which means that they use a greedy algorithm to find the optimal split of the predictor variables. They are a simple method, which means that they are easy to understand and implement.
-
-In practical terms using decision trees for text classification can be very useful as they are easy to interpret. For example, we can see which words are most important for the classification of a text. However, they are prone to overfitting the training data.
-
-To avoid this we can use a technique called **bagging**. Bagging is a resampling technique that builds and combines multiple decision trees to make a prediction.
-
-A **random forest** uses bagged decision trees, with the addition that each decision tree is trained on a random sample of the features. This helps to reduce the correlation between the decision trees and thus reduces the variance of the model.
-
-
-Neural networks are a supervised machine learning method for regression and classification. They are a non-parametric method, which means that they do not make any assumptions about the underlying distribution of the data. They are an iterative method, which means that they use an iterative algorithm to find the optimal parameters. They are a complex method, which means that they are difficult to understand and implement. However, they are very powerful and can be used to solve a wide range of problems. However, they are expensive to train and require a lot of data. It is often the case that a simpler method will perform just as well as a neural network in certain contexts.
-
-See https://smltar.com/mlregression.html for more info on evaluation (and other aspects) of supervised machine learning regression models.  -->
+<!-- [ ] Let's jump the linear regression -->
 
 Let's start with a with a linear regression model in mind for our model specification. But let's also consider what we learned in our first attempt to build a logistic regression model using word frequencies. We learned that the model was overfitting the training data and we needed to use a regularized model to reduce the variance of the model. So let's start with a regularized linear regression model.
 
@@ -1379,6 +1471,10 @@ We have a model that is performing better than the null model, but it is not per
 
 Let's try a decision tree model. **Decision trees** are non-linear models that are able to model non-linear relationships and interactions between the features and the outcome and tend to be less influenced by outliers. These are all desirable characteristics. Decision trees, however, can be prone to overfitting
 
+
+----
+
+
 Along the spectrum of model complexity, decision trees are more complex than linear regression models, but less complex than other models such as neural networks. Furthermore, decision trees are interpretable, which is a nice feature for an exploratory-oriented analysis.
 
 To implement a new model in `tidymodels`, we need to create a new model specification and a new workflow. We will use the `decision_tree()` function from the `parsnip` package to create the model specification. The `decision_tree()` function takes no arguments and returns a `decision_tree` object. We create the new model specification in @exm-pda-reg-model-spec-decision-tree.
@@ -1517,7 +1613,7 @@ estimates <-
 
 The random forest model performs better than the decision tree model and the regularized linear regression model. The RSME is `r format(estimates[1])` and the $R^2$ is `r format(estimates[2])`. We also see that the standard error is the lowest of the models we have tried so far. This means that the random forest model is less prone to overfitting the training data.
 
-Before we settle on this model, let's try one more model, a support vector machine (SVM). A **support vector machine** is a supervised machine learning model that can be used for both classification and regression. It is a non-parametric method, which means that it does not make any assumptions about the underlying distribution of the data. It is also a method which can be better suited for high-dimensional data where many values are zero, that is, sparse data, which is often the case with text data.
+Before we settle on this model, let's try one more model, a support vector machine (SVM). A **support vector machine** is a supervised machine learning model that can be used for both classification and regression. It is a non-parametric method, which means that it does not make any assumptions about the underlying distribution of the data. It is also a method which can be better suited for high-dimensionalensional data where many values are zero, that is, sparse data, which is often the case with text data.
 
 Let's again specify the model. We will use the `svm_linear()` function from the `parsnip` package to create the model specification and we will use the `LiblineaR` computational engine. We create the new model specification in @exm-pda-reg-model-spec-svm.
 
@@ -1911,4 +2007,3 @@ reg_final_rf_fit |>
 ## Summary {.unnumbered}
 
 In this chapter we have learned about supervised machine learning. We have learned about the different types of supervised machine learning methods and how they can be used to predict and classify. We have also learned about the different types of data structures that are used in supervised machine learning. Finally, we have learned about the different types of evaluation metrics that are used to evaluate the performance of supervised machine learning models.
-

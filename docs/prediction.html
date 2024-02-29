@@ -725,8 +725,7 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
-<p>For text processing steps for Japanese, see the <code>washoku</code> package <span class="citation" data-cites="R-washoku">(<a href="references.html#ref-R-washoku" role="doc-biblioref">Uryu 2024</a>)</span>.</p>
+<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong> For other tokenization strategies and feature engineering methods, see the <code>textrecipes</code> package documentation <span class="citation" data-cites="R-textrecipes">(<a href="references.html#ref-R-textrecipes" role="doc-biblioref">Hvitfeldt 2023</a>)</span>. There are, however, pacakges which provide integration with <code>textrecipes</code> for other languages, for example, the <code>washoku</code> package for Japanese text processing <span class="citation" data-cites="R-washoku">(<a href="references.html#ref-R-washoku" role="doc-biblioref">Uryu 2024</a>)</span>.</p>
 </div>
 </div>
 </div>
@@ -761,7 +760,7 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add step to tokenize the text</span></span>
 <span><span class="va">cls_rec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cls_rec</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span>, smooth_idf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Preview</span></span>
 <span><span class="va">cls_rec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -777,6 +776,17 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 </div>
 <!-- Step 4: Inspect:  -->
 <p>To make sure things are in order and that the recipe performs as expected, we can use the functions <code><a href="https://recipes.tidymodels.org/reference/prep.html">prep()</a></code> and <code><a href="https://recipes.tidymodels.org/reference/bake.html">bake()</a></code> to inspect the recipe. The <code><a href="https://recipes.tidymodels.org/reference/prep.html">prep()</a></code> function takes a recipe object and a data frame and returns a <code>prep</code> object. The <code>prep</code> object contains the recipe and the data frame with the feature variables engineered according to the recipe. The <code><a href="https://recipes.tidymodels.org/reference/bake.html">bake()</a></code> function takes a <code>prep</code> object and an optional new dataset to apply the recipe to. If we only want to see the application to the training set, we can use the <code>new_data = NULL</code> argument.</p>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
+<p>The <code><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf()</a></code> function by default add a <em>smoothing term</em> to the inverse document frequency (IDF) calculation. This setting has the effect of reducing the influence of the IDF calculation. Thus, terms that appear in many (or all) documents will not be downweighted as much as they would be if the smoothing term was not added. For our purposes, we want to downweight or eliminate the influence of the most frequent terms, so we will set <code>smooth_idf = FALSE</code>.</p>
+</div>
+</div>
+</div>
 <p>In <a href="#exm-pda-class-recipe-prep" class="quarto-xref">Example&nbsp;<span>9.9</span></a>, we use the <code><a href="https://recipes.tidymodels.org/reference/prep.html">prep()</a></code> and <code><a href="https://recipes.tidymodels.org/reference/bake.html">bake()</a></code> functions to create a data frame with the feature variables. We can then inspect the data frame to see if the recipe performed as expected.</p>
 <div id="exm-pda-class-recipe-prep" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.9</strong></span> &nbsp;</p>
@@ -803,7 +813,7 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
 <p>When applying tokenization and feature engineering steps to text data the result is often contained in a matrix object. Using the <code>recipes</code> package a data frame with a matrix-like structure is returned.</p>
-<p>Furthermore, the features are prefixed with the variable name and transformation step labels. In <a href="#exm-pda-class-recipe-prep" class="quarto-xref">Example&nbsp;<span>9.9</span></a> we applied term frequency - inverse document frequency to the <code>text</code> variable. Therefore we see that our features are prefixed with <code>tfidf_text_</code>.</p>
+<p>Furthermore, the features are prefixed with the variable name and transformation step labels. In <a href="#exm-pda-class-recipe-prep" class="quarto-xref">Example&nbsp;<span>9.9</span></a> we applied term frequency - inverse document frequency to the <code>text</code> variable. Therefore the features are prefixed with <code>tfidf_text_</code>.</p>
 </div>
 </div>
 </div>
@@ -818,7 +828,7 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <span>  <span class="va">base_rec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenize.html">step_tokenize</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenfilter.html">step_tokenfilter</a></span><span class="op">(</span><span class="va">text</span>, max_tokens <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span>, smooth_idf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Prep and bake</span></span>
 <span><span class="va">cls_bake</span> <span class="op">&lt;-</span></span>
@@ -836,11 +846,11 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <pre><code>&gt; # A tibble: 5 × 5
 &gt;   outcome tfidf_text_a tfidf_text_ahora tfidf_text_al tfidf_text_amigos
 &gt;   &lt;fct&gt;          &lt;dbl&gt;            &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;
-&gt; 1 Learner       0                     0             0                 0
-&gt; 2 Learner       0.0248                0             0                 0
-&gt; 3 Learner       0.0382                0             0                 0
-&gt; 4 Learner       0                     0             0                 0
-&gt; 5 Learner       0.0687                0             0                 0</code></pre>
+&gt; 1 Learner      0                      0             0                 0
+&gt; 2 Learner      0.00399                0             0                 0
+&gt; 3 Learner      0.00615                0             0                 0
+&gt; 4 Learner      0                      0             0                 0
+&gt; 5 Learner      0.0111                 0             0                 0</code></pre>
 </div>
 </div>
 </div>
@@ -936,6 +946,7 @@ Table&nbsp;9.3: Common classification algorithms
 <p>With this end mind, we will start with a simple logistic regression model to see how well we can classify the texts in the training set with the features we have engineered. We will use the <code>logistic_reg()</code> function from the <code>parsnip</code> package to specify the logistic regression model. We then select the implementation engine (<code>glmnet</code> General Linear Model) and the mode of the model (<code>classification</code>). The implementation engine is the software that will be used to fit the model. The code to set up the model specification is seen in <a href="#exm-pda-class-model-spec" class="quarto-xref">Example&nbsp;<span>9.11</span></a>.</p>
 <div id="exm-pda-class-model-spec" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.11</strong></span> &nbsp;</p>
+<div class="cell">
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a model specification</span></span>
 <span><span class="va">cls_spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">logistic_reg</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -943,6 +954,7 @@ Table&nbsp;9.3: Common classification algorithms
 <span></span>
 <span><span class="co"># Preview</span></span>
 <span><span class="va">cls_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="sourceCode" id="cb23"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>Logistic Regression Model Specification (classification)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>Computational engine: glmnet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -952,6 +964,7 @@ Table&nbsp;9.3: Common classification algorithms
 <p>Instead of guessing, we will use the <code>tune</code> package to tune the hyperparameters of the model. The <code>tune()</code> functions serves as a placeholder for the hyperparameters we want to tune. We can add the <code>tune()</code> function to our model specification to specify the hyperparameters we want to tune. The code is seen in <a href="#exm-pda-class-model-spec-tune" class="quarto-xref">Example&nbsp;<span>9.12</span></a>.</p>
 <div id="exm-pda-class-model-spec-tune" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.12</strong></span> &nbsp;</p>
+<div class="cell">
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a model specification (with tune)</span></span>
 <span><span class="va">cls_spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">logistic_reg</span><span class="op">(</span>penalty <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, mixture <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -959,6 +972,7 @@ Table&nbsp;9.3: Common classification algorithms
 <span></span>
 <span><span class="co"># Preview</span></span>
 <span><span class="va">cls_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="sourceCode" id="cb25"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Logistic Regression Model Specification (classification)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
@@ -972,6 +986,7 @@ Table&nbsp;9.3: Common classification algorithms
 <p>To tune our model, we will need to combine our recipe and model specification into a workflow object. The workflow object will allow us to train and evaluate the model on the training set. We will use the <code>workflow()</code> function from the <code>workflows</code> package to combine the recipe and model specification into a workflow object. The code is seen in <a href="#exm-pda-class-workflow" class="quarto-xref">Example&nbsp;<span>9.13</span></a>.</p>
 <div id="exm-pda-class-workflow" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.13</strong></span> &nbsp;</p>
+<div class="cell">
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a workflow</span></span>
 <span><span class="va">cls_wf</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">workflow</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -980,6 +995,7 @@ Table&nbsp;9.3: Common classification algorithms
 <span></span>
 <span><span class="co"># Preview</span></span>
 <span><span class="va">cls_wf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="sourceCode" id="cb27"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>══ Workflow ═══════════════════════════════════════</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>Preprocessor: Recipe</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>Model: logistic_reg()</span>
@@ -1141,46 +1157,25 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process.
 <span></span>
 <span><span class="co"># Preview</span></span>
 <span><span class="va">cls_wf_lasso</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; ══ Workflow ════════════════════════════════════════════════════════════════════
-&gt; Preprocessor: Recipe
-&gt; Model: logistic_reg()
-&gt; 
-&gt; ── Preprocessor ────────────────────────────────────────────────────────────────
-&gt; 3 Recipe Steps
-&gt; 
-&gt; • step_tokenize()
-&gt; • step_tokenfilter()
-&gt; • step_tfidf()
-&gt; 
-&gt; ── Model ───────────────────────────────────────────────────────────────────────
-&gt; Logistic Regression Model Specification (classification)
-&gt; 
-&gt; Main Arguments:
-&gt;   penalty = 0.000464158883361278
-&gt;   mixture = 1
-&gt; 
-&gt; Computational engine: glmnet</code></pre>
 </div>
-</div>
-<div class="sourceCode" id="cb39"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>══ Workflow ═══════════════════════════════════════</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>Preprocessor: Recipe</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>Model: logistic_reg()</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>── Preprocessor ───────────────────────────────────</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>• step_tokenize()</span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>• step_tokenfilter()</span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>• step_tfidf()</span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>── Model ──────────────────────────────────────────</span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>Logistic Regression Model Specification (classification)</span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  penalty = 0.000464158883361278</span>
-<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  mixture = 1</span>
-<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>Computational engine: glmnet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>══ Workflow ═══════════════════════════════════════</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>Preprocessor: Recipe</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>Model: logistic_reg()</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>── Preprocessor ───────────────────────────────────</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>• step_tokenize()</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>• step_tokenfilter()</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>• step_tfidf()</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>── Model ──────────────────────────────────────────</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>Logistic Regression Model Specification (classification)</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>  penalty = 0.000464158883361278</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  mixture = 1</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>Computational engine: glmnet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Our model specification and the worflow are updated with the tuned hyperparameter.</p>
 <p>As a reminder we are still working in step 5 of our workflow, interrogating the data. So far we have selected and engineered the features, split the data into training and testing sets, and selected a classification algorithm. We have also tuned the hyperparameters of the model and updated the model specification and workflow with the best performing hyperparameter value.</p>
@@ -1190,7 +1185,7 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-workflow-cv" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.20</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Cross-validate workflow</span></span>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Cross-validate workflow</span></span>
 <span><span class="va">cls_lasso_cv</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cls_wf_lasso</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
@@ -1204,9 +1199,8 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-collect" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.21</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
-<span><span class="va">cls_lasso_cv</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<span><span class="va">cls_lasso_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 2 × 6
 &gt;   .metric  .estimator  mean     n std_err .config             
@@ -1232,7 +1226,7 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.22</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
 <span><span class="va">cls_lasso_cv</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">conf_mat_resampled</span><span class="op">(</span>tidy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">autoplot</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1275,7 +1269,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <div id="exm-pda-class-tune-hyperparameters-tokenfilter" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.23</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a recipe with a token filter step</span></span>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a recipe with a token filter step</span></span>
 <span><span class="va">cls_rec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span></span>
 <span>    formula <span class="op">=</span> <span class="va">outcome</span> <span class="op">~</span> <span class="va">text</span>,</span>
@@ -1290,7 +1284,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <div id="exm-pda-class-tune-hyperparameters-update-rec" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.24</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Update workflow with token filter tuning</span></span>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Update workflow with token filter tuning</span></span>
 <span><span class="va">cls_wf_lasso</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cls_wf_lasso</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">update_recipe</span><span class="op">(</span><span class="va">cls_rec</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1301,7 +1295,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <div id="exm-pda-class-tune-hyperparameters-tokenfilter-grid" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.25</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a grid of values for the max tokens hyperparameter</span></span>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a grid of values for the max tokens hyperparameter</span></span>
 <span><span class="va">cls_grid</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">max_tokens</span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">2000</span><span class="op">)</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
@@ -1320,12 +1314,11 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 </div>
 </div>
 <p>From here, the process is the same as before. We will use the <code>tune_grid()</code> function to tune the <code>max_tokens</code> hyperparameter, select the best value, and finalize the workflow, as seen from <a href="#exm-pda-class-model-spec-tune-grid-cv" class="quarto-xref">Example&nbsp;<span>9.15</span></a> through <a href="#exm-pda-class-tune-hyperparameters-update-workflow" class="quarto-xref">Example&nbsp;<span>9.19</span></a>.</p>
-<p>:::</p>
 <p>After tuning the <code>max_tokens</code> hyperparameter, the best performing value is 1050. We now used the updated <code>cls_wf_lasso_tokens</code> workflow to cross-validate the model and collect the metrics. The code is seen in <a href="#exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect" class="quarto-xref">Example&nbsp;<span>9.26</span></a>.</p>
 <div id="exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.26</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Cross-validate workflow</span></span>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Cross-validate workflow</span></span>
 <span><span class="va">cls_lasso_tokens_cv</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cls_wf_lasso_tokens</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
@@ -1350,7 +1343,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <div id="exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.27</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
 <span><span class="va">cls_lasso_tokens_cv</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">conf_mat_resampled</span><span class="op">(</span>tidy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">autoplot</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1369,11 +1362,11 @@ Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validati
 <p>It appears that the model is more robust with the updated <code>max_tokens</code> hyperparameter. We could continue to explore other model improvement strategies, but for now we will move on to the next step in our workflow.</p>
 <!-- Step 6: Evaluate -->
 <p>We are now ready to move on to step 7, evaluating the model on the test set. To do this we need to fit the tuned workflow to the training set, which is the actual training phase. We will use the <code>last_fit()</code> function from the <code>workflows</code> package to fit the workflow to the training set. The <code>last_fit()</code> function takes a workflow and a split object and returns a <code>last_fit</code> object. The <code>last_fit</code> object contains the results of the model fit on the training set and the results of the model evaluation on the test set. The code is seen in <a href="#exm-pda-class-tune-hyperparameters-evaluate-test" class="quarto-xref">Example&nbsp;<span>9.28</span></a>.</p>
-<p>We will use the <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code> function to predict the outcome on the test set. The <code>metrics()</code> function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in <a href="#exm-pda-class-tune-hyperparameters-evaluate-test" class="quarto-xref">Example&nbsp;<span>9.28</span></a>.</p>
+<p>We will use the <code>last_fit()</code> function to train the final model and predict the outcome on the test set. The <code>collect_metrics()</code> function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in <a href="#exm-pda-class-tune-hyperparameters-evaluate-test" class="quarto-xref">Example&nbsp;<span>9.28</span></a>.</p>
 <div id="exm-pda-class-tune-hyperparameters-evaluate-test" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.28</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model to the training set and</span></span>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model to the training set and</span></span>
 <span><span class="co"># evaluate on the test set</span></span>
 <span><span class="va">cls_final_fit</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">last_fit</span><span class="op">(</span></span>
@@ -1397,7 +1390,7 @@ Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validati
 <div id="exm-pda-class-tune-hyperparameters-evaluate-test-confusion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.29</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
 <span><span class="va">cls_final_fit</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">collect_predictions</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">conf_mat</span><span class="op">(</span>truth <span class="op">=</span> <span class="va">outcome</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1415,13 +1408,12 @@ Figure&nbsp;9.4: Confusion matrix for the test set.
 </div>
 </div>
 <p>On the test set the false instances are balanced, which is a good sign that the model is robust. Ideally, there would be no errors, but this is not realistic. The model is not perfect, but it is useful.</p>
-<p>Now a model that can predict the proficiency level of a writer based on their writing sample is useful, as a task. You could imagine that this could be a preprocessing step for a language learning application, for example. The model could be used to filter out writing samples that are not at the right proficiency level for the user. This is a simple example, but the model could be used in many different ways.</p>
-<p>But for a study that is more interested in learning about what features are most important for predicting the proficiency level of a writer, we still have some work to do. We can inspect the errors on the test set to gain some insight into what what writing samples, and the proficiency levels of the writers, are most difficult to predict. We can also inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes.</p>
+<p>Now a model that can predict the nativeness of a writer based on their writing sample is a useful tool in itself. You could imagine that this could be a preprocessing step for a language learning application, for example. But for a study that is more interested in learning about what features are most important for predicting the native versus non-native features of a writer, we still have some work to do. We can inspect the errors on the test set to gain some insight into what writing samples, and which proficiency levels of the writers, are most difficult to predict. We can also inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes.</p>
 <p>Let’s first approach this from a document-proficiency point of view. First, we will want to integrate the predictions with the test set to inspect the errors. We can use the <code>collect_predictions()</code> function to collect the predictions from the <code>last_fit</code> object and attach them with the test set <code>cls_test</code> with <code>bind_cols</code>. Note, we can drop the <code>outcome</code> variable from <code>cls_test</code> as we have this column in our fitted model. The code is seen in <a href="#exm-pda-class-tune-hyperparameters-integrate-test" class="quarto-xref">Example&nbsp;<span>9.30</span></a>.</p>
 <div id="exm-pda-class-tune-hyperparameters-integrate-test" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.30</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect predictions</span></span>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect predictions from the model</span></span>
 <span><span class="va">cls_lasso_fit_preds_test</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cls_final_fit</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">collect_predictions</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1448,7 +1440,7 @@ Figure&nbsp;9.4: Confusion matrix for the test set.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-test-errors" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.31</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect errors</span></span>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect errors</span></span>
 <span><span class="va">cls_lasso_fit_preds_test</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">!=</span> <span class="va">.pred_class</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">outcome</span>, <span class="va">.pred_class</span>, <span class="va">proficiency</span>, <span class="va">text</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1468,7 +1460,7 @@ Figure&nbsp;9.4: Confusion matrix for the test set.
 &gt; 10 Learner Native      Lower advanced     "Un día Pablo, un niño de 6 años, enc…
 &gt; # ℹ 44 more rows</code></pre>
 </div>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect learners falsely predicted to be natives</span></span>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect learners falsely predicted to be natives</span></span>
 <span><span class="va">cls_lasso_fit_preds_test</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">==</span> <span class="st">"Learner"</span>, <span class="va">.pred_class</span> <span class="op">==</span> <span class="st">"Native"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">outcome</span>, <span class="va">.pred_class</span>, <span class="va">proficiency</span>, <span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1494,7 +1486,7 @@ Figure&nbsp;9.4: Confusion matrix for the test set.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-test-estimates" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.32</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract estimates</span></span>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract estimates</span></span>
 <span><span class="va">cls_final_fit_features</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cls_final_fit</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">extract_fit_parsnip</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1506,7 +1498,7 @@ Figure&nbsp;9.4: Confusion matrix for the test set.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-test-estimates-probability" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.33</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate probability</span></span>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate probability</span></span>
 <span><span class="va">cls_final_fit_features</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>probability <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">estimate</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">estimate</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1532,7 +1524,7 @@ Figure&nbsp;9.4: Confusion matrix for the test set.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-test-vip" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.34</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/koalaverse/vip/">vip</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Avoid conflicts for function names from other packages</span></span>
@@ -1568,12 +1560,14 @@ Figure&nbsp;9.4: Confusion matrix for the test set.
 <div id="exm-pda-class-tune-hyperparameters-evaluate-test-vip-plot" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.35</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Recode variable and sign</span></span>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Recode variable and sign</span></span>
 <span><span class="va">var_importance_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">var_importance_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span></span>
 <span>    Feature <span class="op">=</span> <span class="fu">str_remove</span><span class="op">(</span><span class="va">Variable</span>, <span class="st">"tfidf_text_"</span><span class="op">)</span>,</span>
-<span>    Outcome <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span><span class="va">Sign</span> <span class="op">==</span> <span class="st">"NEG"</span> <span class="op">~</span> <span class="st">"Learner"</span>, <span class="va">Sign</span> <span class="op">==</span> <span class="st">"POS"</span> <span class="op">~</span> <span class="st">"Native"</span><span class="op">)</span>,</span>
+<span>    Outcome <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
+<span>      <span class="va">Sign</span> <span class="op">==</span> <span class="st">"NEG"</span> <span class="op">~</span> <span class="st">"Learner"</span>,</span>
+<span>      <span class="va">Sign</span> <span class="op">==</span> <span class="st">"POS"</span> <span class="op">~</span> <span class="st">"Native"</span><span class="op">)</span>,</span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">Outcome</span>, <span class="va">Feature</span>, <span class="va">Importance</span><span class="op">)</span></span>
 <span></span>
@@ -1602,11 +1596,12 @@ Figure&nbsp;9.5: Most important features for predicting the outcome.
 <p>In this section, we’ve build a text classifier using a regularized logistic regression model. We’ve tuned the hyperparameters to arrive at a robust model that performs well on both the training and test sets. We’ve also evaluated the model errors and inspected the most important features for predicting the outcome.</p>
 </section><section id="sec-pda-text-regression" class="level3" data-number="9.2.2"><h3 data-number="9.2.2" class="anchored" data-anchor-id="sec-pda-text-regression">
 <span class="header-section-number">9.2.2</span> Text regression</h3>
-<p>We will now turn our attention to the second task in this section, text regression. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. Let’s start by extracting the observations (only learners) and the relevant variables from the original data set. The code is seen in <a href="#exm-pda-reg-data" class="quarto-xref">Example&nbsp;<span>9.36</span></a>.</p>
+<p>We will now turn our attention to the second task in this section, text regression. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. I will make reference to but not repeat the steps we took in the classification task, as many of the steps are the same. This is one of the benefits of using <code>tidymodels</code> –the workflow is by-and-large the same for different tasks.</p>
+<p>Let’s start by extracting the observations (only learners) and the relevant variables from the original data set. The code is seen in <a href="#exm-pda-reg-data" class="quarto-xref">Example&nbsp;<span>9.36</span></a>.</p>
 <div id="exm-pda-reg-data" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.36</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract observations and relevant variables</span></span>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract observations and relevant variables</span></span>
 <span><span class="va">reg_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cedel_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">proficiency</span> <span class="op">!=</span> <span class="st">"Native"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1624,13 +1619,13 @@ Figure&nbsp;9.5: Most important features for predicting the outcome.
 </div>
 </div>
 <!-- Step 1: Identify variables -->
-<p>In this task, our outcome variable is numeric so we do not need, or want, to convert it to a factor. Our predictor variable <code>text</code> is the same as before. We have already weighed the options for feature engineering and decided to use the term frequency - inverse document frequency method (<span class="math inline">\(tf\)</span>-<span class="math inline">\(idf\)</span>) for the top 1,050 words. Since we are setting up the same recipe as before, essentially, we can use the same code as before.</p>
+<p>In this task, our outcome variable is numeric and our predictor variable <code>text</code> is the same as before. It might be useful to engineer the features differently, but we will start with the same feature engineering process as before, namely the term frequency - inverse document frequency method (<span class="math inline">\(tf\)</span>-<span class="math inline">\(idf\)</span>) for the top 1,050 words.</p>
 <!-- Step 2: Initial split -->
-<p>Let’s first move to step 2, initial split. We will use the <code>initial_split()</code> function again, but this time we will not need to stratify the data as we are not predicting a categorical variable. The code is seen in <a href="#exm-pda-reg-initial-split" class="quarto-xref">Example&nbsp;<span>9.37</span></a>.</p>
+<p>With this assumption about the features, let’s move to step 2, initial split. We will use the <code>initial_split()</code> function again, but this time we will not need to stratify the data as we are not predicting a categorical variable. The code is seen in <a href="#exm-pda-reg-initial-split" class="quarto-xref">Example&nbsp;<span>9.37</span></a>.</p>
 <div id="exm-pda-reg-initial-split" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.37</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Split data</span></span>
@@ -1652,162 +1647,87 @@ Figure&nbsp;9.5: Most important features for predicting the outcome.
 <div id="exm-pda-reg-recipe" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.38</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a recipe</span></span>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a recipe</span></span>
 <span><span class="va">reg_rec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">~</span> <span class="va">text</span>, data <span class="op">=</span> <span class="va">reg_train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenize.html">step_tokenize</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenfilter.html">step_tokenfilter</a></span><span class="op">(</span><span class="va">text</span>, max_tokens <span class="op">=</span> <span class="fl">1050</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="va">reg_rec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span>, smooth_idf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <!-- Step 4: Inspect -->
 <p>At this point we would inspect our recipe to make sure that it looks as expected and gauge the number of features. But since are using the same recipe as before, we can skip this step.</p>
 <!-- Step 5: Interrogate -->
-<p>We can now proceed to interrogate the data. As before we will want to start with a simple model and then build up to more complex models. Let’s consider some common algorithms for regression tasks in <a href="#tbl-pda-reg-algorithms" class="quarto-xref">Table&nbsp;<span>9.4</span></a>.</p>
-<!-- update with Tuning recommendation, much overlap --just refer to previous table? -->
-<div id="tbl-pda-reg-algorithms" class="striped quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pda-reg-algorithms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;9.4: Regression algorithms
-</figcaption><div aria-describedby="tbl-pda-reg-algorithms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table-striped table">
+<p>We can now proceed to interrogate the data. As before we will want to start with a simple model and then build up to more complex models. The list in <a href="#tbl-pda-class-algorithms" class="quarto-xref">Table&nbsp;<span>9.3</span></a>, includes algorithms that are commonly used in classification tasks. Interestingly, many of these same algorithms can be applied to regression. One exception is that instead of logistic regression, linear regressions is used for numeric outcomes.</p>
+<p>As with logistic regressionn, linear regression model is one of the simpler models. And just as with logistic regression, we will want to tune the regularlization hyperparameter of the linear regression model. Instead of detailing these steps again, let me summarize the process, in <a href="#tbl-workflow" class="quarto-xref">Table&nbsp;<span>9.4</span></a>, and then we will discuss the results from the regularized linear regression model.</p>
+<div id="tbl-workflow" class="quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;9.4: Steps to build and tune a model
+</figcaption><div aria-describedby="tbl-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table">
 <colgroup>
-<col style="width: 30%">
-<col style="width: 30%">
-<col style="width: 38%">
+<col style="width: 5%">
+<col style="width: 95%">
 </colgroup>
 <thead><tr class="header">
-<th>Algorithm</th>
-<th>Strengths</th>
-<th>Shortcomings</th>
+<th>Step</th>
+<th>Description</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Linear regression</td>
-<td>Simple, interpretable, fast</td>
-<td>Assumes linear relationship between features and outcome</td>
+<td>1</td>
+<td>Build a model specification with a placeholder to tune the model.</td>
 </tr>
 <tr class="even">
-<td>Decision trees</td>
-<td>Nonlinear relationships, interpretable</td>
-<td>Prone to overfitting</td>
+<td>2</td>
+<td>Create a workflow with the recipe and the model specification.</td>
 </tr>
 <tr class="odd">
-<td>Random forest</td>
-<td>Nonlinear relationships, interpretable</td>
-<td>Prone to overfitting</td>
+<td>3</td>
+<td>Create a grid of values for the regularization hyperparameter.</td>
 </tr>
 <tr class="even">
-<td>Neural networks</td>
-<td>Nonlinear relationships, fast</td>
-<td>Prone to overfitting, difficult to interpret</td>
+<td>4</td>
+<td>Tune the model using cross-validation.</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Select the best performing hyperparameter value.</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Update the model specification and workflow with the best performing hyperparameter value.</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Fit the model to the training set and evaluate the performance using cross-validation.</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<!-- [ ] Let's jump the linear regression -->
-<p>Let’s start with a with a linear regression model in mind for our model specification. But let’s also consider what we learned in our first attempt to build a logistic regression model using word frequencies. We learned that the model was overfitting the training data and we needed to use a regularized model to reduce the variance of the model. So let’s start with a regularized linear regression model.</p>
-<p>The <code>linear_reg()</code> function, just as the <code>logistic_reg()</code> function, provides arguments for the regularization hyperparameters when the <code>glmnet</code> computational engine is used. Let’s tune the <code>penalty</code> hyperparameter in the same way as before. The code for the process is seen in <a href="#exm-pda-reg-model-spec-tune" class="quarto-xref">Example&nbsp;<span>9.39</span></a>.</p>
-<div id="exm-pda-reg-model-spec-tune" class="theorem example">
+<p>Applying the steps 1-7 we have cross-validated results for our model in the <code>reg_lasso_cv</code> object. We can collect the metrics and inspect the RMSE and <span class="math inline">\(R^2\)</span> values. The code is seen in <a href="#exm-pda-reg-metrics-lasso" class="quarto-xref">Example&nbsp;<span>9.39</span></a>.</p>
+<div id="exm-pda-reg-metrics-lasso" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.39</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
-<span><span class="va">reg_spec_lasso</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">linear_reg</span><span class="op">(</span>penalty <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, mixture <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glmnet"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create workflow</span></span>
-<span><span class="va">reg_wf_lasso</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">workflow</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_recipe</span><span class="op">(</span><span class="va">reg_rec</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">reg_spec_lasso</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create tuning grid</span></span>
-<span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">penalty</span><span class="op">(</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Set seed for reproducibility</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create tuning workflow</span></span>
-<span><span class="va">reg_tune</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">tune_grid</span><span class="op">(</span></span>
-<span>    <span class="va">reg_wf_lasso</span>,</span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    grid <span class="op">=</span> <span class="va">reg_grid</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Select best parameter</span></span>
-<span><span class="va">chosen_penalty</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_tune</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">select_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Update workflow</span></span>
-<span><span class="va">reg_final_wf_lasso</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_wf_lasso</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="va">chosen_penalty</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">reg_final_wf_lasso</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; ══ Workflow ════════════════════════════════════════════════════════════════════
-&gt; Preprocessor: Recipe
-&gt; Model: linear_reg()
-&gt; 
-&gt; ── Preprocessor ────────────────────────────────────────────────────────────────
-&gt; 4 Recipe Steps
-&gt; 
-&gt; • step_tokenize()
-&gt; • step_tokenfilter()
-&gt; • step_tf()
-&gt; • step_log()
-&gt; 
-&gt; ── Model ───────────────────────────────────────────────────────────────────────
-&gt; Linear Regression Model Specification (regression)
-&gt; 
-&gt; Main Arguments:
-&gt;   penalty = 1
-&gt;   mixture = 1
-&gt; 
-&gt; Computational engine: glmnet</code></pre>
-</div>
-</div>
-</div>
-<p>Now we fit this model to the training data and evaluate the performance using cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-tune-fit-evaluate" class="quarto-xref">Example&nbsp;<span>9.40</span></a>.</p>
-<div id="exm-pda-reg-model-spec-tune-fit-evaluate" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.40</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Cross-validated workflow</span></span>
-<span><span class="va">reg_cv_lasso</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_final_wf_lasso</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Collect metrics</span></span>
-<span><span class="va">reg_cv_lasso</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<span><span class="va">reg_lasso_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 2 × 6
 &gt;   .metric .estimator   mean     n std_err .config             
 &gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-&gt; 1 rmse    standard   13.3      10  0.348  Preprocessor1_Model1
-&gt; 2 rsq     standard    0.659    10  0.0222 Preprocessor1_Model1</code></pre>
+&gt; 1 rmse    standard   14.1      10  0.269  Preprocessor1_Model1
+&gt; 2 rsq     standard    0.621    10  0.0119 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 </div>
-<p>Now, the RMSE estimate is 13.3. RMSE is expressed in the same units as the outcome variable. In this case, the outcome variable is the placement test score percent. So the RMSE is 13.3 percentage points. The <span class="math inline">\(R^2\)</span> (rsq) is 0.659. This means that the model explains 66% of the variance in the outcome variable. Taken together, this isn’t the best model.</p>
-<p>But how good or bad is it? This is where we can use the null model to compare the model to. The null model is a model that predicts the mean of the outcome variable. We can use the <code>null_model()</code> function to create a null model and submit it to cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-tune-fit-evaluate-null" class="quarto-xref">Example&nbsp;<span>9.41</span></a>.</p>
+<p>Now, the Root Mean Squared Error (RMSE) estimate is 14.1. RMSE is expressed in the same units as the outcome variable. In this case, the outcome variable is the placement test score percent. So the RMSE is 14.1 percentage points. The <span class="math inline">\(R^2\)</span> (rsq) is 0.621. This means that the model explains 62% of the variance in the outcome variable. Taken together, this isn’t the best model.</p>
+<p>But how good or bad is it? This is where we can use the null model to compare the model to. The null model is a model that predicts the mean of the outcome variable for each of the outcomes. We can use the <code>null_model()</code> function to create a null model and submit it to cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-tune-fit-evaluate-null" class="quarto-xref">Example&nbsp;<span>9.40</span></a>.</p>
 <div id="exm-pda-reg-model-spec-tune-fit-evaluate-null" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.41</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 9.40</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create null model</span></span>
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create null model</span></span>
 <span><span class="va">null_model</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">null_model</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"parsnip"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1824,23 +1744,33 @@ Table&nbsp;9.4: Regression algorithms
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Collect metrics</span></span>
-<span><span class="va">null_cv</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">null_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 1 × 6
 &gt;   .metric .estimator  mean     n std_err .config             
 &gt;   &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-&gt; 1 rmse    standard    22.6    10   0.206 Preprocessor1_Model1</code></pre>
+&gt; 1 rmse    standard    22.6    10   0.203 Preprocessor1_Model1</code></pre>
+</div>
+</div>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-solid fa-exclamation-triangle" aria-label="exclamation-triangle"></i> Warning</strong></p>
+<p>For model specifications in which the model can be used in a classification or regression task, the model specification must be set to the correct mode before fitting the model. We have not set the mode for the <code>logistic_reg()</code> or <code>linear_reg()</code> model specifications, as the task is inferred. However, we have set the mode for the <code>null_model()</code>, and other model specifications that can be used in both classification and regression tasks.</p>
 </div>
 </div>
 </div>
-<p>Our regression model performs better than the null model (22.608) which means that it is picking up on some signal in the data.</p>
-<p>Let’s visualize the distribution of the predictions and the errors from our model to see if there are any patterns of interest. We can use the <code>collect_predictions()</code> function to extract the predictions of the cross-validation and plot the true outcome against the predicted outcome using <code>ggplot()</code>, as in <a href="#exm-pda-reg-lr-eval-rmse" class="quarto-xref">Example&nbsp;<span>9.59</span></a>.</p>
+</div>
+<p>Our regression model performs better than the null model (22.6) which means that it is picking up on some signal in the data.</p>
+<p>Let’s visualize the distribution of the predictions and the errors from our model to see if there are any patterns of interest. We can use the <code>collect_predictions()</code> function to extract the predictions of the cross-validation and plot the true outcome against the predicted outcome using <code>ggplot()</code>, as in <a href="#exm-pda-reg-lr-eval-rmse" class="quarto-xref">Example&nbsp;<span>9.41</span></a>.</p>
 <div id="exm-pda-reg-lr-eval-rmse" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.42</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 9.41</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize predictions</span></span>
-<span><span class="va">reg_cv_lasso</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize predictions</span></span>
+<span><span class="va">reg_lasso_cv</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">collect_predictions</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">outcome</span>, <span class="va">.pred</span>, shape <span class="op">=</span> <span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span>, position <span class="op">=</span> <span class="fu">position_jitter</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1862,203 +1792,112 @@ Figure&nbsp;9.6: Distribution of the RMSE for the cross-validated linear regress
 </div>
 </div>
 </div>
-<p>From this plot, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, <em>i.e.</em> outliers, in particular for test scores in the lower ranges.</p>
-<p>If the <span class="math inline">\(R^2\)</span> value is in the ballpark, this means that somewhere around 40% of the variation is not explained by the frequency of the top 1,000 words. This is not surprising, as there are many other factors that contribute to the proficiency level of a text.</p>
-<p>We have a model that is performing better than the null model, but it is not performing well enough to be very useful. We will need to update the model specification and/ or the features to try to improve the model fit. Let’s start with the model. There are many different model specifications we could try, but we will likely need to use a more complex model specification to capture the complexity that we observed in the errors from the previous model.</p>
-<p>Let’s try a decision tree model. <strong>Decision trees</strong> are non-linear models that are able to model non-linear relationships and interactions between the features and the outcome and tend to be less influenced by outliers. These are all desirable characteristics. Decision trees, however, can be prone to overfitting</p>
-<hr>
-<p>Along the spectrum of model complexity, decision trees are more complex than linear regression models, but less complex than other models such as neural networks. Furthermore, decision trees are interpretable, which is a nice feature for an exploratory-oriented analysis.</p>
-<p>To implement a new model in <code>tidymodels</code>, we need to create a new model specification and a new workflow. We will use the <code>decision_tree()</code> function from the <code>parsnip</code> package to create the model specification. The <code>decision_tree()</code> function takes no arguments and returns a <code>decision_tree</code> object. We create the new model specification in <a href="#exm-pda-reg-model-spec-decision-tree" class="quarto-xref">Example&nbsp;<span>9.43</span></a>.</p>
+<p>From <a href="#fig-pda-reg-lr-eval-rmse" class="quarto-xref">Figure&nbsp;<span>9.6</span></a>, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, <em>i.e.</em> outliers, in particular for test scores in the lower ranges.</p>
+<p>If the <span class="math inline">\(R^2\)</span> value is in the ballpark, this means that somewhere around 40% of the variation is not explained by the frequency of the top 1,050 words. This is not surprising, as there are many other factors that contribute to the proficiency level of a text.</p>
+<p>We have a model that is performing better than the null model, but it is not performing well enough to be very useful. We will need to update the model specification and/ or the features to try to improve the model fit. Let’s start with the model. There are many different model specifications we could try, but we will likely need to use a more complex model specification to capture the complexity that we observe in the errors from the current linear regression model.</p>
+<p>Let’s try a decision tree model. <strong>Decision trees</strong> are models that are able to model non-linear relationships and interactions between the features and the outcome and tend to be less influenced by outliers. Furthermore, decision trees are interpretable, which is a nice feature for an exploratory-oriented analysis. These are all desirable characteristics. Decision trees, however, can be prone to overfitting. For this reason, we will tune the maximum depth of the tree to minimize overfitting.</p>
+<p>To implement a new model in <code>tidymodels</code>, we need to create a new model specification and a new workflow. We will use the <code>decision_tree()</code> function from the <code>parsnip</code> package to create the model specification. The <code>decision_tree()</code> function takes a <code>tree_depth</code> argument that we want to tune. We create the new model specification with the tuning placeholder in <a href="#exm-pda-reg-model-spec-decision-tree" class="quarto-xref">Example&nbsp;<span>9.42</span></a>.</p>
 <div id="exm-pda-reg-model-spec-decision-tree" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.43</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 9.42</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
-<span><span class="va">reg_spec_tree</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">decision_tree</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
+<span><span class="va">reg_spec</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">decision_tree</span><span class="op">(</span>tree_depth <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"rpart"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">reg_spec_tree</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; Decision Tree Model Specification (regression)
-&gt; 
-&gt; Computational engine: rpart</code></pre>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">reg_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="sourceCode" id="cb75"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>Decision Tree Model Specification (regression)</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  tree_depth = tune()</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>Computational engine: rpart</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<p>We now have a new model specification. We can now create a new workflow. We will use the same recipe as before, but we will change the model specification to <code>prof_spec_tree</code>. We add this to a new workflow and fit the workflow to the training data. The code is seen in <a href="#exm-pda-reg-model-spec-decision-tree-workflow" class="quarto-xref">Example&nbsp;<span>9.44</span></a>.</p>
-<div id="exm-pda-reg-model-spec-decision-tree-workflow" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.44</strong></span> &nbsp;</p>
+<p>With the model and tuning specification in place, we can now continue through the steps outlined in <a href="#tbl-workflow" class="quarto-xref">Table&nbsp;<span>9.4</span></a> for this decision tree model.</p>
 <div class="cell">
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create workflow</span></span>
-<span><span class="va">reg_wf_tree</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a workflow</span></span>
+<span><span class="va">reg_wf</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">workflow</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">add_recipe</span><span class="op">(</span><span class="va">reg_rec</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">reg_spec_tree</span><span class="op">)</span></span>
+<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">reg_spec</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a grid of values for the tree depth hyperparameter</span></span>
+<span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">tree_depth</span><span class="op">(</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create the cross-validation folds</span></span>
+<span><span class="va">reg_vfold</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Set seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Create tuning workflow</span></span>
+<span><span class="va">reg_tune</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">tune_grid</span><span class="op">(</span></span>
+<span>    <span class="va">reg_wf</span>,</span>
+<span>    resamples <span class="op">=</span> <span class="va">reg_vfold</span>,</span>
+<span>    grid <span class="op">=</span> <span class="va">reg_grid</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select best parameter</span></span>
+<span><span class="va">chosen_depth</span> <span class="op">&lt;-</span> <span class="va">reg_tune</span> <span class="op">|&gt;</span> <span class="fu">select_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Update workflow</span></span>
+<span><span class="va">reg_wf_tree</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">reg_wf</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="va">chosen_depth</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Cross-validated workflow</span></span>
-<span><span class="va">reg_cv_tree</span> <span class="op">&lt;-</span></span>
+<span><span class="va">reg_tree_cv</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">reg_wf_tree</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
+<span>    resamples <span class="op">=</span> <span class="va">reg_vfold</span>,</span>
 <span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<p>We can now evaluate the performance of the model using cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-decision-tree-workflow-evaluate" class="quarto-xref">Example&nbsp;<span>9.45</span></a>.</p>
-<div id="exm-pda-reg-model-spec-decision-tree-workflow-evaluate" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.45</strong></span> &nbsp;</p>
+<p>We can collect the metrics and inspect the RMSE and <span class="math inline">\(R^2\)</span> values. The code is seen in <a href="#exm-pda-reg-metrics-tree" class="quarto-xref">Example&nbsp;<span>9.43</span></a>.</p>
+<div id="exm-pda-reg-metrics-tree" class="theorem example">
+<p><span class="theorem-title"><strong>Example 9.43</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
-<span><span class="va">reg_cv_tree</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<span><span class="va">reg_tree_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 2 × 6
 &gt;   .metric .estimator   mean     n std_err .config             
 &gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-&gt; 1 rmse    standard   15.1      10  0.404  Preprocessor1_Model1
-&gt; 2 rsq     standard    0.554    10  0.0215 Preprocessor1_Model1</code></pre>
+&gt; 1 rmse    standard   16.3      10  0.252  Preprocessor1_Model1
+&gt; 2 rsq     standard    0.483    10  0.0167 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 </div>
-<p>The metrics for the vanilla decision tree are similar to the regularized linear regression model. The RSME is 15.1 and the <span class="math inline">\(R^2\)</span> is 0.554. Yet, if we compare the standard error between the two models, we can see that the decision tree model has a larger standard error. This means that the decision tree model is more prone to overfitting the training data.</p>
-<p>To minimize overfitting, we can tune hyperparameters of the model. Regularization is one way to reduce overfitting, as we saw with the regularized linear regression model. Another way to reduce overfitting is to reduce the complexity of the model. This can be done by reducing the number of features or by reducing the number of splits in the decision tree, known as <strong>pruning</strong>.</p>
-<p>Another approach is to implement a random forest model. A <strong>random forest</strong> is an ensemble model that combines multiple decision trees to make a prediction. A random forest is a type of ensemble model which means that it combines multiple models to make a prediction. In addition to multiple decision trees, random forests also perform random feature selection. This helps to reduce the correlation between the decision trees and thus reduces the variance of the model.</p>
-<p>Let’s try a random forest model. We will use the <code>rand_forest()</code> function from the <code>parsnip</code> package to create the model specification. The <code>rand_forest()</code> function takes no arguments and returns a <code>rand_forest</code> object. We will select the <code>ranger</code> engine and add the <code>importance</code> argument to ensure that we can extract feature importance if this model proves to be useful. We create the new model specification in <a href="#exm-pda-reg-model-spec-random-forest" class="quarto-xref">Example&nbsp;<span>9.46</span></a>.</p>
+<p>The performance for the decision tree is worse than the regularized linear regression model. The RSME is 16.3 and the <span class="math inline">\(R^2\)</span> is 0.483. And, if we compare the standard error between the two models, we can see that the decision tree model has a lower standard error. This means that the decision tree model is likely overfitting.</p>
+<p>Given the sensitivity of the decision tree branching process and random initialization, it is possible that the decision tree model is capturing too much nuance, and not enough generalities. Re-running the model with a different seed may result in a different model. This is a limitation with decision tree models, but it is also a feature, if we consider combining multiple decision trees to make a prediction. This is the basis of <strong>ensemble models</strong>. An ensemble model is a model that combines multiple models with the goal to draw out the strengths of each model and minimize the weaknesses.</p>
+<p>A <strong>random forest</strong> is an ensemble model that combines multiple decision trees to make a prediction. In addition, random forests also perform random feature selection. This helps to reduce the correlation between the decision trees and thus works to reduce the overall variance of the model.</p>
+<p>Let’s try a random forest model to address our text regression task. We will use the <code>rand_forest()</code> function from the <code>parsnip</code> package to create the model specification. The <code>rand_forest()</code> function also takes a hyperparameter for the number of trees to be used in the model. We will select the <code>ranger</code> engine. Additionally, we will add the <code>importance</code> argument to ensure that we can extract feature importance if this model proves to be useful. We create the new model specification in <a href="#exm-pda-reg-model-spec-random-forest" class="quarto-xref">Example&nbsp;<span>9.44</span></a>.</p>
 <div id="exm-pda-reg-model-spec-random-forest" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.46</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 9.44</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
-<span><span class="va">reg_spec_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">rand_forest</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
+<span><span class="va">reg_spec</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">reg_spec_rf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; Random Forest Model Specification (regression)
-&gt; 
-&gt; Engine-Specific Arguments:
-&gt;   importance = impurity
-&gt; 
-&gt; Computational engine: ranger</code></pre>
-</div>
-</div>
-</div>
-<p>We can now update the workflow to use the new model specification. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow" class="quarto-xref">Example&nbsp;<span>9.47</span></a>.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.47</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Update workflow</span></span>
-<span><span class="va">reg_wf_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_wf_tree</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">reg_spec_rf</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Set seed for reproducibility</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Cross-validated workflow</span></span>
-<span><span class="va">reg_cv_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_wf_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>We can now evaluate the performance of the model using cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-evaluate" class="quarto-xref">Example&nbsp;<span>9.48</span></a>.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow-evaluate" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.48</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
-<span><span class="va">reg_cv_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 2 × 6
-&gt;   .metric .estimator   mean     n std_err .config             
-&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-&gt; 1 rmse    standard   13.1      10  0.305  Preprocessor1_Model1
-&gt; 2 rsq     standard    0.680    10  0.0133 Preprocessor1_Model1</code></pre>
-</div>
-</div>
-</div>
-<p>The random forest model performs better than the decision tree model and the regularized linear regression model. The RSME is 13.1 and the <span class="math inline">\(R^2\)</span> is 0.68. We also see that the standard error is the lowest of the models we have tried so far. This means that the random forest model is less prone to overfitting the training data.</p>
-<p>Before we settle on this model, let’s try one more model, a support vector machine (SVM). A <strong>support vector machine</strong> is a supervised machine learning model that can be used for both classification and regression. It is a non-parametric method, which means that it does not make any assumptions about the underlying distribution of the data. It is also a method which can be better suited for high-dimensionalensional data where many values are zero, that is, sparse data, which is often the case with text data.</p>
-<p>Let’s again specify the model. We will use the <code>svm_linear()</code> function from the <code>parsnip</code> package to create the model specification and we will use the <code>LiblineaR</code> computational engine. We create the new model specification in <a href="#exm-pda-reg-model-spec-svm" class="quarto-xref">Example&nbsp;<span>9.49</span></a>.</p>
-<div id="exm-pda-reg-model-spec-svm" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.49</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
-<span><span class="va">reg_spec_svm</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">svm_linear</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"LiblineaR"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">reg_spec_svm</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; Linear Support Vector Machine Model Specification (regression)
-&gt; 
-&gt; Computational engine: LiblineaR</code></pre>
-</div>
-</div>
-</div>
-<p>Now let’s update the workflow to use the new model specification. The code is seen in <a href="#exm-pda-reg-model-spec-svm-workflow" class="quarto-xref">Example&nbsp;<span>9.50</span></a>.</p>
-<div id="exm-pda-reg-model-spec-svm-workflow" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.50</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Update workflow</span></span>
-<span><span class="va">reg_wf_svm</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_wf_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">reg_spec_svm</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Set seed for reproducibility</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Cross-validated workflow</span></span>
-<span><span class="va">reg_cv_svm</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_wf_svm</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Let’s evaluate the cross-validation performance of the model. The code is seen in <a href="#exm-pda-reg-model-spec-svm-workflow-evaluate" class="quarto-xref">Example&nbsp;<span>9.51</span></a>.</p>
-<div id="exm-pda-reg-model-spec-svm-workflow-evaluate" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.51</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
-<span><span class="va">reg_cv_svm</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 2 × 6
-&gt;   .metric .estimator   mean     n std_err .config             
-&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-&gt; 1 rmse    standard   14.7      10  0.353  Preprocessor1_Model1
-&gt; 2 rsq     standard    0.625    10  0.0152 Preprocessor1_Model1</code></pre>
-</div>
-</div>
-</div>
-<p>This SVR is not performing better than the linear regression and random forest models and the standard error is not particularly low. So we will not pursue this model further.</p>
-<p>So in summary, we’ve tried four different model specifications. The regularized linear regression model, the decision tree model, the random forest model, and the support vector machine model. The random forest model performed the best. But there stands to be improvement, but it looks as if we may need to update the features.</p>
-<p>In the recipe we have used until this point we have limited the word features to 1,000 and used the raw counts of the words. The rationale for this was that we wanted to limit the number of features to reduce the complexity of the model while still capturing the most important features. But we may have limited the features too much, at least now that we are comparing features between the same population (learners). A potentially more informative feature would be the TF-IDF score. This score is a measure of how important a word is to a document in a collection or corpus. Specifically, it is the product of the term frequency and the inverse document frequency. The more dispersed a feature is across the corpus, the lower the TF-IDF score. The more concentrated a feature is across the corpus, the higher the TF-IDF score, and the more informative the feature is for distinguishing between documents.</p>
-<p>So we can use the <code><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf()</a></code> function to update the recipe. The code is seen in <a href="#exm-pda-reg-recipe-tfidf" class="quarto-xref">Example&nbsp;<span>9.52</span></a>.</p>
-<div id="exm-pda-reg-recipe-tfidf" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.52</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a recipe</span></span>
-<span><span class="va">reg_rec</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">~</span> <span class="va">text</span>, data <span class="op">=</span> <span class="va">reg_train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenize.html">step_tokenize</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenfilter.html">step_tokenfilter</a></span><span class="op">(</span><span class="va">text</span>, max_tokens <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span>, smooth_idf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
 <span><span class="co"># Preview</span></span>
-<span><span class="va">reg_rec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">reg_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="sourceCode" id="cb80"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>Random Forest Model Specification (regression)</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>  trees = tune()</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a>Engine-Specific Arguments:</span>
+<span id="cb80-7"><a href="#cb80-7" aria-hidden="true" tabindex="-1"></a>  importance = impurity</span>
+<span id="cb80-8"><a href="#cb80-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a>Computational engine: ranger</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
@@ -2066,336 +1905,213 @@ Figure&nbsp;9.6: Distribution of the RMSE for the cross-validated linear regress
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
-<p>Two things to note about the code in <a href="#exm-pda-reg-recipe-tfidf" class="quarto-xref">Example&nbsp;<span>9.52</span></a>. First, the <code><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf()</a></code> function by default add a smoothing term to the inverse document frequency (IDF) calculation. This setting has the effect of reducing the influence of the IDF calculation. Thus, terms that appear in many (or all) documents will not be downweighted as much as they would be if the smoothing term was not added. For our purposes, we want to downweight or eliminate the influence of the most frequent terms, so we will set <code>smooth_idf = FALSE</code>.</p>
-<p>Second, the log-transformation is not necessary when using TF-IDF scores as normalization is built into the TF-IDF calculation.</p>
+<p><strong><i class="fa-regular fa-lightbulb" aria-label="lightbulb"></i> Consider this</strong></p>
+<p>As you can appreciate the model building process is iterative and many of the steps are the same. This is a good indication that creating a custom function to build and tune the model would be a good idea.</p>
+<p>Consider the following: What would you include in the function? What would you leave out? What required and/ or optional arguments would you include? What would you hard code? What would you return?</p>
 </div>
 </div>
 </div>
-<p>Another change we can explore is to increase the number of features. But how many features should we use? We can turn to the <code>tune()</code> function to help us answer this question. Let’s add the <code>tune()</code> function to the recipe and tune the <code>max_tokens</code> hyperparameter. The code is seen in <a href="#exm-pda-reg-recipe-tune" class="quarto-xref">Example&nbsp;<span>9.53</span></a>.</p>
-<div id="exm-pda-reg-recipe-tune" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.53</strong></span> &nbsp;</p>
+<p>Again, we apply the steps in <a href="#tbl-workflow" class="quarto-xref">Table&nbsp;<span>9.4</span></a> to build and tune the random forest model. For transparency, I will limit the range of the number of trees from 100 to 500 in five levels.</p>
 <div class="cell">
-<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a recipe</span></span>
-<span><span class="va">reg_rec</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">~</span> <span class="va">text</span>, data <span class="op">=</span> <span class="va">reg_train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenize.html">step_tokenize</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenfilter.html">step_tokenfilter</a></span><span class="op">(</span><span class="va">text</span>, max_tokens <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span>, smooth_idf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="va">reg_rec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Let’s tune the <code>max_tokens</code> with the random forest model specification that we created earlier. We will create a tuning workflow, which will tune the <code>max_tokens</code> hyperparameter on the training data using cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune" class="quarto-xref">Example&nbsp;<span>9.54</span></a>.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow-tune" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.54</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create tuning workflow</span></span>
-<span><span class="va">tune_wf</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a workflow</span></span>
+<span><span class="va">reg_wf</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">workflow</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">add_recipe</span><span class="op">(</span><span class="va">reg_rec</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">reg_spec_rf</span><span class="op">)</span></span>
+<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">reg_spec</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">tune_wf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; ══ Workflow ════════════════════════════════════════════════════════════════════
-&gt; Preprocessor: Recipe
-&gt; Model: rand_forest()
-&gt; 
-&gt; ── Preprocessor ────────────────────────────────────────────────────────────────
-&gt; 3 Recipe Steps
-&gt; 
-&gt; • step_tokenize()
-&gt; • step_tokenfilter()
-&gt; • step_tfidf()
-&gt; 
-&gt; ── Model ───────────────────────────────────────────────────────────────────────
-&gt; Random Forest Model Specification (regression)
-&gt; 
-&gt; Engine-Specific Arguments:
-&gt;   importance = impurity
-&gt; 
-&gt; Computational engine: ranger</code></pre>
-</div>
-</div>
-</div>
-<p>The <code>tune_grid()</code> function takes a workflow, a resampling method, a tuning grid, and a set of metrics. The tuning grid is a set of hyperparameters and their values. The <code>tune_grid()</code> function will tune the hyperparameters on the training data using cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-grid" class="quarto-xref">Example&nbsp;<span>9.55</span></a>. This is a computationally intensive process, as it will train a 10 folds, for each hyperparameter value. Each fold in the random forest is 500 trees, so this will train 5,000 trees for each hyperparameter value! So that is 30,000 trees in total. This code will take some time to run.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow-tune-grid" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.55</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create tuning grid</span></span>
-<span><span class="va">tune_grid</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">max_tokens</span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">3500</span><span class="op">)</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co"># Create a grid of values for the number of trees hyperparameter</span></span>
+<span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">trees</span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">750</span><span class="op">)</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">tune_grid</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 1
-&gt;   max_tokens
-&gt;        &lt;int&gt;
-&gt; 1        500
-&gt; 2       1250
-&gt; 3       2000
-&gt; 4       2750
-&gt; 5       3500</code></pre>
-</div>
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create tuning workflow</span></span>
-<span><span class="va">tune</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">tune_grid</span><span class="op">(</span></span>
-<span>    <span class="va">tune_wf</span>,</span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    grid <span class="op">=</span> <span class="va">tune_grid</span>,</span>
-<span>    metrics <span class="op">=</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">rmse</span>, <span class="va">rsq</span><span class="op">)</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="va">tune</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # Tuning results
-&gt; # 10-fold cross-validation 
-&gt; # A tibble: 10 × 5
-&gt;    splits             id     .metrics          .notes           .predictions
-&gt;    &lt;list&gt;             &lt;chr&gt;  &lt;list&gt;            &lt;list&gt;           &lt;list&gt;      
-&gt;  1 &lt;split [1371/153]&gt; Fold01 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  2 &lt;split [1371/153]&gt; Fold02 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  3 &lt;split [1371/153]&gt; Fold03 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  4 &lt;split [1371/153]&gt; Fold04 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  5 &lt;split [1372/152]&gt; Fold05 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  6 &lt;split [1372/152]&gt; Fold06 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  7 &lt;split [1372/152]&gt; Fold07 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  8 &lt;split [1372/152]&gt; Fold08 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt;  9 &lt;split [1372/152]&gt; Fold09 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;    
-&gt; 10 &lt;split [1372/152]&gt; Fold10 &lt;tibble [10 × 5]&gt; &lt;tibble [0 × 3]&gt; &lt;tibble&gt;</code></pre>
-</div>
-</div>
-</div>
-<p>Just as we did for the <code>penalty</code> hyperparameter, we can visualize the performance of the model as a function of the <code>max_tokens</code> hyperparameter. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-plot" class="quarto-xref">Example&nbsp;<span>9.56</span></a>.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow-tune-plot" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.56</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize tuning results</span></span>
-<span><span class="va">tune</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">max_tokens</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_x_continuous</span><span class="op">(</span></span>
-<span>    breaks <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/pretty_breaks.html">pretty_breaks</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html">comma</a></span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span> <span class="va">.metric</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Max tokens"</span></span>
-<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-pda-reg-model-spec-random-forest-workflow-tune-plot" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-reg-model-spec-random-forest-workflow-tune-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="prediction_files/figure-html/fig-pda-reg-model-spec-random-forest-workflow-tune-plot-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-reg-model-spec-random-forest-workflow-tune-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.7: Performance of the random forest model as a function of the max_tokens hyperparameter.
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<p>We added a range of maximum token values to the tuning grid to see if there is a point of diminishing returns. We can see that the performance of the model actually appears to improve, not with more tokens, but instead with less. Our lowest value of 500 tokens appears to perform the best. This is interesting, as it suggests that there are a small number of words that are most informative for predicting the placement test score. It also suggests that individual words, on the whole, are not very informative for predicting the placement test score.</p>
-<p>We can now select the best hyperparameter value. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-select" class="quarto-xref">Example&nbsp;<span>9.57</span></a>.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow-tune-select" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.57</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Select best parameter</span></span>
-<span><span class="va">chosen_max_tokens</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">tune</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">select_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Update workflow</span></span>
-<span><span class="va">reg_final_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">tune_wf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="va">chosen_max_tokens</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">reg_final_rf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; ══ Workflow ════════════════════════════════════════════════════════════════════
-&gt; Preprocessor: Recipe
-&gt; Model: rand_forest()
-&gt; 
-&gt; ── Preprocessor ────────────────────────────────────────────────────────────────
-&gt; 3 Recipe Steps
-&gt; 
-&gt; • step_tokenize()
-&gt; • step_tokenfilter()
-&gt; • step_tfidf()
-&gt; 
-&gt; ── Model ───────────────────────────────────────────────────────────────────────
-&gt; Random Forest Model Specification (regression)
-&gt; 
-&gt; Engine-Specific Arguments:
-&gt;   importance = impurity
-&gt; 
-&gt; Computational engine: ranger</code></pre>
-</div>
-</div>
-</div>
-<p>We can now fit the model to the training data and evaluate the performance using cross-validation. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate" class="quarto-xref">Example&nbsp;<span>9.58</span></a>.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.58</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Cross-validated workflow</span></span>
-<span><span class="va">reg_cv_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_final_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Collect metrics</span></span>
-<span><span class="va">reg_cv_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 2 × 6
-&gt;   .metric .estimator   mean     n std_err .config             
-&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-&gt; 1 rmse    standard   12.8      10  0.221  Preprocessor1_Model1
-&gt; 2 rsq     standard    0.695    10  0.0137 Preprocessor1_Model1</code></pre>
-</div>
-</div>
-</div>
-<p>We’ve improved the model, but not very much. We can see that the RMSE is 13.1 and the <span class="math inline">\(R^2\)</span> is 0.68. The standard error is NA. This is the lowest standard error we have seen so far, but it is still not as low as we would like.</p>
-<p>Let’s now visualize the distribution of the predictions and the errors from our word features model to see if there are any patterns of interest. We can use the <code>collect_predictions()</code> function to extract the predictions of the cross-validation and plot the true outcome agains the predicted outcome using <code>ggplot()</code>, as in <a href="#exm-pda-reg-lr-eval-rmse" class="quarto-xref">Example&nbsp;<span>9.59</span></a>.</p>
-<div id="exm-pda-reg-lr-eval-rmse" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.59</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize predictions</span></span>
-<span><span class="va">reg_cv_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_predictions</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">outcome</span>, <span class="va">.pred</span>, shape <span class="op">=</span> <span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span>, position <span class="op">=</span> <span class="fu">position_jitter</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span> <span class="co"># trend for each fold</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Truth"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"Predicted score"</span>,</span>
-<span>    shape <span class="op">=</span> <span class="st">"Fold"</span></span>
-<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-pda-reg-rf-eval-rmse" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-reg-rf-eval-rmse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="prediction_files/figure-html/fig-pda-reg-rf-eval-rmse-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-reg-rf-eval-rmse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.8: Distribution of the RMSE for the cross-validated linear regression model.
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<p>There appears to be more cohesion in the predictions, overall. The errors however seem visually to be larger for the lower scores.</p>
-<p>At this point we can either consider this model to be good enough or we can try to improve it further. Let’s take one more shot at improving the features by including bigrams. To include words (unigrams) and bigrams, we can modify the <code><a href="https://textrecipes.tidymodels.org/reference/step_tokenize.html">step_tokenize()</a></code> function in our recipe. We add the <code>token = "ngrams"</code> argument and specify the <code>options</code> as <code>list(n = 2, n_min = 1)</code>. This will create unigrams and bigrams. The code is seen in <a href="#exm-pda-reg-recipe-tfidf-bigrams" class="quarto-xref">Example&nbsp;<span>9.60</span></a>.</p>
-<div id="exm-pda-reg-recipe-tfidf-bigrams" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.60</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a recipe</span></span>
-<span><span class="va">reg_rec</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">~</span> <span class="va">text</span>, data <span class="op">=</span> <span class="va">reg_train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenize.html">step_tokenize</a></span><span class="op">(</span><span class="va">text</span>, token <span class="op">=</span> <span class="st">"ngrams"</span>, options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">2</span>, n_min <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tokenfilter.html">step_tokenfilter</a></span><span class="op">(</span><span class="va">text</span>, max_tokens <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf</a></span><span class="op">(</span><span class="va">text</span>, smooth_idf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="va">reg_rec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Since the features have changed, we won’t assume that our tuning of the <code>max_tokens</code> is still valid. So we will tune the <code>max_tokens</code> hyperparameter again, as in <a href="#exm-pda-reg-recipe-tune" class="quarto-xref">Example&nbsp;<span>9.53</span></a> through <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate" class="quarto-xref">Example&nbsp;<span>9.58</span></a>. For the sake of brevity, we will not show the code here. We will simply show the results.</p>
-<div class="cell">
-<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create workflow</span></span>
-<span><span class="va">reg_wf_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">workflow</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_recipe</span><span class="op">(</span><span class="va">reg_rec</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">reg_spec_rf</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create tuning grid</span></span>
-<span><span class="va">tune_grid</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">max_tokens</span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">3500</span><span class="op">)</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co"># Create the cross-validation folds</span></span>
+<span><span class="va">reg_vfold</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Set seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create tuning workflow</span></span>
-<span><span class="va">tune</span> <span class="op">&lt;-</span></span>
+<span><span class="va">reg_tune</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">tune_grid</span><span class="op">(</span></span>
-<span>    <span class="va">reg_wf_rf</span>,</span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
-<span>    grid <span class="op">=</span> <span class="va">tune_grid</span>,</span>
-<span>    metrics <span class="op">=</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">rmse</span>, <span class="va">rsq</span><span class="op">)</span>,</span>
-<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>    <span class="va">reg_wf</span>,</span>
+<span>    resamples <span class="op">=</span> <span class="va">reg_vfold</span>,</span>
+<span>    grid <span class="op">=</span> <span class="va">reg_grid</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Select best parameter</span></span>
-<span><span class="va">chosen_max_tokens</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">tune</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">select_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<span><span class="va">chosen_trees</span> <span class="op">&lt;-</span> <span class="va">reg_tune</span> <span class="op">|&gt;</span> <span class="fu">select_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Update workflow</span></span>
-<span><span class="va">reg_final_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_wf_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="va">chosen_max_tokens</span><span class="op">)</span></span>
+<span><span class="va">reg_wf_rf</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">reg_wf</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="va">chosen_trees</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Cross-validated workflow</span></span>
-<span><span class="va">reg_cv_rf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_final_rf</span> <span class="op">|&gt;</span></span>
+<span><span class="va">reg_rf_cv</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">reg_wf_rf</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
-<span>    resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
+<span>    resamples <span class="op">=</span> <span class="va">reg_vfold</span>,</span>
 <span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Collect metrics</span></span>
-<span><span class="va">estimates</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_cv_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">pull</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The tuning of <code>max_tokens</code> selected 2,000 features as the optimal number. The cross-validation of the training dataset produced an RMSE of 12.8 and an <span class="math inline">\(R^2\)</span> of 0.698. The standard error is NA. The upshot is that by including bigrams we have not improved, or worsened, the model. Including the unigrams and bigrams together may be more informative for the exploration of the features.</p>
-<p>We could continue to try to improve the model, but at this point we have a model that is performing better than the null model and is performing better than the other models we have tried. So we will consider this model to be good enough.</p>
-<p>Let’s now fit the 1-2 gram model to the testing data and evaluate the performance on the testing set. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test" class="quarto-xref">Example&nbsp;<span>9.61</span></a>.</p>
-<!-- Step 7: Interpret -->
-<div id="exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.61</strong></span> &nbsp;</p>
+<p>Let’s collect the metrics and inspect the RMSE and <span class="math inline">\(R^2\)</span> values. The code is seen in <a href="#exm-pda-reg-metrics-rf" class="quarto-xref">Example&nbsp;<span>9.45</span></a>.</p>
+<div id="exm-pda-reg-metrics-rf" class="theorem example">
+<p><span class="theorem-title"><strong>Example 9.45</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit model on training data</span></span>
-<span><span class="va">reg_final_rf_fit</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">reg_final_rf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">fit</span><span class="op">(</span><span class="va">reg_train</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Predict on testing data</span></span>
-<span><span class="va">reg_final_rf_pred</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">bind_cols</span><span class="op">(</span></span>
-<span>    <span class="va">reg_test</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">reg_final_rf_fit</span>, <span class="va">reg_test</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Evaluate performance</span></span>
-<span><span class="va">reg_final_rf_pred</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">metrics</span><span class="op">(</span>truth <span class="op">=</span> <span class="va">outcome</span>, estimate <span class="op">=</span> <span class="va">.pred</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<span><span class="va">reg_rf_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 3 × 3
-&gt;   .metric .estimator .estimate
-&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
-&gt; 1 rmse    standard      12.9  
-&gt; 2 rsq     standard       0.695
-&gt; 3 mae     standard       9.84</code></pre>
+<pre><code>&gt; # A tibble: 2 × 6
+&gt;   .metric .estimator   mean     n std_err .config             
+&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+&gt; 1 rmse    standard   12.9      10  0.320  Preprocessor1_Model1
+&gt; 2 rsq     standard    0.697    10  0.0164 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 </div>
-<p>We can now visualize the feature importance of the model. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance" class="quarto-xref">Example&nbsp;<span>9.62</span></a>.</p>
-<div id="exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance" class="theorem example">
-<p><span class="theorem-title"><strong>Example 9.62</strong></span> &nbsp;</p>
+<p>The random forest model performs better than the decision tree model and the regularized linear regression model. The RSME is 12.9 and the <span class="math inline">\(R^2\)</span> is 0.697. We also see that the standard error falls between the models we have tried so far.</p>
+<p>Before we settle on this model, let’s try one more model. In this case, we will introduce a neural network model. Neural networks are models that are able to model non-linear relationships and interactions between the features and the outcome. They are also able to model complex relationships between the features and the outcome. We will use the <code>mlp()</code> function from the <code>parsnip</code> package to create the model specification. We will choose the <code>brulee</code> engine which allows us to tune the learning rate. The <strong>learning rate</strong> is a hyperparameter that controls the size of the steps that the model takes to update the weights.</p>
+<p>We create the new model specification with the tuning placeholder in <a href="#exm-pda-reg-model-spec-mlp" class="quarto-xref">Example&nbsp;<span>9.46</span></a>.</p>
+<div id="exm-pda-reg-model-spec-mlp" class="theorem example">
+<p><span class="theorem-title"><strong>Example 9.46</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract predictions</span></span>
-<span><span class="va">reg_final_rf_fit</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">vip</span><span class="fu">::</span><span class="fu"><a href="https://koalaverse.github.io/vip/reference/vi.html">vi</a></span><span class="op">(</span>scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>  <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
+<span><span class="va">reg_spec</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">mlp</span><span class="op">(</span>learn_rate <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"brulee"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">reg_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb85"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>Single Layer Neural Network Model Specification (regression)</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a>  learn_rate = tune()</span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a>Computational engine: brulee</span>
+<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>Model fit template:</span>
+<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a>brulee::brulee_mlp(x = missing_arg(), y = missing_arg(), learn_rate = tune())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a workflow</span></span>
+<span><span class="va">reg_wf</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">workflow</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_recipe</span><span class="op">(</span><span class="va">reg_rec</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">reg_spec</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a grid of values for the learning rate hyperparameter</span></span>
+<span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">learn_rate</span><span class="op">(</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create the cross-validation folds</span></span>
+<span><span class="va">reg_vfold</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">reg_train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Set seed for reproducibility</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create tuning workflow</span></span>
+<span><span class="va">reg_tune</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">tune_grid</span><span class="op">(</span></span>
+<span>    <span class="va">reg_wf</span>,</span>
+<span>    resamples <span class="op">=</span> <span class="va">reg_vfold</span>,</span>
+<span>    grid <span class="op">=</span> <span class="va">reg_grid</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select best parameter</span></span>
+<span><span class="va">chosen_learn_rate</span> <span class="op">&lt;-</span> <span class="va">reg_tune</span> <span class="op">|&gt;</span> <span class="fu">select_best</span><span class="op">(</span>metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Update workflow</span></span>
+<span><span class="va">reg_wf_mlp</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">reg_wf</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="va">chosen_learn_rate</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Cross-validated workflow</span></span>
+<span><span class="va">reg_mlp_cv</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">reg_wf_mlp</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">fit_resamples</span><span class="op">(</span></span>
+<span>    resamples <span class="op">=</span> <span class="va">reg_vfold</span>,</span>
+<span>    control <span class="op">=</span> <span class="fu">control_resamples</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s collect the metrics and inspect the RMSE and <span class="math inline">\(R^2\)</span> values. The code is seen in <a href="#exm-pda-reg-metrics-mlp" class="quarto-xref">Example&nbsp;<span>9.47</span></a>.</p>
+<div id="exm-pda-reg-metrics-mlp" class="theorem example">
+<p><span class="theorem-title"><strong>Example 9.47</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<span><span class="va">reg_mlp_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 2 × 6
+&gt;   .metric .estimator   mean     n std_err .config             
+&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+&gt; 1 rmse    standard   16.8      10  1.53   Preprocessor1_Model1
+&gt; 2 rsq     standard    0.474    10  0.0857 Preprocessor1_Model1</code></pre>
+</div>
+</div>
+</div>
+<p>So in summary, we’ve tried four different model specifications. The regularized linear regression model, the decision tree model, the random forest model, and the neural network model. The random forest model performed the best. For each of these models, however, we have only tried word features measured by <span class="math inline">\(tf\)</span>-<span class="math inline">\(idf\)</span>. We could imagine that the performance of these models could be improved by varying the features to include bigrams, for example. We could also explore different measures of word usage. Furthermore, for some of our models, we could try different engines and/ or hyperparameters (some have more than one!).</p>
+<p>We could continue to try to explore these possible combinations, and you likely would in your research. But at this point we have a model that is performing better than the null model and is performing better than the other models we have tried. So we will consider this model to be good enough for our purposes.</p>
+<p>Let’s take our Random Forest model, fit it to our training data, apply it to the testing data, and collect the metrics on the test set. The code is seen in <a href="#exm-pda-reg-model-spec-random-forest-workflow-tune-fit" class="quarto-xref">Example&nbsp;<span>9.48</span></a>.</p>
+<div id="exm-pda-reg-model-spec-random-forest-workflow-tune-fit" class="theorem example">
+<p><span class="theorem-title"><strong>Example 9.48</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model to the training set and</span></span>
+<span><span class="co"># evaluate on the test set</span></span>
+<span><span class="va">reg_final_fit</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">last_fit</span><span class="op">(</span></span>
+<span>    <span class="va">reg_wf_rf</span>,</span>
+<span>    split <span class="op">=</span> <span class="va">reg_split</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Evaluate model on testing set</span></span>
+<span><span class="va">reg_final_fit</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 2 × 4
+&gt;   .metric .estimator .estimate .config             
+&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
+&gt; 1 rmse    standard      12.9   Preprocessor1_Model1
+&gt; 2 rsq     standard       0.690 Preprocessor1_Model1</code></pre>
+</div>
+</div>
+</div>
+<p>Ok. The difference between the cross-validated metrics and the metrics for the test set differ –but only slightly. This suggests that the model is robust and that we have not overfit the data from the training set.</p>
+<!-- Step 7: Interpret -->
+<p>Now, our likely goal as an academic is to understanding something about the features that contribute to the performance of the model. So let’s approach extracting feature importance from the Random Forest model we build with the <code>ranger</code> engine. Remember, we added an <code>importance</code> argument to the <code>set_engine()</code> function and set it to ‘impurity’. We can now take advantage by using the <code>vip</code> package to extract the feature importance. The code is seen in <a href="#exm-pda-reg-final-fit-vip" class="quarto-xref">Example&nbsp;<span>9.49</span></a>.</p>
+<div id="exm-pda-reg-final-fit-vip" class="theorem example">
+<p><span class="theorem-title"><strong>Example 9.49</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract feature importance</span></span>
+<span><span class="va">reg_vip</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">reg_final_fit</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">extract_fit_parsnip</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://koalaverse.github.io/vip/reference/vi.html">vi</a></span><span class="op">(</span>scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">reg_vip</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 10 × 2
+&gt;    Variable        Importance
+&gt;    &lt;chr&gt;                &lt;dbl&gt;
+&gt;  1 tfidf_text_que       100  
+&gt;  2 tfidf_text_es         64.6
+&gt;  3 tfidf_text_del        44.4
+&gt;  4 tfidf_text_pero       43.6
+&gt;  5 tfidf_text_por        41.4
+&gt;  6 tfidf_text_se         39.6
+&gt;  7 tfidf_text_una        39.5
+&gt;  8 tfidf_text_para       34.1
+&gt;  9 tfidf_text_más        30.2
+&gt; 10 tfidf_text_los        28.0</code></pre>
+</div>
+</div>
+</div>
+<p>We can now visualize the feature importance of the model. The code is seen in <a href="#exm-pda-reg-final-fit-vip-visualize" class="quarto-xref">Example&nbsp;<span>9.50</span></a>.</p>
+<div id="exm-pda-reg-final-fit-vip-visualize" class="theorem example">
+<p><span class="theorem-title"><strong>Example 9.50</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract predictions</span></span>
+<span><span class="va">reg_vip</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>Variable <span class="op">=</span> <span class="fu">str_replace</span><span class="op">(</span><span class="va">Variable</span>, <span class="st">"^tfidf_text_"</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_max</span><span class="op">(</span><span class="va">Importance</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># reorder variables by importance</span></span>
@@ -2407,18 +2123,20 @@ Figure&nbsp;9.8: Distribution of the RMSE for the cross-validated linear regress
 <span>    y <span class="op">=</span> <span class="st">"Importance"</span></span>
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="prediction_files/figure-html/fig-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance-1.png" class="img-fluid figure-img" width="384">
+<div id="fig-pda-reg-final-fit-vip-visualize" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-reg-final-fit-vip-visualize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="prediction_files/figure-html/fig-pda-reg-final-fit-vip-visualize-1.png" class="img-fluid figure-img" width="768">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.9: Feature importance of the random forest model.
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-reg-final-fit-vip-visualize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.7: Feature importance of the random forest model.
 </figcaption></figure>
 </div>
 </div>
 </div>
 </div>
+<p>In this section, we’ve built text regression models focusing on the ability to change algorithms and hyperparameters. We also seen some of the differences between evaluating model performance between classification and regression tasks. There are many more combinations of model specifications and feature selection and engineering that can be applied. In your research, you will find yourself using these tools to explore the best model for your data.</p>
 </section></section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
+<p>In the following activities, we will apply the concepts and techniques we have learned in this chapter. We will use the <code>tidymodels</code> framework to build and evaluate supervised machine learning models for text classification and regression tasks.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -2426,8 +2144,7 @@ Figure&nbsp;9.9: Feature importance of the random forest model.
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-file-code" aria-label="file-code"></i> Recipe</strong></p>
-<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<p><strong>What</strong>: <a href="https://qtalr.github.io/qtalrkit/articles/recipe-9.html">Building predictive models</a><br><strong>How</strong>: Read Recipe 9 and participate in the Hypothes.is online social annotation.<br><strong>Why</strong>: <i class="fa-solid fa-wrench" aria-label="wrench"></i> …</p>
+<p><strong>What</strong>: <a href="https://qtalr.github.io/qtalrkit/articles/recipe-9.html">Building predictive models</a><br><strong>How</strong>: Read Recipe 9, complete comprehension check, and prepare for Lab 7.<br><strong>Why</strong>: To continue to build experience building predictive models with the <code>tidymodels</code> framework.</p>
 </div>
 </div>
 </div>
@@ -2438,13 +2155,12 @@ Figure&nbsp;9.9: Feature importance of the random forest model.
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-flask" aria-label="flask"></i> Lab</strong></p>
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<p><strong>What</strong>: <a href="https://github.com/qtalr/lab-09">Text classification</a><br><strong>How</strong>: Clone, fork, and complete the steps in Lab 9.<br><strong>Why</strong>: <i class="fa-solid fa-wrench" aria-label="wrench"></i> …</p>
+<p><strong>What</strong>: <a href="https://github.com/qtalr/lab-09">Text classification</a><br><strong>How</strong>: Clone, fork, and complete the steps in Lab 9.<br><strong>Why</strong>: To apply your knowledge of supervised machine learning to a text classification task.</p>
 </div>
 </div>
 </div>
 </section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
-<p>In this chapter we have learned about supervised machine learning. We have learned about the different types of supervised machine learning methods and how they can be used to predict and classify. We have also learned about the different types of data structures that are used in supervised machine learning. Finally, we have learned about the different types of evaluation metrics that are used to evaluate the performance of supervised machine learning models.</p>
+<p>In this chapter, we outlined the workflow for approach predictive modeling and the <code>tidymodels</code> framework. We then applied the workflow to text classification and regression tasks. Gained experience identifying, selecting, and engineering features on the one hand, and building and tuning models on the other. To evaluate the models, we used cross-validation for performance and finalized our interpretation with techniques to extract feature importance.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -2456,6 +2172,9 @@ Deshors, Sandra C, and Stefan Th. Gries. 2016. <span>“Profiling Verb Complemen
 </div>
 <div id="ref-Gries2014" class="csl-entry" role="listitem">
 Gries, Stefan Th., and Sandra C. Deshors. 2014. <span>“Using Regressions to Explore Deviations Between Corpus Data and a Standard/Target: Two Suggestions.”</span> <em>Corpora</em> 9 (1): 109–36. <a href="https://doi.org/10.3366/cor.2014.0053">https://doi.org/10.3366/cor.2014.0053</a>.
+</div>
+<div id="ref-R-textrecipes" class="csl-entry" role="listitem">
+Hvitfeldt, Emil. 2023. <em>Textrecipes: Extra Recipes for Text Processing</em>. <a href="https://github.com/tidymodels/textrecipes">https://github.com/tidymodels/textrecipes</a>.
 </div>
 <div id="ref-R-washoku" class="csl-entry" role="listitem">
 Uryu, Shinya. 2024. <em>Washoku: Extra ’Recipes’ for Japanese Text, Date and Address Processing</em>.

@@ -442,8 +442,7 @@ To ease this process, the `textrecipes` package provides a number of step functi
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
-
-For text processing steps for Japanese, see the `washoku` package [@R-washoku].
+For other tokenization strategies and feature engineering methods, see the `textrecipes` package documentation [@R-textrecipes]. There are, however, pacakges which provide integration with `textrecipes` for other languages, for example, the `washoku` package for Japanese text processing [@R-washoku].
 :::
 
 [^1]: Note that functions for meta-features require more sophisticated text analysis software to be installed on the computing environment (e.g. `spacyr` for `step_lemma()`, `step_pos()`, *etc.*). See the `textrecipes` package documentation for more information.
@@ -488,7 +487,7 @@ We decided in step 1 that we will start with $tf$-$idf$, so we will add `step_tf
 # Add step to tokenize the text
 cls_rec <-
   cls_rec |>
-  step_tfidf(text)
+  step_tfidf(text, smooth_idf = FALSE)
 
 # Preview
 cls_rec
@@ -508,6 +507,12 @@ predictor: 1
 <!-- Step 4: Inspect:  -->
 
 To make sure things are in order and that the recipe performs as expected, we can use the functions `prep()` and `bake()` to inspect the recipe. The `prep()` function takes a recipe object and a data frame and returns a `prep` object. The `prep` object contains the recipe and the data frame with the feature variables engineered according to the recipe. The `bake()` function takes a `prep` object and an optional new dataset to apply the recipe to. If we only want to see the application to the training set, we can use the `new_data = NULL` argument.
+
+::: {.callout .halfsize}
+**{{< fa regular hand-point-up >}} Tip**
+
+The `step_tfidf()` function by default add a *smoothing term* to the inverse document frequency (IDF) calculation. This setting has the effect of reducing the influence of the IDF calculation. Thus, terms that appear in many (or all) documents will not be downweighted as much as they would be if the smoothing term was not added. For our purposes, we want to downweight or eliminate the influence of the most frequent terms, so we will set `smooth_idf = FALSE`.
+:::
 
 In @exm-pda-class-recipe-prep, we use the `prep()` and `bake()` functions to create a data frame with the feature variables. We can then inspect the data frame to see if the recipe performed as expected.
 
@@ -533,7 +538,7 @@ The resulting engineered features data frame has `r nrow(cls_bake)` observations
 
 When applying tokenization and feature engineering steps to text data the result is often contained in a matrix object. Using the `recipes` package a data frame with a matrix-like structure is returned.
 
-Furthermore, the features are prefixed with the variable name and transformation step labels. In @exm-pda-class-recipe-prep we applied term frequency - inverse document frequency to the `text` variable. Therefore we see that our features are prefixed with `tfidf_text_`.
+Furthermore, the features are prefixed with the variable name and transformation step labels. In @exm-pda-class-recipe-prep we applied term frequency - inverse document frequency to the `text` variable. Therefore the features are prefixed with `tfidf_text_`.
 :::
 
 But we should pause. This is an unweildy number of features, on for every single word, for a model and it is likely that many of these features are not useful for our classification task. Furthermore, the more features we have, the more chance these features will capture the nuances of these particular writing samples increasing the likelihood we overfit the model. All in all, we need to reduce the number of features.
@@ -551,7 +556,7 @@ cls_rec <-
   base_rec |>
   step_tokenize(text) |>
   step_tokenfilter(text, max_tokens = 100) |>
-  step_tfidf(text)
+  step_tfidf(text, smooth_idf = FALSE)
 
 # Prep and bake
 cls_bake <-
@@ -597,7 +602,6 @@ There are many classification algorithms to choose from with their own strengths
 
 In the process of selecting an algorithm, simple, computationally efficient, and interpretable models are preferred over complex, computationally expensive, and uninterpretable models, all things being equal. Only if the performance of the simple model is not good enough should we move on to a more complex model.
 
-
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
@@ -609,18 +613,9 @@ You can also retrieve the list of potential engines for a given model specificat
 With this end mind, we will start with a simple logistic regression model to see how well we can classify the texts in the training set with the features we have engineered. We will use the `logistic_reg()` function from the `parsnip` package to specify the logistic regression model. We then select the implementation engine (`glmnet` General Linear Model) and the mode of the model (`classification`). The implementation engine is the software that will be used to fit the model. The code to set up the model specification is seen in @exm-pda-class-model-spec.
 
 ::: {#exm-pda-class-model-spec}
-```r
-# Create a model specification
-cls_spec <-
-  logistic_reg() |>
-  set_engine("glmnet")
-
-# Preview
-cls_spec
-```
 ```{r}
 #| label: pda-class-model-spec
-#| include: false
+#| output: false
 
 # Create a model specification
 cls_spec <-
@@ -646,18 +641,9 @@ For example, the logistic regression model using `glmnet` can be tuned to preven
 Instead of guessing, we will use the `tune` package to tune the hyperparameters of the model. The `tune()` functions serves as a placeholder for the hyperparameters we want to tune. We can add the `tune()` function to our model specification to specify the hyperparameters we want to tune. The code is seen in @exm-pda-class-model-spec-tune.
 
 ::: {#exm-pda-class-model-spec-tune}
-```r
-# Create a model specification (with tune)
-cls_spec <-
-  logistic_reg(penalty = tune(), mixture = 1) |>
-  set_engine("glmnet")
-
-# Preview
-cls_spec
-```
 ```{r}
 #| label: pda-class-model-spec-tune-lasso
-#| include: false
+#| output: false
 
 # Create a model specification (with tune)
 cls_spec <-
@@ -685,19 +671,9 @@ We can see now that the `cls_spec` model specification now includes the `tune()`
 To tune our model, we will need to combine our recipe and model specification into a workflow object. The workflow object will allow us to train and evaluate the model on the training set. We will use the `workflow()` function from the `workflows` package to combine the recipe and model specification into a workflow object. The code is seen in @exm-pda-class-workflow.
 
 ::: {#exm-pda-class-workflow}
-```r
-# Create a workflow
-cls_wf <-
-  workflow() |>
-  add_recipe(cls_rec) |>
-  add_model(cls_spec)
-
-# Preview
-cls_wf
-```
 ```{r}
 #| label: pda-class-workflow
-#| include: false
+#| output: false
 
 # Create a workflow
 cls_wf <-
@@ -829,6 +805,7 @@ All of that to tune a hyperparameter! Now we can update the model specification 
 ::: {#exm-pda-class-tune-hyperparameters-update-workflow}
 ```{r}
 #| label: pda-class-tune-hyperparameters-update-workflow
+#| output: false
 
 # Update model specification
 cls_wf_lasso <-
@@ -892,8 +869,7 @@ We want to aggregate the metrics across the folds to get a sense of the variabil
 #| label: pda-class-tune-hyperparameters-evaluate-workflow-cv-collect
 
 # Collect metrics
-cls_lasso_cv |>
-  collect_metrics()
+cls_lasso_cv |> collect_metrics()
 ```
 :::
 
@@ -1017,7 +993,6 @@ cls_wf_lasso_tokens <-
   cls_wf_lasso |>
   finalize_workflow(cls_best)
 ```
-:::
 
 After tuning the `max_tokens` hyperparameter, the best performing value is 1050. We now used the updated `cls_wf_lasso_tokens` workflow to cross-validate the model and collect the metrics. The code is seen in @exm-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect.
 
@@ -1060,7 +1035,7 @@ It appears that the model is more robust with the updated `max_tokens` hyperpara
 
 We are now ready to move on to step 7, evaluating the model on the test set. To do this we need to fit the tuned workflow to the training set, which is the actual training phase. We will use the `last_fit()` function from the `workflows` package to fit the workflow to the training set. The `last_fit()` function takes a workflow and a split object and returns a `last_fit` object. The `last_fit` object contains the results of the model fit on the training set and the results of the model evaluation on the test set. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
 
-We will use the `predict()` function to predict the outcome on the test set. The `metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
+We will use the `last_fit()` function to train the final model and predict the outcome on the test set. The `collect_metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-pda-class-tune-hyperparameters-evaluate-test.
 
 ::: {#exm-pda-class-tune-hyperparameters-evaluate-test}
 ```{r}
@@ -1098,9 +1073,7 @@ cls_final_fit |>
 
 On the test set the false instances are balanced, which is a good sign that the model is robust. Ideally, there would be no errors, but this is not realistic. The model is not perfect, but it is useful.
 
-Now a model that can predict the proficiency level of a writer based on their writing sample is useful, as a task. You could imagine that this could be a preprocessing step for a language learning application, for example. The model could be used to filter out writing samples that are not at the right proficiency level for the user. This is a simple example, but the model could be used in many different ways.
-
-But for a study that is more interested in learning about what features are most important for predicting the proficiency level of a writer, we still have some work to do. We can inspect the errors on the test set to gain some insight into what what writing samples, and the proficiency levels of the writers, are most difficult to predict. We can also inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes.
+Now a model that can predict the nativeness of a writer based on their writing sample is a useful tool in itself. You could imagine that this could be a preprocessing step for a language learning application, for example. But for a study that is more interested in learning about what features are most important for predicting the native versus non-native features of a writer, we still have some work to do. We can inspect the errors on the test set to gain some insight into what writing samples, and which proficiency levels of the writers, are most difficult to predict. We can also inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes.
 
 Let's first approach this from a document-proficiency point of view. First, we will want to integrate the predictions with the test set to inspect the errors. We can use the `collect_predictions()` function to collect the predictions from the `last_fit` object and attach them with the test set `cls_test` with `bind_cols`. Note, we can drop the `outcome` variable from `cls_test` as we have this column in our fitted model. The code is seen in @exm-pda-class-tune-hyperparameters-integrate-test.
 
@@ -1108,7 +1081,7 @@ Let's first approach this from a document-proficiency point of view. First, we w
 ```{r}
 #| label: pda-class-tune-hyperparameters-integrate-test
 
-# Collect predictions
+# Collect predictions from the model
 cls_lasso_fit_preds_test <-
   cls_final_fit |>
   collect_predictions() |>
@@ -1210,7 +1183,9 @@ var_importance_tbl <-
   var_importance_tbl |>
   mutate(
     Feature = str_remove(Variable, "tfidf_text_"),
-    Outcome = case_when(Sign == "NEG" ~ "Learner", Sign == "POS" ~ "Native"),
+    Outcome = case_when(
+      Sign == "NEG" ~ "Learner",
+      Sign == "POS" ~ "Native"),
     ) |>
   select(Outcome, Feature, Importance)
 
@@ -1232,7 +1207,9 @@ In this section, we've build a text classifier using a regularized logistic regr
 
 ### Text regression {#sec-pda-text-regression}
 
-We will now turn our attention to the second task in this section, text regression. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. Let's start by extracting the observations (only learners) and the relevant variables from the original data set. The code is seen in @exm-pda-reg-data.
+We will now turn our attention to the second task in this section, text regression. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. I will make reference to but not repeat the steps we took in the classification task, as many of the steps are the same. This is one of the benefits of using `tidymodels` --the workflow is by-and-large the same for different tasks.
+
+Let's start by extracting the observations (only learners) and the relevant variables from the original data set. The code is seen in @exm-pda-reg-data.
 
 ::: {#exm-pda-reg-data}
 ```{r}
@@ -1251,11 +1228,11 @@ reg_tbl |> glimpse()
 
 <!-- Step 1: Identify variables -->
 
-In this task, our outcome variable is numeric so we do not need, or want, to convert it to a factor. Our predictor variable `text` is the same as before. We have already weighed the options for feature engineering and decided to use the term frequency - inverse document frequency method ($tf$-$idf$) for the top 1,050 words. Since we are setting up the same recipe as before, essentially, we can use the same code as before.
+In this task, our outcome variable is numeric and our predictor variable `text` is the same as before. It might be useful to engineer the features differently, but we will start with the same feature engineering process as before, namely the term frequency - inverse document frequency method ($tf$-$idf$) for the top 1,050 words.
 
 <!-- Step 2: Initial split -->
 
-Let's first move to step 2, initial split. We will use the `initial_split()` function again, but this time we will not need to stratify the data as we are not predicting a categorical variable. The code is seen in @exm-pda-reg-initial-split.
+With this assumption about the features, let's move to step 2, initial split. We will use the `initial_split()` function again, but this time we will not need to stratify the data as we are not predicting a categorical variable. The code is seen in @exm-pda-reg-initial-split.
 
 ::: {#exm-pda-reg-initial-split}
 ```{r}
@@ -1293,10 +1270,7 @@ reg_rec <-
   recipe(outcome ~ text, data = reg_train) |>
   step_tokenize(text) |>
   step_tokenfilter(text, max_tokens = 1050) |>
-  step_tfidf(text)
-
-# Preview
-reg_rec
+  step_tfidf(text, smooth_idf = FALSE)
 ```
 :::
 
@@ -1306,44 +1280,42 @@ At this point we would inspect our recipe to make sure that it looks as expected
 
 <!-- Step 5: Interrogate -->
 
-We can now proceed to interrogate the data. As before we will want to start with a simple model and then build up to more complex models. Let's consider some common algorithms for regression tasks in @tbl-pda-reg-algorithms.
+We can now proceed to interrogate the data. As before we will want to start with a simple model and then build up to more complex models. The list in @tbl-pda-class-algorithms, includes algorithms that are commonly used in classification tasks. Interestingly, many of these same algorithms can be applied to regression. One exception is that instead of logistic regression, linear regressions is used for numeric outcomes.
 
-<!-- update with Tuning recommendation, much overlap --just refer to previous table? -->
+As with logistic regressionn, linear regression model is one of the simpler models. And just as with logistic regression, we will want to tune the regularlization hyperparameter of the linear regression model. Instead of detailing these steps again, let me summarize the process, in @tbl-workflow, and then we will discuss the results from the regularized linear regression model.
 
-| Algorithm | Strengths | Shortcomings |
-|-----------|-----------|--------------|
-| Linear regression | Simple, interpretable, fast | Assumes linear relationship between features and outcome |
-| Decision trees | Nonlinear relationships, interpretable | Prone to overfitting |
-| Random forest | Nonlinear relationships, interpretable | Prone to overfitting |
-| Neural networks | Nonlinear relationships, fast | Prone to overfitting, difficult to interpret |
+| Step | Description |
+| --- | --- |
+| 1 | Build a model specification with a placeholder to tune the model. |
+| 2 | Create a workflow with the recipe and the model specification. |
+| 3 | Create a grid of values for the regularization hyperparameter. |
+| 4 | Tune the model using cross-validation. |
+| 5 | Select the best performing hyperparameter value. |
+| 6 | Update the model specification and workflow with the best performing hyperparameter value. |
+| 7 | Fit the model to the training set and evaluate the performance using cross-validation. |
 
-: Regression algorithms {#tbl-pda-reg-algorithms .striped}
+: Steps to build and tune a model {#tbl-workflow tbl-colwidths="[5, 95]"}
 
-<!-- [ ] Let's jump the linear regression -->
-
-Let's start with a with a linear regression model in mind for our model specification. But let's also consider what we learned in our first attempt to build a logistic regression model using word frequencies. We learned that the model was overfitting the training data and we needed to use a regularized model to reduce the variance of the model. So let's start with a regularized linear regression model.
-
-The `linear_reg()` function, just as the `logistic_reg()` function, provides arguments for the regularization hyperparameters when the `glmnet` computational engine is used. Let's tune the `penalty` hyperparameter in the same way as before. The code for the process is seen in @exm-pda-reg-model-spec-tune.
-
-::: {#exm-pda-reg-model-spec-tune}
 ```{r}
-#| label: pda-reg-model-spec-tune
+#| label: pda-reg-linear-model-lasso
+#| include: false
 
 # Create model specification
-reg_spec_lasso <-
+reg_spec <-
   linear_reg(penalty = tune(), mixture = 1) |>
-  set_engine("glmnet") |>
-  set_mode("regression")
+  set_engine("glmnet")
 
 # Create workflow
-reg_wf_lasso <-
+reg_wf <-
   workflow() |>
   add_recipe(reg_rec) |>
-  add_model(reg_spec_lasso)
+  add_model(reg_spec)
 
 # Create tuning grid
-reg_grid <-
-  grid_regular(penalty(), levels = 10)
+reg_grid <- grid_regular(penalty(), levels = 10)
+
+# Create the cross-validation folds
+reg_vfold <- vfold_cv(reg_train, v = 10)
 
 # Set seed for reproducibility
 set.seed(123)
@@ -1351,60 +1323,53 @@ set.seed(123)
 # Create tuning workflow
 reg_tune <-
   tune_grid(
-    reg_wf_lasso,
-    resamples = vfold_cv(reg_train, v = 10),
-    grid = reg_grid,
-    control = control_resamples(save_pred = TRUE)
+    reg_wf,
+    resamples = reg_vfold,
+    grid = reg_grid
   )
 
 # Select best parameter
-chosen_penalty <-
-  reg_tune |>
-  select_best(metric = "rmse")
+chosen_penalty <- reg_tune |> select_best(metric = "rmse")
 
 # Update workflow
-reg_final_wf_lasso <-
-  reg_wf_lasso |>
+reg_wf_lasso <-
+  reg_wf |>
   finalize_workflow(chosen_penalty)
 
-reg_final_wf_lasso
-```
-:::
-
-Now we fit this model to the training data and evaluate the performance using cross-validation. The code is seen in @exm-pda-reg-model-spec-tune-fit-evaluate.
-
-::: {#exm-pda-reg-model-spec-tune-fit-evaluate}
-```{r}
-#| label: pda-reg-model-spec-tune-fit-evaluate
-
 # Cross-validated workflow
-reg_cv_lasso <-
-  reg_final_wf_lasso |>
+reg_lasso_cv <-
+  reg_wf_lasso |>
   fit_resamples(
-    resamples = vfold_cv(reg_train, v = 10),
+    resamples = reg_vfold,
     control = control_resamples(save_pred = TRUE)
   )
+```
+
+Applying the steps 1-7 we have cross-validated results for our model in the `reg_lasso_cv` object. We can collect the metrics and inspect the RMSE and $R^2$ values. The code is seen in @exm-pda-reg-metrics-lasso.
+
+::: {#exm-pda-reg-metrics-lasso}
+```{r}
+#| label: pda-reg-metrics-lasso
 
 # Collect metrics
-reg_cv_lasso |>
-  collect_metrics()
+reg_lasso_cv |> collect_metrics()
 ```
 :::
 
 ```{r}
-#| label: pda-reg-metrics-lasso-text-block-1
+#| label: pda-reg-metrics-lasso-results
 #| echo: false
 
 # Collect metrics
 estimates <-
-  reg_cv_lasso |>
+  reg_lasso_cv |>
   collect_metrics() |>
   pull(3)
 ```
 
-Now, the RMSE estimate is `r format(estimates[1])`. RMSE is expressed in the same units as the outcome variable. In this case, the outcome variable is the placement test score percent. So the RMSE is `r format(estimates[1])` percentage points. The $R^2$ (rsq) is `r format(estimates[2])`. This means that the model explains `r scales::percent(estimates[2])` of the variance in the outcome variable. Taken together, this isn't the best model.
+Now, the Root Mean Squared Error (RMSE) estimate is `r format(estimates[1])`. RMSE is expressed in the same units as the outcome variable. In this case, the outcome variable is the placement test score percent. So the RMSE is `r format(estimates[1])` percentage points. The $R^2$ (rsq) is `r format(estimates[2])`. This means that the model explains `r scales::percent(estimates[2])` of the variance in the outcome variable. Taken together, this isn't the best model.
 
-But how good or bad is it? This is where we can use the null model to compare the model to. The null model is a model that predicts the mean of the outcome variable. We can use the `null_model()` function to create a null model and submit it to cross-validation. The code is seen in @exm-pda-reg-model-spec-tune-fit-evaluate-null.
+But how good or bad is it? This is where we can use the null model to compare the model to. The null model is a model that predicts the mean of the outcome variable for each of the outcomes. We can use the `null_model()` function to create a null model and submit it to cross-validation. The code is seen in @exm-pda-reg-model-spec-tune-fit-evaluate-null.
 
 ::: {#exm-pda-reg-model-spec-tune-fit-evaluate-null}
 ```{r}
@@ -1427,9 +1392,14 @@ null_cv <-
   )
 
 # Collect metrics
-null_cv |>
-  collect_metrics()
+null_cv |> collect_metrics()
 ```
+
+::: {.callout .halfsize}
+**{{< fa exclamation-triangle >}} Warning**
+
+For model specifications in which the model can be used in a classification or regression task, the model specification must be set to the correct mode before fitting the model. We have not set the mode for the `logistic_reg()` or `linear_reg()` model specifications, as the task is inferred. However, we have set the mode for the `null_model()`, and other model specifications that can be used in both classification and regression tasks.
+:::
 
 ```{r}
 #| label: pda-reg-metrics-null-text-block-1
@@ -1439,7 +1409,7 @@ null_estimate <- null_cv |> collect_metrics() |> pull(3)
 ```
 :::
 
-Our regression model performs better than the null model (`r null_estimate`) which means that it is picking up on some signal in the data.
+Our regression model performs better than the null model (`r round(null_estimate, 1)`) which means that it is picking up on some signal in the data.
 
 Let's visualize the distribution of the predictions and the errors from our model to see if there are any patterns of interest. We can use the `collect_predictions()` function to extract the predictions of the cross-validation and plot the true outcome against the predicted outcome using `ggplot()`, as in @exm-pda-reg-lr-eval-rmse.
 
@@ -1450,7 +1420,7 @@ Let's visualize the distribution of the predictions and the errors from our mode
 #| fig-height: 4
 
 # Visualize predictions
-reg_cv_lasso |>
+reg_lasso_cv |>
   collect_predictions() |>
   ggplot(aes(outcome, .pred, shape = id)) +
   geom_point(alpha = 0.5, position = position_jitter(width = 0.5)) +
@@ -1463,511 +1433,363 @@ reg_cv_lasso |>
 ```
 :::
 
-From this plot, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, *i.e.* outliers, in particular for test scores in the lower ranges.
+From @fig-pda-reg-lr-eval-rmse, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, *i.e.* outliers, in particular for test scores in the lower ranges.
 
-If the $R^2$ value is in the ballpark, this means that somewhere around 40% of the variation is not explained by the frequency of the top 1,000 words. This is not surprising, as there are many other factors that contribute to the proficiency level of a text.
+If the $R^2$ value is in the ballpark, this means that somewhere around 40% of the variation is not explained by the frequency of the top 1,050 words. This is not surprising, as there are many other factors that contribute to the proficiency level of a text.
 
-We have a model that is performing better than the null model, but it is not performing well enough to be very useful. We will need to update the model specification and/ or the features to try to improve the model fit. Let's start with the model. There are many different model specifications we could try, but we will likely need to use a more complex model specification to capture the complexity that we observed in the errors from the previous model.
+We have a model that is performing better than the null model, but it is not performing well enough to be very useful. We will need to update the model specification and/ or the features to try to improve the model fit. Let's start with the model. There are many different model specifications we could try, but we will likely need to use a more complex model specification to capture the complexity that we observe in the errors from the current linear regression model.
 
-Let's try a decision tree model. **Decision trees** are non-linear models that are able to model non-linear relationships and interactions between the features and the outcome and tend to be less influenced by outliers. These are all desirable characteristics. Decision trees, however, can be prone to overfitting
+Let's try a decision tree model. **Decision trees** are models that are able to model non-linear relationships and interactions between the features and the outcome and tend to be less influenced by outliers. Furthermore, decision trees are interpretable, which is a nice feature for an exploratory-oriented analysis. These are all desirable characteristics. Decision trees, however, can be prone to overfitting. For this reason, we will tune the maximum depth of the tree to minimize overfitting.
 
-
-----
-
-
-Along the spectrum of model complexity, decision trees are more complex than linear regression models, but less complex than other models such as neural networks. Furthermore, decision trees are interpretable, which is a nice feature for an exploratory-oriented analysis.
-
-To implement a new model in `tidymodels`, we need to create a new model specification and a new workflow. We will use the `decision_tree()` function from the `parsnip` package to create the model specification. The `decision_tree()` function takes no arguments and returns a `decision_tree` object. We create the new model specification in @exm-pda-reg-model-spec-decision-tree.
+To implement a new model in `tidymodels`, we need to create a new model specification and a new workflow. We will use the `decision_tree()` function from the `parsnip` package to create the model specification. The `decision_tree()` function takes a `tree_depth` argument that we want to tune. We create the new model specification with the tuning placeholder in @exm-pda-reg-model-spec-decision-tree.
 
 ::: {#exm-pda-reg-model-spec-decision-tree}
 ```{r}
 #| label: pda-reg-model-spec-decision-tree
+#| output: false
 
 # Create model specification
-reg_spec_tree <-
-  decision_tree() |>
+reg_spec <-
+  decision_tree(tree_depth = tune()) |>
   set_engine("rpart") |>
   set_mode("regression")
 
-reg_spec_tree
+# Preview
+reg_spec
+```
+```txt
+Decision Tree Model Specification (regression)
+
+Main Arguments:
+  tree_depth = tune()
+
+Computational engine: rpart
 ```
 :::
 
-We now have a new model specification. We can now create a new workflow. We will use the same recipe as before, but we will change the model specification to `prof_spec_tree`. We add this to a new workflow and fit the workflow to the training data. The code is seen in @exm-pda-reg-model-spec-decision-tree-workflow.
+With the model and tuning specification in place, we can now continue through the steps outlined in @tbl-workflow for this decision tree model.
 
-::: {#exm-pda-reg-model-spec-decision-tree-workflow}
 ```{r}
-#| label: pda-reg-model-spec-decision-tree-workflow
+#| label: pda-reg-decision-tree-depth
 
-# Create workflow
-reg_wf_tree <-
+# Create a workflow
+reg_wf <-
   workflow() |>
   add_recipe(reg_rec) |>
-  add_model(reg_spec_tree)
+  add_model(reg_spec)
+
+# Create a grid of values for the tree depth hyperparameter
+reg_grid <-
+  grid_regular(tree_depth(), levels = 10)
+
+# Create the cross-validation folds
+reg_vfold <- vfold_cv(reg_train, v = 10)
 
 # Set seed for reproducibility
 set.seed(123)
 
+# Create tuning workflow
+reg_tune <-
+  tune_grid(
+    reg_wf,
+    resamples = reg_vfold,
+    grid = reg_grid
+  )
+
+# Select best parameter
+chosen_depth <- reg_tune |> select_best(metric = "rmse")
+
+# Update workflow
+reg_wf_tree <-
+  reg_wf |>
+  finalize_workflow(chosen_depth)
+
 # Cross-validated workflow
-reg_cv_tree <-
+reg_tree_cv <-
   reg_wf_tree |>
   fit_resamples(
-    resamples = vfold_cv(reg_train, v = 10),
+    resamples = reg_vfold,
     control = control_resamples(save_pred = TRUE)
   )
 ```
-:::
 
-We can now evaluate the performance of the model using cross-validation. The code is seen in @exm-pda-reg-model-spec-decision-tree-workflow-evaluate.
+We can collect the metrics and inspect the RMSE and $R^2$ values. The code is seen in @exm-pda-reg-metrics-tree.
 
-::: {#exm-pda-reg-model-spec-decision-tree-workflow-evaluate}
+::: {#exm-pda-reg-metrics-tree}
 ```{r}
-#| label: pda-reg-model-spec-decision-tree-workflow-evaluate
+#| label: pda-reg-metrics-tree
 
 # Collect metrics
-reg_cv_tree |>
-  collect_metrics()
+reg_tree_cv |> collect_metrics()
 ```
 :::
 
-
 ```{r}
-#| label: pda-reg-metrics-tree-text-block-1
+#| label: pda-reg-metrics-tree-results
 #| echo: false
 
 # Collect metrics
 estimates <-
-  reg_cv_tree |>
+  reg_tree_cv |>
   collect_metrics() |>
   pull(3)
 ```
 
-The metrics for the vanilla decision tree are similar to the regularized linear regression model. The RSME is `r format(estimates[1])` and the $R^2$ is `r format(estimates[2])`. Yet, if we compare the standard error between the two models, we can see that the decision tree model has a larger standard error. This means that the decision tree model is more prone to overfitting the training data.
+The performance for the decision tree is worse than the regularized linear regression model. The RSME is `r format(estimates[1])` and the $R^2$ is `r format(estimates[2])`. And, if we compare the standard error between the two models, we can see that the decision tree model has a lower standard error. This means that the decision tree model is likely overfitting.
 
-To minimize overfitting, we can tune hyperparameters of the model. Regularization is one way to reduce overfitting, as we saw with the regularized linear regression model. Another way to reduce overfitting is to reduce the complexity of the model. This can be done by reducing the number of features or by reducing the number of splits in the decision tree, known as **pruning**.
+Given the sensitivity of the decision tree branching process and random initialization, it is possible that the decision tree model is capturing too much nuance, and not enough generalities. Re-running the model with a different seed may result in a different model. This is a limitation with decision tree models, but it is also a feature, if we consider combining multiple decision trees to make a prediction. This is the basis of **ensemble models**. An ensemble model is a model that combines multiple models with the goal to draw out the strengths of each model and minimize the weaknesses.
 
-Another approach is to implement a random forest model. A **random forest** is an ensemble model that combines multiple decision trees to make a prediction. A random forest is a type of ensemble model which means that it combines multiple models to make a prediction. In addition to multiple decision trees, random forests also perform random feature selection. This helps to reduce the correlation between the decision trees and thus reduces the variance of the model.
+A **random forest** is an ensemble model that combines multiple decision trees to make a prediction. In addition, random forests also perform random feature selection. This helps to reduce the correlation between the decision trees and thus works to reduce the overall variance of the model.
 
-Let's try a random forest model. We will use the `rand_forest()` function from the `parsnip` package to create the model specification. The `rand_forest()` function takes no arguments and returns a `rand_forest` object. We will select the `ranger` engine and add the `importance` argument to ensure that we can extract feature importance if this model proves to be useful. We create the new model specification in @exm-pda-reg-model-spec-random-forest.
+Let's try a random forest model to address our text regression task. We will use the `rand_forest()` function from the `parsnip` package to create the model specification. The `rand_forest()` function also takes a hyperparameter for the number of trees to be used in the model. We will select the `ranger` engine. Additionally, we will add the `importance` argument to ensure that we can extract feature importance if this model proves to be useful. We create the new model specification in @exm-pda-reg-model-spec-random-forest.
 
 ::: {#exm-pda-reg-model-spec-random-forest}
 ```{r}
 #| label: pda-reg-model-spec-random-forest
+#| output: false
 
 # Create model specification
-reg_spec_rf <-
-  rand_forest() |>
+reg_spec <-
+  rand_forest(trees = tune()) |>
   set_engine("ranger", importance = "impurity") |>
   set_mode("regression")
 
-reg_spec_rf
-```
-:::
-
-We can now update the workflow to use the new model specification. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow}
-```{r}
-#| label: pda-reg-model-spec-random-forest-workflow
-
-# Update workflow
-reg_wf_rf <-
-  reg_wf_tree |>
-  update_model(reg_spec_rf)
-
-# Set seed for reproducibility
-set.seed(123)
-
-# Cross-validated workflow
-reg_cv_rf <-
-  reg_wf_rf |>
-  fit_resamples(
-    resamples = vfold_cv(reg_train, v = 10),
-    control = control_resamples(save_pred = TRUE)
-  )
-```
-:::
-
-We can now evaluate the performance of the model using cross-validation. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-evaluate.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-evaluate}
-```{r}
-#| label: pda-reg-model-spec-random-forest-workflow-evaluate
-
-# Collect metrics
-reg_cv_rf |>
-  collect_metrics()
-```
-:::
-
-```{r}
-#| label: pda-reg-metrics-rf-text-block-1
-#| echo: false
-
-# Collect metrics
-estimates <-
-  reg_cv_rf |>
-  collect_metrics() |>
-  pull(3)
-```
-
-The random forest model performs better than the decision tree model and the regularized linear regression model. The RSME is `r format(estimates[1])` and the $R^2$ is `r format(estimates[2])`. We also see that the standard error is the lowest of the models we have tried so far. This means that the random forest model is less prone to overfitting the training data.
-
-Before we settle on this model, let's try one more model, a support vector machine (SVM). A **support vector machine** is a supervised machine learning model that can be used for both classification and regression. It is a non-parametric method, which means that it does not make any assumptions about the underlying distribution of the data. It is also a method which can be better suited for high-dimensionalensional data where many values are zero, that is, sparse data, which is often the case with text data.
-
-Let's again specify the model. We will use the `svm_linear()` function from the `parsnip` package to create the model specification and we will use the `LiblineaR` computational engine. We create the new model specification in @exm-pda-reg-model-spec-svm.
-
-::: {#exm-pda-reg-model-spec-svm}
-```{r}
-#| label: pda-reg-model-spec-svm
-
-# Create model specification
-reg_spec_svm <-
-  svm_linear() |>
-  set_engine("LiblineaR") |>
-  set_mode("regression")
-
-reg_spec_svm
-```
-:::
-
-
-Now let's update the workflow to use the new model specification. The code is seen in @exm-pda-reg-model-spec-svm-workflow.
-
-::: {#exm-pda-reg-model-spec-svm-workflow}
-```{r}
-#| label: pda-reg-model-spec-svm-workflow
-
-# Update workflow
-reg_wf_svm <-
-  reg_wf_rf |>
-  update_model(reg_spec_svm)
-
-# Set seed for reproducibility
-set.seed(123)
-
-# Cross-validated workflow
-reg_cv_svm <-
-  reg_wf_svm |>
-  fit_resamples(
-    resamples = vfold_cv(reg_train, v = 10),
-    control = control_resamples(save_pred = TRUE)
-  )
-```
-:::
-
-Let's evaluate the cross-validation performance of the model. The code is seen in @exm-pda-reg-model-spec-svm-workflow-evaluate.
-
-::: {#exm-pda-reg-model-spec-svm-workflow-evaluate}
-```{r}
-#| label: pda-reg-model-spec-svm-workflow-evaluate
-
-# Collect metrics
-reg_cv_svm |>
-  collect_metrics()
-```
-:::
-
-This SVR is not performing better than the linear regression and random forest models and the standard error is not particularly low. So we will not pursue this model further.
-
-So in summary, we've tried four different model specifications. The regularized linear regression model, the decision tree model, the random forest model, and the support vector machine model. The random forest model performed the best. But there stands to be improvement, but it looks as if we may need to update the features.
-
-In the recipe we have used until this point we have limited the word features to 1,000 and used the raw counts of the words. The rationale for this was that we wanted to limit the number of features to reduce the complexity of the model while still capturing the most important features. But we may have limited the features too much, at least now that we are comparing features between the same population (learners). A potentially more informative feature would be the TF-IDF score. This score is a measure of how important a word is to a document in a collection or corpus. Specifically, it is the product of the term frequency and the inverse document frequency. The more dispersed a feature is across the corpus, the lower the TF-IDF score. The more concentrated a feature is across the corpus, the higher the TF-IDF score, and the more informative the feature is for distinguishing between documents.
-
-So we can use the `step_tfidf()` function to update the recipe. The code is seen in @exm-pda-reg-recipe-tfidf.
-
-::: {#exm-pda-reg-recipe-tfidf}
-```{r}
-#| label: pda-reg-recipe-tfidf
-
-# Create a recipe
-reg_rec <-
-  recipe(outcome ~ text, data = reg_train) |>
-  step_tokenize(text) |>
-  step_tokenfilter(text, max_tokens = 1000) |>
-  step_tfidf(text, smooth_idf = FALSE)
-
 # Preview
-reg_rec
+reg_spec
+```
+```txt
+Random Forest Model Specification (regression)
+
+Main Arguments:
+  trees = tune()
+
+Engine-Specific Arguments:
+  importance = impurity
+
+Computational engine: ranger
 ```
 :::
 
 ::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
+**{{< fa regular lightbulb >}} Consider this**
 
-Two things to note about the code in @exm-pda-reg-recipe-tfidf. First, the `step_tfidf()` function by default add a smoothing term to the inverse document frequency (IDF) calculation. This setting has the effect of reducing the influence of the IDF calculation. Thus, terms that appear in many (or all) documents will not be downweighted as much as they would be if the smoothing term was not added. For our purposes, we want to downweight or eliminate the influence of the most frequent terms, so we will set `smooth_idf = FALSE`.
+As you can appreciate the model building process is iterative and many of the steps are the same. This is a good indication that creating a custom function to build and tune the model would be a good idea.
 
-Second, the log-transformation is not necessary when using TF-IDF scores as normalization is built into the TF-IDF calculation.
+Consider the following: What would you include in the function? What would you leave out? What required and/ or optional arguments would you include? What would you hard code? What would you return?
 :::
 
-Another change we can explore is to increase the number of features. But how many features should we use? We can turn to the `tune()` function to help us answer this question. Let's add the `tune()` function to the recipe and tune the `max_tokens` hyperparameter. The code is seen in @exm-pda-reg-recipe-tune.
+Again, we apply the steps in @tbl-workflow to build and tune the random forest model. For transparency, I will limit the range of the number of trees from 100 to 500 in five levels.
 
-::: {#exm-pda-reg-recipe-tune}
 ```{r}
-#| label: pda-reg-recipe-tune
+#| label: pda-reg-random-forest-trees
 
-# Create a recipe
-reg_rec <-
-  recipe(outcome ~ text, data = reg_train) |>
-  step_tokenize(text) |>
-  step_tokenfilter(text, max_tokens = tune()) |>
-  step_tfidf(text, smooth_idf = FALSE)
-
-# Preview
-reg_rec
-```
-:::
-
-Let's tune the `max_tokens` with the random forest model specification that we created earlier. We will create a tuning workflow, which will tune the `max_tokens` hyperparameter on the training data using cross-validation. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-tune}
-```{r}
-#| label: pda-reg-model-spec-random-forest-workflow-tune
-
-# Create tuning workflow
-tune_wf <-
+# Create a workflow
+reg_wf <-
   workflow() |>
   add_recipe(reg_rec) |>
-  add_model(reg_spec_rf)
+  add_model(reg_spec)
 
-tune_wf
-```
-:::
+# Create a grid of values for the number of trees hyperparameter
+reg_grid <-
+  grid_regular(trees(range = c(250, 750)), levels = 5)
 
-The `tune_grid()` function takes a workflow, a resampling method, a tuning grid, and a set of metrics. The tuning grid is a set of hyperparameters and their values. The `tune_grid()` function will tune the hyperparameters on the training data using cross-validation. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-grid. This is a computationally intensive process, as it will train a 10 folds, for each hyperparameter value. Each fold in the random forest is 500 trees, so this will train 5,000 trees for each hyperparameter value! So that is 30,000 trees in total. This code will take some time to run.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-grid}
-```{r}
-#| label: pda-reg-model-spec-random-forest-workflow-tune-grid
-
-# Create tuning grid
-tune_grid <-
-  grid_regular(max_tokens(range = c(500, 3500)), levels = 5)
-
-tune_grid
+# Create the cross-validation folds
+reg_vfold <- vfold_cv(reg_train, v = 10)
 
 # Set seed for reproducibility
 set.seed(123)
 
 # Create tuning workflow
-tune <-
+reg_tune <-
   tune_grid(
-    tune_wf,
-    resamples = vfold_cv(reg_train, v = 10),
-    grid = tune_grid,
-    metrics = metric_set(rmse, rsq),
-    control = control_resamples(save_pred = TRUE)
+    reg_wf,
+    resamples = reg_vfold,
+    grid = reg_grid
   )
-
-tune
-```
-:::
-
-Just as we did for the `penalty` hyperparameter, we can visualize the performance of the model as a function of the `max_tokens` hyperparameter. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-plot.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-plot}
-```{r}
-#| label: fig-pda-reg-model-spec-random-forest-workflow-tune-plot
-#| fig-cap: "Performance of the random forest model as a function of the max_tokens hyperparameter."
-#| fig-height: 4
-
-# Visualize tuning results
-tune |>
-  collect_metrics() |>
-  ggplot(aes(max_tokens, mean)) +
-  geom_point() +
-  geom_line() +
-  scale_x_continuous(
-    breaks = scales::pretty_breaks(n = 10),
-    labels = scales::comma
-  ) +
-  facet_wrap(~ .metric, scales = "free_y", ncol = 1) +
-  labs(
-    x = "Max tokens"
-  )
-```
-:::
-
-We added a range of maximum token values to the tuning grid to see if there is a point of diminishing returns. We can see that the performance of the model actually appears to improve, not with more tokens, but instead with less. Our lowest value of 500 tokens appears to perform the best. This is interesting, as it suggests that there are a small number of words that are most informative for predicting the placement test score. It also suggests that individual words, on the whole, are not very informative for predicting the placement test score.
-
-We can now select the best hyperparameter value. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-select.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-select}
-```{r}
-#| label: pda-reg-model-spec-random-forest-workflow-tune-select
 
 # Select best parameter
-chosen_max_tokens <-
-  tune |>
-  select_best(metric = "rmse")
+chosen_trees <- reg_tune |> select_best(metric = "rmse")
 
 # Update workflow
-reg_final_rf <-
-  tune_wf |>
-  finalize_workflow(chosen_max_tokens)
-
-reg_final_rf
-```
-:::
-
-We can now fit the model to the training data and evaluate the performance using cross-validation. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate}
-```{r}
-#| label: pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate
+reg_wf_rf <-
+  reg_wf |>
+  finalize_workflow(chosen_trees)
 
 # Cross-validated workflow
-reg_cv_rf <-
-  reg_final_rf |>
+reg_rf_cv <-
+  reg_wf_rf |>
   fit_resamples(
-    resamples = vfold_cv(reg_train, v = 10),
+    resamples = reg_vfold,
     control = control_resamples(save_pred = TRUE)
   )
+```
+
+Let's collect the metrics and inspect the RMSE and $R^2$ values. The code is seen in @exm-pda-reg-metrics-rf.
+
+::: {#exm-pda-reg-metrics-rf}
+```{r}
+#| label: pda-reg-metrics-rf
 
 # Collect metrics
-reg_cv_rf |>
-  collect_metrics()
+reg_rf_cv |> collect_metrics()
 ```
 :::
 
-We've improved the model, but not very much. We can see that the RMSE is `r format(estimates[1])` and the $R^2$ is `r format(estimates[2])`. The standard error is `r format(estimates[3])`. This is the lowest standard error we have seen so far, but it is still not as low as we would like.
-
-Let's now visualize the distribution of the predictions and the errors from our word features model to see if there are any patterns of interest. We can use the `collect_predictions()` function to extract the predictions of the cross-validation and plot the true outcome agains the predicted outcome using `ggplot()`, as in @exm-pda-reg-lr-eval-rmse.
-
-::: {#exm-pda-reg-lr-eval-rmse}
 ```{r}
-#| label: fig-pda-reg-rf-eval-rmse
-#| fig-cap: "Distribution of the RMSE for the cross-validated linear regression model."
-#| fig-height: 4
-
-# Visualize predictions
-reg_cv_rf |>
-  collect_predictions() |>
-  ggplot(aes(outcome, .pred, shape = id)) +
-  geom_point(alpha = 0.5, position = position_jitter(width = 0.5)) +
-  geom_smooth(method = "lm", se = FALSE) + # trend for each fold
-  labs(
-    x = "Truth",
-    y = "Predicted score",
-    shape = "Fold"
-  )
-```
-:::
-
-There appears to be more cohesion in the predictions, overall. The errors however seem visually to be larger for the lower scores.
-
-At this point we can either consider this model to be good enough or we can try to improve it further. Let's take one more shot at improving the features by including bigrams. To include words (unigrams) and bigrams, we can modify the `step_tokenize()` function in our recipe. We add the `token = "ngrams"` argument and specify the `options` as `list(n = 2, n_min = 1)`. This will create unigrams and bigrams. The code is seen in @exm-pda-reg-recipe-tfidf-bigrams.
-
-::: {#exm-pda-reg-recipe-tfidf-bigrams}
-```{r}
-#| label: pda-reg-recipe-tfidf-bigrams
-
-# Create a recipe
-reg_rec <-
-  recipe(outcome ~ text, data = reg_train) |>
-  step_tokenize(text, token = "ngrams", options = list(n = 2, n_min = 1)) |>
-  step_tokenfilter(text, max_tokens = tune()) |>
-  step_tfidf(text, smooth_idf = FALSE)
-
-# Preview
-reg_rec
-```
-:::
-
-Since the features have changed, we won't assume that our tuning of the `max_tokens` is still valid. So we will tune the `max_tokens` hyperparameter again, as in @exm-pda-reg-recipe-tune through @exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate. For the sake of brevity, we will not show the code here. We will simply show the results.
-
-```{r}
-#| label: pda-reg-tune-bigrams
-
-# Create workflow
-reg_wf_rf <-
-  workflow() |>
-  add_recipe(reg_rec) |>
-  add_model(reg_spec_rf)
-
-# Create tuning grid
-tune_grid <-
-  grid_regular(max_tokens(range = c(500, 3500)), levels = 5)
-
-# Set seed for reproducibility
-set.seed(123)
-
-# Create tuning workflow
-tune <-
-  tune_grid(
-    reg_wf_rf,
-    resamples = vfold_cv(reg_train, v = 10),
-    grid = tune_grid,
-    metrics = metric_set(rmse, rsq),
-    control = control_resamples(save_pred = TRUE)
-  )
-
-# Select best parameter
-chosen_max_tokens <-
-  tune |>
-  select_best(metric = "rmse")
-
-# Update workflow
-reg_final_rf <-
-  reg_wf_rf |>
-  finalize_workflow(chosen_max_tokens)
-
-# Cross-validated workflow
-reg_cv_rf <-
-  reg_final_rf |>
-  fit_resamples(
-    resamples = vfold_cv(reg_train, v = 10),
-    control = control_resamples(save_pred = TRUE)
-  )
+#| label: pda-reg-metrics-rf-results
+#| echo: false
 
 # Collect metrics
 estimates <-
-  reg_cv_rf |>
+  reg_rf_cv |>
   collect_metrics() |>
   pull(3)
 ```
 
-The tuning of `max_tokens` selected 2,000 features as the optimal number. The cross-validation of the training dataset produced an RMSE of `r format(estimates[1])` and an $R^2$ of `r format(estimates[2])`. The standard error is `r format(estimates[3])`. The upshot is that by including bigrams we have not improved, or worsened, the model. Including the unigrams and bigrams together may be more informative for the exploration of the features.
+The random forest model performs better than the decision tree model and the regularized linear regression model. The RSME is `r format(estimates[1])` and the $R^2$ is `r format(estimates[2])`. We also see that the standard error falls between the models we have tried so far.
 
-We could continue to try to improve the model, but at this point we have a model that is performing better than the null model and is performing better than the other models we have tried. So we will consider this model to be good enough.
+Before we settle on this model, let's try one more model. In this case, we will introduce a neural network model. Neural networks are models that are able to model non-linear relationships and interactions between the features and the outcome. They are also able to model complex relationships between the features and the outcome. We will use the `mlp()` function from the `parsnip` package to create the model specification. We will choose the `brulee` engine which allows us to tune the learning rate. The **learning rate** is a hyperparameter that controls the size of the steps that the model takes to update the weights.
 
-Let's now fit the 1-2 gram model to the testing data and evaluate the performance on the testing set. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test.
+ We create the new model specification with the tuning placeholder in @exm-pda-reg-model-spec-mlp.
 
-<!-- Step 7: Interpret -->
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test}
+::: {#exm-pda-reg-model-spec-mlp}
 ```{r}
-#| label: pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test
+#| label: pda-reg-model-spec-mlp
+#| output: false
 
-# Fit model on training data
-reg_final_rf_fit <-
-  reg_final_rf |>
-  fit(reg_train)
+# Create model specification
+reg_spec <-
+  mlp(learn_rate = tune()) |>
+  set_engine("brulee") |>
+  set_mode("regression")
 
-# Predict on testing data
-reg_final_rf_pred <-
-  bind_cols(
-    reg_test,
-    predict(reg_final_rf_fit, reg_test)
-  )
+# Preview
+reg_spec
+```
+```txt
+Single Layer Neural Network Model Specification (regression)
 
-# Evaluate performance
-reg_final_rf_pred |>
-  metrics(truth = outcome, estimate = .pred)
+Main Arguments:
+  learn_rate = tune()
+
+Computational engine: brulee
+
+Model fit template:
+brulee::brulee_mlp(x = missing_arg(), y = missing_arg(), learn_rate = tune())
 ```
 :::
 
-We can now visualize the feature importance of the model. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance.
-
-::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance}
 ```{r}
-#| label: fig-pda-reg-model-spec-random-forest-workflow-tune-select-fit-evaluate-test-feature-importance
+#| label: pda-reg-mlp-learn-rate
+
+# Create a workflow
+reg_wf <-
+  workflow() |>
+  add_recipe(reg_rec) |>
+  add_model(reg_spec)
+
+# Create a grid of values for the learning rate hyperparameter
+reg_grid <-
+  grid_regular(learn_rate(), levels = 10)
+
+# Create the cross-validation folds
+reg_vfold <- vfold_cv(reg_train, v = 10)
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Create tuning workflow
+reg_tune <-
+  tune_grid(
+    reg_wf,
+    resamples = reg_vfold,
+    grid = reg_grid
+  )
+
+# Select best parameter
+chosen_learn_rate <- reg_tune |> select_best(metric = "rmse")
+
+# Update workflow
+reg_wf_mlp <-
+  reg_wf |>
+  finalize_workflow(chosen_learn_rate)
+
+# Cross-validated workflow
+reg_mlp_cv <-
+  reg_wf_mlp |>
+  fit_resamples(
+    resamples = reg_vfold,
+    control = control_resamples(save_pred = TRUE)
+  )
+```
+
+Let's collect the metrics and inspect the RMSE and $R^2$ values. The code is seen in @exm-pda-reg-metrics-mlp.
+
+::: {#exm-pda-reg-metrics-mlp}
+```{r}
+#| label: pda-reg-metrics-mlp
+
+# Collect metrics
+reg_mlp_cv |> collect_metrics()
+```
+:::
+
+So in summary, we've tried four different model specifications. The regularized linear regression model, the decision tree model, the random forest model, and the neural network model. The random forest model performed the best. For each of these models, however, we have only tried word features measured by $tf$-$idf$. We could imagine that the performance of these models could be improved by varying the features to include bigrams, for example. We could also explore different measures of word usage. Furthermore, for some of our models, we could try different engines and/ or hyperparameters (some have more than one!).
+
+We could continue to try to explore these possible combinations, and you likely would in your research. But at this point we have a model that is performing better than the null model and is performing better than the other models we have tried. So we will consider this model to be good enough for our purposes.
+
+Let's take our Random Forest model, fit it to our training data, apply it to the testing data, and collect the metrics on the test set. The code is seen in @exm-pda-reg-model-spec-random-forest-workflow-tune-fit.
+
+::: {#exm-pda-reg-model-spec-random-forest-workflow-tune-fit}
+```{r}
+#| label: pda-reg-model-spec-random-forest-workflow-tune-fit
+
+# Fit the model to the training set and
+# evaluate on the test set
+reg_final_fit <-
+  last_fit(
+    reg_wf_rf,
+    split = reg_split
+  )
+
+# Evaluate model on testing set
+reg_final_fit |> collect_metrics()
+```
+:::
+
+Ok. The difference between the cross-validated metrics and the metrics for the test set differ --but only slightly. This suggests that the model is robust and that we have not overfit the data from the training set.
+
+<!-- Step 7: Interpret -->
+
+Now, our likely goal as an academic is to understanding something about the features that contribute to the performance of the model. So let's approach extracting feature importance from the Random Forest model we build with the `ranger` engine. Remember, we added an `importance` argument to the `set_engine()` function and set it to 'impurity'. We can now take advantage by using the `vip` package to extract the feature importance. The code is seen in @exm-pda-reg-final-fit-vip.
+
+::: {#exm-pda-reg-final-fit-vip}
+```{r}
+#| label: pda-reg-final-fit-vip
+
+# Extract feature importance
+reg_vip <-
+  reg_final_fit |>
+  extract_fit_parsnip() |>
+  vi(scale = TRUE)
+
+# Preview
+reg_vip |>
+  slice_head(n = 10)
+```
+:::
+
+We can now visualize the feature importance of the model. The code is seen in @exm-pda-reg-final-fit-vip-visualize.
+
+::: {#exm-pda-reg-final-fit-vip-visualize}
+```{r}
+#| label: fig-pda-reg-final-fit-vip-visualize
 #| fig-cap: "Feature importance of the random forest model."
-#| fig-height: 4
+#| fig-width: 8
+#| fig-asp: 0.5
 
 # Extract predictions
-reg_final_rf_fit |>
-  vip::vi(scale = TRUE)  |>
+reg_vip |>
   mutate(Variable = str_replace(Variable, "^tfidf_text_", "")) |>
   slice_max(Importance, n = 20) |>
   # reorder variables by importance
@@ -1981,29 +1803,28 @@ reg_final_rf_fit |>
 ```
 :::
 
+In this section, we've built text regression models focusing on the ability to change algorithms and hyperparameters. We also seen some of the differences between evaluating model performance between classification and regression tasks. There are many more combinations of model specifications and feature selection and engineering that can be applied. In your research, you will find yourself using these tools to explore the best model for your data.
 
 ## Activities {.unnumbered}
+
+In the following activities, we will apply the concepts and techniques we have learned in this chapter. We will use the `tidymodels` framework to build and evaluate supervised machine learning models for text classification and regression tasks.
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**
 
-<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
 **What**: [Building predictive models](https://qtalr.github.io/qtalrkit/articles/recipe-9.html)\
-**How**: Read Recipe 9 and participate in the Hypothes.is online social annotation.\
-**Why**: {{< fa wrench >}} ...
+**How**: Read Recipe 9, complete comprehension check, and prepare for Lab 7.\
+**Why**: To continue to build experience building predictive models with the `tidymodels` framework.
 :::
 
 ::: {.callout}
 **{{< fa flask >}} Lab**
 
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
 **What**: [Text classification](https://github.com/qtalr/lab-09)\
 **How**: Clone, fork, and complete the steps in Lab 9.\
-**Why**: {{< fa wrench >}} ...
+**Why**: To apply your knowledge of supervised machine learning to a text classification task.
 :::
 
 ## Summary {.unnumbered}
 
-In this chapter we have learned about supervised machine learning. We have learned about the different types of supervised machine learning methods and how they can be used to predict and classify. We have also learned about the different types of data structures that are used in supervised machine learning. Finally, we have learned about the different types of evaluation metrics that are used to evaluate the performance of supervised machine learning models.
+In this chapter, we outlined the workflow for approach predictive modeling and the `tidymodels` framework. We then applied the workflow to text classification and regression tasks. Gained experience identifying, selecting, and engineering features on the one hand, and building and tuning models on the other. To evaluate the models, we used cross-validation for performance and finalized our interpretation with techniques to extract feature importance.

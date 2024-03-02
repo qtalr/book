@@ -11,30 +11,12 @@ execute:
 #| cache: false
 ```
 
-<!--
-
-Content:
-
-- IMPORTANT: Come back to effect size and variance explained
-
-Activities:
-
-- [ ] add concept questions to Activities
-- [ ] add exercises to Activities
-- [ ] add thought questions/ case studies to prose sections
-
-Formatting:
-
--->
-
 > People generally see what they look for, and hear what they listen for.
 >
 > --- Harper Lee, To Kill a Mockingbird
 
 ::: {.callout}
 **{{< fa regular list-alt >}} Outcomes**
-
-<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 - Identify the research goals of inferential data analysis
 - Describe the workflow for inferential data analysis
@@ -49,30 +31,19 @@ Formatting:
 
 ```
 
-In this chapter, we consider approaches to deriving knowledge from information which can be generalized to the population from which the data is sampled. This process is known as statistical inference. The discussion here implements descriptive assessments, statistical tests, and evaluation procedures for a series of contexts which are common in the analysis of corpus-based data. During our treatment of these contexts, we will establish a foundational understanding of the null hypothesis signficance testing (NHST) framework using a simulation-based approach. This approach is more intuitive, easier to implement, and provides a better conceptual understanding of the statistical designs and analyses. The structure of the chapter groups significance testing scenarios by reponse and explanatory variables, highlighting the commonalities and differences that arise in the statistical designs and analyses.
+In this chapter, we consider approaches to deriving knowledge from information which can be generalized to the population from which the data is sampled. This process is known as statistical inference. The discussion here implements descriptive assessments, statistical tests, and evaluation procedures for a series of contexts which are common in the analysis of corpus-based data. During our treatment of these contexts, we will establish a foundational understanding of the null hypothesis signficance testing (NHST) framework using a simulation-based approach.
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
 
-<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-<!--
-- [ ] Update lesson name,
-- [ ] update lesson purpose
--->
-
 **What**: [Advanced Tables](https://github.com/qtalr/lessons) \
-**How**: In the R Console pane load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
-**Why**: {{< fa wrench >}} TBD
+**How**: In an R console, load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
+**Why**: To explore how to enhance dataset summaries using the `janitor` package and present them effectively with the `kableExtra` package's advanced formatting options.
 :::
 
 ## Orientation {#sec-ida-orientation}
 
-The aim of this section is to provide an overview of inferential data analysis (IDA). First we consider the research goal of inferential analysis pointing to key differences with exploratory data analysis (EDA) and predictive data analysis (PDA). Next we outline the Null Hypothesis Signficance Testing (NHST) approach to IDA, highlighting the key steps in the workflow used to conduct analysis.
-
-### Research goal {#sec-ida-research-goal}
-
-In contrast to exploratory and predictive analyses, inference is not a data-driven endeavor. Rather, the goal of inferential data analysis (IDA) is to make claims about the population and assess the extent to which the data supports those claims. This implicates two key methodological restrictions which are not in play in other analysis methods.
+In contrast to exploratory and predictive analyses, inference is not a data-driven endeavor. Rather, the goal of inferential data analysis (IDA) is to make theoretical claims about the population and assess the extent to which the data supports those claims. This implicates two key methodological restrictions which are not in play in other analysis methods.
 
 First, the research question and expected findings are formulated *before* the data is analyzed, in fact strictly speaking this should take place even before data collection. This helps ensure that the data is aligned with the research question and that the data is representative of the population and that the analysis has a targeted focus and does not run the risk of becoming a 'just-so' story[^hark] or a 'significance-finding' mission[^phack] both of which violate the principles of significance testing.
 
@@ -80,16 +51,7 @@ First, the research question and expected findings are formulated *before* the d
 
 [^phack]: "p-hacking" is the practice of running multiple tests until a statistically significant result is found. This practice violates the principles of significance testing [@Head2015].
 
-Second, the data used in IDA is only used once. That is to say, that the entire dataset is used a single time to statistically interrogate the relationship(s) of interest. In both EDA and PDA the data can be approached in different ways and the results of the analysis can be used to inform the next steps in the analysis. In IDA, however, the data is used to test a specific hypothesis and the results of the analysis are interpreted in the context of that hypothesis.
-
-### Approach {#sec-ida-approach}
-
-<!-- Note:
-This section should cover the following:
-- Workflow: Identify, Inspect, Interrogate, Interpret
-  - Add a few words on the common aspects with other research approaches
-  - And point out the differences (use of data, results, interpretation, etc.)
--->
+Second, the data used in IDA is only used once. That is to say, that the entire dataset is used a single time to statistically interrogate the relationship(s) of interest. In both EDA and PDA the data can be approached multiple times in different ways and the results of the analysis can be used to inform the next steps in the analysis. In IDA, however, the data is used to test a specific hypothesis and the results of the analysis are interpreted in the context of that hypothesis.
 
 The methodological approach to inferential data analysis (IDA) is the most straightforward of the analysis types covered in this textbook. As the research goal is to test a claim, the steps necessary are fewer than in EDA or PDA, where the exploratory nature of these approaches includes various possible iterations. The workflow for IDA is shown in @tbl-ida-workflow.
 
@@ -102,24 +64,22 @@ The methodological approach to inferential data analysis (IDA) is the most strai
 | 3 | Interrogate | Apply the appropriate statistical procedure to the dataset. |
 | 4 | Interpret | Review the statistical results and interpret them in the context of the hypothesis. |
 
-: Workflow for inferential data analysis {#tbl-ida-workflow tbl-colwidths="[10, 15, 75]" .striped}
+: Workflow for inferential data analysis {#tbl-ida-workflow tbl-colwidths="[5, 10, 85]" .striped}
 
-Based on the hypothesis statement, we first identify and operationalize the variables. The response variable whose variation we aim to explain. In most statistical designs, one or more explanatory variables are included in the analysis in an attempt to gauge the extent to which these variables account for the variation in the response variable. For both reponse and explanatory variables, it is key to confirm that your operationalization of the variables is well-defined and that the data is aligned with the operationalization.
+Based on the hypothesis statement, we first identify and operationalize the variables. The response variable whose variation we aim to explain. In most statistical designs, one or more explanatory variables are included in the analysis in an attempt to gauge the extent to which these variables account for the variation in the response variable. For both reponse and explanatory variables, it is key to confirm that your operationalization of the variables is well-defined and that the data aligns.
 
 <!-- something about unit of analysis and observation in hypothesis statements and the mapping of variables? -->
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
 
-- [ ] Update this callout
+What are the explanatory and/ or response variables in each of these statements? How are these variables operationalized? What key sampling features are necessary for the data to test these hypotheses?
 
-Consider the following hypothesis statements:
-
-- *The length of the recipient clause is related to the realization of the recipient clause.*
-- *The length of the recipient clause is related to the realization of the recipient clause in spoken language but not in written language.*
-- *The length of the recipient clause is related to the realization of the recipient clause in spoken language but not in written language when the length of the theme clause is controlled for.*
-
-What are the explanatory and/ or response variables in each of these statements? What are the operationalizations of these variables? What are the implications for the data that is used to test these hypotheses?
+1. There will be statistically significant differences in the kinds of collocations used in English dialects spoken in urban areas compared to those spoken in rural areas.
+2. French L2 learners will make more vocabulary errors in oral production than in written production.
+3. The association strength between Mandarin words and their English translations will be a significant predictor of translation difficulty for novice translators.
+4. The prevalence of gender-specific words in German-speaking communities on distinct online forums will significantly reflect gender roles.
+5. The frequency of function words used by Spanish L2 learners will be a significant predictor of their stage in language acquisition.
 :::
 
 Next, we determine the informational values of the variables. The informational value of each variable will condition how we approach visualization, interrogation, and ultimately interpretation of the results. Note, that some informational types can be converted to other types, specifically higer-order types can be converted to lower-order types. For example, a continuous variable can be converted to a categorical variable, but not vice versa. It is preferrable, however, to use the highest informational value of a variable. Simplifying data results in a loss of information --which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data [@Baayen2004].
@@ -136,20 +96,13 @@ Used in conjunction with p-values, confidence intervals can provide a more nuanc
 
 It is important to underscore that the purpose of IDA is to draw conclusions from a dataset which are generalizable to the population. These conclusions require that there are rigorous measures to ensure that the results of the analysis do not overgeneralize (suggest there is a relationship when there is not one) and balance that with the fact that we don't want to undergeneralize (miss the fact that there is an relationship in the population, but our analysis was not capable of detecting it).
 
-
 ## Analysis {#sec-ida-analysis}
 
 <!-- Goals of this section -->
 
-In this section, we will discuss the practical application of inferential data analysis. The discussion will be divided into two sections based on the type of response variable: categorical and numeric. We will then explore specific designs for univariate, bivariate, and multivariate tests. Throughout this process, we will focus on null hypothesis testing, covering concepts and methods that are relevant to significance testing and the interpretation of results.
+In this section, we will discuss the practical application of inferential data analysis. The discussion will be divided into two sections based on the type of response variable: categorical and numeric. We will then explore specific designs for univariate, bivariate, and multivariate tests. We will learn and implement null significance testing using a simulation-based workflow. In contrast to theory-based methods, simulation-based methods tend to be more intuitive, easier to implement, and provide a better conceptual understanding of the statistical designs and analyses [@Morris2019; @Rossman2014a].
 
-<!-- Research questions -->
-
-Two datasets are included in this section to provide a context for the inferential data analysis in both categorical and numeric cases. The `dative` dataset is a subset of the `languageR::dative` dataset [@R-languageR]. It contains over 3k observations describing the realization of the recipient clause in English dative constructions. The `fillers` dataset is drawn from the Switchboard Dialog Act Corpus [@SWDA2008]. This dataset contains //FIXME ... observations summarizing the use of fillers by speaker in the corpus.
-
-<!-- Approach -->
-
-We will learn and implement null significance testing using a simulation-based method. In contrast to theory-based methods, simulation-based methods tend to be more intuitive, easier to implement, and provide a better conceptual understanding of the statistical designs and analyses [@Morris2019; @Rossman2014a]. The steps for implementing a simulation-based approach to significance testing are outlined in @tbl-ida-simulation.
+The steps for implementing a simulation-based approach to significance testing are outlined in @tbl-ida-simulation.
 
 <!-- Simulation-based approach -->
 
@@ -158,38 +111,27 @@ We will learn and implement null significance testing using a simulation-based m
 | 1 | Specify | Specify the variables of interest and their relationship |
 | 2 | Calculate | Calculate the observed statistic |
 | 3 | Hypothesize | Generate the null hypothesis distribution |
-| 4 | Visualize | Visualize the null hypothesis distribution |
-| 5 | Get p-value | Calculate the p-value |
-| 6 | Get confidence interval | Calculate the confidence interval |
+| 4 | Get p-value | Calculate the p-value |
+| 5 | Get confidence interval | Calculate the confidence interval |
 
-: Simulation-based approach to significance testing {#tbl-ida-simulation tbl-colwidths="[10, 25, 65]" .striped}
+: Simulation-based workflow for significance testing {#tbl-ida-simulation tbl-colwidths="[5, 25, 70]" .striped}
 
 <!-- Setup: packages/ options/ data -->
 
 The `infer` package [@R-infer] provides a tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the `tidyverse` [@R-tidyverse], `infer` provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution, visualize the null hypothesis distribution, calculate the p-value, and calculate the confidence interval.
 
-Let's load the necessary packages and import the datasets we will use in this section, as seen in @exm-ida-setup.
+Let's load the necessary packages we will use in this section, as seen in @exm-ida-setup.
 
 ::: {#exm-ida-setup}
-```{r}
-#| label: ida-setup-show
-#| eval: false
-
+```r
 # Load packages
 library(infer)      # for statistical inference
 library(skimr)      # for descriptive statistics
 library(janitor)    # for cross-tabulation
-
-# Load datasets
-dative_df <-
-  read_csv("../data/derived/dative.csv")
-
-fillers_df <-
-  read_csv("../data/derived/fillers.csv")
 ```
 
 ```{r}
-#| label: ida-setup-run
+#| label: ida-setup
 #| echo: false
 #| message: false
 
@@ -197,42 +139,31 @@ fillers_df <-
 library(infer)      # for statistical inference
 library(skimr)      # for descriptive statistics
 library(janitor)    # for cross-tabulation
-
-# Load datasets
-dative_df <-
-  read_csv("data/dative_ida.csv")
-
-fillers_df <-
-  read_csv("data/swda_fillers_ida.csv")
 ```
 :::
 
 ### Categorical {#sec-ida-categorical}
 
-<!-- The goal of this ....
-set up the analysis questions, hypotheses, and datasets
--->
-
 Here we demonstrate the application of inferential data analysis (IDA) to categorical response variables. This will include various common statistical designs and analyses. In @tbl-ida-cat-design, we see common design scenarios, the variables involved, and the statistic used in the analysis.
 
-| Scenario | Dependent variable | Independent variable(s) | Statistical test |
-|:---------|:-------------------|:------------------------|:-----------------|
-| Univariate | Categorical | None | Proportion |
-| Bivariate | Categorical | Categorical | Difference in proportions |
-| Bivariate | Categorical (>2 levels) | Categorical (>2 levels) | Chi-square |
-| Multivariate | Categorical | Categorical or Numeric (>1 variables) | Logistic regression |
+| Scenario | Explanatory variable(s) | Statistical test | `infer` |
+|:---------|:------------------------|:-----------------|:------------|
+| Univariate  | - | Proportion | `prop` |
+| Bivariate | Categorical | Difference in proportions | `diff in props` |
+| Bivariate (>2 levels) | Categorical (3+ levels) | Chi-square | `chisq` |
+| Multivariate  | Categorical or Numeric<br>(2+ variables) | Logistic regression | `fit()` |
 
-: Statistical test designs for categorical response variables {#tbl-ida-cat-design tbl-colwidths="[10, 30, 30, 20]" .striped}
+: Statistical test designs for categorical response variables {#tbl-ida-cat-design tbl-colwidths="[10, 35, 35, 20]" .striped}
 
-We will use the `dative_df` dataset to illustrate each of these designs and analyses. To familiarize ourselves with the dataset, let's consider the data dictionary in @tbl-ida-cat-data-dict.
+We will use a derived version of the `dative` dataset from the `languageR` package [@R-languageR]. It contains over 3k observations describing the realization of the recipient clause in English dative constructions. To familiarize ourselves with the dataset, let's consider the data dictionary in @tbl-ida-cat-data-dict.
 
 ```{r}
 #| label: tbl-ida-cat-data-dict
-#| tbl-cap: "Data dictionary for the `dative_df` dataset."
-#| echo: false
+#| tbl-cap: "Data dictionary for the `dative_tbl` dataset."
 #| message: false
+#| echo: false
 
-# Data dictionary for the `dative_df` dataset
+# Data dictionary for the `dative_tbl` dataset
 read_csv("data/dative_ida_dd.csv") |>
   kable() |>
   kable_styling()
@@ -240,46 +171,71 @@ read_csv("data/dative_ida_dd.csv") |>
 
 We see that this dataset has four variables, two categorical and two numeric. In our demonstrations we are going to use the `realization_of_rcp` as the response variable, the variable whose variation we are investigating.
 
-For a bit more context, a dative is the phrase which reflects the entity that takes the recipient role in a ditransitive clause. In English, the recipient (dative) can be realized as either a prepositional phrase (PP) as seen in (1) or as a noun phrase (NP) as seen in (2) below.
+For a bit more context, a dative is the phrase which reflects the entity that takes the recipient role in a ditransitive clause. In English, the recipient (dative) can be realized as either a prepositional phrase (PP) as seen in (1) or as a noun phrase (NP) as seen in (2) @exm-ida-cat-dative-examples.
 
+::: {#exm-ida-cat-dative-examples}
 Example utterances:
 
 1. John gave the book [to Mary ~PP~].
 2. John gave [Mary ~NP~] the book.
+:::
 
-Together these two syntactic options are known as the Dative Alternation @Bresnan2007.
+Together these two syntactic options are known as the Dative Alternation [@Bresnan2007].
 
-From the large set of variables in the original dataset, I've selected three explanatory variables to use in our demonstrations. These variables are:
+Let's go ahead and load the dataset, as seen in @exm-ida-cat-read-dative.
 
-- `modality`: either written or spoken
-- `length_of_rcp`: the length of the recipient clause (in words)
-- `length_of_thm`: the length of the theme clause (in words)
-
-In preparation for statistical analysis, we need to convert the character variables to factors. Let's do that and preview the dataset, as seen in @exm-ida-cat-setup-factors.
-
-::: {#exm-ida-cat-setup-factors}
+::: {#exm-ida-cat-read-dative}
+```r
+# Load datasets
+dative_tbl <-
+  read_csv("../data/dative_ida.csv")
+```
 ```{r}
-#| label: ida-cat-setup-factors
+#| label: ida-cat-read-dative
+#| include: false
 
-# Convert character variables to factors
-dative_df <-
-  dative_df |>
-  mutate(across(where(is.character), factor))
-
-# Preview
-glimpse(dative_df)
+# Load datasets
+dative_tbl <-
+  read_csv("data/dative_ida.csv")
 ```
 :::
 
-We can see that the dataset includes `r nrow(dative_df)` observations. We will take a closer look a the descriptive statistics for the variables as we prepare for each analysis.
+
+```{r}
+#| label: ida-cat-diagnostics
+#| include: false
+
+# Convert character variables to factors
+dative_tbl <-
+  dative_tbl |>
+  mutate(across(where(is.character), factor))
+
+# Statistical overview
+dative_tbl |>
+  skim()
+```
+
+In preparation for statistical analysis, I performed a statistical overview and diagnostics of the dataset. This included checking for missing data, outliers, and anomalies. I also checked the distribution of the variables using descriptive statistics and visualizations. The results of this overview and diagnostics are not shown here, but they are important steps in the IDA workflow. In this process, I converted the character variables to factors as most statistical tests require factors. A preview of the dataset is shown in @exm-ida-cat-dative-preview.
+
+::: {#exm-ida-cat-dative-preview}
+```{r}
+#| label: ida-cat-dative-preview
+#| echo: false
+
+# Preview of the dataset
+dative_tbl
+```
+:::
+
+We can see that the dataset includes `r nrow(dative_tbl)` observations. We will take a closer look a the descriptive statistics for the variables as we prepare for each analysis.
 
 #### Univariate analysis {#sec-ida-cat-univariate}
 
-The univariate analysis is the simplest statistical design and analysis. It includes only one variable. The goal is to describe the distribution of the levels of the variable. The `realization_of_rcp` variable has two levels: NP and PP. A potential research question is:
+The univariate analysis is the simplest statistical design and analysis. It includes only one variable. The goal is to describe the distribution of the levels of the variable. The `realization_of_rcp` variable has two levels: NP and PP. A potential research question fo a case like this may aim to test the claim that:
 
-- Is there a difference in the proportion of NP and PP realizations of the recipient clause?
+- NP realizations of the recipient clause are the canonical form in English dative constructions, and therefore will be the most frequent realization of the recipient clause.
 
-This question can be answered using a difference in proportion test. The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause. The alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause.
+This hypothesis can be tested using a **difference in proportion test**. The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause. The alternative hypothesis is that NP realizations of the recipient clause are more frequent than PP realizations of the recipient clause.
 
 Before we get into statistical analysis, it is always a good idea to cross-tabulate or visualize the question, depending on the complexity of the relationship. In @exm-ida-cat-univariate-tbl, we see the code the shows the distribution of the levels of the `realization_of_rcp` variable in a cross-table.
 
@@ -289,7 +245,7 @@ Before we get into statistical analysis, it is always a good idea to cross-tabul
 #| tbl-cap: "Distribution of the levels of the `realization_of_rcp` variable."
 
 # Cross-tabulation of `realization_of_rcp`
-dative_df |>
+dative_tbl |>
   tabyl(realization_of_rcp) |>
   adorn_pct_formatting(digits = 2) |>
   kable() |>
@@ -301,7 +257,7 @@ From @tbl-ida-cat-univariate, we see that the proportion of NP realizations of t
 
 To determine if the distribution of the levels of the `realization_of_rcp` variable is different from what we would expect if the null hypothesis were true, we need to calculate the difference observed in the sample and compare it to the differences observed in many samples where the null hypothesis is true.
 
-First, let's calculate the proportion of NP and PP realizations of the recipient clause in the sample. We turn to the `specify()` function from the `infer` package to specify the variable of interest. In this case, we only have the response variable. Furthermore, the argument `success` specifies the level of the response variable that we will use as the 'success'. The term 'success' is used because the `specify()` function was designed for binomial variables where the levels are 'success' and 'failure', as seen in @exm-ida-cat-specify.
+First, let's calculate the proportion of NP and PP realizations of the recipient clause in the sample. We turn to the `specify()` function from the `infer` package to specify the variable of interest, step 1 in the simulation-based workflow in @tbl-ida-simulation. In this case, we only have the response variable. Furthermore, the argument `success` specifies the level of the response variable that we will use as the 'success'. The term 'success' is used because the `specify()` function was designed for binomial variables where the levels are 'success' and 'failure', as seen in @exm-ida-cat-specify.
 
 ::: {#exm-ida-cat-specify}
 ```{r}
@@ -309,19 +265,20 @@ First, let's calculate the proportion of NP and PP realizations of the recipient
 
 # Specify the variable of interest
 dative_spec <-
-  dative_df |>
+  dative_tbl |>
   specify(
     response = realization_of_rcp,
     success = "NP"
   )
 
+# Preview
 dative_spec
 ```
 :::
 
 The `dative_spec` is a data frame with attributes which are used by the `infer` package to maintain information about the statistical design for the analysis. In this case, we only have information about what the response variable is.
 
-The next step to calculating the observed proportion is to calculate the proportion statistic. The `calculate()` function from the `infer` package is used to calculate the proportion statistic. The `calculate()` function takes the `dative_spec` data frame as an argument. The `calculate()` function returns a data frame with the proportion statistic in the `stat` column, as seen in @exm-ida-cat-calculate.
+Step 2 is to calculate the observed statistic. The `calculate()` function is used to calculate the proportion statistic setting `stat = "prop"`, as seen in @exm-ida-cat-calculate.
 
 ::: {#exm-ida-cat-calculate}
 ```{r}
@@ -332,17 +289,18 @@ dative_obs <-
   dative_spec |>
   calculate(stat = "prop")
 
+# Preview
 dative_obs
 ```
 :::
 
 Note, that the observed statistic, proportion, is the same as the proportion we calculated in @tbl-ida-cat-univariate. In such a simple example, the summary statistic and the observed statistic are the same. But this simple example shows how choosing the 'success' level of the response variable is important. If we had chosen the 'PP' level as the 'success' level, then the observed statistic would be the proportion of PP realizations of the recipient clause. There is nothing wrong with choosing the 'PP' level as the 'success' level, but it would change the direction of the observed statistic.
 
-Now that we have the observed statistic, our goal will be to determine if the observed statistic is different from what we would expect if the null hypothesis were true. To do this, we simulate many samples where the null hypothesis is true. Simulation means that we will randomly sample from the `dative_df` data frame many times. Note that sampling the dataset in this way is much more feasible with a computer than it would be to do so by hand. This is one of the advantages of using a computer for statistical analysis.
+Now that we have the observed statistic, our goal will be to determine if the observed statistic is different from what we would expect if the null hypothesis were true. To do this, we simulate samples where the null hypothesis is true, step 3 in our workflow.
 
-The only addition decision we need to make is how the sampling takes place. Since `realization_of_rcp` is a variable with only two levels, the null hypothesis that both levels are equally likely. In other words, in a null hypothesis world, NP and PP we would expect the proportions to roughly be 50/50.
+Simulation means that we will randomly sample from the `dative_tbl` data frame many times. We need to determine how the sampling takes place. Since `realization_of_rcp` is a variable with only two levels, the null hypothesis is that both levels are equally likely. In other words, in a null hypothesis world, NP and PP we would expect the proportions to roughly be 50/50.
 
-To formulize this hypothesis with `infer` we use the `hypothesize()` function and set the null hypothesis to "point" and the proportion to 0.5. Then we can `generate()` a number of samples, say 1,000, drawn from our 50/50 world. Finally, the "prop" (proportion) statistic is `calculate()`d for each of the 1,000 samples and returned in a data frame, as seen in @exm-ida-cat-null-hypothesis.
+To formulize this hypothesis with `infer` we use the `hypothesize()` function and set the null hypothesis to "point" and the proportion to 0.5. Then we can `generate()` a number of samples, say 1,000, drawn from our 50/50 world. Finally, the `prop` (proportion) statistic is calculated for each of the 1,000 samples and returned in a data frame, as seen in @exm-ida-cat-null-hypothesis.
 
 ::: {#exm-ida-cat-null-hypothesis}
 ```{r}
@@ -355,6 +313,7 @@ dative_null <-
   generate(reps = 1000, type = "draw") |>
   calculate(stat = "prop")
 
+# Preview
 dative_null
 ```
 :::
@@ -367,102 +326,68 @@ To appreciate the null hypothesis distribution, we can visualize it using a hist
 ```{r}
 #| label: fig-ida-cat-null-hypothesis
 #| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause."
-#| fig-height: 4
+#| fig-width: 8
+#| fig-asp: 0.5
 
 # Visualize the null hypothesis distribution
-dative_null |>
-  visualize()
+dative_null |> visualize()
+```
+
+```{r}
+#| label: ida-cat-null-hypothesis-range
+#| include: false
+
+null_range <- round(range(dative_null$stat), 2)
+null_mean <- round(mean(dative_null$stat), 2)
+null_sd <- round(sd(dative_null$stat), 2)
 ```
 :::
 
-On the x-axis is the proportion statistic of NP realizations of the recipient clause that we would expect if the null hypothesis were true. For the 1,000 samples, the proportion statistic ranges from `r round(range(dative_null$stat), 2)`. Importantly we can appreciate that the most of the proportion statistics are around 0.5, which is what we would expect if the null hypothesis were true. But there is variation, as we would also expect.
+On the x-axis is the proportion statistic of NP realizations of the recipient clause that we would expect if the null hypothesis were true. For the 1,000 samples, the proportion statistic ranges from `r null_range[1]` to `r null_range[2]`. Importantly we can appreciate that the most of the proportion statistics are around 0.5, in fact, the mean is `r null_mean` with a standard deviation of `r null_sd`, which is what we would expect if the null hypothesis were true. But there is variation, as we would also expect.
 
 Why would we expect variation? Consider the following analogy. If we were to flip a fair coin 10 times, we would expect to get 5 heads and 5 tails. But this doesn't always happen. Sometimes we get 6 heads and 4 tails. Sometimes we get 7 heads and 3 tails, and so on. As the number of flips increases, however, we would expect the proportion of heads to be closer to 0.5, but there would still be variation. The same is true for the null hypothesis distribution. As the number of samples increases, we would expect the proportion of NP realizations of the recipient clause to be closer to 0.5, but there would still be variation. The question is whether the observed statistic we obtained from our data, in @exm-ida-cat-calculate, is within some level of variation that we would expect if the null hypothesis were true.
 
-Let's visualize the observed statistic on the null hypothesis distribution, as seen in @fig-ida-cat-null-hypothesis-obs, to gauge whether the observed statistic is within some level of variation that we would expect if the null hypothesis were true.
+Let's visualize the observed statistic on the null hypothesis distribution, as seen in @fig-ida-cat-null-hypothesis-obs, to gauge whether the observed statistic is within some level of variation that we would expect if the null hypothesis were true. The `shade_p_value()` function will take the null hypothesis distribution and the observed statistic and shade the sample statistics that fall within the alpha level.
 
 ::: {#exm-ida-cat-null-hypothesis-obs}
+```r
+dative_null |>
+  visualize() + # note we are adding a visual layer `+`
+  shade_p_value(
+    obs_stat = dative_obs, # the observed statistic
+    direction = "greater" # the direction of the alternative hypothesis
+  )
+```
 ```{r}
 #| label: fig-ida-cat-null-hypothesis-obs
 #| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause with the observed statistic."
-#| fig-height: 4
+#| echo: false
+#| fig-width: 8
+#| fig-asp: 0.5
 
 # Visualize the null hypothesis distribution with the observed statistic
 dative_null |>
   visualize() + # note we are adding a visual layer `+`
-  geom_vline(
-    data = dative_obs,      # the data is the observed statistic
-    aes(xintercept = stat), # the x-axis is the proportion statistic
-    color = "red",          # the color of the line is red
-    linewidth = 2           # the size of the line is 2
-  )
-```
-:::
-
-Just from a visual inspection, we can see that the observed statistic lies far away from the null distribution, far right of the right tail. This suggests that the observed statistic is not within some level of variation that we would expect if the null hypothesis were true.
-
-But we need to quantify this. We need to calculate the probability of observing the observed statistic or a more extreme statistic if the null hypothesis were true. This is called the p-value. The p-value is calculated by counting the number of samples in the null hypothesis distribution that are more extreme than expected within some level of uncertainty. 95% is the most common level of uncertainty, which is called the alpha level. The remain 5% of the distribution is the space where the likelihood that the null hypothesis accounts for the statistic is below This means that if the p-value is less than 0.05, then we reject the null hypothesis. If the p-value is greater than 0.05, then we fail to reject the null hypothesis.
-
-The `shade_p_value()` function from the `infer` package will plot our observed statistic and shade the sample statistics that fall within the alpha level, as seen in @exm-ida-cat-null-hypothesis-obs-pval.
-
-::: {#exm-ida-cat-null-hypothesis-obs-pval}
-```{r}
-#| label: fig-ida-cat-null-hypothesis-obs-pval
-#| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause with the observed statistic and p-value."
-#| fig-height: 4
-
-# Visualize the null hypothesis distribution with the observed statistic and p-value
-
-dative_null |>
-  visualize() +
   shade_p_value(
-    dative_obs, # the observed statistic
-    direction = "two-sided", # the direction of the alternative hypothesis
-  )
-```
-:::
-
-The two plots we've generated look identical, we cannot appreciate the shading of the p-value range, as our statistic is so far away from the null hypothesis distribution. But if we were to change the observed statistic, to say $0.51$, we would see the shading, as seen in @exm-ida-cat-null-hypothesis-obs-pval-alpha.
-
-::: {#exm-ida-cat-null-hypothesis-obs-pval-alpha}
-```{r}
-#| label: fig-ida-cat-null-hypothesis-obs-pval-alpha
-#| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause with the observed statistic and p-value with alpha level of 0.1."
-#| fig-height: 4
-
-# Visualize the null hypothesis distribution with the observed statistic and p-value
-dative_null |>
-  visualize() +
-  shade_p_value(
-    obs_stat = 0.51, # the observed statistic
-    direction = "two-sided", # the direction of the alternative hypothesis
-  )
-```
-:::
-
-Now we can appreciate the shading of the p-value range. We can now talk about the "two-sided" direction we used. The direction of the alternative hypothesis is important because it determines the p-value range. The "two-sided" direction means that we are interested in the proportion of NP realizations of the recipient clause being different from 0.5. If we were only interested in the proportion of NP realizations of the recipient clause being greater than 0.5, then we would use the "greater" direction. If we were only interested in the proportion of NP realizations of the recipient clause being less than 0.5, then we would use the "less" direction.
-
-Let's visualize our hypothetical observed statistic of 0.51 on the null hypothesis distribution were the alternative hypothesis is that the proportion of NP realizations of the recipient clause is greater than 0.5, as seen in @exm-ida-cat-null-hypothesis-obs-pval-greater.
-
-::: {#exm-ida-cat-null-hypothesis-obs-pval-greater}
-```{r}
-#| label: fig-ida-cat-null-hypothesis-obs-pval-greater
-#| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause with the observed statistic and p-value with alpha level of 0.1 and alternative hypothesis that the proportion of NP realizations of the recipient clause is greater than 0.5."
-#| fig-height: 4
-
-# Visualize the null hypothesis distribution with the observed statistic and p-value
-dative_null |>
-  visualize() +
-  shade_p_value(
-    0.51, # the observed statistic
+    obs_stat = dative_obs, # the observed statistic
     direction = "greater", # the direction of the alternative hypothesis
-  )
+    color = "grey"
+  ) +
+  labs(title = "")
 ```
 :::
 
-As you can now see, the p-value range is dependent on the null hypothesis distribution and the direction of the alternative hypothesis as well as the number of samples. The more samples we have, the more precise the p-value range will likely be.
+Just from a visual inspection, we can see that the observed statistic lies far away from the null distribution, far right of the right tail. No shading appears in this case as the observed statistic is far from the expected variation. This suggests that the observed statistic is not within the level of variation that we would expect if the null hypothesis were true.
 
-With `infer` we can calculate the p-value using the `get_p_value()` function. Let's calculate the p-value for our observed statistic and the hypothetical observed statistic of 0.51, as seen in @exm-ida-cat-p-value.
+::: {.callout .halfsize}
+**{{< fa regular hand-point-up >}} Tip**
+
+The direction of the alternative hypothesis is important because it determines the p-value range. The "two-sided" direction means that we are interested in the proportion being different from 0.5. If we were only interested in the proportion of one outcome being greater than 0.5, then we would use the "greater" direction, or "less" in the opposite scenario.
+:::
+
+But we need to quantify this. We need to calculate the probability of observing the observed statistic or a more extreme statistic if the null hypothesis were true. This is called the p-value, and calculating this estimate is step 4 in the workflow. The **p-value** is calculated by counting the number of samples in the null hypothesis distribution that are more extreme than expected within some level of uncertainty. 95% is the most common level of uncertainty, which is called the alpha level. The remain 5% of the distribution is the space where the likelihood that the null hypothesis accounts for the statistic is below This means that if the p-value is less than 0.05, then we reject the null hypothesis. If the p-value is greater than 0.05, then we fail to reject the null hypothesis.
+
+With `infer` we can calculate the p-value using the `get_p_value()` function. Let's calculate the p-value for our observed statistic, as seen in @exm-ida-cat-p-value.
 
 ::: {#exm-ida-cat-p-value}
 ```{r}
@@ -471,24 +396,15 @@ With `infer` we can calculate the p-value using the `get_p_value()` function. Le
 # Calculate the p-value (observed statistic)
 dative_null |>
   get_p_value(
-    dative_obs, # the observed statistic
-    direction = "two-sided" # the direction of the alternative hypothesis
-  )
-
-# Calculate the p-value (hypothetical observed statistic)
-dative_null |>
-  get_p_value(
-    0.51, # the observed statistic
-    direction = "two-sided" # the direction of the alternative hypothesis
+    obs_stat = dative_obs, # the observed statistic
+    direction = "greater" # the direction of the alternative hypothesis
   )
 ```
 :::
 
 The p-value for our observed statistic is reported as $0$, with a warning that the p-value estimate is contingent on the number of samples we generate in the null distribution. 1,000 is a reasonable number of samples, so we likely have a statistically significant result at the alpha level of 0.05.
 
-The p-value for our hypothetical observed statistic of 0.51 is reported as larger than $0.05$, which provides evidence that our hypothetical observed statistic is not sufficiently different from the variation expected in the null distribution to reject the null hypothesis, i.e. we would not have a significant result at the alpha level of 0.05.
-
-The p-value is one, traditionally very common, estimate of uncertainty. Another estimate of uncertainty is the confidence interval. The confidence interval is the range of values for our test statistic that we would expect the true statistic value to fall within some level of uncertainty. Again, 95% is the most common level of uncertainty. The upper and lower bounds of this range are called the confidence limits for the test statistic. The confidence interval is calculated by calculating the confidence limits for the test statistic for many samples from the observed data. But instead of generating a null hypothesis distribution, we generate a distribution based on resampling from the observed data. This is called the bootstrap distribution. The bootstrap distribution is generated by resampling from the observed data, with replacement, many times. This simulates the process of sampling from the population many times. Each time the test statistic is generated for each sample. The confidence limits are the 2.5th and 97.5th percentiles of the bootstrap distribution. The confidence interval is the range between the confidence limits.
+The p-value is one, traditionally very common, estimate of uncertainty. Another estimate of uncertainty is the confidence interval, our 5th and final step. The **confidence interval** is the range of values for our test statistic that we would expect the true statistic value to fall within some level of uncertainty. Again, 95% is the most common level of uncertainty. The upper and lower bounds of this range are called the confidence limits for the test statistic. The confidence interval is calculated by calculating the confidence limits for the test statistic for many samples from the observed data. But instead of generating a null hypothesis distribution, we generate a distribution based on resampling from the observed data. This is called the bootstrap distribution. The **bootstrap distribution** is generated by resampling from the observed data, with replacement, many times. This simulates the process of sampling from the population many times. Each time the test statistic is generated for each sample. The confidence limits are the 2.5th and 97.5th percentiles of the bootstrap distribution. The confidence interval is the range between the confidence limits.
 
 In @exm-ida-cat-confidence-interval, we see the code for calculating the confidence interval for our observed statistic.
 
@@ -513,11 +429,7 @@ dative_ci
 Let's visualize the confidence interval for our bootstrapped samples, as seen in @exm-ida-cat-confidence-interval-visualize.
 
 ::: {#exm-ida-cat-confidence-interval-visualize}
-```{r}
-#| label: fig-ida-cat-confidence-interval-visualize
-#| fig-cap: "Bootstrap distribution of the proportion of NP realizations of the recipient clause with the confidence interval."
-#| fig-height: 4
-
+```r
 # Visualize the bootstrap distribution with the confidence interval
 dative_boot |>
   visualize() +
@@ -525,57 +437,49 @@ dative_boot |>
     dative_ci # the confidence interval
   )
 ```
+```{r}
+#| label: fig-ida-cat-confidence-interval-visualize
+#| fig-cap: "Bootstrap distribution of the proportion of NP realizations of the recipient clause with the confidence interval."
+#| echo: false
+#| fig-width: 8
+#| fig-asp: 0.5
+
+# Visualize the bootstrap distribution with the confidence interval
+dative_boot |>
+  visualize() +
+  shade_confidence_interval(
+    endpoints = dative_ci, # the confidence interval
+    color = "grey2",
+    fill = "grey"
+  ) +
+  labs(title = "")
+```
 :::
 
 The confidence level is the probability that the confidence interval contains the true value. The confidence level is typically set to 0.95 in the social sciences. This means that if the confidence interval contains the null hypothesis value, then we fail to reject the null hypothesis. If the confidence interval does not contain the null hypothesis value, then we reject the null hypothesis.
 
-Our stat is `r dative_obs$stat` and the confidence interval is `r dative_ci$lower_ci` to `r dative_ci$upper_ci`. The confidence interval does not contain the null hypothesis value of 0.5, which provides evidence that the proportion of NP realizations of the recipient clause is different from 0.5.
+Confidence intervals are often misinterpreted. Confidence intervals are not the probability that the true value is within the range. The true value is either within the range or not. The confidence interval is the probability that the range contains the true value. This is a subtle but important distinction. Interpreted correctly confidence intervals can enhance our understanding of the uncertainty of our test statistic and reduces the interpretation of p-values (which are based on a relatively arbitrary alpha level) as a binary decision, significant or not significant. Instead, confidence intervals encourage us to think about the uncertainty of our test statistic as a range of values that we would expect the true value to fall within some level of uncertainty.
 
-Confidence intervals are often misinterpreted. Confidence intervals are not the probability that the true value is within the range. The true value is either within the range or not. The confidence interval is the probability that the range contains the true value. This is a subtle but important distinction.
-
-Interpreted correctly confidence intervals can enhance our understanding of the uncertainty of our test statistic and reduces the interpretation of p-values (which are based on a relatively arbitrary alpha level) as a binary decision, significant or not significant. Instead, confidence intervals encourage us to think about the uncertainty of our test statistic as a range of values that we would expect the true value to fall within some level of uncertainty.
-
-<!-- - [ ] Add note on effect size for proportion statistic?
-  - Effect size measures for proportion is the difference in proportions?-->
+Our stat is `r dative_obs$stat` and the confidence interval limits are `r dative_ci$lower_ci` and `r dative_ci$upper_ci`. The confidence interval does not contain the null hypothesis value of 0.5, which provides supports the evidence from the p-value that the proportion of NP realizations of the recipient clause is greater than 0.5.
 
 #### Bivariate analysis {#sec-ida-cat-bivariate}
 
-The univarite case is not very interesting or common in statistical inference, but it is a good place to start to understand the process and the logic of statistical inference. The bivariate case, on the other hand, is much more common and interesting. The bivariate case includes two variables. The goal is to describe the relationship between the two variables.
+The univarite case is not very interesting or common in statistical inference, but it is a good place to start to understand the simulation-based process and the logic of statistical inference. The bivariate case, on the other hand, is much more common and interesting. The bivariate case includes two variables. The goal is to describe the relationship between the two variables.
 
-In the `dative_df` dataset, we can imagine asking the question:
+Using the `dative_tbl` dataset, we can imagine making the claim that:
 
-- Is there a difference in the proportion of NP and PP realizations of the recipient clause by modality?
+- The proportion of NP and PP realizations of the recipient clause are contingent on the modality.
 
-This question can be answered using a difference in proportions test, as both variables are binomial (have two levels). The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality. The alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality.
+This hypothesis can be approached using a **difference in proportions** test, as both variables are binomial (have two levels). The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality. The alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality.
 
-We can cross-tabulate or visualize, but let's visualize this relationship in this case. In @exm-ida-cat-bivariate-vis, we see the code the shows the distribution of the levels of the `realization_of_rcp` variable by the levels of the `modality` variable.
-
-::: {#exm-ida-cat-bivariate-vis}
-```{r}
-#| label: fig-ida-cat-bivariate
-#| fig-cap: "Distribution of the levels of the `realization_of_rcp` variable by the levels of the `modality` variable."
-#| fig-height: 4
-
-# Visualize the relationship between `realization_of_rcp` and `modality`
-dative_df |>
-  ggplot(aes(x = realization_of_rcp, fill = modality)) +
-  geom_bar(position = "fill") +
-  labs(
-    x = "Realization of recipient clause",
-    y = "Proportion",
-    fill = "Modality"
-  )
-```
-:::
-
-From our visualization, we can see that the proportion of NP realizations of the recipient clause is higher in both modalities, as we might expect from our univariate analysis. However, the proportion appears to be different with the spoken modality having a higher proportion of NP realizations of the recipient clause than the written modality. But we cannot conclude that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality. We need to conduct a statistical test to determine if the difference is statistically significant.
+We can cross-tabulate or visualize, but let's cross-tabulate this relationship as it is a basic 2-by-2 contingency table. In @exm-ida-cat-bivariate-tbl, we see the code for the cross-tabulation of the `realization_of_rcp` and `modality` variables.
 
 ::: {#exm-ida-cat-bivariate-tbl}
 ```{r}
 #| label: tbl-ida-cat-bivariate
 #| tbl-cap: "Contingency table for `realization_of_rcp` and `modality`."
 
-dative_df |>
+dative_tbl |>
   tabyl(realization_of_rcp, modality) |> # cross-tabulate
   adorn_totals(c("row", "col")) |> # provide row and column totals
   adorn_percentages("col") |> # add percentages to the columns
@@ -587,13 +491,15 @@ dative_df |>
 ```
 :::
 
+In @tbl-ida-cat-bivariate, both the proportions and raw counts adorn the table. We can appreciate that the proportion of NP realizations of the recipient clause is higher in both modalities, as we might expect from our univariate analysis. However, the proportion appears to be different with the spoken modality having a higher proportion of NP realizations of the recipient clause than the written modality. But we cannot conclude that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality. We need to conduct a statistical test to determine if the difference is statistically significant.
+
 To determine if the distribution of the levels of the `realization_of_rcp` variable by the levels of the `modality` variable is different from what we would expect if the null hypothesis were true, we need to calculate the difference observed in the sample and compare it to the differences observed in many samples where the null hypothesis is true.
 
-The `infer` package provides a pipeline which maintains a consistent workflow for statistical inference. As such, the procedure is very similar to the univarite analysis we performed, with some adjustments. Let's focus on the adjustments. First, our `specify()` call needs to include the relationship between two variables: `realization_of_rcp` and `modality`. The `response` argument is the response variable, which is `realization_of_rcp`. The `explanatory` argument is the explanatory variable, which is `modality`.
+The `infer` package provides a pipeline, steps 1-5, which maintains a consistent workflow for statistical inference. As such, the procedure is very similar to the univarite analysis we performed, with some adjustments. Let's focus on the adjustments. First, our `specify()` call needs to include the relationship between two variables: `realization_of_rcp` and `modality`. The `response` argument is the response variable, which is `realization_of_rcp`. The `explanatory` argument is the explanatory variable, which is `modality`.
 
 There are two approaches to specifying the relationship between the response and explanatory variables. The first approach is to specify the response variable and the explanatory variable separately as values of the arguments `response` and `explanatory`. The second approach is to specify the response variable and the explanatory variable as a formula using the `~` operator. The formula approach is more flexible and allows for more complex relationships between the response and explanatory variables. In @exm-ida-cat-specify-bivariate, we see the code for the `specify()` call using the formula approach.
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 The formula syntax `y ~ x` can be read as 'y' as a function of 'x'.
@@ -605,12 +511,13 @@ The formula syntax `y ~ x` can be read as 'y' as a function of 'x'.
 
 # Specify the relationship between the response and explanatory variables
 dative_spec <-
-  dative_df |>
+  dative_tbl |>
   specify(
     realization_of_rcp ~ modality,
     success = "NP"
   )
 
+# Preview
 dative_spec
 ```
 :::
@@ -626,8 +533,12 @@ We now calculate the observed statistic with `calculate()`, as seen in @exm-ida-
 # Calculate the observed statistic
 dative_obs <-
   dative_spec |>
-  calculate(stat = "diff in props", order = c("spoken", "written"))
+  calculate(
+    stat = "diff in props",
+    order = c("spoken", "written")
+  )
 
+# Preview
 dative_obs
 ```
 :::
@@ -636,14 +547,12 @@ Two differences are that our statistic is now a difference in proportions and th
 
 So our observed statistic `r round(dative_obs$stat, 2)` is the proportion of NP realizations of the recipient clause in the spoken modality minus the proportion of NP realizations of the recipient clause in the written modality, so the NP realization appears `r round(dative_obs$stat * 100, 0)`% more in the spoken modality compared to the written modality.
 
-The question remains, is this difference statistically significant? To answer this question, we generate the null hypothesis distribution, visualize the p-value range, and calculate the p-value, as seen in @exm-ida-cat-null-hypothesis-bivariate.
+The question remains, is this difference statistically significant? To answer this question, we generate the null hypothesis distribution and calculate the p-value, as seen in @exm-ida-cat-null-hypothesis-bivariate.
 
 ::: {#exm-ida-cat-null-hypothesis-bivariate}
 ```{r}
-#| label: fig-ida-cat-null-hypothesis-bivariate
-#| fig-cap: "Null hypothesis distribution of the difference in proportions of NP realizations of the recipient clause by modality with the observed statistic and p-value."
+#| label: ida-cat-null-hypothesis-bivariate
 #| message: false
-#| fig-height: 4
 
 # Generate the null hypothesis distribution
 dative_null <-
@@ -652,18 +561,10 @@ dative_null <-
   generate(reps = 1000, type = "permute") |>
   calculate(stat = "diff in props", order = c("spoken", "written"))
 
-# Visualize the null hypothesis distribution with the observed statistic and p-value
-dative_null |>
-  visualize() +
-  shade_p_value(
-    dative_obs, # the observed statistic
-    direction = "two-sided", # the direction of the alternative hypothesis
-  )
-
 # Calculate the p-value
 dative_null |>
   get_p_value(
-    dative_obs, # the observed statistic
+    obs_stat = dative_obs, # the observed statistic
     direction = "two-sided" # the direction of the alternative hypothesis
   )
 ```
@@ -671,14 +572,11 @@ dative_null |>
 
 Note when generating the null hypothesis distribution, we use the `hypothesize()` function with the `null` argument set to "independence". This is because we are interested in the relationship between the response and explanatory variables. The null hypothesis is that there is no relationship between the response and explanatory variables. When generating the samples, we use the permutation approach, which randomly shuffles the response variable values for each sample. This simulates the null hypothesis that there is no relationship between the response and explanatory variables.
 
-When we plot the null distribution, we see that the statistic values cluster around $0$, which is what we expect if there is no difference. We also see that our observed statistic is far away from the null distribution, which suggests that there is a difference in the proportion of NP realizations of the recipient clause by modality.
-
-The p-value underscores this apparent difference. The p-value is reported as $0$. To provide some context, we will generate a confidence interval for our observed statistic using the bootstrap method, as seen in @exm-ida-cat-confidence-interval-bivariate.
+The p-value is reported as $0$. To provide some context, we will generate a confidence interval for our observed statistic using the bootstrap method, as seen in @exm-ida-cat-confidence-interval-bivariate.
 
 ::: {#exm-ida-cat-confidence-interval-bivariate}
 ```{r}
-#| label: fig-ida-cat-confidence-interval-bivariate
-#| fig-cap: "Bootstrap distribution of the difference in proportions of NP realizations of the recipient clause by modality with the confidence interval."
+#| label: ida-cat-confidence-interval-bivariate
 
 # Generate boostrap distribution
 dative_boot <-
@@ -691,30 +589,20 @@ dative_ci <-
   dative_boot |>
   get_confidence_interval(level = 0.95)
 
-# Visualize the bootstrap distribution with the confidence interval
-dative_boot |>
-  visualize() +
-  shade_confidence_interval(
-    dative_ci # the confidence interval
-  )
+# Preview
+dative_ci
 ```
 :::
 
-The confidence interval does not contain the null hypothesis value of 0, which provides evidence that the proportion of NP realizations of the recipient clause is different between the spoken and written modalities.
-
-<!--
-- [ ] Add note on effect size for difference in proportions statistic?
-  - Effect size measures for difference in proportions is the difference in proportions?
-
-We get effect size and confidence interval information. Note that the effect size for this relationship is weak. This points out an important aspect to evaluation of statistical tests. The fact that a test is significant does not mean that it is meaningful. A small effect size suggests that we should be cautious about the extent to which this significant finding is robust in the population from which the data is sampled. -->
+The confidence interval does not contain the null hypothesis value of 0 (no difference), which provides evidence that the proportion of NP realizations of the recipient clause is different between the spoken and written modalities.
 
 #### Multivariate Analysis
 
-In many scenarios, it is common to have multiple explanatory variables that need to be considered. In such cases, logistic regression is a suitable modeling technique. Logistic regression allows for the inclusion of both categorical and continuous explanatory variables. The primary objective of using logistic regression is to assess the association between these variables and the dependent variable. By analyzing this relationship, we can determine how changes in the explanatory variables influence the probability of the outcome occurring.
+In many scenarios, it is common to have multiple explanatory variables that need to be considered. In such cases, logistic regression is a suitable modeling technique. Logistic regression allows for the inclusion of both categorical and continuous explanatory variables. The primary objective of using logistic regression is to assess the association between these variables and the response variable. By analyzing this relationship, we can determine how changes in the explanatory variables influence the probability of the outcome occurring.
 
-In our `dative_df` dataset, we can imagine asking the question:
+To explore this scenario, let's posit that:
 
-- Is there a difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio?
+- NP and PP realizations of the recipient clause are contingent on modality and word length ratio of the recipient and theme?
 
 The length ratio gets at the length of the recipient clause relative to the length of the theme clause. This ratio is an operationalization of a phenomenon known as 'Heavy NP' shift. There are many ways to operationalize this phenomenon, but the length ratio is a simple method to approximate the phenomenon. It attempts to capture the idea that the longer the theme clause is relative to the recipient clause, the more likely the recipient clause will be realized as an NP --in other words, when the theme is relatively longer than the recipient, the theme is ordered last in the sentence, and the recipient is ordered first in the sentence and takes the form of an NP (instead of a PP).
 
@@ -723,27 +611,28 @@ For example,
 1. John gave the book [to Mary]. (PP)
 2. John gave [Mary] the large book that I showed you in class yesterday. (NP)
 
-The prediction, then, is that the example in (3) would be less likely than (2) because the theme is relatively longer than the recipient.
+The hypothesis, then, is that the example in (3) would be less likely than (2) because the theme is relatively longer than the recipient.
 
 3. John gave the book that I showed you in class yesterday [to Mary]. (PP)
 
 Let's consider this variable `length_ratio` and `modality` together as explanatory variables for the realizations of the recipient clause `realization_of_rcp`.
 
-Let's create the `length_ratio` variable by dividing the `length_of_thm` by the `length_of_rcp`. This will give us values larger than 1 when the theme is  longer than the recipient. In @exm-ida-cat-create-length-ratio, we see the code for creating the `length_ratio` variable.
+Let's create the `length_ratio` variable by dividing the `length_of_thm` by the `length_of_rcp`. This will give us values larger than 1 when the theme is longer than the recipient. In @exm-ida-cat-create-length-ratio, we see the code for creating the `length_ratio` variable.
 
 ::: {#exm-ida-cat-create-length-ratio}
 ```{r}
 #| label: ida-cat-create-length-ratio
 
 # Create the `length_ratio` variable
-dative_df <-
-  dative_df |>
+dative_tbl <-
+  dative_tbl |>
   mutate(
     length_ratio = length_of_thm / length_of_rcp
-  )
+  ) |>
+  select(-length_of_thm, -length_of_rcp)
 
 # Preview
-dative_df |> glimpse()
+dative_tbl |> glimpse()
 ```
 :::
 
@@ -752,44 +641,45 @@ Let's visualize the relationship between `realization_of_rcp` and `length_ratio`
 ::: {#exm-ida-cat-bivariate-vis-length-ratio}
 ```{r}
 #| label: fig-ida-cat-bivariate-length-ratio
-#| fig-cap: "Distribution of the levels of the `realization_of_rcp` variable by the levels of the `modality` variable and `length_ratio` variable."
+#| fig-cap: "Distribution the variables `modality` and `length_ratio` by the levels of the `realization_of_rcp` variable."
 #| fig-subcap:
-#| - "Length ratio by realization of recipient clause"
-#| - "Length ratio by realization of recipient clause by modality"
+#|  - "Realization of recipient clause by modality"
+#|  - "Realization of recipient clause by length ratio"
 #| layout-ncol: 2
 
+# Visualize the proportion of `realization_of_rcp` by `modality`
+dative_tbl |>
+  ggplot(aes(x = realization_of_rcp, fill = modality)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Realization of recipient clause",
+    y = "Proportion",
+    fill = "Modality"
+  )
+
 # Visualize the relationship between `realization_of_rcp` and `length_ratio`
-p1 <-
-  dative_df |>
+dative_tbl |>
   ggplot(aes(x = realization_of_rcp, y = length_ratio)) +
   geom_boxplot() +
   labs(
     x = "Realization of recipient clause",
     y = "Length ratio"
   )
-
-p1
-
-# Visualize the relationship between `realization_of_rcp` and `length_ratio` by `modality`
-p1 +
-  facet_wrap(~ modality)
 ```
 :::
 
-Before jumping in here, the outliers should catch our attention. Each boxplot has a number of outliers. These outliers are likely due to the fact that the `length_ratio` variable is built upon the `length_of_thm` and `length_of_rcp` variables, which are both highly skewed. This is a common problem in statistical inference. The solution is to transform the variables to reduce the skewness. In this case, we can use the log transformation, as seen in @exm-ida-cat-log-transform.
+Before jumping in here, the outliers in @fig-ida-cat-bivariate-length-ratio-2 should catch our attention. Each boxplot has a number of outliers. These outliers are likely due to the fact that the `length_ratio` variable is built upon the `length_of_thm` and `length_of_rcp` variables, which are both highly skewed. This is a common problem in statistical inference. The solution is to transform the variables to reduce the skewness. In this case, we can use the log transformation, as seen in @exm-ida-cat-log-transform.
 
 ::: {#exm-ida-cat-log-transform}
 ```{r}
 #| label: ida-cat-log-transform
 
 # Log transform the `length_ratio` variable
-dative_df <-
-  dative_df |>
+dative_tbl <-
+  dative_tbl |>
   mutate(
     length_ratio_log = log10(length_ratio)
   )
-
-dative_df |> glimpse()
 ```
 :::
 
@@ -798,37 +688,37 @@ Now we can plot the relationships in @fig-ida-cat-bivariate-length-ratio with th
 ::: {#exm-ida-cat-bivariate-vis-length-ratio-log}
 ```{r}
 #| label: fig-ida-cat-bivariate-length-ratio-log
-#| fig-cap: "Distribution of the levels of the `realization_of_rcp` variable by the levels of the `modality` variable and `length_ratio` variable with log transformation."
+#| fig-cap: "Distribution the variables `modality` and `length_ratio` by the levels of the `realization_of_rcp` variable."
 #| fig-subcap:
-#| - "Length ratio by realization of recipient clause"
-#| - "Length ratio by realization of recipient clause by modality"
+#|  - "Realization of recipient clause by modality"
+#|  - "Realization of recipient clause by length ratio"
 #| layout-ncol: 2
+#| echo: false
+
+# Visualize the proportion of `realization_of_rcp` by `modality`
+dative_tbl |>
+  ggplot(aes(x = realization_of_rcp, fill = modality)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Realization of recipient clause",
+    y = "Proportion",
+    fill = "Modality"
+  )
 
 # Visualize the relationship between `realization_of_rcp` and `length_ratio`
-p1 <-
-  dative_df |>
+dative_tbl |>
   ggplot(aes(x = realization_of_rcp, y = length_ratio_log)) +
   geom_boxplot() +
   labs(
     x = "Realization of recipient clause",
     y = "Length ratio (log)"
   )
-
-p1
-
-# Visualize the relationship between `realization_of_rcp` and `length_ratio` by `modality`
-p1 +
-  facet_wrap(~ modality)
 ```
 :::
 
 The log transformation has reduced the skewness of the `length_ratio` variable. Note that the log transformation does not change the rank order of the values, but it does change the scale of the values (the distance between the values) by reducing the magnitude of the values. The boxplots in @fig-ida-cat-bivariate-length-ratio-log still have outliers, but there are fewer outliers and they are not as extreme.
 
-Now we can return to our question:
-
-- Is there a difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio?
-
-We can answer this question using a logistic regression. The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio. The alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio.
+To understand visualizations in @fig-ida-cat-bivariate-length-ratio-log, remember the null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality or length ratio. On the flip side, the alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio. From the visual inspection, it appears that NP realizations of the recipient clause are more common in the spoken modality and that the NP realizations have a higher overall length ratio (larger theme relative to recipient) than PP realizations of the recipient clause. This suggests that the alternative hypothesis is likely true, but we need to conduct a statistical test to determine if the differences are statistically significant.
 
 Let's calculate the statistics (not statistic) for our logistic regression by specifying the relationship between the response and explanatory variables and then using `fit()` to fit the logistic regression model, as seen in @exm-ida-cat-logistic-regression.
 
@@ -836,9 +726,9 @@ Let's calculate the statistics (not statistic) for our logistic regression by sp
 ```{r}
 #| label: ida-cat-logistic-regression
 
-# Specify the relationship between the response and explanatory variables
+# Specify the relationship
 dative_spec <-
-  dative_df |>
+  dative_tbl |>
   specify(
     realization_of_rcp ~ modality + length_ratio_log
   )
@@ -848,108 +738,27 @@ dative_fit <-
   dative_spec |>
   fit()
 
+# Preview
 dative_fit
 ```
 :::
 
 Note I pointed out statistics, not statistic. In logistic regression models, there the number of statistic reported depends on the number of explanatory variables. If there are two variables there will be at least three terms, one for each variable and the intercept term. If one or more variables are categorical, however, there will be additional terms when the categorical variable has three or more levels.
 
-In our case, the `modality` variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the `length_ratio` is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the `length_ratio` is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the `length_ratio` is 1 in the written modality. Notable the spoken modality does not explicitly appear but is implicitly represented the `modalitywritten` term statistic. It is used as the reference level for the `modality` variable.
+In our case, the `modality` variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the `length_ratio` is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the `length_ratio` is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the `length_ratio` is 1 in the written modality. Notably, the spoken modality does not explicitly appear but is implicitly represented the `modalitywritten` term statistic. `modalityspoken`is used as the reference level for the `modality` variable.
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
-The reference level in R is assumed to be the first level alphabetically, unless otherwise specified. We can override this default by using the `fct_relevel()` function from the `forcats` package. The reason we would want to do this is to make the reference level more interpretable. In our case, we would want to make the spoken modality the reference level it allows us to estimate the difference of the proportion of NP realizations of the recipient as a positive value. Remember that in @fig-ida-cat-bivariate-length-ratio-log-2, the proportion of NP realizations of the recipient clause is higher in the written modality than in the spoken modality. If we were to use the written modality as the reference level, the difference would be negative. Not that we couldn't interpret this, but working with positive integers is easier to interpret.
+The reference level in R is assumed to be the first level alphabetically, unless otherwise specified. We can override this default by using the `fct_relevel()` function from the `forcats` package. The reason we would want to do this is to make the reference level more interpretable. In our case, we would want to make the spoken modality the reference level it allows us to estimate the difference of the proportion of NP realizations of the recipient as a positive value. Remember that in @fig-ida-cat-bivariate-length-ratio-log-1, the proportion of NP realizations of the recipient clause is higher in the spoken modality than in the written modality. If we were to use the written modality as the reference level, the difference would be negative. Not that we couldn't interpret this, but working with positive integers is easier to interpret.
 :::
 
-The statistics returned in logistic regression are log odds. Odds are the ratio of the probability of an event occurring to the probability of an event not occurring. Log odds are the natural log of the odds. If we would like to return the statistic as the odds ratio, we can use the `exp()` function, as seen in @exm-ida-cat-logistic-regression-odds-ratio.
-
-::: {#exm-ida-cat-logistic-regression-odds-ratio}
-```{r}
-#| label: ida-cat-logistic-regression-odds-ratio
-
-# Calculate the odds ratio by exponentiating the log odds
-dative_fit <-
-  dative_fit |>
-  mutate(
-    odds_ratio = exp(estimate)
-  )
-
-dative_fit
-```
-:::
-
-- [ ] TODO: Interpret the odds ratio
-
-The log odds for `writtenmodality` is `r round(dative_fit$estimate[2], 2)`. This means that the odds of the proportion of NP realizations of the recipient clause in the written modality when the `length_ratio` is 1 is `r round(exp(dative_fit$estimate[2]), 2)` times the odds of the proportion of NP realizations of the recipient clause in the spoken modality when the `length_ratio` is 1.
-
-On the other hand, the log odds for `length_ratio` is `r round(dative_fit$estimate[3], 2)`. In this case the `length_ratio` log odds can be interpreted as the log odds of the proportion of NP realizations of the recipient clause as a function of the `length_ratio` when the `modality` is the spoken modality. This is because the `modality` variable is the reference level.
-
-? `length_ratio_log` has was log-transformed with a base of 10. This means that the odds ratio can be exponentiated with a base of 10, to return the odds ratio as a function of the `length_ratio` values, as seen in @exm-ida-cat-logistic-regression-odds-ratio-10.
-
-::: {#exm-ida-cat-logistic-regression-odds-ratio-10}
-```{r}
-#| label: ida-cat-logistic-regression-odds-ratio-10
-
-# Calculate the odds ratio by exponentiating the log odds with a base of 10
-dative_fit <-
-  dative_fit |>
-  mutate(
-    odds_ratio = case_when(
-      term == "length_ratio_log" ~ 10^odds_ratio,
-      TRUE ~ exp(estimate)
-    )
-  )
-
-dative_fit
-```
-:::
-
-
-So the odds ratio for `length_ratio` is `r dative_fit$odds_ratio[3]` when the `modality` is the written modality.
-
-So our logistic regression model as specified considers each explanatory variable independently, controlling for the other explanatory variable. This is an additive model, which is what we stated in our formula `y ~ x1 + x2`. We can also specify an interaction between the explanatory variables, as seen in @exm-ida-cat-logistic-regression-interaction.
-
-::: {#exm-ida-cat-logistic-regression-interaction}
-```{r}
-#| label: ida-cat-logistic-regression-interaction
-
-# Specify the relationship between the response and explanatory variables
-dative_inter_spec <-
-  dative_df |>
-  specify(
-    realization_of_rcp ~ modality * length_ratio_log
-  )
-
-dative_inter_spec
-```
-:::
-
-Replacing the `+` with a `*` tells the model to consider the interaction between the explanatory variables. The interaction is the effect of one explanatory variable on the response variable is dependent on the other explanatory variable. In our case, the interaction is the effect of the `length_ratio` on the proportion of NP realizations of the recipient clause is dependent on the `modality`.
-
-An model with an interaction changes the terms and the estimates. In @exm-ida-cat-logistic-regression-interaction-terms, we see the terms for the logistic regression model with an interaction.
-
-::: {#exm-ida-cat-logistic-regression-interaction-terms}
-```{r}
-#| label: ida-cat-logistic-regression-interaction-terms
-
-# Fit the logistic regression model
-dative_inter_fit <-
-  dative_inter_spec |>
-  fit()
-
-dative_inter_fit
-```
-:::
-
-The additional term `modalitywritten:length_ratio_log` is the interaction term. We also see the log odds estimates have changed for the previous terms. This is because this interaction draws some of the explanatory power from the other terms. Whether or not we run an interaction model depends on our research question. Whether or not the interaction term, or the other main terms, adds evidence to reject the null hypothesis, is the next step to consider.
-
-Let's return to our additive model and generate the null hypothesis distribution, visualize the p-value range, and calculate the p-value for each of the terms, as seen in @exm-ida-cat-null-hypothesis-logistic-regression.
+Now let's generate the null hypothesis distribution and calculate the p-value for each of the terms, as seen in @exm-ida-cat-null-hypothesis-logistic-regression.
 
 ::: {#exm-ida-cat-null-hypothesis-logistic-regression}
 ```{r}
-#| label: fig-ida-cat-null-hypothesis-logistic-regression
-#| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause by modality and length ratio with the observed statistic and p-value."
+#| label: ida-cat-null-hypothesis-logistic-regression
+#| message: false
 
 # Generate the null hypothesis distribution
 dative_null <-
@@ -957,14 +766,6 @@ dative_null <-
   hypothesize(null = "independence") |>
   generate(reps = 1000, type = "permute") |>
   fit()
-
-# Visualize the null hypothesis distribution with the observed statistics
-dative_null |>
-  visualize() +
-  shade_p_value(
-    dative_fit, # the observed statistics
-    direction = "two-sided" # the direction of the alternative hypothesis
-  )
 
 # Calculate the p-value
 dative_null |>
@@ -979,8 +780,7 @@ It appears that our main effects, `modality` and `length_ratio`, are statistical
 
 ::: {#exm-ida-cat-confidence-interval-logistic-regression}
 ```{r}
-#| label: fig-ida-cat-confidence-interval-logistic-regression
-#| fig-cap: "Bootstrap distribution of the proportion of NP realizations of the recipient clause by modality and length ratio with the confidence interval."
+#| label: ida-cat-confidence-interval-logistic-regression
 
 # Generate boostrap distribution
 dative_boot <-
@@ -992,73 +792,88 @@ dative_boot <-
 dative_ci <-
   dative_boot |>
   get_confidence_interval(
-    point_estimate = dative_fit, # the observed statistics
+    point_estimate = dative_fit,
     level = 0.95
   )
 
-# Visualize the bootstrap distribution with the confidence interval
-dative_boot |>
-  visualize() +
-  shade_confidence_interval(
-    dative_ci # the confidence interval
-  )
+# Preview
+dative_ci
 ```
 :::
 
 The confidence intervals for the main effects, `modality` and `length_ratio`, do not contain the null hypothesis value of 0, which provides evidence that each of the explanatory variables is related to the proportion of NP realizations of the recipient clause.
 
-We can quantify the effect size of each of the explanatory variables using the odds ratio to calculate the $r$ and $R^2$ values. We can use the `logoddsratio_to_r()` function from `effectsize` package to calculate the $r$ value and then square the $r$ value to calculate the $R^2$ value, as seen in @exm-ida-cat-effect-size-logistic-regression.
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
 
-::: {#exm-ida-cat-effect-size-logistic-regression}
+Significance tests are not the only way to evaluate the evidence for the null hypothesis. We can also quantify the effect size of each of the explanatory variables using the odds ratio to calculate the $r$ (correlation coefficient) and $R^2$ (coefficient of determination) values. The `effectsize` package provides a function `logoddsratio_to_r()` to calculate the $r$ and $R^2$ values for logistic regression models.
+
+It can be important to use these measures to distinguish between statistically significant and practically significant results. A statistically significant result is one that is unlikely to have occurred by chance. A practically significant result is one that has a meaningful effect.
+:::
+
+Our logistic regression model as specified considers the explanatory variables `modality` and `length_ratio` independently, controlling for the other explanatory variable. This is an **additive model**, which is what we stated in our hypothesis and represented in the formula `y ~ x1 + x2`.
+
+Not all multivariate relationships are additive. We can also hypothesize an interaction between the explanatory variables. A **interaction** is the effect of one explanatory variable on the response variable is dependent on the other explanatory variable(s). In our case, we could have hypothesized that the effect of the `length_ratio` on the proportion of NP realizations of the recipient clause is dependent on the `modality`. We can specify this relationship using the formula approach, as seen in @exm-ida-cat-logistic-regression-interaction.
+
+::: {#exm-ida-cat-logistic-regression-interaction}
 ```{r}
-#| label: ida-cat-effect-size-logistic-regression
+#| label: ida-cat-logistic-regression-interaction
 
-# Calculate the effect size
-dative_fit <-
-  dative_fit |>
-  mutate(
-    r = logoddsratio_to_r(estimate),
-    r_squared = r^2
+# Specify the relationship between the response and explanatory variables
+dative_inter_spec <-
+  dative_tbl |>
+  specify(
+    realization_of_rcp ~ modality * length_ratio_log
   )
 
-dative_fit
+# Preview
+dative_inter_spec
 ```
 :::
 
-Beyond the estimates to quantify the likelihood that the null hypothesis is true, the effect size provides a measure of the strength of the relationship between the response and explanatory variables. The $r$ value is the correlation coefficient, which is a measure of the strength of the linear relationship between the response and explanatory variables. The $R^2$ value is the coefficient of determination, which is a measure of the proportion of the variance in the response variable that is explained by the explanatory variables.
+Replacing the `+` with a `*` tells the model to consider the interaction between the explanatory variables. A model with an interaction changes the terms and the estimates. In @exm-ida-cat-logistic-regression-interaction-terms, we see the terms for the logistic regression model with an interaction.
 
-As you can imagine, the larger the $R^2$ value, the stronger the relationship between the response and explanatory variables. From our effect size evaluation, the `length_ratio` variable has a stronger relationship with the proportion of NP realizations of the recipient clause than the `modality` variable.
-
-Now, knowing "how" strong a given value is can be a little less intuitive. The `effectsize` package provides some guidelines for interpreting effect size measures. Let's use the `interpret_r2()` function to interpret the $R^2$ value, as seen in @exm-ida-cat-interpret-r2.
-
-::: {#exm-ida-cat-interpret-r2}
+::: {#exm-ida-cat-logistic-regression-interaction-terms}
 ```{r}
-#| label: ida-cat-interpret-r2
+#| label: ida-cat-logistic-regression-interaction-terms
 
-# Interpret the R^2 value
-dative_fit |>
-  mutate(
-    r2_interpretation = interpret_r2(r_squared)
-  )
+# Fit the logistic regression model
+dative_inter_fit <-
+  dative_inter_spec |>
+  fit()
+
+# Preview
+dative_inter_fit
 ```
 :::
 
-While the effects for `modality` and `length_ratio` are statistically significant, the effect size for `modality` is small and the effect size for `length_ratio` is much stronger. This can help inform our interpretation of the results.
+The additional term `modalitywritten:length_ratio_log` is the interaction term. We also see the log odds estimates have changed for the previous terms. This is because this interaction draws some of the explanatory power from the other terms. Whether or not we run an interaction model depends on our research question. Again, the hypothesis precedes the model. If we hypothesize an interaction, then we should run an interaction model. If we do not hypothesize an interaction, then we should not run an interaction model.
+
+::: {.callout .halfsize}
+**{{< fa regular lightbulb >}} Consider this**
+
+As an exercise, consider the following research question:
+
+- NP and PP realizations of the recipient clause are contingent on modality and word length ratio of the recipient and theme, and the effect of the length ratio on the proportion of NP realizations of the recipient clause is dependent on the modality.
+
+Follow the simulation-based process to test this hypothesis. What are the results? What are the implications of the results?
+:::
 
 ### Numeric {#sec-ida-numeric}
 
 We now turn our attention to the analysis scenarios where the response variable is numeric. Just as for categorical variables, we can have univariate, bivariate, and multivariate analysis scenarios. The statistical tests for numeric variables are summarized in @tbl-ida-num-design.
 
-| Scenario | Dependent variable | Independent variable(s) | Statistical test |
-|:---------|:-------------------|:------------------------|:-----------------|
-| Univariate | Numeric | None | Mean |
-| Bivariate | Numeric | Numeric | Correlation |
-| Bivariate | Numeric | Categorical | Difference in means |
-| Multivariate | Numeric | Numeric or Categorical (2+) | Linear regression |
+| Scenario | Explanatory variable(s) | Statistical test | `infer`
+|:---------|:------------------------|:-----------------|:-----------------|
+| Univariate | - | Mean | `mean` |
+| Bivariate  | Numeric | Correlation | `correlation` |
+| Bivariate | Categorical (2 levels) | Difference in means | `diff in means` |
+| Bivariate | Categorical (3+ levels ) | ANOVA | `f` |
+| Multivariate  | Numeric or Categorical (2+) | Linear regression | `fit()` |
 
-: Statistical test design for numeric variables {#tbl-ida-num-design}
+: Statistical test design for numeric response variables {#tbl-ida-num-design tbl-colwidths="[10, 35, 35, 20]" .striped}
 
-The dataset we will use here is `fillers_df`. The data dictionary is found in @tbl-ida-num-data-dict.
+The `fillers` dataset is drawn from the Switchboard Dialog Act Corpus [@SWDA2008]. This dataset contains over 200k utterances from 1,155 5-minute telephone conversations and includes information about the use of fillers in the conversations. The data dictionary is found in @tbl-ida-num-data-dict.
 
 ```{r}
 #| label: tbl-ida-num-data-dict

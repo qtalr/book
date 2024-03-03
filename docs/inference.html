@@ -538,7 +538,7 @@ Table&nbsp;10.2: Simulation-based workflow for significance testing
 </figure>
 </div>
 <!-- Setup: packages/ options/ data -->
-<p>The <code>infer</code> package <span class="citation" data-cites="R-infer">(<a href="references.html#ref-R-infer" role="doc-biblioref">Bray et al. 2024</a>)</span> provides a tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the <code>tidyverse</code> <span class="citation" data-cites="R-tidyverse">(<a href="references.html#ref-R-tidyverse" role="doc-biblioref">Wickham 2023</a>)</span>, <code>infer</code> provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution, visualize the null hypothesis distribution, calculate the p-value, and calculate the confidence interval.</p>
+<p>The <code>infer</code> package <span class="citation" data-cites="R-infer">(<a href="references.html#ref-R-infer" role="doc-biblioref">Bray et al. 2024</a>)</span> provides a tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the <code>tidyverse</code> <span class="citation" data-cites="R-tidyverse">(<a href="references.html#ref-R-tidyverse" role="doc-biblioref">Wickham 2023</a>)</span>, <code>infer</code> provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution, calculate the p-value, and calculate the confidence interval.</p>
 <p>Let’s load the necessary packages we will use in this section, as seen in <a href="#exm-ida-setup" class="quarto-xref">Example&nbsp;<span>10.1</span></a>.</p>
 <div id="exm-ida-setup" class="theorem example">
 <p><span class="theorem-title"><strong>Example 10.1</strong></span> &nbsp;</p>
@@ -662,7 +662,7 @@ Table&nbsp;10.4: Data dictionary for the <code>dative_tbl</code> dataset.
 <span><span class="va">dative_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"../data/dative_ida.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>In preparation for statistical analysis, I performed a statistical overview and diagnostics of the dataset. This included checking for missing data, outliers, and anomalies. I also checked the distribution of the variables using descriptive statistics and visualizations. The results of this overview and diagnostics are not shown here, but they are important steps in the IDA workflow. In this process, I converted the character variables to factors as most statistical tests require factors. A preview of the dataset is shown in <a href="#exm-ida-cat-dative-preview" class="quarto-xref">Example&nbsp;<span>10.4</span></a>.</p>
+<p>In preparation for statistical analysis, I performed a statistical overview and diagnostics of the dataset. This included checking for missing data, outliers, and anomalies. I also checked the distribution of the variables using descriptive statistics and visualizations, noting that the <code>length_of_rcp</code> and <code>length_of_thm</code> variables are right-skewed. This is something to keep in mind. The results of this overview and diagnostics are not shown here, but they are important steps in the IDA workflow. In this process, I converted the character variables to factors as most statistical tests require factors. A preview of the dataset is shown in <a href="#exm-ida-cat-dative-preview" class="quarto-xref">Example&nbsp;<span>10.4</span></a>.</p>
 <div id="exm-ida-cat-dative-preview" class="theorem example">
 <p><span class="theorem-title"><strong>Example 10.4</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1013,7 +1013,6 @@ Table&nbsp;10.6: Contingency table for <code>realization_of_rcp</code> and <code
 <p>In <a href="#tbl-ida-cat-bivariate" class="quarto-xref">Table&nbsp;<span>10.6</span></a>, both the proportions and raw counts adorn the table. We can appreciate that the proportion of NP realizations of the recipient clause is higher in both modalities, as we might expect from our univariate analysis. However, the proportion appears to be different with the spoken modality having a higher proportion of NP realizations of the recipient clause than the written modality. But we cannot conclude that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality. We need to conduct a statistical test to determine if the difference is statistically significant.</p>
 <p>To determine if the distribution of the levels of the <code>realization_of_rcp</code> variable by the levels of the <code>modality</code> variable is different from what we would expect if the null hypothesis were true, we need to calculate the difference observed in the sample and compare it to the differences observed in many samples where the null hypothesis is true.</p>
 <p>The <code>infer</code> package provides a pipeline, steps 1-5, which maintains a consistent workflow for statistical inference. As such, the procedure is very similar to the univarite analysis we performed, with some adjustments. Let’s focus on the adjustments. First, our <code><a href="https://infer.tidymodels.org/reference/specify.html">specify()</a></code> call needs to include the relationship between two variables: <code>realization_of_rcp</code> and <code>modality</code>. The <code>response</code> argument is the response variable, which is <code>realization_of_rcp</code>. The <code>explanatory</code> argument is the explanatory variable, which is <code>modality</code>.</p>
-<p>There are two approaches to specifying the relationship between the response and explanatory variables. The first approach is to specify the response variable and the explanatory variable separately as values of the arguments <code>response</code> and <code>explanatory</code>. The second approach is to specify the response variable and the explanatory variable as a formula using the <code>~</code> operator. The formula approach is more flexible and allows for more complex relationships between the response and explanatory variables. In <a href="#exm-ida-cat-specify-bivariate" class="quarto-xref">Example&nbsp;<span>10.15</span></a>, we see the code for the <code><a href="https://infer.tidymodels.org/reference/specify.html">specify()</a></code> call using the formula approach.</p>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1025,6 +1024,7 @@ Table&nbsp;10.6: Contingency table for <code>realization_of_rcp</code> and <code
 </div>
 </div>
 </div>
+<p>There are two approaches to specifying the relationship between the response and explanatory variables. The first approach is to specify the response variable and the explanatory variable separately as values of the arguments <code>response</code> and <code>explanatory</code>. The second approach is to specify the response variable and the explanatory variable as a formula using the <code>~</code> operator. The formula approach is more flexible and allows for more complex relationships between the response and explanatory variables. In <a href="#exm-ida-cat-specify-bivariate" class="quarto-xref">Example&nbsp;<span>10.15</span></a>, we see the code for the <code><a href="https://infer.tidymodels.org/reference/specify.html">specify()</a></code> call using the formula approach.</p>
 <div id="exm-ida-cat-specify-bivariate" class="theorem example">
 <p><span class="theorem-title"><strong>Example 10.15</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1138,7 +1138,7 @@ Table&nbsp;10.6: Contingency table for <code>realization_of_rcp</code> and <code
 </div>
 <p>The confidence interval does not contain the null hypothesis value of 0 (no difference), which provides evidence that the proportion of NP realizations of the recipient clause is different between the spoken and written modalities.</p>
 </section><section id="multivariate-analysis" class="level4"><h4 class="anchored" data-anchor-id="multivariate-analysis">Multivariate Analysis</h4>
-<p>In many scenarios, it is common to have multiple explanatory variables that need to be considered. In such cases, logistic regression is a suitable modeling technique. Logistic regression allows for the inclusion of both categorical and continuous explanatory variables. The primary objective of using logistic regression is to assess the association between these variables and the response variable. By analyzing this relationship, we can determine how changes in the explanatory variables influence the probability of the outcome occurring.</p>
+<p>In many scenarios, it is common to have multiple explanatory variables that need to be considered. In such cases, logistic regression is a suitable modeling technique. <strong>Logistic regression</strong> allows for the inclusion of both categorical and continuous explanatory variables. The primary objective of using logistic regression is to assess the association between these variables and the response variable. By analyzing this relationship, we can determine how changes in the explanatory variables influence the probability of the outcome occurring.</p>
 <p>To explore this scenario, let’s posit that:</p>
 <ul>
 <li>NP and PP realizations of the recipient clause are contingent on modality and word length ratio of the recipient and theme?</li>
@@ -1154,15 +1154,15 @@ Table&nbsp;10.6: Contingency table for <code>realization_of_rcp</code> and <code
 <li>John gave the book that I showed you in class yesterday [to Mary]. (PP)</li>
 </ol>
 <p>Let’s consider this variable <code>length_ratio</code> and <code>modality</code> together as explanatory variables for the realizations of the recipient clause <code>realization_of_rcp</code>.</p>
-<p>Let’s create the <code>length_ratio</code> variable by dividing the <code>length_of_thm</code> by the <code>length_of_rcp</code>. This will give us values larger than 1 when the theme is longer than the recipient. In <a href="#exm-ida-cat-create-length-ratio" class="quarto-xref">Example&nbsp;<span>10.19</span></a>, we see the code for creating the <code>length_ratio</code> variable.</p>
+<p>Let’s create the <code>length_ratio</code> variable by dividing the <code>length_of_thm</code> by the <code>length_of_rcp</code>. This will give us values larger than 1 when the theme is longer than the recipient. And since we are working with skewed-distributions, let’s log-transform the <code>length_ratio</code> variable. In <a href="#exm-ida-cat-create-length-ratio" class="quarto-xref">Example&nbsp;<span>10.19</span></a>, we see the code for creating the <code>length_ratio</code> variable.</p>
 <div id="exm-ida-cat-create-length-ratio" class="theorem example">
 <p><span class="theorem-title"><strong>Example 10.19</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create the `length_ratio` variable</span></span>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create the `length_ratio_log` variable</span></span>
 <span><span class="va">dative_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">dative_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span></span>
-<span>    length_ratio <span class="op">=</span> <span class="va">length_of_thm</span> <span class="op">/</span> <span class="va">length_of_rcp</span></span>
+<span>    length_ratio_log <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">length_of_thm</span> <span class="op">/</span> <span class="va">length_of_rcp</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">length_of_thm</span>, <span class="op">-</span><span class="va">length_of_rcp</span><span class="op">)</span></span>
 <span></span>
@@ -1173,12 +1173,12 @@ Table&nbsp;10.6: Contingency table for <code>realization_of_rcp</code> and <code
 &gt; Columns: 3
 &gt; $ realization_of_rcp &lt;fct&gt; NP, NP, NP, NP, NP, NP, NP, NP, NP, NP, NP, NP, NP,…
 &gt; $ modality           &lt;fct&gt; written, written, written, written, written, writte…
-&gt; $ length_ratio       &lt;dbl&gt; 14.00, 1.50, 13.00, 5.00, 1.50, 2.00, 2.00, 1.00, 1…</code></pre>
+&gt; $ length_ratio_log   &lt;dbl&gt; 2.639, 0.405, 2.565, 1.609, 0.405, 0.693, 0.693, 0.…</code></pre>
 </div>
 </div>
 </div>
-<p>Let’s visualize the relationship between <code>realization_of_rcp</code> and <code>length_ratio</code> separately and then together with <code>modality</code>, as seen in <a href="#exm-ida-cat-bivariate-vis-length-ratio" class="quarto-xref">Example&nbsp;<span>10.20</span></a>.</p>
-<div id="exm-ida-cat-bivariate-vis-length-ratio" class="theorem example">
+<p>Let’s visualize the relationship between <code>realization_of_rcp</code> and <code>length_ratio_log</code> separately and then together with <code>modality</code>, as seen in <a href="#exm-ida-cat-bivariate-vis-length-ratio-log" class="quarto-xref">Example&nbsp;<span>10.20</span></a>.</p>
+<div id="exm-ida-cat-bivariate-vis-length-ratio-log" class="theorem example">
 <p><span class="theorem-title"><strong>Example 10.20</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize the proportion of `realization_of_rcp` by `modality`</span></span>
 <span><span class="va">dative_tbl</span> <span class="op">|&gt;</span></span>
@@ -1190,59 +1190,14 @@ Table&nbsp;10.6: Contingency table for <code>realization_of_rcp</code> and <code
 <span>    fill <span class="op">=</span> <span class="st">"Modality"</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Visualize the relationship between `realization_of_rcp` and `length_ratio`</span></span>
+<span><span class="co"># Visualize the relationship between `realization_of_rcp` and `length_ratio_log`</span></span>
 <span><span class="va">dative_tbl</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">realization_of_rcp</span>, y <span class="op">=</span> <span class="va">length_ratio</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">realization_of_rcp</span>, y <span class="op">=</span> <span class="va">length_ratio_log</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_boxplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="st">"Realization of recipient clause"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Length ratio"</span></span>
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="fig-ida-cat-bivariate-length-ratio" class="quarto-layout-panel">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-cat-bivariate-length-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="quarto-layout-row">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-cat-bivariate-length-ratio" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-cat-bivariate-length-ratio-1" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-cat-bivariate-length-ratio-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-cat-bivariate-length-ratio-1.png" class="img-fluid figure-img" data-ref-parent="fig-ida-cat-bivariate-length-ratio" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-cat-bivariate-length-ratio-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Realization of recipient clause by modality
-</figcaption></figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-cat-bivariate-length-ratio" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-cat-bivariate-length-ratio-2" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-cat-bivariate-length-ratio-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-cat-bivariate-length-ratio-2.png" class="img-fluid figure-img" data-ref-parent="fig-ida-cat-bivariate-length-ratio" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-cat-bivariate-length-ratio-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(b) Realization of recipient clause by length ratio
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-cat-bivariate-length-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.4: Distribution the variables <code>modality</code> and <code>length_ratio</code> by the levels of the <code>realization_of_rcp</code> variable.
-</figcaption></figure>
-</div>
-</div>
-<p>Before jumping in here, the outliers in <a href="#fig-ida-cat-bivariate-length-ratio-2" class="quarto-xref">Figure&nbsp;<span>10.4 (b)</span></a> should catch our attention. Each boxplot has a number of outliers. These outliers are likely due to the fact that the <code>length_ratio</code> variable is built upon the <code>length_of_thm</code> and <code>length_of_rcp</code> variables, which are both highly skewed. This is a common problem in statistical inference. The solution is to transform the variables to reduce the skewness. In this case, we can use the log transformation, as seen in <a href="#exm-ida-cat-log-transform" class="quarto-xref">Example&nbsp;<span>10.21</span></a>.</p>
-<div id="exm-ida-cat-log-transform" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.21</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Log transform the `length_ratio` variable</span></span>
-<span><span class="va">dative_tbl</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">dative_tbl</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span></span>
-<span>    length_ratio_log <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="va">length_ratio</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Now we can plot the relationships in <a href="#fig-ida-cat-bivariate-length-ratio" class="quarto-xref">Figure&nbsp;<span>10.4</span></a> with the log-transformed <code>length_ratio</code>, seen in <a href="#exm-ida-cat-bivariate-vis-length-ratio-log" class="quarto-xref">Example&nbsp;<span>10.22</span></a>.</p>
-<div id="exm-ida-cat-bivariate-vis-length-ratio-log" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.22</strong></span> &nbsp;</p>
 <div id="fig-ida-cat-bivariate-length-ratio-log" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-cat-bivariate-length-ratio-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
@@ -1269,17 +1224,16 @@ Figure&nbsp;10.4: Distribution the variables <code>modality</code> and <code>len
 </div>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-cat-bivariate-length-ratio-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>length_ratio</code> by the levels of the <code>realization_of_rcp</code> variable.
+Figure&nbsp;10.4: Distribution the variables <code>modality</code> and <code>length_ratio_log</code> by the levels of the <code>realization_of_rcp</code> variable.
 </figcaption></figure>
 </div>
 </div>
-<p>The log transformation has reduced the skewness of the <code>length_ratio</code> variable. Note that the log transformation does not change the rank order of the values, but it does change the scale of the values (the distance between the values) by reducing the magnitude of the values. The boxplots in <a href="#fig-ida-cat-bivariate-length-ratio-log" class="quarto-xref">Figure&nbsp;<span>10.5</span></a> still have outliers, but there are fewer outliers and they are not as extreme.</p>
-<p>To understand visualizations in <a href="#fig-ida-cat-bivariate-length-ratio-log" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>, remember the null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality or length ratio. On the flip side, the alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio. From the visual inspection, it appears that NP realizations of the recipient clause are more common in the spoken modality and that the NP realizations have a higher overall length ratio (larger theme relative to recipient) than PP realizations of the recipient clause. This suggests that the alternative hypothesis is likely true, but we need to conduct a statistical test to determine if the differences are statistically significant.</p>
-<p>Let’s calculate the statistics (not statistic) for our logistic regression by specifying the relationship between the response and explanatory variables and then using <code><a href="https://generics.r-lib.org/reference/fit.html">fit()</a></code> to fit the logistic regression model, as seen in <a href="#exm-ida-cat-logistic-regression" class="quarto-xref">Example&nbsp;<span>10.23</span></a>.</p>
+<p>To understand visualizations in <a href="#fig-ida-cat-bivariate-length-ratio-log" class="quarto-xref">Figure&nbsp;<span>10.4</span></a>, remember the null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality or length ratio. On the flip side, the alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio. From the visual inspection, it appears that NP realizations of the recipient clause are more common in the spoken modality and that the NP realizations have a higher overall length ratio (larger theme relative to recipient) than PP realizations of the recipient clause. This suggests that the alternative hypothesis is likely true, but we need to conduct a statistical test to determine if the differences are statistically significant.</p>
+<p>Let’s calculate the statistics (not statistic) for our logistic regression by specifying the relationship between the response and explanatory variables and then using <code><a href="https://generics.r-lib.org/reference/fit.html">fit()</a></code> to fit the logistic regression model, as seen in <a href="#exm-ida-cat-logistic-regression" class="quarto-xref">Example&nbsp;<span>10.21</span></a>.</p>
 <div id="exm-ida-cat-logistic-regression" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.23</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.21</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
 <span><span class="va">dative_spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">dative_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/specify.html">specify</a></span><span class="op">(</span></span>
@@ -1303,8 +1257,6 @@ Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>len
 </div>
 </div>
 </div>
-<p>Note I pointed out statistics, not statistic. In logistic regression models, there the number of statistic reported depends on the number of explanatory variables. If there are two variables there will be at least three terms, one for each variable and the intercept term. If one or more variables are categorical, however, there will be additional terms when the categorical variable has three or more levels.</p>
-<p>In our case, the <code>modality</code> variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the <code>length_ratio</code> is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the <code>length_ratio</code> is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the <code>length_ratio</code> is 1 in the written modality. Notably, the spoken modality does not explicitly appear but is implicitly represented the <code>modalitywritten</code> term statistic. <code>modalityspoken</code>is used as the reference level for the <code>modality</code> variable.</p>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1312,15 +1264,17 @@ Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>len
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
-<p>The reference level in R is assumed to be the first level alphabetically, unless otherwise specified. We can override this default by using the <code>fct_relevel()</code> function from the <code>forcats</code> package. The reason we would want to do this is to make the reference level more interpretable. In our case, we would want to make the spoken modality the reference level it allows us to estimate the difference of the proportion of NP realizations of the recipient as a positive value. Remember that in <a href="#fig-ida-cat-bivariate-length-ratio-log-1" class="quarto-xref">Figure&nbsp;<span>10.5 (a)</span></a>, the proportion of NP realizations of the recipient clause is higher in the spoken modality than in the written modality. If we were to use the written modality as the reference level, the difference would be negative. Not that we couldn’t interpret this, but working with positive integers is easier to interpret.</p>
+<p>The reference level in R is assumed to be the first level alphabetically, unless otherwise specified. We can override this default by using the <code>fct_relevel()</code> function from the <code>forcats</code> package. The reason we would want to do this is to make the reference level more interpretable. In our case, we would want to make the spoken modality the reference level it allows us to estimate the difference of the proportion of NP realizations of the recipient as a positive value. Remember that in <a href="#fig-ida-cat-bivariate-length-ratio-log-1" class="quarto-xref">Figure&nbsp;<span>10.4 (a)</span></a>, the proportion of NP realizations of the recipient clause is higher in the spoken modality than in the written modality. If we were to use the written modality as the reference level, the difference would be negative. Not that we couldn’t interpret this, but working with positive integers is easier to interpret.</p>
 </div>
 </div>
 </div>
-<p>Now let’s generate the null hypothesis distribution and calculate the p-value for each of the terms, as seen in <a href="#exm-ida-cat-null-hypothesis-logistic-regression" class="quarto-xref">Example&nbsp;<span>10.24</span></a>.</p>
+<p>Note I pointed out statistics, not statistic. In logistic regression models, there the number of statistic reported depends on the number of explanatory variables. If there are two variables there will be at least three terms, one for each variable and the intercept term. If one or more variables are categorical, however, there will be additional terms when the categorical variable has three or more levels.</p>
+<p>In our case, the <code>modality</code> variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the <code>length_ratio_log</code> is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the <code>length_ratio_log</code> is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the <code>length_ratio_log</code> is 1 in the written modality. Notably, the spoken modality does not explicitly appear but is implicitly represented the <code>modalitywritten</code> term statistic. <code>modalityspoken</code>is used as the reference level for the <code>modality</code> variable.</p>
+<p>Now let’s generate the null hypothesis distribution and calculate the p-value for each of the terms, as seen in <a href="#exm-ida-cat-null-hypothesis-logistic-regression" class="quarto-xref">Example&nbsp;<span>10.22</span></a>.</p>
 <div id="exm-ida-cat-null-hypothesis-logistic-regression" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.24</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.22</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate the null hypothesis distribution</span></span>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate the null hypothesis distribution</span></span>
 <span><span class="va">dative_null</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">dative_spec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/hypothesize.html">hypothesize</a></span><span class="op">(</span>null <span class="op">=</span> <span class="st">"independence"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1343,11 +1297,11 @@ Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>len
 </div>
 </div>
 </div>
-<p>It appears that our main effects, <code>modality</code> and <code>length_ratio</code>, are statistically significant. Let’s generate the confidence intervals for each of the terms, as seen in <a href="#exm-ida-cat-confidence-interval-logistic-regression" class="quarto-xref">Example&nbsp;<span>10.25</span></a>.</p>
+<p>It appears that our main effects, <code>modality</code> and <code>length_ratio_log</code>, are statistically significant. Let’s generate the confidence intervals for each of the terms, as seen in <a href="#exm-ida-cat-confidence-interval-logistic-regression" class="quarto-xref">Example&nbsp;<span>10.23</span></a>.</p>
 <div id="exm-ida-cat-confidence-interval-logistic-regression" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.25</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.23</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate boostrap distribution</span></span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate boostrap distribution</span></span>
 <span><span class="va">dative_boot</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">dative_spec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"bootstrap"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1373,7 +1327,7 @@ Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>len
 </div>
 </div>
 </div>
-<p>The confidence intervals for the main effects, <code>modality</code> and <code>length_ratio</code>, do not contain the null hypothesis value of 0, which provides evidence that each of the explanatory variables is related to the proportion of NP realizations of the recipient clause.</p>
+<p>The confidence intervals for the main effects, <code>modality</code> and <code>length_ratio_log</code>, do not contain the null hypothesis value of 0, which provides evidence that each of the explanatory variables is related to the proportion of NP realizations of the recipient clause.</p>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1386,45 +1340,24 @@ Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>len
 </div>
 </div>
 </div>
-<p>Our logistic regression model as specified considers the explanatory variables <code>modality</code> and <code>length_ratio</code> independently, controlling for the other explanatory variable. This is an <strong>additive model</strong>, which is what we stated in our hypothesis and represented in the formula <code>y ~ x1 + x2</code>.</p>
-<p>Not all multivariate relationships are additive. We can also hypothesize an interaction between the explanatory variables. A <strong>interaction</strong> is the effect of one explanatory variable on the response variable is dependent on the other explanatory variable(s). In our case, we could have hypothesized that the effect of the <code>length_ratio</code> on the proportion of NP realizations of the recipient clause is dependent on the <code>modality</code>. We can specify this relationship using the formula approach, as seen in <a href="#exm-ida-cat-logistic-regression-interaction" class="quarto-xref">Example&nbsp;<span>10.26</span></a>.</p>
+<p>Our logistic regression model as specified considers the explanatory variables <code>modality</code> and <code>length_ratio_log</code> independently, controlling for the other explanatory variable. This is an <strong>additive model</strong>, which is what we stated in our hypothesis and represented in the formula <code>y ~ x1 + x2</code>.</p>
+<p>Not all multivariate relationships are additive. We can also hypothesize an interaction between the explanatory variables. A <strong>interaction</strong> is the effect of one explanatory variable on the response variable is dependent on the other explanatory variable(s). In our case, we could have hypothesized that the effect of the <code>length_ratio_log</code> on the proportion of NP realizations of the recipient clause is dependent on the <code>modality</code>. We can specify this relationship using the formula approach, as seen in <a href="#exm-ida-cat-logistic-regression-interaction" class="quarto-xref">Example&nbsp;<span>10.24</span></a>.</p>
 <div id="exm-ida-cat-logistic-regression-interaction" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.26</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.24</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship between the response and explanatory variables</span></span>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship between the response and explanatory variables</span></span>
 <span><span class="va">dative_inter_spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">dative_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/specify.html">specify</a></span><span class="op">(</span></span>
 <span>    <span class="va">realization_of_rcp</span> <span class="op">~</span> <span class="va">modality</span> <span class="op">*</span> <span class="va">length_ratio_log</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="va">dative_inter_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; Response: realization_of_rcp (factor)
-&gt; Explanatory: modality (factor), length_ratio_log (numeric)
-&gt; # A tibble: 3,263 × 3
-&gt;    realization_of_rcp modality length_ratio_log
-&gt;    &lt;fct&gt;              &lt;fct&gt;               &lt;dbl&gt;
-&gt;  1 NP                 written             1.15 
-&gt;  2 NP                 written             0.176
-&gt;  3 NP                 written             1.11 
-&gt;  4 NP                 written             0.699
-&gt;  5 NP                 written             0.176
-&gt;  6 NP                 written             0.301
-&gt;  7 NP                 written             0.301
-&gt;  8 NP                 written             0    
-&gt;  9 NP                 written             1.04 
-&gt; 10 NP                 written             0.301
-&gt; # ℹ 3,253 more rows</code></pre>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-</div>
-<p>Replacing the <code>+</code> with a <code>*</code> tells the model to consider the interaction between the explanatory variables. A model with an interaction changes the terms and the estimates. In <a href="#exm-ida-cat-logistic-regression-interaction-terms" class="quarto-xref">Example&nbsp;<span>10.27</span></a>, we see the terms for the logistic regression model with an interaction.</p>
+<p>Replacing the <code>+</code> with a <code>*</code> tells the model to consider the interaction between the explanatory variables. A model with an interaction changes the terms and the estimates. In <a href="#exm-ida-cat-logistic-regression-interaction-terms" class="quarto-xref">Example&nbsp;<span>10.25</span></a>, we see the terms for the logistic regression model with an interaction.</p>
 <div id="exm-ida-cat-logistic-regression-interaction-terms" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.27</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.25</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the logistic regression model</span></span>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the logistic regression model</span></span>
 <span><span class="va">dative_inter_fit</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">dative_inter_spec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -1442,7 +1375,6 @@ Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>len
 </div>
 </div>
 </div>
-<p>The additional term <code>modalitywritten:length_ratio_log</code> is the interaction term. We also see the log odds estimates have changed for the previous terms. This is because this interaction draws some of the explanatory power from the other terms. Whether or not we run an interaction model depends on our research question. Again, the hypothesis precedes the model. If we hypothesize an interaction, then we should run an interaction model. If we do not hypothesize an interaction, then we should not run an interaction model.</p>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1458,6 +1390,7 @@ Figure&nbsp;10.5: Distribution the variables <code>modality</code> and <code>len
 </div>
 </div>
 </div>
+<p>The additional term <code>modalitywritten:length_ratio_log</code> is the interaction term. We also see the log odds estimates have changed for the previous terms. This is because this interaction draws some of the explanatory power from the other terms. Whether or not we run an interaction model depends on our research question. Again, the hypothesis precedes the model. If we hypothesize an interaction, then we should run an interaction model. If we do not, then we should not.</p>
 </section></section><section id="sec-ida-numeric" class="level3" data-number="10.2.2"><h3 data-number="10.2.2" class="anchored" data-anchor-id="sec-ida-numeric">
 <span class="header-section-number">10.2.2</span> Numeric</h3>
 <p>We now turn our attention to the analysis scenarios where the response variable is numeric. Just as for categorical variables, we can have univariate, bivariate, and multivariate analysis scenarios. The statistical tests for numeric variables are summarized in <a href="#tbl-ida-num-design" class="quarto-xref">Table&nbsp;<span>10.7</span></a>.</p>
@@ -1514,11 +1447,11 @@ Table&nbsp;10.7: Statistical test design for numeric response variables
 </div>
 </figure>
 </div>
-<p>The <code>fillers</code> dataset is drawn from the Switchboard Dialog Act Corpus <span class="citation" data-cites="SWDA2008">(<a href="references.html#ref-SWDA2008" role="doc-biblioref">University of Colorado Boulder 2008</a>)</span>. This dataset contains over 200k utterances from 1,155 5-minute telephone conversations and includes information about the use of fillers in the conversations. The data dictionary is found in <a href="#tbl-ida-num-data-dict" class="quarto-xref">Table&nbsp;<span>10.8</span></a>.</p>
+<p>The dataset will will use is drawn from the Switchboard Dialog Act Corpus <span class="citation" data-cites="SWDA2008">(<a href="references.html#ref-SWDA2008" role="doc-biblioref">University of Colorado Boulder 2008</a>)</span>. This dataset contains over 200k utterances from 1,155 5-minute telephone conversations and includes information about the use of fillers in the conversations. The data dictionary is found in <a href="#tbl-ida-num-data-dict" class="quarto-xref">Table&nbsp;<span>10.8</span></a>.</p>
 <div class="cell">
 <div id="tbl-ida-num-data-dict" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ida-num-data-dict-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;10.8: Data dictionary for the <code>fillers_df</code> dataset
+Table&nbsp;10.8: Data dictionary for the transformed SWDA dataset
 </figcaption><div aria-describedby="tbl-ida-num-data-dict-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div>
@@ -1580,51 +1513,40 @@ Table&nbsp;10.8: Data dictionary for the <code>fillers_df</code> dataset
 </figure>
 </div>
 </div>
-<p>We see the dataset has [FOUR FIXME] variables. The <code>fillers_per_100</code> will be used as our reponse variable and corresponds to the rate of filler usage per speaker, normalized by the number of utterances. The other variables we will consider as explanatory variables are <code>age</code>, <code>sex</code>, and <code>education</code>, providing us a mix of numeric and categorical variables.</p>
+<p>We see the dataset has seven variables. The <code>fillers_per_100</code> will be used as our reponse variable and corresponds to the rate of filler usage per speaker, normalized by the number of utterances. The other variables we will consider as explanatory variables are <code>age</code>, <code>sex</code>, and <code>education</code>, providing us a mix of numeric and categorical variables.</p>
 <p>The context for these analysis demonstrations comes from the socio-linguistic literature on the use of filled pauses. Filled pauses have often been associated with a type of disfluency; speech errors that occur during speech production. However, some authors have argued that filled pauses can act as sociolinguistic markers of socio-demographic characterstics of speakers, such as gender, age, and educational level <span class="citation" data-cites="Shriberg1994 Tottie2011">(<a href="references.html#ref-Shriberg1994" role="doc-biblioref">Shriberg 1994</a>; <a href="references.html#ref-Tottie2011" role="doc-biblioref">Tottie 2011</a>)</span>.</p>
-<p>Let’s prepare these datasets for analysis by converting the categorical variables to factors and ordering the <code>education</code> variable, as seen in <a href="#exm-ida-num-factors" class="quarto-xref">Example&nbsp;<span>10.28</span></a>.</p>
-<div id="exm-ida-num-factors" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.28</strong></span> &nbsp;</p>
+<p>Reading the dataset and performing some basic diagnostics, a preview of the <code>fillers_tbl</code> dataset is seen in <a href="#exm-ida-num-dataset" class="quarto-xref">Example&nbsp;<span>10.26</span></a> .</p>
+<div id="exm-ida-num-dataset" class="theorem example">
+<p><span class="theorem-title"><strong>Example 10.26</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Establish level names and order for the `education` variable</span></span>
-<span><span class="va">edu_levels</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"More Than College"</span>,</span>
-<span>    <span class="st">"College"</span>,</span>
-<span>    <span class="st">"Less Than College"</span>,</span>
-<span>    <span class="st">"Less Than High School"</span>,</span>
-<span>    <span class="st">"Unknown"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Convert categorical variables to factors</span></span>
-<span><span class="va">fillers_df</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span>,</span>
-<span>    education <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">education</span>, levels <span class="op">=</span> <span class="va">edu_levels</span>, ordered <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="fu">glimpse</span><span class="op">(</span><span class="va">fillers_df</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview the dataset</span></span>
+<span><span class="va">fillers_tbl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 441
-&gt; Columns: 7
-&gt; $ speaker_id       &lt;dbl&gt; 1000, 1001, 1002, 1004, 1005, 1007, 1008, 1010, 1011,…
-&gt; $ age              &lt;dbl&gt; 38, 52, 29, 34, 36, 27, 53, 60, 28, 35, 45, 25, 47, 3…
-&gt; $ sex              &lt;fct&gt; Female, Male, Female, Female, Female, Female, Female,…
-&gt; $ education        &lt;ord&gt; Less Than College, More Than College, College, Colleg…
-&gt; $ fillers_per_100  &lt;dbl&gt; 2.14, 25.34, 4.13, 2.41, 3.79, 0.00, 8.33, 1.82, 5.22…
-&gt; $ total_fillers    &lt;dbl&gt; 44, 263, 54, 45, 129, 0, 27, 2, 54, 130, 135, 14, 152…
-&gt; $ total_utterances &lt;dbl&gt; 2052, 1038, 1308, 1866, 3400, 278, 324, 110, 1034, 20…</code></pre>
+<pre><code>&gt; # A tibble: 441 × 4
+&gt;      age sex    education         fillers_per_100
+&gt;    &lt;dbl&gt; &lt;fct&gt;  &lt;ord&gt;                       &lt;dbl&gt;
+&gt;  1    38 Female Less Than College            2.14
+&gt;  2    52 Male   More Than College           25.3 
+&gt;  3    29 Female College                      4.13
+&gt;  4    34 Female College                      2.41
+&gt;  5    36 Female College                      3.79
+&gt;  6    27 Female College                      0   
+&gt;  7    53 Female Less Than College            8.33
+&gt;  8    60 Male   Less Than College            1.82
+&gt;  9    28 Female College                      5.22
+&gt; 10    35 Female College                      6.23
+&gt; # ℹ 431 more rows</code></pre>
 </div>
 </div>
 </div>
-<p>Our <code>fillers_df</code> dataset has 441 observations. Again, we will postpone more descriptive statistics for treatment in the particular scenarios.</p>
+<p>Our <code>fillers_tbl</code> dataset has 441 observations. Again, we will postpone more specific descriptive statistics for treatment in the upcoming scenarios.</p>
 <section id="univariate-analysis" class="level4"><h4 class="anchored" data-anchor-id="univariate-analysis">Univariate analysis</h4>
-<p>In hypothesis testing, the analysis of a single variable is directed at determining whether or not the distribution or statistic of the variable differs from some expected distribution or statistic. In the case of a single categorical variable with two levels (as in the datives case), we sampled from a binomial distribution by chance. In the case of a single numeric variable, we can sample and compare the observed distribution to a theoretical distribution. When approaching hypothesis testing from a theoretical perspective, it is often necessary to assess how well a numeric variable fits the normal distribution as many statistical tests assume that the data are normally distributed. However, we have adopted the simulation-based approach to hypothesis testing, which does not require that the data fit the normal distribution, or any other distribution for that matter.</p>
-<p>The other approach to analyzing a single numeric variable is to compare an observed statistic to an expected statistic. This approach requires a priori knowledge of the expected statistic. For example, imagine we are interested testing the hypothesis that the length of words in a medical corpus tend to be longer than the average length of words in English. We would then calculate the observed mean for the length of words in the medical corpus and then generate a null distribution of means for the length of words in English, as in <a href="#exm-ida-num-uni-null-mean" class="quarto-xref">Example&nbsp;<span>10.29</span></a>.</p>
+<p>In hypothesis testing, the analysis of a single variable is directed at determining whether or not the distribution or statistic of the variable differs from some expected distribution or statistic. In the case of a single categorical variable with two levels (as <a href="#sec-ida-categorical" class="quarto-xref"><span>Section 10.2.1</span></a>), we sampled from a binomial distribution by chance. In the case of a single numeric variable, we can sample and compare the observed distribution to a theoretical distribution. When approaching hypothesis testing from a theoretical perspective, it is often necessary to assess how well a numeric variable fits the normal distribution as many statistical tests assume that the data are normally distributed. However, we have adopted the simulation-based approach to hypothesis testing, which does not require that the data fit the normal distribution, or any other distribution for that matter.</p>
+<p>The other approach to analyzing a single numeric variable is to compare an observed statistic to an expected statistic. This approach requires <em>a priori</em> knowledge of the expected statistic. For example, imagine we are interested testing the hypothesis that the length of words in a medical corpus tend to be longer than the average length of words in English. We would then calculate the observed mean for the length of words in the medical corpus and then generate a null distribution of means for the length of words in English, as in <a href="#exm-ida-num-uni-null-mean" class="quarto-xref">Example&nbsp;<span>10.27</span></a>.</p>
 <div id="exm-ida-num-uni-null-mean" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.29</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.27</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Observed mean</span></span>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Observed mean</span></span>
 <span><span class="va">obs_mean</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">medical_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/specify.html">specify</a></span><span class="op">(</span>response <span class="op">=</span> <span class="va">word_length</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1639,97 +1561,47 @@ Table&nbsp;10.8: Data dictionary for the <code>fillers_df</code> dataset
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/calculate.html">calculate</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>Note that instead of a <code>p =</code> argument, as was used in the <code><a href="https://infer.tidymodels.org/reference/hypothesize.html">hypothesize()</a></code> step to generate a null distribution of proportions, we use a <code>mu =</code> argument in <a href="#exm-ida-num-uni-null-mean" class="quarto-xref">Example&nbsp;<span>10.29</span></a> to specify the expected mean. The rest of the hypothesis testing workflow is the same as for the null distribution of proportions.</p>
-<div class="callout callout-style-simple callout-none no-icon">
+<p>Note that instead of a <code>p =</code> argument, as was used in the <code><a href="https://infer.tidymodels.org/reference/hypothesize.html">hypothesize()</a></code> step to generate a null distribution of proportions, we use a <code>mu =</code> argument in <a href="#exm-ida-num-uni-null-mean" class="quarto-xref">Example&nbsp;<span>10.27</span></a> to specify the expected mean. The rest of the hypothesis testing workflow is the same as for the null distribution of proportions.</p>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
+<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
 <p>The mean <code>mu</code> is not the only statistic we can specify for a numeric variable. We can also specify the median <code>med</code>, or the standard deviation <code>sigma</code>.</p>
 </div>
 </div>
 </div>
-<p>In our case, we do not have a priori knowledge of the expected statistic for the <code>fillers_per_100</code> variable, so we will not pursue this approach. However, when looking at the distribution of a numeric variable, it is useful to look at the descriptive statistics the mean, median, and standard deviation in order to get a sense of the central tendency and spread of the data.</p>
-<p>We can use the <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> function to get the mean, median, and standard deviation of the <code>fillers_per_100</code> variable, as seen in <a href="#exm-ida-num-uni-summary" class="quarto-xref">Example&nbsp;<span>10.30</span></a>.</p>
-<div id="exm-ida-num-uni-summary" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.30</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="va">fillers_per_100</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; ── Data Summary ────────────────────────
-&gt;                            Values    
-&gt; Name                       fillers_df
-&gt; Number of rows             441       
-&gt; Number of columns          7         
-&gt; _______________________              
-&gt; Column type frequency:               
-&gt;   numeric                  1         
-&gt; ________________________             
-&gt; Group variables            None      
-&gt; 
-&gt; ── Variable type: numeric ──────────────────────────────────────────────────────
-&gt;   skim_variable   n_missing complete_rate mean   sd p0  p25  p50  p75 p100 hist 
-&gt; 1 fillers_per_100         0             1 9.19 7.03  0 4.11 7.95 13.2 52.8 ▇▃▁▁▁</code></pre>
-</div>
-</div>
-</div>
-<p>The mean is larger than the median which suggests that the distribution is right-skewed. Furthermore, the standard deviation is large relative to the mean, which suggests that there is a lot of variability in the data.</p>
-<p>To get a sense of the distribution of the <code>fillers_per_100</code> variable, we can plot a histogram and density plot, as seen in <a href="#exm-ida-num-uni-hist-dens" class="quarto-xref">Example&nbsp;<span>10.31</span></a>.</p>
+<p>In our case, we do not have <em>a priori</em> knowledge of the expected statistic for the <code>fillers_per_100</code> variable, so we will not pursue this approach. However, it is useful to take a closer look at the distribution of a numeric variable in order to detect extreme skewing and/ or outliers. This is important because the presence of skewing and outliers can affect the results of statistical tests. We can visualize the distribution of the <code>fillers_per_100</code> variable using a histogram and density plot, as seen in <a href="#fig-ida-num-uni-hist-dens" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>.</p>
 <div id="exm-ida-num-uni-hist-dens" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.31</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Histogram</span></span>
-<span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<p><span class="theorem-title"><strong>Example 10.28</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Histogram-density plot</span></span>
+<span><span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">fillers_per_100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_histogram</span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Fillers per 100 utterances"</span>, y <span class="op">=</span> <span class="st">"Count"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Density plot</span></span>
-<span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">fillers_per_100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">density</span><span class="op">)</span><span class="op">)</span>, bins <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_density</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Fillers per 100 utterances"</span>, y <span class="op">=</span> <span class="st">"Density"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="fig-ida-num-uni-hist-dens" class="quarto-layout-panel">
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Fillers per 100 utterances"</span>, y <span class="op">=</span> <span class="st">"Count"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-ida-num-uni-hist-dens" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-uni-hist-dens-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="quarto-layout-row">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-num-uni-hist-dens" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-num-uni-hist-dens-1" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-num-uni-hist-dens-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-uni-hist-dens-1.png" class="img-fluid figure-img" data-ref-parent="fig-ida-num-uni-hist-dens" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-num-uni-hist-dens-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Histogram
-</figcaption></figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-num-uni-hist-dens" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-num-uni-hist-dens-2" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-num-uni-hist-dens-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-uni-hist-dens-2.png" class="img-fluid figure-img" data-ref-parent="fig-ida-num-uni-hist-dens" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-num-uni-hist-dens-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(b) Density plot
-</figcaption></figure>
-</div>
-</div>
-</div>
+<img src="inference_files/figure-html/fig-ida-num-uni-hist-dens-1.png" class="img-fluid figure-img" width="768">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-uni-hist-dens-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.6: Histogram and density plot of the <code>fillers_per_100</code> variable
+Figure&nbsp;10.5: Histogram and density plot of the <code>fillers_per_100</code> variable
 </figcaption></figure>
 </div>
 </div>
-<p>The distribution of <code>fillers_per_100</code> is indeed skewed to the right. We might have predicted this given that we are working with ratio based on count data, perhaps not. In any case, the skewing we observe tends to compress the distribution and may make it difficult to see any patterns. To mitigate this, we can log transform the variable. But we will run into a problem if we have any speakers who do not use any fillers at all as these speakers will have a value of zero, as we can see in <a href="#fig-ida-num-uni-hist-dens-2" class="quarto-xref">Figure&nbsp;<span>10.6 (b)</span></a>. The log of zero is undefined. So we need to address this.</p>
-<p>Eliminating the speakers who do not use any fillers at all is one option. This is quite extreme as we may lose quite a few speakers and it is not clear that removing data in this way will not cause inordinate bias in the results as these speakers may be different in some way from the rest of the speakers. Looking at the speakers with zero fillers in <a href="#exm-ida-num-uni-zero-fillers" class="quarto-xref">Example&nbsp;<span>10.32</span></a>, we can see that there is some potential for bias.</p>
+</div>
+</div>
+<p>The distribution of <code>fillers_per_100</code> is indeed skewed to the right. We might have predicted this given that we are working with ratio based on count data, perhaps not. In any case, the skewing we observe tends to compress the distribution and may make it difficult to see any patterns. To mitigate this, we can log transform the variable. But we will run into a problem if we have any speakers who do not use any fillers at all as these speakers will have a value of zero, as we can see in <a href="#fig-ida-num-uni-hist-dens" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>. The log of zero is undefined. So we need to address this.</p>
+<p>Eliminating the speakers who do not use any fillers at all is one option. This is quite extreme as we may lose quite a few speakers and it is not clear that removing data in this way will not cause inordinate bias in the results as these speakers may be different in some way from the rest of the speakers. Looking at the speakers with zero fillers in <a href="#exm-ida-num-uni-zero-fillers" class="quarto-xref">Example&nbsp;<span>10.29</span></a>, we can see that there is some potential for bias as the speakers with zero fillers are not evenly distributed across the levels of the <code>education</code> and <code>sex</code> variables.</p>
 <div id="exm-ida-num-uni-zero-fillers" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.32</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.29</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Cross-tabulation of zero fillers by education and sex</span></span>
+<span><span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">fillers_per_100</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/tabyl.html">tabyl</a></span><span class="op">(</span><span class="va">education</span>, <span class="va">sex</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1744,196 +1616,125 @@ Figure&nbsp;10.6: Histogram and density plot of the <code>fillers_per_100</code>
 </div>
 <p>Another approach is to add a small value to the <code>fillers_per_100</code> variable, for all speakers. This will allow us to log transform the variable and will likely not have any (or very little) impact on the results. It also allows us to keep these speakers.</p>
 <p>Adding values can be done in one of two ways. We can add a small constant value to all speakers, or we can add a small random value to all speakers. The former is easier to implement, but means that we will still have a spike in the distribution at the value of the constant. Since we do not expect that speakers that did not use fillers at all would never do so and that when they do we would not expect them to be at exactly the same rate as other speakers, we can add a small random value to all speakers.</p>
-<p>In R, we can use the <code><a href="https://rdrr.io/r/base/jitter.html">jitter()</a></code> function to add a small amount of random noise to the variable. Note, however, this random noise can be positive or negative. When a negative value is added to a zero value, we are still in trouble. So we need to make sure that none of the jitter produces negative values. We can do this by simply taking the absolute value of the jittered variable with the <code><a href="https://rdrr.io/r/base/MathFun.html">abs()</a></code> function. Let’s see how this works in <a href="#exm-ida-num-uni-jitter" class="quarto-xref">Example&nbsp;<span>10.33</span></a>.</p>
+<p>In R, we can use the <code><a href="https://rdrr.io/r/base/jitter.html">jitter()</a></code> function to add a small amount of random noise to the variable. Note, however, this random noise can be positive or negative. When a negative value is added to a zero value, we are still in trouble. So we need to make sure that none of the jitter produces negative values. We can do this by simply taking the absolute value of the jittered variable with the <code><a href="https://rdrr.io/r/base/MathFun.html">abs()</a></code> function. Let’s see how this works in <a href="#exm-ida-num-uni-jitter" class="quarto-xref">Example&nbsp;<span>10.30</span></a>.</p>
 <div id="exm-ida-num-uni-jitter" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.33</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.30</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1234</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add jitter to fillers</span></span>
-<span><span class="va">fillers_df</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<span><span class="va">fillers_tbl</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>fillers_per_100_jitter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/jitter.html">jitter</a></span><span class="op">(</span><span class="va">fillers_per_100</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fillers_df</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">fillers_tbl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 441 × 8
-&gt;    speaker_id   age sex    education         fillers_per_100 total_fillers
-&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;  &lt;ord&gt;                       &lt;dbl&gt;         &lt;dbl&gt;
-&gt;  1       1000    38 Female Less Than College            2.14            44
-&gt;  2       1001    52 Male   More Than College           25.3            263
-&gt;  3       1002    29 Female College                      4.13            54
-&gt;  4       1004    34 Female College                      2.41            45
-&gt;  5       1005    36 Female College                      3.79           129
-&gt;  6       1007    27 Female College                      0                0
-&gt;  7       1008    53 Female Less Than College            8.33            27
-&gt;  8       1010    60 Male   Less Than College            1.82             2
-&gt;  9       1011    28 Female College                      5.22            54
-&gt; 10       1013    35 Female College                      6.23           130
-&gt; # ℹ 431 more rows
-&gt; # ℹ 2 more variables: total_utterances &lt;dbl&gt;, fillers_per_100_jitter &lt;dbl&gt;</code></pre>
+<pre><code>&gt; # A tibble: 441 × 5
+&gt;      age sex    education         fillers_per_100 fillers_per_100_jitter
+&gt;    &lt;dbl&gt; &lt;fct&gt;  &lt;ord&gt;                       &lt;dbl&gt;                  &lt;dbl&gt;
+&gt;  1    38 Female Less Than College            2.14               2.14    
+&gt;  2    52 Male   More Than College           25.3               25.3     
+&gt;  3    29 Female College                      4.13               4.13    
+&gt;  4    34 Female College                      2.41               2.41    
+&gt;  5    36 Female College                      3.79               3.80    
+&gt;  6    27 Female College                      0                  0.000561
+&gt;  7    53 Female Less Than College            8.33               8.33    
+&gt;  8    60 Male   Less Than College            1.82               1.82    
+&gt;  9    28 Female College                      5.22               5.22    
+&gt; 10    35 Female College                      6.23               6.23    
+&gt; # ℹ 431 more rows</code></pre>
 </div>
 </div>
 </div>
-<p>The results from <a href="#exm-ida-num-uni-jitter" class="quarto-xref">Example&nbsp;<span>10.33</span></a> show that the <code>fillers_per_100_jitter</code> variable has been added to the <code>fillers_df</code> dataset and that zero values for <code>fillers_per_100</code> now have a small amount of random noise added to them. Note, that the other values also have a small amount of random noise added to them, but it is so small that rounding to 2 decimal places makes it look like nothing has changed.</p>
-<p>Now let’s return to log transforming the <code>fillers_per_100_jitter</code> variable. We can do this with the <code><a href="https://rdrr.io/r/base/Log.html">log()</a></code> function. Let’s see how this works in <a href="#exm-ida-num-uni-log" class="quarto-xref">Example&nbsp;<span>10.34</span></a>.</p>
+<p>The results from <a href="#exm-ida-num-uni-jitter" class="quarto-xref">Example&nbsp;<span>10.30</span></a> show that the <code>fillers_per_100_jitter</code> variable has been added to the <code>fillers_tbl</code> dataset and that zero values for <code>fillers_per_100</code> now have a small amount of random noise added to them. Note, that the other values also have a small amount of random noise added to them, but it is so small that rounding to 2 decimal places makes it look like nothing has changed.</p>
+<p>Now let’s return to log transforming the <code>fillers_per_100_jitter</code> variable. We can do this with the <code><a href="https://rdrr.io/r/base/Log.html">log()</a></code> function. Let’s see how this works in <a href="#exm-ida-num-uni-log" class="quarto-xref">Example&nbsp;<span>10.31</span></a>.</p>
 <div id="exm-ida-num-uni-log" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.34</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.31</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Log transform fillers (with jitter)</span></span>
-<span><span class="va">fillers_df</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Log transform fillers (with jitter)</span></span>
+<span><span class="va">fillers_tbl</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>fillers_per_100_log <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">fillers_per_100_jitter</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fillers_df</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">fillers_tbl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 441 × 9
-&gt;    speaker_id   age sex    education         fillers_per_100 total_fillers
-&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;  &lt;ord&gt;                       &lt;dbl&gt;         &lt;dbl&gt;
-&gt;  1       1000    38 Female Less Than College            2.14            44
-&gt;  2       1001    52 Male   More Than College           25.3            263
-&gt;  3       1002    29 Female College                      4.13            54
-&gt;  4       1004    34 Female College                      2.41            45
-&gt;  5       1005    36 Female College                      3.79           129
-&gt;  6       1007    27 Female College                      0                0
-&gt;  7       1008    53 Female Less Than College            8.33            27
-&gt;  8       1010    60 Male   Less Than College            1.82             2
-&gt;  9       1011    28 Female College                      5.22            54
-&gt; 10       1013    35 Female College                      6.23           130
+<pre><code>&gt; # A tibble: 441 × 6
+&gt;      age sex    education         fillers_per_100 fillers_per_100_jitter
+&gt;    &lt;dbl&gt; &lt;fct&gt;  &lt;ord&gt;                       &lt;dbl&gt;                  &lt;dbl&gt;
+&gt;  1    38 Female Less Than College            2.14               2.14    
+&gt;  2    52 Male   More Than College           25.3               25.3     
+&gt;  3    29 Female College                      4.13               4.13    
+&gt;  4    34 Female College                      2.41               2.41    
+&gt;  5    36 Female College                      3.79               3.80    
+&gt;  6    27 Female College                      0                  0.000561
+&gt;  7    53 Female Less Than College            8.33               8.33    
+&gt;  8    60 Male   Less Than College            1.82               1.82    
+&gt;  9    28 Female College                      5.22               5.22    
+&gt; 10    35 Female College                      6.23               6.23    
 &gt; # ℹ 431 more rows
-&gt; # ℹ 3 more variables: total_utterances &lt;dbl&gt;, fillers_per_100_jitter &lt;dbl&gt;,
-&gt; #   fillers_per_100_log &lt;dbl&gt;</code></pre>
+&gt; # ℹ 1 more variable: fillers_per_100_log &lt;dbl&gt;</code></pre>
 </div>
 </div>
 </div>
-<p>Let’s now plot the log-transformed variable, as seen in <a href="#exm-ida-num-uni-log-plot" class="quarto-xref">Example&nbsp;<span>10.35</span></a>.</p>
+<p>Let’s now plot the log-transformed variable, as seen in <a href="#exm-ida-num-uni-log-plot" class="quarto-xref">Example&nbsp;<span>10.32</span></a>.</p>
 <div id="exm-ida-num-uni-log-plot" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.35</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Histogram</span></span>
-<span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<p><span class="theorem-title"><strong>Example 10.32</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Histogram-density plot</span></span>
+<span><span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">fillers_per_100_log</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_histogram</span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Fillers per 100 utterances (log)"</span>, y <span class="op">=</span> <span class="st">"Count"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Density plot</span></span>
-<span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">fillers_per_100_log</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">density</span><span class="op">)</span><span class="op">)</span>, bins <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_density</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Fillers per 100 utterances (log)"</span>, y <span class="op">=</span> <span class="st">"Density"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="fig-ida-num-uni-log-plot" class="quarto-layout-panel">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-uni-log-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="quarto-layout-row">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-num-uni-log-plot" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-num-uni-log-plot-1" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-num-uni-log-plot-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-uni-log-plot-1.png" class="img-fluid figure-img" data-ref-parent="fig-ida-num-uni-log-plot" width="384">
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Fillers per 100 utterances"</span>, y <span class="op">=</span> <span class="st">"Count"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-ida-num-uni-hist-dens-log" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-uni-hist-dens-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="inference_files/figure-html/fig-ida-num-uni-hist-dens-log-1.png" class="img-fluid figure-img" width="768">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-num-uni-log-plot-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Histogram
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-uni-hist-dens-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.6: Histogram and density plot of the <code>fillers_per_100_log</code> variable
 </figcaption></figure>
 </div>
 </div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-num-uni-log-plot" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-num-uni-log-plot-2" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-num-uni-log-plot-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-uni-log-plot-2.png" class="img-fluid figure-img" data-ref-parent="fig-ida-num-uni-log-plot" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-num-uni-log-plot-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(b) Density plot
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-uni-log-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.7: Histogram and density plot of the <code>fillers_per_100_log</code> variable
-</figcaption></figure>
 </div>
 </div>
 <p>The distribution of the log-transformed variable is more spread out now, but the zero-filler speakers do show a low-level spike in the left tail of the distribution. Jitter and log-transformation, however, smooth over their effect to a large degree.</p>
-<p>Let’s drop some of the variables we no longer need and proceed with the log-transformed variable, as seen in <a href="#exm-ida-num-uni-drop" class="quarto-xref">Example&nbsp;<span>10.36</span></a>.</p>
-<div id="exm-ida-num-uni-drop" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.36</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Drop variables</span></span>
-<span><span class="va">fillers_df</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu">select</span><span class="op">(</span><span class="va">sex</span>, <span class="va">education</span>, <span class="va">age</span>, <span class="va">fillers_per_100_log</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
 </section><section id="bivariate-analysis" class="level4"><h4 class="anchored" data-anchor-id="bivariate-analysis">Bivariate analysis</h4>
 <p>When considering a numeric reponses variable and another variable, it is key to consider the nature of the other variable. If it is a categorical variable with two levels, then we can compare a statistic between the two groups (mean or median). If it is categorical with more than two levels, the F statistic is used to compare the means. Finally, if it is a numeric variable, then we can use a correlation test to see if there is an association between the two variables.</p>
-<p>Let’s approach each of these bivariate scenarios in turn.</p>
-<p>The <code>datives_df</code> contains the <code>sex</code> variable which is a categorical variable with two levels. According to the literature, filled pauses are associated with differences between men and women <span class="citation" data-cites="Shriberg1994 Tottie2011">Tottie (<a href="references.html#ref-Tottie2014" role="doc-biblioref">2014</a>)</span>. Sex is one of the variables associated with the rate of filled pauses. The findings suggest that men use fillers at a higher rate than women. Let’s test to see if this holds for the SWDA data.</p>
-<p>Let’s first explore the distribution from a descriptive point of view. With a numeric response variable <code>fillers_per_100_log</code> and a categorical explanatory variable <code>sex</code>, a boxplot is a natural fit. Let’s add a density plot with a <code>sex</code> overlay in <a href="#exm-ida-num-bi-vis" class="quarto-xref">Example&nbsp;<span>10.37</span></a>.</p>
+<p>The <code>fillers_tbl</code> contains the <code>sex</code> variable which is a categorical variable with two levels. According to the literature, filled pauses are associated with differences between men and women <span class="citation" data-cites="Shriberg1994 Tottie2011">Tottie (<a href="references.html#ref-Tottie2014" role="doc-biblioref">2014</a>)</span>. Sex is one of the variables associated with the rate of filled pauses. The findings suggest that men use fillers at a higher rate than women. Let’s test to see if this holds for the SWDA data.</p>
+<p>Let’s first explore the distribution from a descriptive point of view. With a numeric response variable <code>fillers_per_100_log</code> and a categorical explanatory variable <code>sex</code>, a boxplot is a natural fit, as seen in <a href="#exm-ida-num-bi-vis" class="quarto-xref">Example&nbsp;<span>10.33</span></a>.</p>
 <div id="exm-ida-num-bi-vis" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.37</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">fillers_per_100_log</span>, x <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<p><span class="theorem-title"><strong>Example 10.33</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Boxplot</span></span>
+<span><span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">fillers_per_100_log</span>, y <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_boxplot</span><span class="op">(</span>notch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span></span>
-<span>    y <span class="op">=</span> <span class="st">"Filler use (log)"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"Sex"</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">fillers_per_100_log</span>, fill <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_density</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="st">"Filler use (log)"</span>,</span>
-<span>    fill <span class="op">=</span> <span class="st">"Sex"</span></span>
+<span>    y <span class="op">=</span> <span class="st">"Sex"</span></span>
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="fig-ida-num-bi-vis" class="quarto-layout-panel">
+<div class="cell-output-display">
+<div id="fig-ida-num-bi-vis" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="quarto-layout-row">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-num-bi-vis" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-num-bi-vis-1" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-num-bi-vis-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-vis-1.png" class="img-fluid figure-img" data-ref-parent="fig-ida-num-bi-vis" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-num-bi-vis-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Boxplot
-</figcaption></figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ida-num-bi-vis" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-ida-num-bi-vis-2" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-ida-num-bi-vis-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-vis-2.png" class="img-fluid figure-img" data-ref-parent="fig-ida-num-bi-vis" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ida-num-bi-vis-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(b) Density plot
-</figcaption></figure>
-</div>
-</div>
-</div>
+<img src="inference_files/figure-html/fig-ida-num-bi-vis-1.png" class="img-fluid figure-img" width="768">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.8: Visualizations of the <code>fillers_per_100_log</code> variable by <code>sex</code>
+Figure&nbsp;10.7: Boxplot of the <code>fillers_per_100_log</code> variable by <code>sex</code>
 </figcaption></figure>
 </div>
 </div>
-<p>Looking at the boxplot in <a href="#fig-ida-num-bi-vis-1" class="quarto-xref">Figure&nbsp;<span>10.8 (a)</span></a>, we see that the appears to be an overall higher rate of filler use for men, compared to women. We also can see that the random noise added to zero-rate speakers appear as outliers in the left tail. The density plot in <a href="#fig-ida-num-bi-vis-2" class="quarto-xref">Figure&nbsp;<span>10.8 (b)</span></a> confirms this and allows us to see the overlap between the two groups. We see that the density distribution is not as concentrated and is slightly lower than that of men.</p>
-<div class="callout callout-style-simple callout-none no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong>Consider this</strong></p>
-<p>If we focus on the zero-rate outliers, we see there is also a difference in the distribution. Can this difference be attributed to differences between men and women? Why or why not?</p>
-<p>Does your answer to this question have an effect on how we interpret the differences between men and women in the main distribution?</p>
 </div>
 </div>
-</div>
-<p>Let’s follow the simulation-based hypothesis testing workflow and investigate if the apparent difference between men and women is statistically significant, or expected by chance. The first steps are found in <a href="#exm-ida-num-bi-sex-null" class="quarto-xref">Example&nbsp;<span>10.38</span></a>.</p>
+<p>Looking at the boxplot in <a href="#fig-ida-num-bi-vis" class="quarto-xref">Figure&nbsp;<span>10.7</span></a>, we see that the appears to be an overall higher rate of filler use for men, compared to women. We also can see that the random noise added to zero-rate speakers appear as outliers in the left tail. Since I added a notch to the boxplots, we can also gauge to some degree the uncertainty of the median. The notches do not overlap, which suggests that the medians are different.</p>
+<p>To test this differences, let’s follow the simulation-based hypothesis testing workflow and investigate if the apparent difference between men and women is statistically significant, or expected by chance<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. The first steps are found in <a href="#exm-ida-num-bi-sex-null" class="quarto-xref">Example&nbsp;<span>10.34</span></a>.</p>
 <div id="exm-ida-num-bi-sex-null" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.38</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.34</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
 <span><span class="va">fillers_spec</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/specify.html">specify</a></span><span class="op">(</span><span class="va">fillers_per_100_log</span> <span class="op">~</span> <span class="va">sex</span><span class="op">)</span> <span class="co"># response ~ explanatory</span></span>
 <span></span>
 <span><span class="co"># Observed statistic</span></span>
@@ -1949,38 +1750,23 @@ Figure&nbsp;10.8: Visualizations of the <code>fillers_per_100_log</code> variabl
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"permute"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># permute = shuffle</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/calculate.html">calculate</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"diff in means"</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Male"</span>, <span class="st">"Female"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Visualize the null distribution w/ observed statistic</span></span>
-<span><span class="va">fillers_null</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_p_value.html">shade_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_obs</span>, direction <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span> <span class="co"># expect greater</span></span>
-<span></span>
 <span><span class="co"># Calculate the p-value</span></span>
 <span><span class="va">fillers_null</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/get_p_value.html">get_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_obs</span>, direction <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/get_p_value.html">get_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_obs</span>, direction <span class="op">=</span> <span class="st">"two-sided"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 1 × 1
 &gt;   p_value
 &gt;     &lt;dbl&gt;
-&gt; 1   0.033</code></pre>
-</div>
-<div class="cell-output-display">
-<div id="fig-ida-num-bi-sex-null" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-sex-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-sex-null-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-sex-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.9: Null distribution of the <code>fillers_per_100_log</code> variable by <code>sex</code>
-</figcaption></figure>
+&gt; 1   0.066</code></pre>
 </div>
 </div>
 </div>
-</div>
-<p>From the analysis performed in <a href="#exm-ida-num-bi-sex-null" class="quarto-xref">Example&nbsp;<span>10.38</span></a>, we can reject the null hypothesis that there is no difference between the rate of filler use between men and women, as the p-value is greater less than 0.05.</p>
-<p>To further assess the uncertainty of the observed statistic, and the robustness of the difference, we calculate a confidence interval, as seen in <a href="#exm-ida-num-bi-sex-ci" class="quarto-xref">Example&nbsp;<span>10.39</span></a>.</p>
+<p>From the analysis performed in <a href="#exm-ida-num-bi-sex-null" class="quarto-xref">Example&nbsp;<span>10.34</span></a>, we can reject the null hypothesis that there is no difference between the rate of filler use between men and women, as the p-value is less than 0.05.</p>
+<p>To further assess the uncertainty of the observed statistic, and the robustness of the difference, we calculate a confidence interval, as seen in <a href="#exm-ida-num-bi-sex-ci" class="quarto-xref">Example&nbsp;<span>10.35</span></a>.</p>
 <div id="exm-ida-num-bi-sex-ci" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.39</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.35</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resampling distribution</span></span>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resampling distribution</span></span>
 <span><span class="va">fillers_boot</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">fillers_spec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"bootstrap"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1998,31 +1784,16 @@ Figure&nbsp;10.9: Null distribution of the <code>fillers_per_100_log</code> vari
 &gt;      &lt;dbl&gt;    &lt;dbl&gt;
 &gt; 1 -0.00378     1.05</code></pre>
 </div>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize the confidence interval</span></span>
-<span><span class="va">fillers_boot</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_confidence_interval.html">shade_ci</a></span><span class="op">(</span><span class="va">fillers_ci</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-ida-num-bi-sex-ci" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-sex-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-sex-ci-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-sex-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.10: Confidence interval generated from bootstrap resampling
-</figcaption></figure>
 </div>
 </div>
-</div>
-</div>
-<p>The confidence interval includes 0, which suggests that the observed difference is questionable. It is of note, however, that the majority of the interval is above 0, which provides some evidence that the observed difference is not due to chance.</p>
-<p>This result highlights how p-values and confidence intervals together can provide a more nuanced picture of the data.</p>
-<p>The second bivariate scenario we can consider is when the explanatory variable is categorical with more than two levels. In this case, we can use the F statistic to compare the means of the different levels. The <code>education</code> variable in the <code>fillers_df</code> dataset is a categorical variable with five levels. <span class="citation" data-cites="Tottie2011">Tottie (<a href="references.html#ref-Tottie2011" role="doc-biblioref">2011</a>)</span> suggests that more educated speakers use more fillers than less educated speakers. Let’s test this hypothesis.</p>
-<p>First, we visualize the distribution of the <code>fillers_per_100_log</code> variable by <code>education</code>, as seen in <a href="#exm-ida-num-bi-edu-vis" class="quarto-xref">Example&nbsp;<span>10.40</span></a>.</p>
+<p>TThe confidence interval includes 0, which suggests that the observed difference is questionable. It is of note, however, that the majority of the interval is above 0, which provides some evidence that the observed difference is not due to chance. This result highlights how p-values and confidence intervals together can provide a more nuanced picture of the data.</p>
+<p>The second bivariate scenario we can consider is when the explanatory variable is categorical with more than two levels. In this case, we can use the F statistic to compare the means of the different levels. The <code>education</code> variable in the <code>fillers_tbl</code> dataset is a categorical variable with five levels. <span class="citation" data-cites="Tottie2011">Tottie (<a href="references.html#ref-Tottie2011" role="doc-biblioref">2011</a>)</span> suggests that more educated speakers use more fillers than less educated speakers. Let’s test this hypothesis.</p>
+<p>First, we visualize the distribution of the <code>fillers_per_100_log</code> variable by <code>education</code>, as seen in <a href="#exm-ida-num-bi-edu-vis" class="quarto-xref">Example&nbsp;<span>10.36</span></a>.</p>
 <div id="exm-ida-num-bi-edu-vis" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.40</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.36</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Boxplot</span></span>
-<span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Boxplot</span></span>
+<span><span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">fillers_per_100_log</span>, x <span class="op">=</span> <span class="va">education</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_boxplot</span><span class="op">(</span>notch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span></span>
@@ -2035,20 +1806,20 @@ Figure&nbsp;10.10: Confidence interval generated from bootstrap resampling
 <img src="inference_files/figure-html/fig-ida-num-bi-edu-vis-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-edu-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.11: Visualizations of the <code>fillers_per_100_log</code> variable by <code>education</code>
+Figure&nbsp;10.8: Visualizations of the <code>fillers_per_100_log</code> variable by <code>education</code>
 </figcaption></figure>
 </div>
 </div>
 </div>
 </div>
-<p>The boxplot in <a href="#fig-ida-num-bi-edu-vis" class="quarto-xref">Figure&nbsp;<span>10.11</span></a> does not point to any obvious differences between the levels of the <code>education</code> variable. There are a fair number of outliers, however, in the two most educated groups. These outliers are likely due to the random noise added to the 0-rate speakers and it is interesting that they are concentrated in the two most educated groups.</p>
-<p>Let’s now submit these variables to the simulation-based hypothesis testing workflow to quantify the uncertainty of the observed statistic and determine if the observed difference is statistically significant. The first steps are found in <a href="#exm-ida-num-bi-edu-null" class="quarto-xref">Example&nbsp;<span>10.41</span></a>.</p>
-<div id="exm-ida-num-bi-edu-null" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.41</strong></span> &nbsp;</p>
+<p>The boxplot in <a href="#fig-ida-num-bi-edu-vis" class="quarto-xref">Figure&nbsp;<span>10.8</span></a> does not point to any obvious differences between the levels of the <code>education</code> variable. There are a fair number of outliers, however, in the two most educated groups. These outliers are likely due to the random noise added to the 0-rate speakers and it is interesting that they are concentrated in the two most educated groups.</p>
+<p>Let’s now submit these variables to the simulation-based hypothesis testing workflow to quantify the uncertainty of the observed statistic and determine if the observed difference is statistically significant. The first steps are found in <span class="citation" data-cites="xm-ida-num-bi-edu">(<a href="references.html#ref-xm-ida-num-bi-edu" role="doc-biblioref"><strong>xm-ida-num-bi-edu?</strong></a>)</span>.</p>
+<div id="exm-ida-num-bi-edu" class="theorem example">
+<p><span class="theorem-title"><strong>Example 10.37</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
 <span><span class="va">fillers_spec</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="va">fillers_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/specify.html">specify</a></span><span class="op">(</span><span class="va">fillers_per_100_log</span> <span class="op">~</span> <span class="va">education</span><span class="op">)</span> <span class="co"># response ~ explanatory</span></span>
 <span></span>
 <span><span class="co"># Observed statistic</span></span>
@@ -2063,11 +1834,6 @@ Figure&nbsp;10.11: Visualizations of the <code>fillers_per_100_log</code> variab
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"permute"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># permute = shuffle</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/calculate.html">calculate</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"F"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Visualize the null distribution w/ observed statistic</span></span>
-<span><span class="va">fillers_null</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_p_value.html">shade_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_obs</span>, direction <span class="op">=</span> <span class="st">"two-sided"</span><span class="op">)</span> <span class="co"># expect greater</span></span>
-<span></span>
 <span><span class="co"># Calculate the p-value</span></span>
 <span><span class="va">fillers_null</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/get_p_value.html">get_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_obs</span>, direction <span class="op">=</span> <span class="st">"two-sided"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2077,34 +1843,25 @@ Figure&nbsp;10.11: Visualizations of the <code>fillers_per_100_log</code> variab
 &gt;     &lt;dbl&gt;
 &gt; 1   0.426</code></pre>
 </div>
-<div class="cell-output-display">
-<div id="fig-ida-num-bi-edu" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-edu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-edu-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-edu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.12: Null distribuition of the <code>fillers_per_100_log</code> variable by <code>education</code>
-</figcaption></figure>
 </div>
 </div>
-</div>
-</div>
-<p>The analysis in <a href="#exm-ida-num-bi-edu-null" class="quarto-xref">Example&nbsp;<span>10.41</span></a> suggests that the observed difference between the means of the different levels of the <code>education</code> variable not significantly different from what we would expect by chance.</p>
+<p>The analysis in <a href="#exm-ida-num-bi-edu" class="quarto-xref">Example&nbsp;<span>10.37</span></a> suggests that the observed difference between the means of the different levels of the <code>education</code> variable not significantly different from what we would expect by chance.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>The p-value in <a href="#exm-ida-num-bi-edu-null" class="quarto-xref">Example&nbsp;<span>10.41</span></a> was calculated using a two-sided test, which is appropriate when the expected directionality is not known. In this case, while we do have an expected directionality, the visualizations strongly suggest that the observed difference is not in line with our expectations. To account for this uncertainty and to be conservative, we choose to use a two-sided test. This allows us to remain open to the possibility that the observed difference may actually be in the opposite direction, rather than solely focusing on our initial expectation. However, it’s important to note that the decision to use a two-sided test should also consider factors such as the specific research question and the context of the analysis.</p>
+<p><strong><i class="fa-solid fa-exclamation-triangle" aria-label="exclamation-triangle"></i> Warning</strong></p>
+<p>The p-value in <a href="#exm-ida-num-bi-edu" class="quarto-xref">Example&nbsp;<span>10.37</span></a> was calculated using a two-sided test, which is appropriate when the expected directionality is not known. In this case, while we do have an expected directionality, the visualizations strongly suggest that the observed difference is not in line with our expectations. To account for this uncertainty and to be conservative, we choose to use a two-sided test. This allows us to remain open to the possibility that the observed difference may actually be in the opposite direction, rather than solely focusing on our initial expectation. However, it’s important to note that the decision to use a two-sided test should also consider factors such as the specific research question and the context of the analysis.</p>
 </div>
 </div>
 </div>
-<p>Let’s now calculate a confidence interval to assess the uncertainty of the observed statistic, as seen in <a href="#exm-ida-num-bi-edu-ci" class="quarto-xref">Example&nbsp;<span>10.42</span></a>.</p>
+<p>Let’s now calculate a confidence interval to assess the uncertainty of the observed statistic, as seen in <a href="#exm-ida-num-bi-edu-ci" class="quarto-xref">Example&nbsp;<span>10.38</span></a>.</p>
 <div id="exm-ida-num-bi-edu-ci" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.42</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.38</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resampling distribution</span></span>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resampling distribution</span></span>
 <span><span class="va">fillers_boot</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">fillers_spec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"bootstrap"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2122,150 +1879,79 @@ Figure&nbsp;10.12: Null distribuition of the <code>fillers_per_100_log</code> va
 &gt;      &lt;dbl&gt;    &lt;dbl&gt;
 &gt; 1    0.123     4.57</code></pre>
 </div>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize the confidence interval</span></span>
-<span><span class="va">fillers_boot</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_confidence_interval.html">shade_ci</a></span><span class="op">(</span><span class="va">fillers_ci</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-ida-num-bi-edu-ci" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-edu-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-edu-ci-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-edu-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.13: Confidence interval generated from bootstrap resampling
-</figcaption></figure>
 </div>
 </div>
-</div>
-</div>
-<p>In <a href="#exm-ida-num-bi-edu-ci" class="quarto-xref">Example&nbsp;<span>10.42</span></a>, we see that we are in the opposite situation –the p-value is not significant and but the confidence interval does not include 0. So how do we interpret this? Remember, the p-value is the probability of observing a statistic as extreme or more extreme than the observed statistic, given that the null hypothesis is true. The confidence interval is the range of values that we are 95% confident contains the true population parameter. We should take into consideration two aspects: (1) the confidence interval has a large range (the interval is wide) and (2) that the lower limit is near 0. Take together and in addition to the p-value, we can conclude that the observed difference is not statistically significant, and if there is a difference, it is likely to be small or negligible.</p>
-<p>The last bivariate case is when the explanatory variable is numeric. In this case, we can use a correlation test to see if there is an association between the two variables. The <code>age</code> variable in the <code>fillers_df</code> dataset is a numeric variable. <span class="citation" data-cites="Tottie2011">Tottie (<a href="references.html#ref-Tottie2011" role="doc-biblioref">2011</a>)</span> suggests that older speakers use more fillers than younger speakers. Let’s test this hypothesis.</p>
-<p>First, we visualize the distribution of the <code>fillers_per_100_log</code> variable by <code>age</code>, as seen in <a href="#exm-ida-num-bi-age-vis" class="quarto-xref">Example&nbsp;<span>10.43</span></a>.</p>
-<div id="exm-ida-num-bi-age-vis" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.43</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Scatterplot</span></span>
-<span><span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">fillers_per_100_log</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Age"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"Filler use (log)"</span></span>
-<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-ida-num-bi-age-vis" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-age-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-age-vis-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-age-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.14: Scatterplot of the <code>fillers_per_100_log</code> variable by <code>age</code>
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<p>The trend line in <a href="#fig-ida-num-bi-age-vis" class="quarto-xref">Figure&nbsp;<span>10.14</span></a> does not suggest that there is a strong relationship between the two variables, or even if there is a relationship at all. We can see that the rate of filler use appears constant across the age range.</p>
-<p>Let’s now submit these variables to the simulation-based hypothesis testing workflow to quantify the uncertainty of the observed statistic and determine if the observed difference is statistically significant. The first steps are found in <a href="#exm-ida-num-bi-age-null" class="quarto-xref">Example&nbsp;<span>10.44</span></a>.</p>
-<div id="exm-ida-num-bi-age-null" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.44</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
-<span><span class="va">fillers_spec</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_df</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/specify.html">specify</a></span><span class="op">(</span><span class="va">fillers_per_100_log</span> <span class="op">~</span> <span class="va">age</span><span class="op">)</span> <span class="co"># response ~ explanatory</span></span>
-<span></span>
-<span><span class="co"># Observed statistic</span></span>
-<span><span class="va">fillers_obs</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_spec</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/calculate.html">calculate</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"correlation"</span><span class="op">)</span> <span class="co"># correlation = r</span></span>
-<span></span>
-<span><span class="co"># Null distribution</span></span>
-<span><span class="va">fillers_null</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_spec</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/hypothesize.html">hypothesize</a></span><span class="op">(</span>null <span class="op">=</span> <span class="st">"independence"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># independence = no relationship</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"permute"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># permute = shuffle</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/calculate.html">calculate</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"correlation"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Visualize the null distribution w/ observed statistic</span></span>
-<span><span class="va">fillers_null</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_p_value.html">shade_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_obs</span>, direction <span class="op">=</span> <span class="st">"two-sided"</span><span class="op">)</span> <span class="co"># expect greater</span></span>
-<span></span>
-<span><span class="co"># Calculate the p-value</span></span>
-<span><span class="va">fillers_null</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/get_p_value.html">get_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_obs</span>, direction <span class="op">=</span> <span class="st">"two-sided"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 1 × 1
-&gt;   p_value
-&gt;     &lt;dbl&gt;
-&gt; 1   0.762</code></pre>
-</div>
-<div class="cell-output-display">
-<div id="fig-ida-num-bi-age-null" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-age-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-age-null-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-age-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.15: Null distribution of the <code>fillers_per_100_log</code> variable by <code>age</code>
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<p>This is a very large p-value and underscores what the scatterplot in <a href="#fig-ida-num-bi-age-vis" class="quarto-xref">Figure&nbsp;<span>10.14</span></a> suggests –there is no relationship between the two variables.</p>
-<p>For completeness, we calculate a confidence interval to assess the uncertainty of the observed statistic, as seen in <a href="#exm-ida-num-bi-age-ci" class="quarto-xref">Example&nbsp;<span>10.45</span></a>.</p>
-<div id="exm-ida-num-bi-age-ci" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.45</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resampling distribution</span></span>
-<span><span class="va">fillers_boot</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_spec</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"bootstrap"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/calculate.html">calculate</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"correlation"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Calculate the confidence interval</span></span>
-<span><span class="va">fillers_ci</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">fillers_boot</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/get_confidence_interval.html">get_ci</a></span><span class="op">(</span>level <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">fillers_ci</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 1 × 2
-&gt;   lower_ci upper_ci
-&gt;      &lt;dbl&gt;    &lt;dbl&gt;
-&gt; 1  -0.0867    0.120</code></pre>
-</div>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize the confidence interval</span></span>
-<span><span class="va">fillers_boot</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_confidence_interval.html">shade_ci</a></span><span class="op">(</span><span class="va">fillers_ci</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-ida-num-bi-age-ci" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-bi-age-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-bi-age-ci-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-bi-age-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.16: Confidence interval generated from bootstrap resampling
-</figcaption></figure>
-</div>
-</div>
-</div>
-</div>
-<p>The confidence interval includes 0, which suggests that the observed difference is questionable. But in contrast to the confidence interval in <a href="#exm-ida-num-bi-edu-ci" class="quarto-xref">Example&nbsp;<span>10.42</span></a>, the interval is narrow suggesting more strongly that the observed difference is not due to chance.</p>
+<p>In <a href="#exm-ida-num-bi-edu-ci" class="quarto-xref">Example&nbsp;<span>10.38</span></a>, we see that we are in the opposite situation to the previous bivariate case –the p-value is not significant and but the confidence interval does not include 0.</p>
+<p>So how do we interpret this? Remember, the p-value is the probability of observing a statistic as extreme or more extreme than the observed statistic, given that the null hypothesis is true. The confidence interval is the range of values that we are 95% confident contains the true population parameter. We should take into consideration two aspects: (1) the confidence interval has a large range (the interval is wide) and (2) that the lower limit is near 0. Take together and in addition to the p-value, we can conclude that the observed difference is not statistically significant, and if there is a difference, it is likely to be small or negligible.</p>
 </section><section id="multivariate-analysis-1" class="level4"><h4 class="anchored" data-anchor-id="multivariate-analysis-1">Multivariate analysis</h4>
 <p>While bivariate analysis is useful for exploring the relationship between two variables, it is often the case that we want to consider relationships between more than two variables. In this case, we can use multivariate analysis. Linear regression is a common multivariate analysis technique.</p>
 <p>In linear regression, we are interested in predicting the value of a numeric response variable based on the values of the explanatory variables. The contribution of the explanatory variables can be considered individually, as an interaction, or as a combination of both.</p>
-<p>Let’s now pick up the <code>fillers_type_df</code> dataset and explore the hypothesis that the rate of filler use varies by the type of filler across the socio-demographic variables <code>sex</code>, <code>education</code>, and <code>age</code>. To do this we will use R formula syntax to specify the variables we want to include in the model.</p>
-<ul>
-<li>Simple effects: <code>response ~ explanatory_1 + explanatory_2</code>: the response variable as a function of each explanatory variable.</li>
-<li>Interaction effects: <code>response ~ explanatory_1:explanatory_2</code>: the response variable as a function of the interaction between the two explanatory variables.</li>
-<li>Simple and interaction effects: <code>response ~ explanatory_1 * explanatory_2</code>: the response variable as a function of each explanatory variable and the interaction between the two explanatory variables.</li>
-</ul>
-<p>Let’s test the hypothesis that men and women differ in the rates that they use the filler types (<code>fillers_per_100_log ~ filler_type * sex</code>). A plot will help us begin to understand the potential relationships. In <a href="#exm-ida-multi-sex-plot" class="quarto-xref">Example&nbsp;<span>10.46</span></a>, we use a boxplot to visualize the relationship between the <code>fillers_per_100_log</code> variable and the <code>filler_type</code> variable, with a <code>sex</code> overlay.</p>
+<p>Let’s now introduce a variation of the SWDA dataset which includes a variable <code>filler_type</code> which has two levels, ‘uh’ and ‘um’, corresponding to the use of each filler. Here’s a preview of the dataset in <a href="#exm-ida-num-fillers-type-dataset" class="quarto-xref">Example&nbsp;<span>10.39</span></a>.</p>
+<div id="exm-ida-num-fillers-type-dataset" class="theorem example">
+<p><span class="theorem-title"><strong>Example 10.39</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fillers_type_df</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 882 × 6
+&gt;    speaker_id sex    education           age filler_type fillers_per_100_log
+&gt;         &lt;dbl&gt; &lt;fct&gt;  &lt;ord&gt;             &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt;
+&gt;  1       1000 Female Less Than College    38 uh                        0.561
+&gt;  2       1000 Female Less Than College    38 um                       -0.941
+&gt;  3       1001 Male   More Than College    52 uh                        3.22 
+&gt;  4       1001 Male   More Than College    52 um                       -1.64 
+&gt;  5       1002 Female College              29 uh                        0.956
+&gt;  6       1002 Female College              29 um                        0.425
+&gt;  7       1004 Female College              34 uh                        0.474
+&gt;  8       1004 Female College              34 um                       -0.220
+&gt;  9       1005 Female College              36 uh                        1.17 
+&gt; 10       1005 Female College              36 um                       -0.582
+&gt; # ℹ 872 more rows</code></pre>
+</div>
+</div>
+</div>
+<p>The <code>fillers_type_df</code> dataset has 882 observations and 6 variables. With this dataset, we will explore the hypothesis that the rate of filler use varies by the type of filler across the socio-demographic variable <code>sex</code>.</p>
+<p>To do this we will use R formula syntax to specify the variables we want to include in the model and their relationships. The possible relationships appear in <a href="#tbl-ida-num-multi-relationships" class="quarto-xref">Table&nbsp;<span>10.9</span></a>.</p>
+<div id="tbl-ida-num-multi-relationships" class="quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ida-num-multi-relationships-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;10.9: Possible relationships in a multivariate analysis
+</figcaption><div aria-describedby="tbl-ida-num-multi-relationships-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 50%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Relationship</th>
+<th style="text-align: left;">Formula</th>
+<th style="text-align: left;">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Simple effects</td>
+<td style="text-align: left;"><code>response ~ explanatory_1 + explanatory_2</code></td>
+<td style="text-align: left;">The response variable as a function of each explanatory variable</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Interaction effects</td>
+<td style="text-align: left;"><code>response ~ explanatory_1:explanatory_2</code></td>
+<td style="text-align: left;">The response variable as a function of the interaction between the two explanatory variables</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Simple and interaction effects</td>
+<td style="text-align: left;"><code>response ~ explanatory_1 * explanatory_2</code></td>
+<td style="text-align: left;">The response variable as a function of each explanatory variable and the interaction between the two explanatory variables</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Our hypothesis is that men and women differ in the rates that they use the filler types. This describes an interaction, so we can use either the interaction or the simple and interaction effects relationships. To demonstrate the difference between simple and interaction terms, let’s approach this using the third relationship (<em>i.e.</em> <code>fillers_per_100_log ~ filler_type * sex</code>).</p>
+<p>A plot will help us begin to understand the potential relationships. In <a href="#exm-ida-multi-sex-plot" class="quarto-xref">Example&nbsp;<span>10.40</span></a>, we use a boxplot to visualize the relationship between the <code>fillers_per_100_log</code> variable and the <code>filler_type</code> variable, with a <code>sex</code> overlay.</p>
 <div id="exm-ida-multi-sex-plot" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.46</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Boxplot `filler_type`</span></span>
+<p><span class="theorem-title"><strong>Example 10.40</strong></span> &nbsp;</p>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Boxplot `filler_type`</span></span>
 <span><span class="va">fillers_type_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">fillers_per_100_log</span>, x <span class="op">=</span> <span class="va">filler_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_boxplot</span><span class="op">(</span>notch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
@@ -2273,7 +1959,6 @@ Figure&nbsp;10.16: Confidence interval generated from bootstrap resampling
 <span>    x <span class="op">=</span> <span class="st">"Filler type"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Fillers per 100 (log)"</span></span>
 <span>  <span class="op">)</span></span>
-<span></span>
 <span></span>
 <span><span class="co"># Boxplot `filler_type` and `sex`</span></span>
 <span><span class="va">fillers_type_df</span> <span class="op">|&gt;</span></span>
@@ -2310,17 +1995,16 @@ Figure&nbsp;10.16: Confidence interval generated from bootstrap resampling
 </div>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-multi-sex-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.17: Boxplot of the <code>fillers_per_100_log</code> variable by <code>filler_type</code> and <code>sex</code>
+Figure&nbsp;10.9: Boxplot of the <code>fillers_per_100_log</code> variable by <code>filler_type</code> and <code>sex</code>
 </figcaption></figure>
 </div>
 </div>
-<p>Let’s interpret the boxplot in <a href="#fig-ida-multi-sex-plot" class="quarto-xref">Figure&nbsp;<span>10.17</span></a>. Focusing on <a href="#fig-ida-multi-sex-plot-1" class="quarto-xref">Figure&nbsp;<span>10.17 (a)</span></a> first, we see that the filler ‘uh’ is more frequent than ‘um’ as the median is distinct and the confidence intervals do not overlap. Now, looking at <a href="#fig-ida-multi-sex-plot-2" class="quarto-xref">Figure&nbsp;<span>10.17 (b)</span></a>, we see the same distinction between ‘uh’ and ‘um’, but we also see that the difference between the use of ‘uh’ and ‘um’ is different for males and females. This type of relationship is called an interaction effect. In this case the interaction effect goes in the same direction but the magnitude of the difference is different.</p>
-<p>The upshot, men and women both use ‘uh’ more than ‘um’ but men are even more likely to use ‘uh’ over ‘um’ than women.</p>
-<p>Let’s test this effect using the <code>infer</code> workflow. Calculating the observed statistics for the simple and interaction effects is very similar to other designs, except instead of <code><a href="https://infer.tidymodels.org/reference/calculate.html">calculate()</a></code> to derive our statistics we will use the <code><a href="https://generics.r-lib.org/reference/fit.html">fit()</a></code> function, just as we did for logistic regression. Let’s go ahead calculate the observed statistics first, as seen in <a href="#exm-ida-num-multi-spec" class="quarto-xref">Example&nbsp;<span>10.47</span></a>.</p>
+<p>Let’s interpret the boxplots in <a href="#fig-ida-multi-sex-plot" class="quarto-xref">Figure&nbsp;<span>10.9</span></a>. Focusing on <a href="#fig-ida-multi-sex-plot-1" class="quarto-xref">Figure&nbsp;<span>10.9 (a)</span></a> first, we see that the filler ‘uh’ is more frequent than ‘um’ as the median is distinct and the confidence intervals do not overlap. Now, looking at <a href="#fig-ida-multi-sex-plot-2" class="quarto-xref">Figure&nbsp;<span>10.9 (b)</span></a>, we see the same distinction between ‘uh’ and ‘um’, but we also see that the difference between the use of ‘uh’ and ‘um’ is different for males and females. This is the interaction effect we hypothesized. In this case the interaction effect goes in the same direction but the magnitude of the difference is different. The upshot, men and women both use ‘uh’ more than ‘um’ but men are even more likely to use ‘uh’ over ‘um’ than women.</p>
+<p>Let’s test this effect using the <code>infer</code> workflow. Calculating the observed statistics for the simple and interaction effects is very similar to other designs, except instead of <code><a href="https://infer.tidymodels.org/reference/calculate.html">calculate()</a></code> to derive our statistics we will use the <code><a href="https://generics.r-lib.org/reference/fit.html">fit()</a></code> function, just as we did for logistic regression. Let’s go ahead calculate the observed statistics first, as seen in <a href="#exm-ida-num-multi-spec" class="quarto-xref">Example&nbsp;<span>10.41</span></a>.</p>
 <div id="exm-ida-num-multi-spec" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.47</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.41</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Specify the relationship</span></span>
 <span><span class="va">fillers_type_spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">fillers_type_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/specify.html">specify</a></span><span class="op">(</span><span class="va">fillers_per_100_log</span> <span class="op">~</span> <span class="va">filler_type</span> <span class="op">*</span> <span class="va">sex</span><span class="op">)</span></span>
@@ -2342,42 +2026,18 @@ Figure&nbsp;10.17: Boxplot of the <code>fillers_per_100_log</code> variable by <
 </div>
 </div>
 </div>
-<p>The terms in the output from <a href="#exm-ida-num-multi-spec" class="quarto-xref">Example&nbsp;<span>10.47</span></a> provide information as to what the reference levels are. For example, <code>filler_typeum</code> tells us that the ‘uh’ level is the reference for <code>filler_type</code> and by the same logic, ‘Female’ is the reference for <code>sex</code>. These terms provide our simple effect statistics. Each can be understood as the difference between the reference level when the other variables are held constant. Our response variable is log transformed, so it is not directly interpretable beyond the fact that smaller units are lower rates of filler use and larger units are higher rates of filler use. So ‘um’ is used less than ‘uh’ and men use more fillers than women.</p>
-<div class="callout callout-style-simple callout-none no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p>The statistic returned from a linear regression is the difference in the means of the two levels with the other variables held constant. In this way, the statistic is a measure of the slope of the line between the two levels. This slope quantifies the magnitude of the difference between the two levels.</p>
-<p>We can also calculate the effect size by standardizing the statistics (coefficients). This is done by dividing the coefficient by the standard deviation of the response variable. This allows us to compare the effect sizes of different variables.</p>
-<div class="cell">
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Standardized effect size</span></span>
-<span><span class="va">fillers_type_df</span>  <span class="op">|&gt;</span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">filler_type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">summarize</span><span class="op">(</span></span>
-<span>    type_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">fillers_per_100_log</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-</div>
+<p>The terms in the output from <a href="#exm-ida-num-multi-spec" class="quarto-xref">Example&nbsp;<span>10.41</span></a> provide information as to what the reference levels are. For example, <code>filler_typeum</code> tells us that the ‘uh’ level is the reference for <code>filler_type</code> and by the same logic, ‘Female’ is the reference for <code>sex</code>. These terms provide our simple effect statistics. Each can be understood as the difference between the reference level when the other variables are held constant. Our response variable is log transformed, so it is not directly interpretable beyond the fact that smaller units are lower rates of filler use and larger units are higher rates of filler use. So ‘um’ is used less than ‘uh’ and men use more fillers than women.</p>
 <p>The interaction term <code>fillertypeum:sexMale</code> is the difference in the rate of fillers for this combination compared to the reference level combination (‘uh’ and ‘Female’). In this case, the observed rate is lower.</p>
-<p>We now need to generate a null distribution to compare the observed statistics to. We will again use the permutation method, but since there is an interaction effect, we need to shuffle the <code>filler_type</code> and <code>sex</code> variables together. This ensures that any relationship between the two variables is removed. Let’s see how this works in <a href="#exm-ida-num-multi-null" class="quarto-xref">Example&nbsp;<span>10.48</span></a>.</p>
+<p>We now need to generate a null distribution to compare the observed statistics to. We will again use the permutation method, but since there is an interaction effect, we need to shuffle the <code>filler_type</code> and <code>sex</code> variables together. This ensures that any relationship between the two variables is removed. Let’s see how this works in <a href="#exm-ida-num-multi-null" class="quarto-xref">Example&nbsp;<span>10.42</span></a>.</p>
 <div id="exm-ida-num-multi-null" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.48</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.42</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Null distribution</span></span>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Null distribution</span></span>
 <span><span class="va">fillers_type_null</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">fillers_type_spec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/hypothesize.html">hypothesize</a></span><span class="op">(</span>null <span class="op">=</span> <span class="st">"independence"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"permute"</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"filler_type"</span>, <span class="st">"sex"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html">fit</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Visualize the null distribution w/ observed statistics</span></span>
-<span><span class="va">fillers_type_null</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_p_value.html">shade_p_value</a></span><span class="op">(</span>obs_stat <span class="op">=</span> <span class="va">fillers_type_obs</span>, direction <span class="op">=</span> <span class="st">"two-sided"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Calculate the p-values</span></span>
 <span><span class="va">fillers_type_null</span> <span class="op">|&gt;</span></span>
@@ -2391,25 +2051,15 @@ Figure&nbsp;10.17: Boxplot of the <code>fillers_per_100_log</code> variable by <
 &gt; 3 intercept               0    
 &gt; 4 sexMale                 0.066</code></pre>
 </div>
-<div class="cell-output-display">
-<div id="fig-ida-num-multi-null" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-multi-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-multi-null-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-multi-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.18: Null distribution of the <code>fillers_per_100_log</code> variable by <code>filler_type</code> and <code>sex</code>
-</figcaption></figure>
-</div>
-</div>
 </div>
 </div>
 <p>For the simple effects, we see that <code>filler_type</code> is significant but <code>sex</code> is not. Remember, when we only considered <code>sex</code> in isolation in the bivariate case, we found it to be significant. So why is it not signficant now? It is important to remember that in every statistical design, there are other factors that are not considered. When these are not in the model, our effects may appear to account for more of the variance than they actually do. In this case, the <code>filler_type</code> variable is accounting for some of the variance that <code>sex</code> was accounting for in the bivariate case, enough, it appears, to make <code>sex</code> not significant as a simple effect.</p>
-<p>Our interaction effect is also significant meaning the observed difference we visualized in <a href="#fig-ida-multi-sex-plot" class="quarto-xref">Figure&nbsp;<span>10.17</span></a> is likely not due to chance. The upshot, both men and women use more ‘uh’ compared to ‘um’ but mens’ difference in use is larger than womens’.</p>
-<p>As always, let’s calculate a confidence interval to assess the uncertainty of the observed statistic, as seen in <a href="#exm-ida-num-multi-sex-ci" class="quarto-xref">Example&nbsp;<span>10.49</span></a>.</p>
+<p>Our interaction effect is also significant meaning the observed difference we visualized in <a href="#fig-ida-multi-sex-plot" class="quarto-xref">Figure&nbsp;<span>10.9</span></a> is likely not due to chance. The upshot, both men and women use more ‘uh’ compared to ‘um’ but mens’ difference in use is larger than womens’.</p>
+<p>As always, let’s calculate a confidence interval to assess the uncertainty of the observed statistic, as seen in <a href="#exm-ida-num-multi-sex-ci" class="quarto-xref">Example&nbsp;<span>10.43</span></a>.</p>
 <div id="exm-ida-num-multi-sex-ci" class="theorem example">
-<p><span class="theorem-title"><strong>Example 10.49</strong></span> &nbsp;</p>
+<p><span class="theorem-title"><strong>Example 10.43</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resampling distribution</span></span>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resampling distribution</span></span>
 <span><span class="va">fillers_type_boot</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">fillers_type_spec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/generate.html">generate</a></span><span class="op">(</span>reps <span class="op">=</span> <span class="fl">1000</span>, type <span class="op">=</span> <span class="st">"bootstrap"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2430,24 +2080,11 @@ Figure&nbsp;10.18: Null distribution of the <code>fillers_per_100_log</code> var
 &gt; 3 intercept               0.168     0.909
 &gt; 4 sexMale                 0.0947    1.22</code></pre>
 </div>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize the confidence intervals</span></span>
-<span><span class="va">fillers_type_boot</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/visualize.html">visualize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://infer.tidymodels.org/reference/shade_confidence_interval.html">shade_ci</a></span><span class="op">(</span><span class="va">fillers_type_ci</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-ida-num-multi-sex-ci" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ida-num-multi-sex-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="inference_files/figure-html/fig-ida-num-multi-sex-ci-1.png" class="img-fluid figure-img" width="384">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ida-num-multi-sex-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.19: Confidence intervals generated from bootstrap resampling
-</figcaption></figure>
-</div>
-</div>
 </div>
 </div>
 <p>From the confidence intervals, we see that zero is not included in any of the intervals, which suggests that the observed differences are not due to chance. Interpreting the width and the proximity to zero, however, suggests that the observed differences for <code>filler_type</code> are stronger than for <code>sex</code>, which did not result in a significant simple effect. The interaction effect is also significant, but the confidence interval is quite wide and approximates zero. This should raise some questions about the robustness of the observed effect.</p>
 </section></section></section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
+<p>The following activities aim to reinforce the concepts covered in this chapter. You’ll review working with key variables, examine data distributions, and employ simulation-based statistical methods using the <code>infer</code> package to test hypotheses about their relationships.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -2455,8 +2092,7 @@ Figure&nbsp;10.19: Confidence intervals generated from bootstrap resampling
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-file-code" aria-label="file-code"></i> Recipe</strong></p>
-<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<p><strong>What</strong>: <a href="https://qtalr.github.io/qtalrkit/articles/recipe-10.html">Building inference models</a> <strong>How</strong>: Read Recipe 10, complete comprehension check, and prepare for Lab 7.<br><strong>Why</strong>: <i class="fa-solid fa-wrench" aria-label="wrench"></i> TBD</p>
+<p><strong>What</strong>: <a href="https://qtalr.github.io/qtalrkit/articles/recipe-10.html">Building inference models</a><br><strong>How</strong>: Read Recipe 10, complete comprehension check, and prepare for Lab 7.<br><strong>Why</strong>: To review and extend your knowledge regarding the simulation-based approach to statistical inference.</p>
 </div>
 </div>
 </div>
@@ -2467,16 +2103,12 @@ Figure&nbsp;10.19: Confidence intervals generated from bootstrap resampling
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-flask" aria-label="flask"></i> Lab</strong></p>
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-<p><strong>What</strong>: <a href="https://github.com/qtalr/lab-10">Statistical inference</a> <strong>How</strong>: Clone, fork, and complete the steps in Lab 10.<br><strong>Why</strong>: <i class="fa-solid fa-wrench" aria-label="wrench"></i> TBD</p>
+<p><strong>What</strong>: <a href="https://github.com/qtalr/lab-10">Statistical inference</a><br><strong>How</strong>: Clone, fork, and complete the steps in Lab 10.<br><strong>Why</strong>: To apply the concepts covered in this chapter to a real-world dataset.</p>
 </div>
 </div>
 </div>
 </section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
-<p>…</p>
-<p>In sum, in this section we explored the process of statistical inference, specifically the process of hypothesis testing with categorical responses variables. We started with a univariate analysis, which, although not very interesting, allowed us to focus on the process and the logic of statistical inference. We then moved on to bivariate and multivariate analyses. We see that the process is very similar, but the complexity increases with the number of explanatory variables. In each case, we applied a simulation-based approach to statistical inference which may differ from the traditional approach you may have learned in your statistics courses. But as you can appreciate, the simulation-based approach is highly flexible, more intiutive, and more transparent. The <code>infer</code> package provides a consistent set of functions and pipeline to maintain a consistent workflow. If you have previous experience with R or find resources on statistical inference using R, you will likely find the traditional, theory-based, approach. I encourage you to explore the both approaches. They have their strengths and weaknesses, but I think you will find the simulation-based approach more intuitive and transparent as a beginner.</p>
-<p>…</p>
-<p>In this chapter we have discussed various approaches to conducting inferential data analysis. Each configuration, however, always includes a descriptive assessment, statistical interrogation, and an evaluation of the results. We considered univariate, bivariate, and multivariate analyses using both categorical and non-categorical dependent variables to explore the similarities and differences between these approaches.</p>
+<p>In sum, in this section we explored the process of null hypothesis testing using the <code>infer</code> package, which is a simulation-based approach to statistical inference. We considered statistical designs, such as univariate, bivariate, and multivariate analyses, and explored the process of hypothesis testing with categorical and numeric responses variables. The workflow provided demonstrates that the <code>infer</code> package is a powerful tool for conducting statistical inference, and that it can be used to test a wide range of hypotheses with a similar workflow.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -2524,6 +2156,7 @@ Wickham, Hadley. 2023. <em>Tidyverse: Easily Install and Load the Tidyverse</em>
 <ol>
 <li id="fn1"><p>“Hypothesis After Result is Known” (HARKing) involves selectively analyzing data, trying different variables or combinations until a significant p-value is obtained, or stopping data collection when a significant result is found <span class="citation" data-cites="Kerr1998">(<a href="references.html#ref-Kerr1998" role="doc-biblioref">Kerr 1998</a>)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>“p-hacking” is the practice of running multiple tests until a statistically significant result is found. This practice violates the principles of significance testing <span class="citation" data-cites="Head2015">(<a href="references.html#ref-Head2015" role="doc-biblioref">Head et al. 2015</a>)</span>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Given the fact that we added jitter to accommodate the zeros, it may actually make more sense to compare medians, rathern than means. But to compare these results with the results from the literature, we will compare means.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

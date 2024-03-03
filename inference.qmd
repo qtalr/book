@@ -118,7 +118,7 @@ The steps for implementing a simulation-based approach to significance testing a
 
 <!-- Setup: packages/ options/ data -->
 
-The `infer` package [@R-infer] provides a tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the `tidyverse` [@R-tidyverse], `infer` provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution, visualize the null hypothesis distribution, calculate the p-value, and calculate the confidence interval.
+The `infer` package [@R-infer] provides a tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the `tidyverse` [@R-tidyverse], `infer` provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution, calculate the p-value, and calculate the confidence interval.
 
 Let's load the necessary packages we will use in this section, as seen in @exm-ida-setup.
 
@@ -215,7 +215,7 @@ dative_tbl |>
   skim()
 ```
 
-In preparation for statistical analysis, I performed a statistical overview and diagnostics of the dataset. This included checking for missing data, outliers, and anomalies. I also checked the distribution of the variables using descriptive statistics and visualizations. The results of this overview and diagnostics are not shown here, but they are important steps in the IDA workflow. In this process, I converted the character variables to factors as most statistical tests require factors. A preview of the dataset is shown in @exm-ida-cat-dative-preview.
+In preparation for statistical analysis, I performed a statistical overview and diagnostics of the dataset. This included checking for missing data, outliers, and anomalies. I also checked the distribution of the variables using descriptive statistics and visualizations, noting that the `length_of_rcp` and `length_of_thm` variables are right-skewed. This is something to keep in mind. The results of this overview and diagnostics are not shown here, but they are important steps in the IDA workflow. In this process, I converted the character variables to factors as most statistical tests require factors. A preview of the dataset is shown in @exm-ida-cat-dative-preview.
 
 ::: {#exm-ida-cat-dative-preview}
 ```{r}
@@ -497,13 +497,13 @@ To determine if the distribution of the levels of the `realization_of_rcp` varia
 
 The `infer` package provides a pipeline, steps 1-5, which maintains a consistent workflow for statistical inference. As such, the procedure is very similar to the univarite analysis we performed, with some adjustments. Let's focus on the adjustments. First, our `specify()` call needs to include the relationship between two variables: `realization_of_rcp` and `modality`. The `response` argument is the response variable, which is `realization_of_rcp`. The `explanatory` argument is the explanatory variable, which is `modality`.
 
-There are two approaches to specifying the relationship between the response and explanatory variables. The first approach is to specify the response variable and the explanatory variable separately as values of the arguments `response` and `explanatory`. The second approach is to specify the response variable and the explanatory variable as a formula using the `~` operator. The formula approach is more flexible and allows for more complex relationships between the response and explanatory variables. In @exm-ida-cat-specify-bivariate, we see the code for the `specify()` call using the formula approach.
-
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 The formula syntax `y ~ x` can be read as 'y' as a function of 'x'.
 :::
+
+There are two approaches to specifying the relationship between the response and explanatory variables. The first approach is to specify the response variable and the explanatory variable separately as values of the arguments `response` and `explanatory`. The second approach is to specify the response variable and the explanatory variable as a formula using the `~` operator. The formula approach is more flexible and allows for more complex relationships between the response and explanatory variables. In @exm-ida-cat-specify-bivariate, we see the code for the `specify()` call using the formula approach.
 
 ::: {#exm-ida-cat-specify-bivariate}
 ```{r}
@@ -598,7 +598,7 @@ The confidence interval does not contain the null hypothesis value of 0 (no diff
 
 #### Multivariate Analysis
 
-In many scenarios, it is common to have multiple explanatory variables that need to be considered. In such cases, logistic regression is a suitable modeling technique. Logistic regression allows for the inclusion of both categorical and continuous explanatory variables. The primary objective of using logistic regression is to assess the association between these variables and the response variable. By analyzing this relationship, we can determine how changes in the explanatory variables influence the probability of the outcome occurring.
+In many scenarios, it is common to have multiple explanatory variables that need to be considered. In such cases, logistic regression is a suitable modeling technique. **Logistic regression** allows for the inclusion of both categorical and continuous explanatory variables. The primary objective of using logistic regression is to assess the association between these variables and the response variable. By analyzing this relationship, we can determine how changes in the explanatory variables influence the probability of the outcome occurring.
 
 To explore this scenario, let's posit that:
 
@@ -617,17 +617,17 @@ The hypothesis, then, is that the example in (3) would be less likely than (2) b
 
 Let's consider this variable `length_ratio` and `modality` together as explanatory variables for the realizations of the recipient clause `realization_of_rcp`.
 
-Let's create the `length_ratio` variable by dividing the `length_of_thm` by the `length_of_rcp`. This will give us values larger than 1 when the theme is longer than the recipient. In @exm-ida-cat-create-length-ratio, we see the code for creating the `length_ratio` variable.
+Let's create the `length_ratio` variable by dividing the `length_of_thm` by the `length_of_rcp`. This will give us values larger than 1 when the theme is longer than the recipient. And since we are working with skewed-distributions, let's log-transform the `length_ratio` variable. In @exm-ida-cat-create-length-ratio, we see the code for creating the `length_ratio` variable.
 
 ::: {#exm-ida-cat-create-length-ratio}
 ```{r}
 #| label: ida-cat-create-length-ratio
 
-# Create the `length_ratio` variable
+# Create the `length_ratio_log` variable
 dative_tbl <-
   dative_tbl |>
   mutate(
-    length_ratio = length_of_thm / length_of_rcp
+    length_ratio_log = log(length_of_thm / length_of_rcp)
   ) |>
   select(-length_of_thm, -length_of_rcp)
 
@@ -636,12 +636,12 @@ dative_tbl |> glimpse()
 ```
 :::
 
-Let's visualize the relationship between `realization_of_rcp` and `length_ratio` separately and then together with `modality`, as seen in @exm-ida-cat-bivariate-vis-length-ratio.
+Let's visualize the relationship between `realization_of_rcp` and `length_ratio_log` separately and then together with `modality`, as seen in @exm-ida-cat-bivariate-vis-length-ratio-log.
 
-::: {#exm-ida-cat-bivariate-vis-length-ratio}
+::: {#exm-ida-cat-bivariate-vis-length-ratio-log}
 ```{r}
-#| label: fig-ida-cat-bivariate-length-ratio
-#| fig-cap: "Distribution the variables `modality` and `length_ratio` by the levels of the `realization_of_rcp` variable."
+#| label: fig-ida-cat-bivariate-length-ratio-log
+#| fig-cap: "Distribution the variables `modality` and `length_ratio_log` by the levels of the `realization_of_rcp` variable."
 #| fig-subcap:
 #|  - "Realization of recipient clause by modality"
 #|  - "Realization of recipient clause by length ratio"
@@ -657,9 +657,9 @@ dative_tbl |>
     fill = "Modality"
   )
 
-# Visualize the relationship between `realization_of_rcp` and `length_ratio`
+# Visualize the relationship between `realization_of_rcp` and `length_ratio_log`
 dative_tbl |>
-  ggplot(aes(x = realization_of_rcp, y = length_ratio)) +
+  ggplot(aes(x = realization_of_rcp, y = length_ratio_log)) +
   geom_boxplot() +
   labs(
     x = "Realization of recipient clause",
@@ -667,56 +667,6 @@ dative_tbl |>
   )
 ```
 :::
-
-Before jumping in here, the outliers in @fig-ida-cat-bivariate-length-ratio-2 should catch our attention. Each boxplot has a number of outliers. These outliers are likely due to the fact that the `length_ratio` variable is built upon the `length_of_thm` and `length_of_rcp` variables, which are both highly skewed. This is a common problem in statistical inference. The solution is to transform the variables to reduce the skewness. In this case, we can use the log transformation, as seen in @exm-ida-cat-log-transform.
-
-::: {#exm-ida-cat-log-transform}
-```{r}
-#| label: ida-cat-log-transform
-
-# Log transform the `length_ratio` variable
-dative_tbl <-
-  dative_tbl |>
-  mutate(
-    length_ratio_log = log10(length_ratio)
-  )
-```
-:::
-
-Now we can plot the relationships in @fig-ida-cat-bivariate-length-ratio with the log-transformed `length_ratio`, seen in @exm-ida-cat-bivariate-vis-length-ratio-log.
-
-::: {#exm-ida-cat-bivariate-vis-length-ratio-log}
-```{r}
-#| label: fig-ida-cat-bivariate-length-ratio-log
-#| fig-cap: "Distribution the variables `modality` and `length_ratio` by the levels of the `realization_of_rcp` variable."
-#| fig-subcap:
-#|  - "Realization of recipient clause by modality"
-#|  - "Realization of recipient clause by length ratio"
-#| layout-ncol: 2
-#| echo: false
-
-# Visualize the proportion of `realization_of_rcp` by `modality`
-dative_tbl |>
-  ggplot(aes(x = realization_of_rcp, fill = modality)) +
-  geom_bar(position = "fill") +
-  labs(
-    x = "Realization of recipient clause",
-    y = "Proportion",
-    fill = "Modality"
-  )
-
-# Visualize the relationship between `realization_of_rcp` and `length_ratio`
-dative_tbl |>
-  ggplot(aes(x = realization_of_rcp, y = length_ratio_log)) +
-  geom_boxplot() +
-  labs(
-    x = "Realization of recipient clause",
-    y = "Length ratio (log)"
-  )
-```
-:::
-
-The log transformation has reduced the skewness of the `length_ratio` variable. Note that the log transformation does not change the rank order of the values, but it does change the scale of the values (the distance between the values) by reducing the magnitude of the values. The boxplots in @fig-ida-cat-bivariate-length-ratio-log still have outliers, but there are fewer outliers and they are not as extreme.
 
 To understand visualizations in @fig-ida-cat-bivariate-length-ratio-log, remember the null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality or length ratio. On the flip side, the alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality and length ratio. From the visual inspection, it appears that NP realizations of the recipient clause are more common in the spoken modality and that the NP realizations have a higher overall length ratio (larger theme relative to recipient) than PP realizations of the recipient clause. This suggests that the alternative hypothesis is likely true, but we need to conduct a statistical test to determine if the differences are statistically significant.
 
@@ -743,15 +693,17 @@ dative_fit
 ```
 :::
 
-Note I pointed out statistics, not statistic. In logistic regression models, there the number of statistic reported depends on the number of explanatory variables. If there are two variables there will be at least three terms, one for each variable and the intercept term. If one or more variables are categorical, however, there will be additional terms when the categorical variable has three or more levels.
-
-In our case, the `modality` variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the `length_ratio` is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the `length_ratio` is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the `length_ratio` is 1 in the written modality. Notably, the spoken modality does not explicitly appear but is implicitly represented the `modalitywritten` term statistic. `modalityspoken`is used as the reference level for the `modality` variable.
 
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 The reference level in R is assumed to be the first level alphabetically, unless otherwise specified. We can override this default by using the `fct_relevel()` function from the `forcats` package. The reason we would want to do this is to make the reference level more interpretable. In our case, we would want to make the spoken modality the reference level it allows us to estimate the difference of the proportion of NP realizations of the recipient as a positive value. Remember that in @fig-ida-cat-bivariate-length-ratio-log-1, the proportion of NP realizations of the recipient clause is higher in the spoken modality than in the written modality. If we were to use the written modality as the reference level, the difference would be negative. Not that we couldn't interpret this, but working with positive integers is easier to interpret.
 :::
+
+Note I pointed out statistics, not statistic. In logistic regression models, there the number of statistic reported depends on the number of explanatory variables. If there are two variables there will be at least three terms, one for each variable and the intercept term. If one or more variables are categorical, however, there will be additional terms when the categorical variable has three or more levels.
+
+In our case, the `modality` variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the `length_ratio_log` is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the `length_ratio_log` is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the `length_ratio_log` is 1 in the written modality. Notably, the spoken modality does not explicitly appear but is implicitly represented the `modalitywritten` term statistic. `modalityspoken`is used as the reference level for the `modality` variable.
+
 
 Now let's generate the null hypothesis distribution and calculate the p-value for each of the terms, as seen in @exm-ida-cat-null-hypothesis-logistic-regression.
 
@@ -776,7 +728,7 @@ dative_null |>
 ```
 :::
 
-It appears that our main effects, `modality` and `length_ratio`, are statistically significant. Let's generate the confidence intervals for each of the terms, as seen in @exm-ida-cat-confidence-interval-logistic-regression.
+It appears that our main effects, `modality` and `length_ratio_log`, are statistically significant. Let's generate the confidence intervals for each of the terms, as seen in @exm-ida-cat-confidence-interval-logistic-regression.
 
 ::: {#exm-ida-cat-confidence-interval-logistic-regression}
 ```{r}
@@ -801,7 +753,7 @@ dative_ci
 ```
 :::
 
-The confidence intervals for the main effects, `modality` and `length_ratio`, do not contain the null hypothesis value of 0, which provides evidence that each of the explanatory variables is related to the proportion of NP realizations of the recipient clause.
+The confidence intervals for the main effects, `modality` and `length_ratio_log`, do not contain the null hypothesis value of 0, which provides evidence that each of the explanatory variables is related to the proportion of NP realizations of the recipient clause.
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
@@ -811,9 +763,9 @@ Significance tests are not the only way to evaluate the evidence for the null hy
 It can be important to use these measures to distinguish between statistically significant and practically significant results. A statistically significant result is one that is unlikely to have occurred by chance. A practically significant result is one that has a meaningful effect.
 :::
 
-Our logistic regression model as specified considers the explanatory variables `modality` and `length_ratio` independently, controlling for the other explanatory variable. This is an **additive model**, which is what we stated in our hypothesis and represented in the formula `y ~ x1 + x2`.
+Our logistic regression model as specified considers the explanatory variables `modality` and `length_ratio_log` independently, controlling for the other explanatory variable. This is an **additive model**, which is what we stated in our hypothesis and represented in the formula `y ~ x1 + x2`.
 
-Not all multivariate relationships are additive. We can also hypothesize an interaction between the explanatory variables. A **interaction** is the effect of one explanatory variable on the response variable is dependent on the other explanatory variable(s). In our case, we could have hypothesized that the effect of the `length_ratio` on the proportion of NP realizations of the recipient clause is dependent on the `modality`. We can specify this relationship using the formula approach, as seen in @exm-ida-cat-logistic-regression-interaction.
+Not all multivariate relationships are additive. We can also hypothesize an interaction between the explanatory variables. A **interaction** is the effect of one explanatory variable on the response variable is dependent on the other explanatory variable(s). In our case, we could have hypothesized that the effect of the `length_ratio_log` on the proportion of NP realizations of the recipient clause is dependent on the `modality`. We can specify this relationship using the formula approach, as seen in @exm-ida-cat-logistic-regression-interaction.
 
 ::: {#exm-ida-cat-logistic-regression-interaction}
 ```{r}
@@ -825,9 +777,6 @@ dative_inter_spec <-
   specify(
     realization_of_rcp ~ modality * length_ratio_log
   )
-
-# Preview
-dative_inter_spec
 ```
 :::
 
@@ -847,8 +796,6 @@ dative_inter_fit
 ```
 :::
 
-The additional term `modalitywritten:length_ratio_log` is the interaction term. We also see the log odds estimates have changed for the previous terms. This is because this interaction draws some of the explanatory power from the other terms. Whether or not we run an interaction model depends on our research question. Again, the hypothesis precedes the model. If we hypothesize an interaction, then we should run an interaction model. If we do not hypothesize an interaction, then we should not run an interaction model.
-
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
 
@@ -858,6 +805,8 @@ As an exercise, consider the following research question:
 
 Follow the simulation-based process to test this hypothesis. What are the results? What are the implications of the results?
 :::
+
+The additional term `modalitywritten:length_ratio_log` is the interaction term. We also see the log odds estimates have changed for the previous terms. This is because this interaction draws some of the explanatory power from the other terms. Whether or not we run an interaction model depends on our research question. Again, the hypothesis precedes the model. If we hypothesize an interaction, then we should run an interaction model. If we do not, then we should not.
 
 ### Numeric {#sec-ida-numeric}
 
@@ -873,31 +822,33 @@ We now turn our attention to the analysis scenarios where the response variable 
 
 : Statistical test design for numeric response variables {#tbl-ida-num-design tbl-colwidths="[10, 35, 35, 20]" .striped}
 
-The `fillers` dataset is drawn from the Switchboard Dialog Act Corpus [@SWDA2008]. This dataset contains over 200k utterances from 1,155 5-minute telephone conversations and includes information about the use of fillers in the conversations. The data dictionary is found in @tbl-ida-num-data-dict.
+The dataset will will use is drawn from the Switchboard Dialog Act Corpus [@SWDA2008]. This dataset contains over 200k utterances from 1,155 5-minute telephone conversations and includes information about the use of fillers in the conversations. The data dictionary is found in @tbl-ida-num-data-dict.
+
 
 ```{r}
 #| label: tbl-ida-num-data-dict
-#| tbl-cap: "Data dictionary for the `fillers_df` dataset"
+#| tbl-cap: "Data dictionary for the transformed SWDA dataset"
 #| echo: false
 #| message: false
 
-# [ ] consider removing `speaker_id, total_fillers, and `total_utterances` from the data dictionary?
-
-# Data dictionary for the `fillers_df` dataset
+# Data dictionary for the `fillers_tbl` dataset
 read_csv("data/swda_fillers_ida_dd.csv") |>
   kable() |>
   kable_styling()
 ```
 
-We see the dataset has [FOUR FIXME] variables. The `fillers_per_100` will be used as our reponse variable and corresponds to the rate of filler usage per speaker, normalized by the number of utterances. The other variables we will consider as explanatory variables are `age`, `sex`, and `education`, providing us a mix of numeric and categorical variables.
+We see the dataset has seven variables. The `fillers_per_100` will be used as our reponse variable and corresponds to the rate of filler usage per speaker, normalized by the number of utterances. The other variables we will consider as explanatory variables are `age`, `sex`, and `education`, providing us a mix of numeric and categorical variables.
 
 The context for these analysis demonstrations comes from the socio-linguistic literature on the use of filled pauses. Filled pauses have often been associated with a type of disfluency; speech errors that occur during speech production. However, some authors have argued that filled pauses can act as sociolinguistic markers of socio-demographic characterstics of speakers, such as gender, age, and educational level [@Shriberg1994; @Tottie2011].
 
-Let's prepare these datasets for analysis by converting the categorical variables to factors and ordering the `education` variable, as seen in @exm-ida-num-factors.
-
-::: {#exm-ida-num-factors}
 ```{r}
-#| label: ida-num-factors
+#| label: ida-num-diagnostics
+#| message: false
+#| echo: false
+
+# Read the dataset
+fillers_tbl <-
+  read_csv("data/swda_fillers_ida.csv")
 
 # Establish level names and order for the `education` variable
 edu_levels <-
@@ -908,25 +859,33 @@ edu_levels <-
     "Unknown")
 
 # Convert categorical variables to factors
-fillers_df <-
-  fillers_df |>
+fillers_tbl <-
+  fillers_tbl |>
   mutate(
     sex = factor(sex),
     education = factor(education, levels = edu_levels, ordered = TRUE)
-  )
+  ) |>
+  select(-speaker_id, -total_fillers, -total_utterances)
+```
 
-# Preview
-glimpse(fillers_df)
+Reading the dataset and performing some basic diagnostics, a preview of the `fillers_tbl` dataset is seen in @exm-ida-num-dataset .
+
+::: {#exm-ida-num-dataset }
+```{r}
+#| label: ida-num-dataset
+
+# Preview the dataset
+fillers_tbl
 ```
 :::
 
-Our `fillers_df` dataset has `r nrow(fillers_df)` observations. Again, we will postpone more descriptive statistics for treatment in the particular scenarios.
+Our `fillers_tbl` dataset has `r nrow(fillers_tbl)` observations. Again, we will postpone more specific descriptive statistics for treatment in the upcoming scenarios.
 
 #### Univariate analysis
 
-In hypothesis testing, the analysis of a single variable is directed at determining whether or not the distribution or statistic of the variable differs from some expected distribution or statistic. In the case of a single categorical variable with two levels (as in the datives case), we sampled from a binomial distribution by chance. In the case of a single numeric variable, we can sample and compare the observed distribution to a theoretical distribution. When approaching hypothesis testing from a theoretical perspective, it is often necessary to assess how well a numeric variable fits the normal distribution as many statistical tests assume that the data are normally distributed. However, we have adopted the simulation-based approach to hypothesis testing, which does not require that the data fit the normal distribution, or any other distribution for that matter.
+In hypothesis testing, the analysis of a single variable is directed at determining whether or not the distribution or statistic of the variable differs from some expected distribution or statistic. In the case of a single categorical variable with two levels (as @sec-ida-categorical), we sampled from a binomial distribution by chance. In the case of a single numeric variable, we can sample and compare the observed distribution to a theoretical distribution. When approaching hypothesis testing from a theoretical perspective, it is often necessary to assess how well a numeric variable fits the normal distribution as many statistical tests assume that the data are normally distributed. However, we have adopted the simulation-based approach to hypothesis testing, which does not require that the data fit the normal distribution, or any other distribution for that matter.
 
-The other approach to analyzing a single numeric variable is to compare an observed statistic to an expected statistic. This approach requires a priori knowledge of the expected statistic. For example, imagine we are interested testing the hypothesis that the length of words in a medical corpus tend to be longer than the average length of words in English. We would then calculate the observed mean for the length of words in the medical corpus and then generate a null distribution of means for the length of words in English, as in @exm-ida-num-uni-null-mean.
+The other approach to analyzing a single numeric variable is to compare an observed statistic to an expected statistic. This approach requires *a priori* knowledge of the expected statistic. For example, imagine we are interested testing the hypothesis that the length of words in a medical corpus tend to be longer than the average length of words in English. We would then calculate the observed mean for the length of words in the medical corpus and then generate a null distribution of means for the length of words in English, as in @exm-ida-num-uni-null-mean.
 
 ::: {#exm-ida-num-uni-null-mean}
 ```{r}
@@ -951,72 +910,40 @@ null_mean <-
 
 Note that instead of a `p = ` argument, as was used in the `hypothesize()` step to generate a null distribution of proportions, we use a `mu = ` argument in @exm-ida-num-uni-null-mean to specify the expected mean. The rest of the hypothesis testing workflow is the same as for the null distribution of proportions.
 
-::: {.callout}
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
+
 The mean `mu` is not the only statistic we can specify for a numeric variable. We can also specify the median `med`, or the standard deviation `sigma`.
 :::
 
-In our case, we do not have a priori knowledge of the expected statistic for the `fillers_per_100` variable, so we will not pursue this approach. However, when looking at the distribution of a numeric variable, it is useful to look at the descriptive statistics the mean, median, and standard deviation in order to get a sense of the central tendency and spread of the data.
-
-We can use the `skim()` function to get the mean, median, and standard deviation of the `fillers_per_100` variable, as seen in @exm-ida-num-uni-summary.
-
-::: {#exm-ida-num-uni-summary}
-```{r}
-#| label: fillers-type-num-summary-show
-#| eval: false
-
-fillers_df |>
-  skim(fillers_per_100)
-```
-
-```{r, comment = ">"}
-#| label: ida-num-uni-summary-run
-#| echo: false
-
-fillers_df |>
-  skim(fillers_per_100) |>
-  capture.output() |>
-  cat(sep = "\n")
-```
-:::
-
-The mean is larger than the median which suggests that the distribution is right-skewed. Furthermore, the standard deviation is large relative to the mean, which suggests that there is a lot of variability in the data.
-
-To get a sense of the distribution of the `fillers_per_100` variable, we can plot a histogram and density plot, as seen in @exm-ida-num-uni-hist-dens.
+In our case, we do not have *a priori* knowledge of the expected statistic for the `fillers_per_100` variable, so we will not pursue this approach. However, it is useful to take a closer look at the distribution of a numeric variable in order to detect extreme skewing and/ or outliers. This is important because the presence of skewing and outliers can affect the results of statistical tests. We can visualize the distribution of the `fillers_per_100` variable using a histogram and density plot, as seen in @fig-ida-num-uni-hist-dens.
 
 ::: {#exm-ida-num-uni-hist-dens}
 ```{r}
 #| label: fig-ida-num-uni-hist-dens
 #| fig-cap: "Histogram and density plot of the `fillers_per_100` variable"
-#| fig-subcap:
-#| - "Histogram"
-#| - "Density plot"
-#| layout-ncol: 2
+#| fig-width: 8
+#| fig-asp: 0.5
 
-# Histogram
-fillers_df |>
+# Histogram-density plot
+fillers_tbl |>
   ggplot(aes(x = fillers_per_100)) +
-  geom_histogram(bins = 50) +
-  labs(x = "Fillers per 100 utterances", y = "Count") +
-  theme_bw()
-
-# Density plot
-fillers_df |>
-  ggplot(aes(x = fillers_per_100)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 50) +
   geom_density() +
-  labs(x = "Fillers per 100 utterances", y = "Density") +
-  theme_bw()
+  labs(x = "Fillers per 100 utterances", y = "Count")
 ```
 :::
 
-The distribution of `fillers_per_100` is indeed skewed to the right. We might have predicted this given that we are working with ratio based on count data, perhaps not. In any case, the skewing we observe tends to compress the distribution and may make it difficult to see any patterns. To mitigate this, we can log transform the variable. But we will run into a problem if we have any speakers who do not use any fillers at all as these speakers will have a value of zero, as we can see in @fig-ida-num-uni-hist-dens-2. The log of zero is undefined. So we need to address this.
+The distribution of `fillers_per_100` is indeed skewed to the right. We might have predicted this given that we are working with ratio based on count data, perhaps not. In any case, the skewing we observe tends to compress the distribution and may make it difficult to see any patterns. To mitigate this, we can log transform the variable. But we will run into a problem if we have any speakers who do not use any fillers at all as these speakers will have a value of zero, as we can see in @fig-ida-num-uni-hist-dens. The log of zero is undefined. So we need to address this.
 
-Eliminating the speakers who do not use any fillers at all is one option. This is quite extreme as we may lose quite a few speakers and it is not clear that removing data in this way will not cause inordinate bias in the results as these speakers may be different in some way from the rest of the speakers. Looking at the speakers with zero fillers in @exm-ida-num-uni-zero-fillers, we can see that there is some potential for bias.
+Eliminating the speakers who do not use any fillers at all is one option. This is quite extreme as we may lose quite a few speakers and it is not clear that removing data in this way will not cause inordinate bias in the results as these speakers may be different in some way from the rest of the speakers. Looking at the speakers with zero fillers in @exm-ida-num-uni-zero-fillers, we can see that there is some potential for bias as the speakers with zero fillers are not evenly distributed across the levels of the `education` and `sex` variables.
 
 ::: {#exm-ida-num-uni-zero-fillers}
 ```{r}
 #| label: ida-num-uni-zero-fillers
 
-fillers_df |>
+# Cross-tabulation of zero fillers by education and sex
+fillers_tbl |>
   filter(fillers_per_100 == 0) |>
   tabyl(education, sex)
 ```
@@ -1036,16 +963,16 @@ In R, we can use the `jitter()` function to add a small amount of random noise t
 set.seed(1234)
 
 # Add jitter to fillers
-fillers_df <-
-  fillers_df |>
+fillers_tbl <-
+  fillers_tbl |>
   mutate(fillers_per_100_jitter = abs(jitter(fillers_per_100)))
 
-fillers_df
+fillers_tbl
 ```
 :::
 
 
-The results from @exm-ida-num-uni-jitter show that the `fillers_per_100_jitter` variable has been added to the `fillers_df` dataset and that zero values for `fillers_per_100` now have a small amount of random noise added to them. Note, that the other values also have a small amount of random noise added to them, but it is so small that rounding to 2 decimal places makes it look like nothing has changed.
+The results from @exm-ida-num-uni-jitter show that the `fillers_per_100_jitter` variable has been added to the `fillers_tbl` dataset and that zero values for `fillers_per_100` now have a small amount of random noise added to them. Note, that the other values also have a small amount of random noise added to them, but it is so small that rounding to 2 decimal places makes it look like nothing has changed.
 
 Now let's return to log transforming the `fillers_per_100_jitter` variable. We can do this with the `log()` function. Let's see how this works in @exm-ida-num-uni-log.
 
@@ -1054,11 +981,11 @@ Now let's return to log transforming the `fillers_per_100_jitter` variable. We c
 #| label: ida-num-uni-log
 
 # Log transform fillers (with jitter)
-fillers_df <-
-  fillers_df |>
+fillers_tbl <-
+  fillers_tbl |>
   mutate(fillers_per_100_log = log(fillers_per_100_jitter))
 
-fillers_df
+fillers_tbl
 ```
 :::
 
@@ -1066,100 +993,71 @@ Let's now plot the log-transformed variable, as seen in @exm-ida-num-uni-log-plo
 
 ::: {#exm-ida-num-uni-log-plot}
 ```{r}
-#| label: fig-ida-num-uni-log-plot
+#| label: fig-ida-num-uni-hist-dens-log
 #| fig-cap: "Histogram and density plot of the `fillers_per_100_log` variable"
-#| fig-subcap:
-#| - "Histogram"
-#| - "Density plot"
-#| layout-ncol: 2
+#| fig-width: 8
+#| fig-asp: 0.5
 
-# Histogram
-fillers_df |>
+# Histogram-density plot
+fillers_tbl |>
   ggplot(aes(x = fillers_per_100_log)) +
-  geom_histogram(bins = 50) +
-  labs(x = "Fillers per 100 utterances (log)", y = "Count")
-
-# Density plot
-fillers_df |>
-  ggplot(aes(x = fillers_per_100_log)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 50) +
   geom_density() +
-  labs(x = "Fillers per 100 utterances (log)", y = "Density")
+  labs(x = "Fillers per 100 utterances", y = "Count")
 ```
 :::
 
 The distribution of the log-transformed variable is more spread out now, but the zero-filler speakers do show a low-level spike in the left tail of the distribution. Jitter and log-transformation, however, smooth over their effect to a large degree.
 
-Let's drop some of the variables we no longer need and proceed with the log-transformed variable, as seen in @exm-ida-num-uni-drop.
-
-::: {#exm-ida-num-uni-drop}
 ```{r}
-#| label: ida-num-uni-drop
+#| label: ida-num-fillers-dataset-clean
+#| echo: false
 
-# Drop variables
-fillers_df <-
-  fillers_df |>
-    select(sex, education, age, fillers_per_100_log)
+# Drop the jittered and non-log transformed variables
+fillers_tbl <-
+  fillers_tbl |>
+  select(-fillers_per_100_jitter, -fillers_per_100)
 ```
-:::
 
 #### Bivariate analysis
 
 When considering a numeric reponses variable and another variable, it is key to consider the nature of the other variable. If it is a categorical variable with two levels, then we can compare a statistic between the two groups (mean or median). If it is categorical with more than two levels, the F statistic is used to compare the means. Finally, if it is a numeric variable, then we can use a correlation test to see if there is an association between the two variables.
 
-Let's approach each of these bivariate scenarios in turn.
+The `fillers_tbl` contains the `sex` variable which is a categorical variable with two levels. According to the literature, filled pauses are associated with differences between men and women [@Shriberg1994; @Tottie2011, @Tottie2014]. Sex is one of the variables associated with the rate of filled pauses. The findings suggest that men use fillers at a higher rate than women. Let's test to see if this holds for the SWDA data.
 
-The `datives_df` contains the `sex` variable which is a categorical variable with two levels. According to the literature, filled pauses are associated with differences between men and women [@Shriberg1994; @Tottie2011, @Tottie2014]. Sex is one of the variables associated with the rate of filled pauses. The findings suggest that men use fillers at a higher rate than women. Let's test to see if this holds for the SWDA data.
-
-Let's first explore the distribution from a descriptive point of view. With a numeric response variable `fillers_per_100_log` and a categorical explanatory variable `sex`, a boxplot is a natural fit. Let's add a density plot with a `sex` overlay in @exm-ida-num-bi-vis.
+Let's first explore the distribution from a descriptive point of view. With a numeric response variable `fillers_per_100_log` and a categorical explanatory variable `sex`, a boxplot is a natural fit, as seen in @exm-ida-num-bi-vis.
 
 ::: {#exm-ida-num-bi-vis}
 ```{r}
 #| label: fig-ida-num-bi-vis
-#| fig-cap: "Visualizations of the `fillers_per_100_log` variable by `sex`"
-#| fig-subcap:
-#| - "Boxplot"
-#| - "Density plot"
-#| layout-ncol: 2
+#| fig-cap: "Boxplot of the `fillers_per_100_log` variable by `sex`"
+#| fig-width: 8
+#| fig-asp: 0.5
 
-fillers_df |>
-  ggplot(aes(y = fillers_per_100_log, x = sex)) +
+# Boxplot
+fillers_tbl |>
+  ggplot(aes(x = fillers_per_100_log, y = sex)) +
   geom_boxplot(notch = TRUE) +
   labs(
-    y = "Filler use (log)",
-    x = "Sex"
-  )
-
-fillers_df |>
-  ggplot(aes(x = fillers_per_100_log, fill = sex)) +
-  geom_density(alpha = 0.5) +
-  labs(
     x = "Filler use (log)",
-    fill = "Sex"
+    y = "Sex"
   )
 ```
 :::
 
-Looking at the boxplot in @fig-ida-num-bi-vis-1, we see that the appears to be an overall higher rate of filler use for men, compared to women. We also can see that the random noise added to zero-rate speakers appear as outliers in the left tail. The density plot in @fig-ida-num-bi-vis-2 confirms this and allows us to see the overlap between the two groups. We see that the density distribution is not as concentrated and is slightly lower than that of men.
+Looking at the boxplot in @fig-ida-num-bi-vis, we see that the appears to be an overall higher rate of filler use for men, compared to women. We also can see that the random noise added to zero-rate speakers appear as outliers in the left tail. Since I added a notch to the boxplots, we can also gauge to some degree the uncertainty of the median. The notches do not overlap, which suggests that the medians are different.
 
-::: {.callout}
-**Consider this**
+To test this differences, let's follow the simulation-based hypothesis testing workflow and investigate if the apparent difference between men and women is statistically significant, or expected by chance[^medians]. The first steps are found in @exm-ida-num-bi-sex-null.
 
-If we focus on the zero-rate outliers, we see there is also a difference in the distribution. Can this difference be attributed to differences between men and women? Why or why not?
-
-Does your answer to this question have an effect on how we interpret the differences between men and women in the main distribution?
-:::
-
-Let's follow the simulation-based hypothesis testing workflow and investigate if the apparent difference between men and women is statistically significant, or expected by chance. The first steps are found in @exm-ida-num-bi-sex-null.
+[^medians]: Given the fact that we added jitter to accommodate the zeros, it may actually make more sense to compare medians, rathern than means. But to compare these results with the results from the literature, we will compare means.
 
 ::: {#exm-ida-num-bi-sex-null}
 ```{r}
-#| label: fig-ida-num-bi-sex-null
-#| fig-cap: "Null distribution of the `fillers_per_100_log` variable by `sex`"
-#| fig-height: 4
+#| label: ida-num-bi-sex-null
 
 # Specify the relationship
 fillers_spec <-
-  fillers_df |>
+  fillers_tbl |>
   specify(fillers_per_100_log ~ sex) # response ~ explanatory
 
 # Observed statistic
@@ -1175,25 +1073,19 @@ fillers_null <-
   generate(reps = 1000, type = "permute") |> # permute = shuffle
   calculate(stat = "diff in means", order = c("Male", "Female"))
 
-# Visualize the null distribution w/ observed statistic
-fillers_null |>
-  visualize() +
-  shade_p_value(obs_stat = fillers_obs, direction = "greater") # expect greater
-
 # Calculate the p-value
 fillers_null |>
-  get_p_value(obs_stat = fillers_obs, direction = "greater")
+  get_p_value(obs_stat = fillers_obs, direction = "two-sided")
 ```
 :::
 
-From the analysis performed in @exm-ida-num-bi-sex-null, we can reject the null hypothesis that there is no difference between the rate of filler use between men and women, as the p-value is greater less than 0.05.
+From the analysis performed in @exm-ida-num-bi-sex-null, we can reject the null hypothesis that there is no difference between the rate of filler use between men and women, as the p-value is less than 0.05.
 
 To further assess the uncertainty of the observed statistic, and the robustness of the difference, we calculate a confidence interval, as seen in @exm-ida-num-bi-sex-ci.
 
 ::: {#exm-ida-num-bi-sex-ci}
 ```{r}
-#| label: fig-ida-num-bi-sex-ci
-#| fig-cap: "Confidence interval generated from bootstrap resampling"
+#| label: ida-num-bi-sex-ci
 
 # Resampling distribution
 fillers_boot <-
@@ -1207,19 +1099,12 @@ fillers_ci <-
   get_ci(level = 0.95)
 
 fillers_ci
-
-# Visualize the confidence interval
-fillers_boot |>
-  visualize() +
-  shade_ci(fillers_ci)
 ```
 :::
 
-The confidence interval includes 0, which suggests that the observed difference is questionable. It is of note, however, that the majority of the interval is above 0, which provides some evidence that the observed difference is not due to chance.
+TThe confidence interval includes 0, which suggests that the observed difference is questionable. It is of note, however, that the majority of the interval is above 0, which provides some evidence that the observed difference is not due to chance. This result highlights how p-values and confidence intervals together can provide a more nuanced picture of the data.
 
-This result highlights how p-values and confidence intervals together can provide a more nuanced picture of the data.
-
-The second bivariate scenario we can consider is when the explanatory variable is categorical with more than two levels. In this case, we can use the F statistic to compare the means of the different levels. The `education` variable in the `fillers_df` dataset is a categorical variable with five levels. @Tottie2011 suggests that more educated speakers use more fillers than less educated speakers. Let's test this hypothesis.
+The second bivariate scenario we can consider is when the explanatory variable is categorical with more than two levels. In this case, we can use the F statistic to compare the means of the different levels. The `education` variable in the `fillers_tbl` dataset is a categorical variable with five levels. @Tottie2011 suggests that more educated speakers use more fillers than less educated speakers. Let's test this hypothesis.
 
 First, we visualize the distribution of the `fillers_per_100_log` variable by `education`, as seen in @exm-ida-num-bi-edu-vis.
 
@@ -1230,7 +1115,7 @@ First, we visualize the distribution of the `fillers_per_100_log` variable by `e
 #| fig-height: 4
 
 # Boxplot
-fillers_df |>
+fillers_tbl |>
   ggplot(aes(y = fillers_per_100_log, x = education)) +
   geom_boxplot(notch = TRUE) +
   labs(
@@ -1242,17 +1127,15 @@ fillers_df |>
 
 The boxplot in @fig-ida-num-bi-edu-vis does not point to any obvious differences between the levels of the `education` variable. There are a fair number of outliers, however, in the two most educated groups. These outliers are likely due to the random noise added to the 0-rate speakers and it is interesting that they are concentrated in the two most educated groups.
 
-Let's now submit these variables to the simulation-based hypothesis testing workflow to quantify the uncertainty of the observed statistic and determine if the observed difference is statistically significant. The first steps are found in @exm-ida-num-bi-edu-null.
+Let's now submit these variables to the simulation-based hypothesis testing workflow to quantify the uncertainty of the observed statistic and determine if the observed difference is statistically significant. The first steps are found in @xm-ida-num-bi-edu.
 
-::: {#exm-ida-num-bi-edu-null}
+::: {#exm-ida-num-bi-edu}
 ```{r}
-#| label: fig-ida-num-bi-edu
-#| fig-cap: "Null distribuition of the `fillers_per_100_log` variable by `education`"
-#| fig-height: 4
+#| label: ida-num-bi-edu
 
 # Specify the relationship
 fillers_spec <-
-  fillers_df |>
+  fillers_tbl |>
   specify(fillers_per_100_log ~ education) # response ~ explanatory
 
 # Observed statistic
@@ -1267,30 +1150,25 @@ fillers_null <-
   generate(reps = 1000, type = "permute") |> # permute = shuffle
   calculate(stat = "F")
 
-# Visualize the null distribution w/ observed statistic
-fillers_null |>
-  visualize() +
-  shade_p_value(obs_stat = fillers_obs, direction = "two-sided") # expect greater
-
 # Calculate the p-value
 fillers_null |>
   get_p_value(obs_stat = fillers_obs, direction = "two-sided")
 ```
 :::
 
-The analysis in @exm-ida-num-bi-edu-null suggests that the observed difference between the means of the different levels of the `education` variable not significantly different from what we would expect by chance.
+The analysis in @exm-ida-num-bi-edu suggests that the observed difference between the means of the different levels of the `education` variable not significantly different from what we would expect by chance.
 
 ::: {.callout}
-The p-value in @exm-ida-num-bi-edu-null was calculated using a two-sided test, which is appropriate when the expected directionality is not known. In this case, while we do have an expected directionality, the visualizations strongly suggest that the observed difference is not in line with our expectations. To account for this uncertainty and to be conservative, we choose to use a two-sided test. This allows us to remain open to the possibility that the observed difference may actually be in the opposite direction, rather than solely focusing on our initial expectation. However, it's important to note that the decision to use a two-sided test should also consider factors such as the specific research question and the context of the analysis.
+**{{< fa exclamation-triangle >}} Warning**
+
+The p-value in @exm-ida-num-bi-edu was calculated using a two-sided test, which is appropriate when the expected directionality is not known. In this case, while we do have an expected directionality, the visualizations strongly suggest that the observed difference is not in line with our expectations. To account for this uncertainty and to be conservative, we choose to use a two-sided test. This allows us to remain open to the possibility that the observed difference may actually be in the opposite direction, rather than solely focusing on our initial expectation. However, it's important to note that the decision to use a two-sided test should also consider factors such as the specific research question and the context of the analysis.
 :::
 
 Let's now calculate a confidence interval to assess the uncertainty of the observed statistic, as seen in @exm-ida-num-bi-edu-ci.
 
 ::: {#exm-ida-num-bi-edu-ci}
 ```{r}
-#| label: fig-ida-num-bi-edu-ci
-#| fig-cap: "Confidence interval generated from bootstrap resampling"
-#| fig-height: 4
+#| label: ida-num-bi-edu-ci
 
 # Resampling distribution
 fillers_boot <-
@@ -1304,107 +1182,12 @@ fillers_ci <-
   get_ci(level = 0.95)
 
 fillers_ci
-
-# Visualize the confidence interval
-fillers_boot |>
-  visualize() +
-  shade_ci(fillers_ci)
 ```
 :::
 
-In @exm-ida-num-bi-edu-ci, we see that we are in the opposite situation --the p-value is not significant and but the confidence interval does not include 0. So how do we interpret this? Remember, the p-value is the probability of observing a statistic as extreme or more extreme than the observed statistic, given that the null hypothesis is true. The confidence interval is the range of values that we are 95% confident contains the true population parameter. We should take into consideration two aspects: (1) the confidence interval has a large range (the interval is wide) and (2) that the lower limit is near 0. Take together and in addition to the p-value, we can conclude that the observed difference is not statistically significant, and if there is a difference, it is likely to be small or negligible.
+In @exm-ida-num-bi-edu-ci, we see that we are in the opposite situation to the previous bivariate case --the p-value is not significant and but the confidence interval does not include 0.
 
-The last bivariate case is when the explanatory variable is numeric. In this case, we can use a correlation test to see if there is an association between the two variables. The `age` variable in the `fillers_df` dataset is a numeric variable. @Tottie2011 suggests that older speakers use more fillers than younger speakers. Let's test this hypothesis.
-
-First, we visualize the distribution of the `fillers_per_100_log` variable by `age`, as seen in @exm-ida-num-bi-age-vis.
-
-::: {#exm-ida-num-bi-age-vis}
-```{r}
-#| label: fig-ida-num-bi-age-vis
-#| fig-cap: "Scatterplot of the `fillers_per_100_log` variable by `age`"
-#| fig-height: 4
-
-# Scatterplot
-fillers_df |>
-  ggplot(aes(x = age, y = fillers_per_100_log)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  labs(
-    x = "Age",
-    y = "Filler use (log)"
-  )
-```
-:::
-
-The trend line in @fig-ida-num-bi-age-vis does not suggest that there is a strong relationship between the two variables, or even if there is a relationship at all. We can see that the rate of filler use appears constant across the age range.
-
-Let's now submit these variables to the simulation-based hypothesis testing workflow to quantify the uncertainty of the observed statistic and determine if the observed difference is statistically significant. The first steps are found in @exm-ida-num-bi-age-null.
-
-::: {#exm-ida-num-bi-age-null}
-```{r}
-#| label: fig-ida-num-bi-age-null
-#| fig-cap: "Null distribution of the `fillers_per_100_log` variable by `age`"
-#| fig-height: 4
-
-# Specify the relationship
-fillers_spec <-
-  fillers_df |>
-  specify(fillers_per_100_log ~ age) # response ~ explanatory
-
-# Observed statistic
-fillers_obs <-
-  fillers_spec |>
-  calculate(stat = "correlation") # correlation = r
-
-# Null distribution
-fillers_null <-
-  fillers_spec |>
-  hypothesize(null = "independence") |> # independence = no relationship
-  generate(reps = 1000, type = "permute") |> # permute = shuffle
-  calculate(stat = "correlation")
-
-# Visualize the null distribution w/ observed statistic
-fillers_null |>
-  visualize() +
-  shade_p_value(obs_stat = fillers_obs, direction = "two-sided") # expect greater
-
-# Calculate the p-value
-fillers_null |>
-  get_p_value(obs_stat = fillers_obs, direction = "two-sided")
-```
-:::
-
-This is a very large p-value and underscores what the scatterplot in @fig-ida-num-bi-age-vis suggests --there is no relationship between the two variables.
-
-For completeness, we calculate a confidence interval to assess the uncertainty of the observed statistic, as seen in @exm-ida-num-bi-age-ci.
-
-::: {#exm-ida-num-bi-age-ci}
-```{r}
-#| label: fig-ida-num-bi-age-ci
-#| fig-cap: "Confidence interval generated from bootstrap resampling"
-#| fig-height: 4
-
-# Resampling distribution
-fillers_boot <-
-  fillers_spec |>
-  generate(reps = 1000, type = "bootstrap") |>
-  calculate(stat = "correlation")
-
-# Calculate the confidence interval
-fillers_ci <-
-  fillers_boot |>
-  get_ci(level = 0.95)
-
-fillers_ci
-
-# Visualize the confidence interval
-fillers_boot |>
-  visualize() +
-  shade_ci(fillers_ci)
-```
-:::
-
-The confidence interval includes 0, which suggests that the observed difference is questionable. But in contrast to the confidence interval in @exm-ida-num-bi-edu-ci, the interval is narrow suggesting more strongly that the observed difference is not due to chance.
+So how do we interpret this? Remember, the p-value is the probability of observing a statistic as extreme or more extreme than the observed statistic, given that the null hypothesis is true. The confidence interval is the range of values that we are 95% confident contains the true population parameter. We should take into consideration two aspects: (1) the confidence interval has a large range (the interval is wide) and (2) that the lower limit is near 0. Take together and in addition to the p-value, we can conclude that the observed difference is not statistically significant, and if there is a difference, it is likely to be small or negligible.
 
 #### Multivariate analysis
 
@@ -1419,7 +1202,6 @@ fillers_type_df <-
     sex = factor(sex),
     education = factor(education, levels = edu_levels, ordered = TRUE)
   )
-
 
 # Set seed for reproducibility
 set.seed(1234)
@@ -1438,13 +1220,31 @@ While bivariate analysis is useful for exploring the relationship between two va
 
 In linear regression, we are interested in predicting the value of a numeric response variable based on the values of the explanatory variables. The contribution of the explanatory variables can be considered individually, as an interaction, or as a combination of both.
 
-Let's now pick up the `fillers_type_df` dataset and explore the hypothesis that the rate of filler use varies by the type of filler across the socio-demographic variables `sex`, `education`, and `age`. To do this we will use R formula syntax to specify the variables we want to include in the model.
+Let's now introduce a variation of the SWDA dataset which includes a variable `filler_type` which has two levels, 'uh' and 'um', corresponding to the use of each filler. Here's a preview of the dataset in @exm-ida-num-fillers-type-dataset.
 
-- Simple effects: `response ~ explanatory_1 + explanatory_2`: the response variable as a function of each explanatory variable.
-- Interaction effects: `response ~ explanatory_1:explanatory_2`: the response variable as a function of the interaction between the two explanatory variables.
-- Simple and interaction effects: `response ~ explanatory_1 * explanatory_2`: the response variable as a function of each explanatory variable and the interaction between the two explanatory variables.
+::: {#exm-ida-num-fillers-type-dataset}
+```{r}
+#| label: ida-num-fillers-type-dataset
 
-Let's test the hypothesis that men and women differ in the rates that they use the filler types (`fillers_per_100_log ~ filler_type * sex`). A plot will help us begin to understand the potential relationships. In @exm-ida-multi-sex-plot, we use a boxplot to visualize the relationship between the `fillers_per_100_log` variable and the `filler_type` variable, with a `sex` overlay.
+fillers_type_df
+```
+:::
+
+The `fillers_type_df` dataset has `r nrow(fillers_type_df)` observations and 6 variables.  With this dataset, we will explore the hypothesis that the rate of filler use varies by the type of filler across the socio-demographic variable `sex`.
+
+To do this we will use R formula syntax to specify the variables we want to include in the model and their relationships. The possible relationships appear in @tbl-ida-num-multi-relationships.
+
+| Relationship | Formula | Description |
+|:-------------|:--------|:------------|
+| Simple effects | `response ~ explanatory_1 + explanatory_2` | The response variable as a function of each explanatory variable |
+| Interaction effects | `response ~ explanatory_1:explanatory_2` | The response variable as a function of the interaction between the two explanatory variables |
+| Simple and interaction effects | `response ~ explanatory_1 * explanatory_2` | The response variable as a function of each explanatory variable and the interaction between the two explanatory variables |
+
+: Possible relationships in a multivariate analysis {#tbl-ida-num-multi-relationships tbl-colwidths="[25, 25, 50]"}
+
+Our hypothesis is that men and women differ in the rates that they use the filler types. This describes an interaction, so we can use either the interaction or the simple and interaction effects relationships. To demonstrate the difference between simple and interaction terms, let's approach this using the third relationship (*i.e.* `fillers_per_100_log ~ filler_type * sex`).
+
+A plot will help us begin to understand the potential relationships. In @exm-ida-multi-sex-plot, we use a boxplot to visualize the relationship between the `fillers_per_100_log` variable and the `filler_type` variable, with a `sex` overlay.
 
 ::: {#exm-ida-multi-sex-plot}
 ```{r}
@@ -1456,7 +1256,6 @@ Let's test the hypothesis that men and women differ in the rates that they use t
 #| fig-height: 4
 #| layout-ncol: 2
 
-
 # Boxplot `filler_type`
 fillers_type_df |>
   ggplot(aes(y = fillers_per_100_log, x = filler_type)) +
@@ -1465,7 +1264,6 @@ fillers_type_df |>
     x = "Filler type",
     y = "Fillers per 100 (log)"
   )
-
 
 # Boxplot `filler_type` and `sex`
 fillers_type_df |>
@@ -1480,9 +1278,7 @@ fillers_type_df |>
 :::
 
 
-Let's interpret the boxplot in @fig-ida-multi-sex-plot. Focusing on @fig-ida-multi-sex-plot-1 first, we see that the filler 'uh' is more frequent than 'um' as the median is distinct and the confidence intervals do not overlap. Now, looking at @fig-ida-multi-sex-plot-2, we see the same distinction between 'uh' and 'um', but we also see that the difference between the use of 'uh' and 'um' is different for males and females. This type of relationship is called an interaction effect. In this case the interaction effect goes in the same direction but the magnitude of the difference is different.
-
-The upshot, men and women both use 'uh' more than 'um' but men are even more likely to use 'uh' over 'um' than women.
+Let's interpret the boxplots in @fig-ida-multi-sex-plot. Focusing on @fig-ida-multi-sex-plot-1 first, we see that the filler 'uh' is more frequent than 'um' as the median is distinct and the confidence intervals do not overlap. Now, looking at @fig-ida-multi-sex-plot-2, we see the same distinction between 'uh' and 'um', but we also see that the difference between the use of 'uh' and 'um' is different for males and females. This is the interaction effect we hypothesized. In this case the interaction effect goes in the same direction but the magnitude of the difference is different. The upshot, men and women both use 'uh' more than 'um' but men are even more likely to use 'uh' over 'um' than women.
 
 Let's test this effect using the `infer` workflow. Calculating the observed statistics for the simple and interaction effects is very similar to other designs, except instead of `calculate()` to derive our statistics we will use the `fit()` function, just as we did for logistic regression. Let's go ahead calculate the observed statistics first, as seen in @exm-ida-num-multi-spec.
 
@@ -1506,34 +1302,13 @@ fillers_type_obs
 
 The terms in the output from @exm-ida-num-multi-spec provide information as to what the reference levels are. For example, `filler_typeum` tells us that the 'uh' level is the reference for `filler_type` and by the same logic, 'Female' is the reference for `sex`. These terms provide our simple effect statistics. Each can be understood as the difference between the reference level when the other variables are held constant. Our response variable is log transformed, so it is not directly interpretable beyond the fact that smaller units are lower rates of filler use and larger units are higher rates of filler use. So 'um' is used less than 'uh' and men use more fillers than women.
 
-::: {.callout}
-The statistic returned from a linear regression is the difference in the means of the two levels with the other variables held constant. In this way, the statistic is a measure of the slope of the line between the two levels. This slope quantifies the magnitude of the difference between the two levels.
-
-We can also calculate the effect size by standardizing the statistics (coefficients). This is done by dividing the coefficient by the standard deviation of the response variable. This allows us to compare the effect sizes of different variables.
-
-```{r}
-#| eval: false
-#| label: ida-num-multi-std-effect-size
-
-# Standardized effect size
-fillers_type_df  |>
-  group_by(filler_type) |>
-  summarize(
-    type_sd = sd(fillers_per_100_log)
-  )
-
-```
-:::
-
 The interaction term `fillertypeum:sexMale` is the difference in the rate of fillers for this combination compared to the reference level combination ('uh' and 'Female'). In this case, the observed rate is lower.
 
 We now need to generate a null distribution to compare the observed statistics to. We will again use the permutation method, but since there is an interaction effect, we need to shuffle the `filler_type` and `sex` variables together. This ensures that any relationship between the two variables is removed. Let's see how this works in @exm-ida-num-multi-null.
 
 ::: {#exm-ida-num-multi-null}
 ```{r}
-#| label: fig-ida-num-multi-null
-#| fig-cap: "Null distribution of the `fillers_per_100_log` variable by `filler_type` and `sex`"
-#| fig-height: 4
+#| label: ida-num-multi-null
 
 # Null distribution
 fillers_type_null <-
@@ -1542,15 +1317,9 @@ fillers_type_null <-
   generate(reps = 1000, type = "permute", variables = c("filler_type", "sex")) |>
   fit()
 
-# Visualize the null distribution w/ observed statistics
-fillers_type_null |>
-  visualize() +
-  shade_p_value(obs_stat = fillers_type_obs, direction = "two-sided")
-
 # Calculate the p-values
 fillers_type_null |>
   get_p_value(obs_stat = fillers_type_obs, direction = "two-sided")
-
 ```
 :::
 
@@ -1562,8 +1331,7 @@ As always, let's calculate a confidence interval to assess the uncertainty of th
 
 ::: {#exm-ida-num-multi-sex-ci}
 ```{r}
-#| label: fig-ida-num-multi-sex-ci
-#| fig-cap: "Confidence intervals generated from bootstrap resampling"
+#| label: ida-num-multi-sex-ci
 
 # Resampling distribution
 fillers_type_boot <-
@@ -1577,11 +1345,6 @@ fillers_type_ci <-
   get_ci(level = 0.95, point_estimate = fillers_type_obs)
 
 fillers_type_ci
-
-# Visualize the confidence intervals
-fillers_type_boot |>
-  visualize() +
-  shade_ci(fillers_type_ci)
 ```
 :::
 
@@ -1589,33 +1352,24 @@ From the confidence intervals, we see that zero is not included in any of the in
 
 ## Activities {.unnumbered}
 
+The following activities aim to reinforce the concepts covered in this chapter. You'll review working with key variables, examine data distributions, and employ simulation-based statistical methods using the `infer` package to test hypotheses about their relationships.
+
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**
 
-<!-- Understand, apply, and analyze verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-**What**: [Building inference models](https://qtalr.github.io/qtalrkit/articles/recipe-10.html)
+**What**: [Building inference models](https://qtalr.github.io/qtalrkit/articles/recipe-10.html)\
 **How**: Read Recipe 10, complete comprehension check, and prepare for Lab 7.\
-**Why**: {{< fa wrench >}} TBD
+**Why**: To review and extend your knowledge regarding the simulation-based approach to statistical inference.
 :::
 
 ::: {.callout}
 **{{< fa flask >}} Lab**
 
-<!-- Analyze, evaluate, and create verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
-
-**What**: [Statistical inference](https://github.com/qtalr/lab-10)
+**What**: [Statistical inference](https://github.com/qtalr/lab-10)\
 **How**: Clone, fork, and complete the steps in Lab 10.\
-**Why**: {{< fa wrench >}} TBD
+**Why**: To apply the concepts covered in this chapter to a real-world dataset.
 :::
 
 ## Summary {.unnumbered}
 
-...
-
-
-In sum, in this section we explored the process of statistical inference, specifically the process of hypothesis testing with categorical responses variables. We started with a univariate analysis, which, although not very interesting, allowed us to focus on the process and the logic of statistical inference. We then moved on to bivariate and multivariate analyses. We see that the process is very similar, but the complexity increases with the number of explanatory variables. In each case, we applied a simulation-based approach to statistical inference which may differ from the traditional approach you may have learned in your statistics courses. But as you can appreciate, the simulation-based approach is highly flexible, more intiutive, and more transparent. The `infer` package provides a consistent set of functions and pipeline to maintain a consistent workflow. If you have previous experience with R or find resources on statistical inference using R, you will likely find the traditional, theory-based, approach. I encourage you to explore the both approaches. They have their strengths and weaknesses, but I think you will find the simulation-based approach more intuitive and transparent as a beginner.
-
-...
-
-In this chapter we have discussed various approaches to conducting inferential data analysis. Each configuration, however, always includes a descriptive assessment, statistical interrogation, and an evaluation of the results. We considered univariate, bivariate, and multivariate analyses using both categorical and non-categorical dependent variables to explore the similarities and differences between these approaches.
+In sum, in this section we explored the process of null hypothesis testing using the `infer` package, which is a simulation-based approach to statistical inference. We considered statistical designs, such as univariate, bivariate, and multivariate analyses, and explored the process of hypothesis testing with categorical and numeric responses variables. The workflow provided demonstrates that the `infer` package is a powerful tool for conducting statistical inference, and that it can be used to test a wide range of hypotheses with a similar workflow.

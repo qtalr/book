@@ -29,17 +29,10 @@ Under development.
 - Comprehend the importance of and pinpoint the aspects of well-documented and reproducible research
 :::
 
-<!--
-- Emphasizing the importance of effective communication for the impact and dissemination of research
-- Overview of the chapter's focus on integrating advanced communication techniques with reproducible research practices
--->
-
 We have discussed the design and implementation of research that is purposive, inquisitive, informed, and methodical. Now, we turn to the task of sharing research results in a manner that is communicable. There are two primary ways to communicate the results of research: audience-oriented and research-oriented. Audience facing research communication includes presentations, articles, and other forms of dissemination that are intended for audiences to become familiar with the research. Research-facing communication, on the other hand, targets other researchers, often working in same field, and focuses on the more technical aspects such as data, code, and documentation that enable other researchers to reproduce and/ or build upon the research. In this chapter, we will cover both aspects of research communication, providing guidelines for effective research reporting and strategies to ensure the reproducibility of your research project.
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
-
-<!-- Remember and understand verbs: https://tips.uark.edu/blooms-taxonomy-verb-chart/ -->
 
 **What**: [Computing environment](https://github.com/qtalr/lessons)\
 **How**: In an R console, load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
@@ -48,17 +41,11 @@ We have discussed the design and implementation of research that is purposive, i
 
 ## Audience oriented {#sec-contr-audience-oriented}
 
-<!--
-- Popular and scholarly dissemination
-  - Presentations
-  - Articles
-  - Blog posts
-  - Social media
--->
-
 Dissemination of research findings is a critical part of the research process. Whether it is through presentations, articles, blog posts, or social media, the ability to effectively communicate the results of research is essential for the impact and dissemination of research. Furthermore, the act of composing a research document can help to develop and refine ideas and conclusions.
 
 The two most common forms of research dissemination in academics are presentations and articles. Both share a common goal: to effectively communicate the research to an audience. However, they also have distinct purposes and require different approaches to achieve their goals. These purposes complement each other, with presentations often serving as a means to engage and elicit feedback from an audience, and articles serving as a more comprehensive and permanent record of the research.
+
+### Structure {#sec-contr-ao-structure}
 
 First, let's focus on the common structural components.
 
@@ -79,6 +66,8 @@ When research is connected to a well-designed plan, as described in @sec-framing
 The discussion and conclusions sections, however, are where the research narrative is brought together. Crafting these sections can be seen as an extension of the research process itself. Instead of elaborating on the planning steps and their implementation, the discussion focus on the interpretation of the findings in the light of the research questions and previous literature. At this stage, the act of articulating the implications of the findings is where insights are developed and refined. The conclusion, for its part, puts a finer point on the research, but also is an opportunity to extend suggestions to where subsequent research might go.
 
 The research abstract is another important component of both presentations and articles. I have not included it in @tbl-c-common-components as it is a distillation of the entire research narrative. Furthermore, the purpose of the abstract is distinct between presentations and articles. In presentations, the abstract typically serves to provide conference referees and attendees with a summary of the research. In articles, the abstract helps readers decide whether the article is relevant to their interests and worth the time to read in full.
+
+### Purpose {#sec-contr-ao-purpose}
 
 Understanding the roles of these common components play in contributing to the overall narrative is essential for effective research communication.
 
@@ -106,6 +95,35 @@ Yet, presentations and articles are not the same. They have distinct elements an
 
  discuss the distinctive elements of research presentations, including storytelling and relatability, the "less is more" approach, visual aids and interactive elements, and engaging the audience through questions or interactive elements.
 
+### Strategies {#sec-contr-ao-strategies}
+
+- Introduction
+  - Collect and curate your references and resources with a reference manager (e.g., Zotero, Mendeley, EndNote, etc.)
+    - Manage your ideas and keep notes
+    - Organize your references and resources
+    - Integrate your references and resources with your writing in Quarto through BibTeX entry citation keys
+
+- Methods
+  - Document your data and processing steps while conducting your research
+    - Use a data dictionary to describe your data
+    - Use literate programming to describe your data processing and analysis steps
+
+- Results
+  - Save key statistical results, tables, and visualizations as outputs
+    - Statistical results can be saved as R objects (e.g., `saveRDS()`)
+    - Tables and visualizations can be saved as files (e.g., `ggsave()`, `kableExtra::save_kable()`)
+
+- Publishing
+  - Presentations
+    - Various presentation software (e.g., PowerPoint, Keynote, Google Slides, etc.) and slide sharing platforms (e.g., SlideShare, Speaker Deck, etc.)
+    - Consider using Quarto with [`revealjs`](https://quarto.org/docs/presentations/revealjs/) for creating and sharing presentations
+      - Facilitates the integration of data, tables, and figures between presentations and articles
+      - Easily shareable and reproducible
+  - Articles
+    - Quarto provides ample support for creating and publishing articles
+      - `.csl` files for formatting references
+      - Quarto extensions for (some) [journal-specific formatting](https://quarto.org/docs/extensions/listing-journals.html)
+      - PDF, HTML, and Word output formats
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
@@ -113,27 +131,64 @@ Yet, presentations and articles are not the same. They have distinct elements an
 Quarto 1.4+ includes a 'manuscript' feature which provides a workflow for including source content, computations, and visualizations in a single document which links to these source documents. For more information, see the [Quarto documentation](https://quarto.org/docs/manuscripts/).
 :::
 
-<!--
-- Structure and purpose
-  - Articles
-    - Typical sections in research articles
-      - Abstract, introduction, methods, results, discussion, conclusion
-        - The role of each section in contributing to the overall narrative of the research
-        - Special attention to methods and results
-  - Presentations
-    - Distinctive elements
-      - Storytelling and relatability
-      - "Less is more" approach (i.e. avoiding information overload)
-      - Visual aids and interactive elements
-      - Engaging the audience through questions or interactive elements
-- Advantages to Literate Programming/ Quarto
-    - Incorporating data visualization, tables, and other R-generated content seamlessly
-      - `ggplot2::ggsave()` for saving figures
-      - `kableExtra::save_kable()` for saving tables
-    - Apply formatting guidelines
-    - Enhance the reproducibility of research
-    - Facilitate the sharing of research findings
--->
+
+```bash
+project/
+├── input/
+│   └── ...
+├── code/
+│   └── ...
+├── output/
+│   └── ...
+├── DESCRIPTION
+├── Makefile
+└── README
+```
+
+```{r}
+#| label: fig-ggsave-test
+#| fig-cap: A test figure saved using `ggsave()`
+
+library(ggplot2)    # plotting functions
+library(dplyr)      # load the pipe operator
+library(qtkit)      # load the `save_*()` functions
+
+p1 <-
+  mtcars |>
+  ggplot(aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title = "Test figure", x = "Weight", y = "Miles (per gallon)")
+
+p1
+
+write_gg(p1, target_dir = "~/Desktop/")
+```
+
+```{r}
+#| label: tbl-kable-test
+#| tbl-cap: A test table saved using `kableExtra::save_kable()`
+
+library(knitr)
+library(kableExtra)
+
+my_mtcars <- mtcars[1:5, 1:5] # Create a subset of the mtcars dataset
+
+t1 <-
+  my_mtcars |>
+  kable() |>
+  kable_styling()
+
+t1
+
+write_kbl(t1, target_dir = "~/Desktop/")
+```
+
+```{r}
+#| label: obj-data-test
+
+write_obj(my_mtcars, target_dir = "~/Desktop/")
+```
 
 ## Research oriented {#sec-contr-research-oriented}
 
@@ -152,32 +207,68 @@ Whether for other researchers or for your future self, creating research that is
     - Combining expertise from different fields.
     - Peer review and feedback.
   - Enhance the visibility and impact of research
-- Elements
-  - Research compendium
-    - Using literate programming for transparency and documentation
-    - Directory and file structure/ naming conventions
-    - Modularization of scripts and files for specific analysis goals
-    - Key documentation files: README, data origin, and data dictionaries
-    - Implementing a 'main' script for coordinating project steps
-  - Computing environment
-    - Directory and file management
-      - Open source formats, software, and tools
-      - Version control
-        - Tracking changes and collaboration
-        - Ethical considerations (data privacy, security, etc.)
-          - `.gitignore` for sensitive data
-    - Software management
-      - R and package management (`renv`)
-    - System-level dependencies
-      - Docker (or `rix`) for containerization
-  - Publishing research
-    - Popular repositories (e.g., GitHub, Open Science Framework)
-    - Strategies for uploading and organizing research projects
-    - Collaboration best practices
-      - GitHub branches and pull requests
-      - Code review and feedback (Issues, Discussions, etc.)
-      - Licensing and citation attribution
-        - appropriate licenses for code and data to ensure proper attribution and reuse
+
+
+### Structure {#sec-contr-ro-structure}
+
+- Research compendium
+  - Using literate programming for transparency and documentation
+  - Directory and file structure/ naming conventions
+  - Modularization of scripts and files for specific analysis goals
+  - Key documentation files: README, data origin, and data dictionaries
+  - Implementing a 'main' script for coordinating project steps
+- Computing environment
+  - Directory and file management
+    - Open source formats, software, and tools
+    - Version control
+      - Tracking changes and collaboration
+      - Ethical considerations (data privacy, security, etc.)
+        - `.gitignore` for sensitive data
+  - Software management
+    - R and package management (`renv`)
+  - System-level dependencies
+    - Docker (or `rix`) for containerization
+
+### Purpose {#sec-contr-ro-purpose}
+
+- Research compendium
+  - Transparency and documentation
+  - Reproducibility and sharing research findings
+  - Facilitating collaboration and peer review
+  - Enhancing the visibility and impact of research
+- Computing environment
+  - Ensuring accuracy and reliability of results
+  - Facilitating knowledge sharing and collaboration
+  - Enhancing the visibility and impact of research
+
+### Strategies {#sec-contr-ro-strategies}
+
+- Research compendium
+  - Using literate programming for transparency and documentation
+  - Directory and file structure/ naming conventions
+  - Modularization of scripts and files for specific analysis goals
+  - Key documentation files: README, data origin, and data dictionaries
+  - Implementing a 'main' script for coordinating project steps
+- Computing environment
+  - Directory and file management
+    - Open source formats, software, and tools
+    - Version control
+      - Tracking changes and collaboration
+      - Ethical considerations (data privacy, security, etc.)
+        - `.gitignore` for sensitive data
+  - Software management
+    - R and package management (`renv`)
+  - System-level dependencies
+    - Docker (or `rix`) for containerization
+
+- Publishing research
+  - Popular repositories (e.g., GitHub, Open Science Framework)
+  - Strategies for uploading and organizing research projects
+  - Collaboration best practices
+    - GitHub branches and pull requests
+    - Code review and feedback (Issues, Discussions, etc.)
+    - Licensing and citation attribution
+      - appropriate licenses for code and data to ensure proper attribution and reuse
 
 ## Activities {.unnumbered}
 

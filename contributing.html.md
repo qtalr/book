@@ -3,13 +3,14 @@ execute:
   echo: true
 ---
 
+
+
 # Contribute {#sec-contributing}
 
-```{r}
-#| label: setup-options
-#| child: "_common.qmd"
-#| cache: false
-```
+
+
+
+
 
 ::: {.callout-caution title="Caution"}
 Under development.

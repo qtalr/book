@@ -1,0 +1,764 @@
+---
+execute:
+  echo: false
+---
+
+# Data {#sec-understanding-data}
+
+```{r}
+#| label: setup-options
+#| child: "../_common.qmd"
+#| cache: false
+```
+
+> The goal is to turn data into information, and information into insight.
+>
+> --- Carly Fiorina
+
+::: {.callout}
+**{{< fa regular list-alt >}} Outcomes**
+
+- Describe the difference between data and information.
+- Understand how the tidy approach to data organization can enhance the quality and usability of data.
+- Articulate the importance of documentation in promoting reproducible research.
+:::
+
+In this chapter, the groundwork is laid for deriving insights from text analysis by focusing on content and structure of data and information. The concepts of populations and samples are introduced, highlighting their similarities and key differences. Connecting these topics to text analysis, language samples, or corpora, are explored, discussing their types, sources, formats, and ethical considerations. Subsequently, key concepts in creating information from corpus data, such as organization and transformation, are introduced. Documentation in quantitative research is emphasized addressing the importance of data origin files and data dictionaries.
+
+::: {.callout}
+**{{< fa terminal >}} Lessons**
+
+**What**: [Objects, Packages and functions](https://github.com/qtalr/lessons)\
+**How**: In an R console, load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
+**Why**: To introduce you to the main types of objects in R and to understand the role and use of functions and packages in R programming.
+:::
+
+## Data {#sec-ud-data}
+
+Data is data, right? The term 'data' is so common in popular vernacular it is easy to assume we know what we mean when we say 'data'. But as in most things in science, where there are common assumptions there are important details that require more careful consideration. Let's turn to the first key distinction that we need to make to start to break down the term 'data': the difference between populations and samples.
+
+### Populations and samples
+
+The first thing that comes to many people's mind when the term population is used is human populations (derived from Latin 'populus'). Say for example we pose the question --What's the population of Milwuakee? When we speak of a population in these terms we are talking about the total sum of individuals living within the geographical boundaries of Milwaukee. In concrete terms, a \index{population}**population** an idealized set of objects or events in reality which share a common characteristic or belong to a specific category. The term to highlight here is idealized. Although we can look up the US Census report for Milwaukee and retrieve a figure for the population, this cannot truly be the population. Why is that? Well, whatever method that was used to derive this numerical figure was surely incomplete. If not incomplete, by the time someone recorded the figure some number of residents of Milwaukee moved out, moved in, were born, or passed away. In either case, this example serves to point out that populations are not fixed and are subject to change over time.
+
+Likewise when we talk about populations in terms of language we dealing with an idealized aspect of linguistic reality. Let's take the words of the English language as an analog to our previous example population. In this case the words are the people and English is the grouping characteristic. Just as people, words move out, move in, are born, and pass away. Any compendium of the words of English at any moment is almost instananeously incomplete. This is true for all populations, save those relatively rare cases in which the grouping characteristics select a narrow slice of reality which is objectively measurable and whose membership is fixed (the complete works of Shakespeare, for example).
+
+Therefore, (most) populations are amorphous moving targets. We subjectively hold them to exist, but in practical terms we often cannot nail down the specifics of populations. So how do researchers go about studying populations if they are theoretically impossible to access directly? The strategy employed is called sampling.
+
+A \index{sampling}**sample** is the product of a subjective process of selecting a finite set of observations from an idealized population with the goal of capturing the relevant characteristics of this population. When we talk about data in data science, we are talking about samples.
+
+Whether selecting a sample for your research or evaluating a sample used in someone else's research, there are two key characteristics to consider: the sampling frame and the representativeness. The **sampling frame** is the set of characteristics that define the population of interest. The **representativeness** is the degree to which the sample reflects the characteristics of the population. Both of these concern bias, albeit in different ways. By defining the population, a sampling frame sets the boundaries of the population and therefore the scope of research based on the sample. This bias is not a bad thing, in fact, the more clearly defined the sampling frame the better. Low representativeness, on the other hand, is a type of bias we would like to avoid. Given the nature of samples, perfect representativeness is not achievable. That said, there are a series of sampling strategies that tend to increase the representativeness of a sample, seen in @tbl-sampling-strategies.
+
+::: {#tbl-sampling-strategies tbl-colwidths="[15, 85]" .striped}
+
+| Strategy | Description |
+|:---------|:------------|
+| Size | Larger samples increase the likelihood of representing the population |
+| Randomized | Avoid invertently including bias in selection |
+| Stratified | Divide the population into sub-populations, 'strata', and sample from each |
+| Balanced | Ensure that the relative size of the strata is reflected in the sample |
+
+Sampling strategies to increase representativeness
+:::
+
+Together, large randomly selected and balanced stratified samples set the benchmark for sampling. However, hitting this ideal is not always feasible. There are situations where sizeable samples are not accessible. Alternatively, there may be instances where the population or its strata are not well understood. In such scenarios, researchers have to work with the most suitable sample they can obtain given the limitations of their research project.
+
+### Corpora
+
+A sample, as just defined, of a language population is called a \index{corpus}**corpus** (*pl.* corpora). Corpora are often classified into various types. These types reflect general characteristics of the scope of the corpus sampling frame. The most common types of corpora appear in @tbl-corpus-types.
+
+::: {#tbl-corpus-types tbl-colwidths="[15, 85]" .striped}
+| Type | Sampling scope |
+|:-----|:----------------|
+| Reference | General characteristics of a language population |
+| Specialized | Specific populations, *e.g.* spoken language, academic writing, *etc.* |
+| Parallel | Directly comparable texts in different languages (*i.e.* translations) |
+| Comparable | Indirectly comparable texts in different languages or language varieties (*i.e.* similar sampling frames) |
+
+Types of corpora
+:::
+
+Of the corpus types, \index{corpora!reference}**reference corpora** are the least common and most ambitious. These resources aim to model the characteristics of a language population. \index{corpora!specialized}**Specialized corpora** aim to represent more specific populations. What specialized corpora lack in breadth of coverage, they make up for in depth of coverage by providing a more targeted representation of specific language populations. \index{corpora!parallel}**Parallel** and \index{corpora!comparable}**comparable corpora** are both types of specialized corpora which aim to model different languages or different language varieties for direct or indirect comparison, respectively.
+
+
+::: {.callout}
+**{{< fa lightbulb >}} Consider this**
+
+::: {layout="[50, -3, 50]" layout-valign="top" layout-align="left"}
+
+::: {#first}
+The 'Standard Sample of Present-Day American English' (known commonly as the Brown Corpus) is widely recognized as one of the first large, machine-readable corpora. Compiled by @Kucera1967, the corpus is comprised of 1,014,312 words from edited English prose published in the United States in 1961.
+\
+\
+Given the sampling frame and the strata and balance for this corpus visualized in @fig-ud-brown-distribution, can you determine what language population this corpus aims to represent? What types of research might this corpus support or not support?
+:::
+
+::: {#second}
+```{r}
+#| label: fig-ud-brown-distribution
+#| fig-cap: "Overview of the sampling characteristics of the Brown Corpus."
+#| fig-height: 3
+#| fig-alt: "The Brown Corpus sampling frame, strata, and balance is shown as a bar plot comprised of 15 main categories (strata) of text on the y-axis. The relative size of each category is shown as a percentage of the total number of words in the corpus on the x-axis (balance). The largest categories are 'Fiction' (23%) and 'Press' (18%) and the smallest categories are 'Religion' (0.3%) and 'Learned' (0.2%)."
+
+brown <- read_csv("data/ud-brown.csv")
+
+brown_categories_docs <-
+  brown |>
+  distinct(category, category_description, document_id) |>
+  separate(category_description,
+    into = c("main_category", "sub_category"),
+    sep = ": ",
+    fill = "right"
+  )
+
+brown_categories_docs |>
+  count(main_category) |>
+  ggplot(aes(y = reorder(main_category, n), x = n / sum(n))) +
+  geom_col() +
+  scale_x_continuous(labels = scales::percent) +
+  labs(
+    x = "Percentage of the corpus (balance)",
+    y = "Main category (strata)"
+  )
+```
+:::
+
+:::
+
+:::
+
+In text analysis, corpora are the raw materials of research. The aim of the quantitative text researcher is to select the corpus, or corpora, which best align with the purpose of the research. For example, a reference corpus such as the American National Corpus may be better suited to address a question dealing with the way American English works, but this general resource may lack detail in certain areas, such as medical language, that may be vital for a research project aimed at understanding changes in medical terminology. Furthermore, a researcher studying spoken language might collect a corpus of transcribed conversations from a particular community or region, such as the Santa Barbara Corpus of Spoken American English. While this would not include every possible spoken utterance produced by members of that group, it could be considered a representative sample of the population of speech in that context.
+
+### Other considerations
+
+In preparing and conducting research using corpora, the most primary concerns is aligning research goals with the corpus resource. However, there are other, more practical, considerations to keep in mind.
+
+#### Access
+
+Ensuring access both in terms of physical access to the data and legal access to the data should not be overlooked in the design and execution of a project. Simply put, without access to the data, research cannot proceed. It is better to consider access early in the research process to avoid delays and complications later on.
+
+The medium to acquire corpus data most used in contemporary quantitative research is the internet. Although a general search query can lead you to corpus data, there are a few primary sources of corpora you should be aware of, summarized in @tbl-corpus-sources.
+
+::: {#tbl-corpus-sources tbl-colwidths="[25, 45, 30]" .striped}
+| Source | Description | Examples |
+|:-------|:------------|:---------|
+| Language repositories | Repositories that specialize in language data | [Language Data Consortium](https://www.ldc.upenn.edu/), [TalkBank](http://talkbank.org/) |
+| Data sharing platforms | Platforms that enable researchers to securely store, manage, and share data | [GitHub](https://github.com), [Zenodo](https://zenodo.org), [OSF](https://osf.io/) |
+| Developed corpora | Corpora prepared by researchers for research purposes | APIs, web scraping |
+
+Sources of corpus data
+
+:::
+
+
+It is always advisable to start looking for data in a **language repository**. The advantage of beginning your data search in repositories is that a repository, especially those geared towards the linguistic community, will make identifying language corpora faster than through a general web search. Furthermore, repositories often require certain standards for corpus format and documentation for publication.
+
+::: {.callout .halfsize}
+**{{< fa regular lightbulb >}} Consider this**
+
+Explore some of the resources listed on the [qtalrkit companion site](https://qtalr.github.io/qtalrkit/articles/guide-4.html) and consider their sampling frames. Can you think of a research question or questions that this resource may be well-suited to support research into? What types of questions would be less-than-adequate for a given resource?
+:::
+
+As part of a general movement towards reproducibility, more corpora are available on \index{data!sharing platforms}**data sharing platforms**. These platforms enable researchers to securely store, manage, and share data with others. Support is provided for various types of data, including documents and code, and as such they are a good place to look as they often include reproducible research projects as well.
+
+Finally, if satisfactory data cannot be found in a repository or data sharing platform, researchers may need to develop their own corpus. There are two primary ways to attain language data from the web. The first is through an **Application Programming Interface** (API). APIs are, as the title suggests, programming interfaces which allow access, under certain conditions, to information that a website or database accessible via the web contains.
+
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
+
+The process of corpus development is a topic in and of itself. For a more in-depth discussion of the process, see @Adel2020.
+:::
+
+The second, more involved, way to acquire data from the web is is through the process of web scraping. **Web scraping** is the process of harvesting data from the public-facing web. Language texts may be found on sites as uploaded files, such as pdf or doc (Word) documents, or found displayed as the primary text of a site. Given the wide variety of documents uploaded and language behavior recorded daily on news sites, blogs and the like, compiling a corpus has never been easier. Having said that, how the data is structured and how much data needs to be retrieved can pose practical obstacles to collecting data from the web, particularly if the approach is to acquire the data by manually instead of automating the task.
+
+
+Beyond physical access to the data, legal access is also a consideration. Just because data is available on the web does not mean it is free to use. Repositories, APIs, and individual data resources often have licensing agreements and terms of use, ranging from public domain to proprietary licenses. Respecting intellectual property rights is crucial when working with corpus data. Violating these rights can lead to legal and ethical issues, including lawsuits, fines, and damage to one's professional reputation. To avoid these problems, researchers must ensure they have the necessary permissions to use copyrighted works in their research.
+
+#### Formats
+
+Whether you are using a published corpus or developing your own, it is important to understand how the data you want to work with is formatted so you can ensure that you are prepared to conduct the subsequent processing steps. When referring to the format of a corpus, this includes the folder and file structure, the file types, and how file content is encoded electronically. Yet, the most important characteristic, especially for language-based data, is the internal structure of the files themselves. With this in mind less discuss the difference between unstructured, semi-structured, and structured data.
+
+A corpus may include various types of linguistic (*e.g.* part of speech, syntactic structure, named entities, *etc.*) or non-linguistic (*e.g.* source, dates, speaker information, *etc.*) attributes. These attributes are known as **metadata**, or data about data. As a general rule, files which include more metadata tend to be more internally structured. Internal file structure refers to the degree to which the content is easy to query and analyze by a computer. Let's review characteristics of the three main types of file structure types and associate common file extensions that files in each have.
+
+**Unstructured data** is data which does not have a machine-readable internal structure. This is the case for plain text files (*.txt*), which are simply a sequence of characters. For example, in @exm-masc-text we see a snippet of a plain text file from the the Manually Annotated Sub-Corpus of American English (MASC) [@Ide2008]:
+
+::: {#exm-masc-text}
+MASC plain text
+
+```xml
+Sound is a vibration. Sound travels as a mechanical wave through a medium, and in space, there is no
+medium. So when my shuttle malfunctioned and the airlocks didn't keep the air in, I heard nothing. After the
+first whoosh of the air being sucked away, there was lightning, but no thunder. Eyes bulging in
+panic, but no screams. Quiet and peaceful, right? Such a relief to never again hear my crewmate Jesse natter
+about his girl back on Earth and that all-expenses-paid vacation-for-two she won last time he was on leave. I
+swore, if I ever had to see a photo of him in a skimpy bathing suit again, giving the camera a cheesy thumbs-up
+from a lounge chair on one of those white sandy beaches, I'd kiss a monkey. Metaphorically, of course.
+```
+:::
+
+Other examples of files which often contain unstructured data include *.pdf* and *.docx* files. While these file types may contain data which appears structured to the human eye, the structure is not designed to be machine-readable. As such the data would typically be read into R as a vector of **character strings**. It is possible to perform only the most rudimentary queries on this type of data, such as string matches. For anything more informative, it is necessary to further process this data, as we will see in @sec-ud-organization and @sec-ud-transformation.
+
+On the other end of the spectrum, **structured data** is data which conforms to a tabular format in which elements in tables and relationships between tables are defined. This makes querying and analyzing easy and efficient. Relational databases (*e.g.* MySQL, PostgreSQL, *etc*.) are designed to store and query structured data. The data frame object in R is also a structured data format. In each case, the data is stored in a tabular format in which each row represents a single observation and each column represents a single attribute whose values are of the same type.
+
+In @exm-masc-df we see an example of an R data frame object which overlaps with the language in the plain text file in @exm-masc-text:
+
+::: {#exm-masc-df}
+MASC data frame
+
+```xml
+   title             date modality domain          ref_num word       lemma      pos
+   <chr>            <dbl> <fct>    <chr>             <int> <chr>      <chr>      <chr>
+ 1 Hotel California  2008 Writing  General Fiction       1 Sound      sound      NNP
+ 2 Hotel California  2008 Writing  General Fiction       2 is         be         VBZ
+ 3 Hotel California  2008 Writing  General Fiction       3 a          a          DT
+ 4 Hotel California  2008 Writing  General Fiction       4 vibration  vibration  NN
+ 5 Hotel California  2008 Writing  General Fiction       5 .          .          .
+ 6 Hotel California  2008 Writing  General Fiction       6 Sound      sound      NNP
+ 7 Hotel California  2008 Writing  General Fiction       7 travels    travel     VBZ
+ 8 Hotel California  2008 Writing  General Fiction       8 as         as         IN
+ 9 Hotel California  2008 Writing  General Fiction       9 a          a          DT
+10 Hotel California  2008 Writing  General Fiction      10 mechanical mechanical JJ
+```
+:::
+
+Here we see that the data is stored in a tabular format with each row representing a single observation (`word`) and each column representing a single attribute. This tabular structure supports the increased number of metadata attributes. Internally, R applies a schema to ensure the values in each column are of the same type (*e.g.* `<chr>`, `<dbl>`, `<fct>`, *etc.*). This structured format is designed to be easy to query and analyze and as such is the primary format for data analysis in R.
+
+**Semi-structured data** falls between unstructured and structured data. This covers a wide range of file structuring approaches. For example, a otherwise plain text file with part-of-speech tags appended to each word is minimally structured (@exm-masc-pos).
+
+::: {#exm-masc-pos}
+MASC plain text with part-of-speech tags
+
+```xml
+Sound/NNP is/VBZ a/DT vibration/NN ./. Sound/NNP travels/VBZ as/IN a/DT mechanical/JJ wave/NN through/IN a/DT medium/NN ,/, and/CC in/IN space/NN ,/, there/EX is/VBZ no/DT medium/NN ./. So/RB when/WRB my/PRP$ shuttle/NN malfunctioned/JJ and/CC the/DT airlocks/NNS did/VBD n't/RB keep/VB the/DT air/NN in/IN ,/, I/PRP heard/VBD nothing/NN ./. After/IN the/DT
+```
+:::
+
+Towards the more structured end of semi-structured data, many file formats including *.xml* and *.json* contain highly structured, hierarchical data. For example, in @exm-masc-xml shows a snippet from a *.xml* file from the MASC corpus.
+
+::: {#exm-masc-xml}
+MASC XML
+
+```xml
+<a xml:id="penn-N264215" label="tok" ref="penn-n7345" as="anc">
+  <fs>
+    <f name="base" value="sound"/>
+    <f name="msd" value="NNP"/>
+    <f name="string" value="Sound"/>
+  </fs>
+</a>
+<node xml:id="penn-n7346">
+  <link targets="seg-r13152"/>
+</node>
+<a xml:id="penn-N264243" label="tok" ref="penn-n7346" as="anc">
+  <fs>
+    <f name="string" value="is"/>
+    <f name="msd" value="VBZ"/>
+    <f name="base" value="be"/>
+  </fs>
+</a>
+<node xml:id="penn-n7347">
+  <link targets="seg-r13154"/>
+</node>
+```
+:::
+
+The format of semi-structured data is often influenced by characteristics of the data or reflect an author's individual preferences. It is sometimes the case that data will be semi-structured in a less-standard format. For example, the SWDA corpus includes a *.utt* file extension for files which contain utterances annotated with dialogue act tags.
+
+::: {#exm-swda-utt}
+SWDA *.utt* file
+
+```xml
+o          A.1 utt1: Okay.  /
+qw          A.1 utt2: {D So, }
+
+qy^d          B.2 utt1: [ [ I guess, +
+
++          A.3 utt1: What kind of experience [ do you, + do you ] have, then with child care? /
+
++          B.4 utt1: I think, ] + {F uh, } I wonder ] if that worked. /
+
+qy          A.5 utt1: Does it say something? /
+```
+:::
+
+Whether standard or not, semi-structured data is often designed to be machine-readable. As with unstructured data, the ultimate goal is to convert the data into a structured format and augment the data where necessary to prepare it for a particular research analysis.
+
+## Information
+
+Identifying an adequate corpus resource, in terms of content, access, and formatting, for the target research question is the first step in moving a quantitative text research project forward. The next step is to select the components or characteristics of this resource that are relevant for the research and then move to organize the attributes of this data into a more informative format. This is the process of converting corpus data into a \index{dataset}**dataset** --a tabular representation of particular attributes of the data as the basis for generating information. Once the data represented as dataset, it is often manipulated and transformed adjusting and augmenting the data such that it better aligns with the research question and the target analytical approach.
+
+### Organization {#sec-ud-organization}
+
+Data alone is not informative. Only through explicit organization of the data in a way that makes relationships and meaning explicit does data become information. In this form, our data is called a dataset. This is a particularly salient hurdle in text analysis research. Many textual sources are unstructured or semi-structured. This means relationships that will be used in the analysis have yet to be purposefully drawn and organized as a dataset.
+
+#### Tidy Data {#sec-ud-tidy-data}
+
+The selection of the attributes from a corpus and the juxtaposition of these attributes in a relational format, or dataset, that converts data into information is known as **data curation**. The process of data curation minimally involves deriving a base dataset, or *curated dataset*, which establishes the main informational associations according to philosophical approach outlined by @Wickham2014a.
+
+In this work, a **tidy dataset** refers both to the structural (physical) and informational (semantic) organization of the dataset. Physically, a tidy dataset is a tabular data structure, illustrated in @fig-ud-tidy-format-image, where each *row* is an observation and each *column* is a variable that contains measures of a feature or attribute of each observation. Each cell where a given row-column intersect contains a *value* which is a particular attribute of a particular observation for the particular observation-feature pair also known as a *data point*.
+
+```{r}
+#| label: fig-ud-tidy-format-image
+#| fig-cap: 'Visual summary of the tidy format.'
+
+knitr::include_graphics("figures/ud-tidy.drawio.png")
+```
+
+In terms of semantics, columns and rows both contribute to the informational value of the dataset. Let's start with columns. In a tidy dataset, each column is a variable, an attribute that can take on a number of values. Although variables vary in terms of values, they do not in type. A variable is of one and only one informational type. Statistically speaking, informational types are defined as **levels of measurement**, a classification system used to semantically distiguish between types of variables. There are four levels (or types) in this system: nominal, ordinal, interval, and ratio.
+
+In practice, however, text analysis researchers often group these levels into three main informational types: categorical, ordinal, and numeric [@Gries2021a]. What do these informational types represent? **Categorical data** is for labeled data or classes that answer the question "what?" **Ordinal data** is categorical data with rank order that answers the question "what order?" **Numeric data** is ordinal data with equal intervals between values that answers the question "how much or how many?"
+
+Let's look at an example of a tidy dataset. Using the criteria just described, let's see if we can identify the informational values (categorical, ordinal, or numeric) of the variables that appear in a snippet from the MASC corpus in dataset form in @tbl-ud-info-values-masc.
+
+```{r}
+#| label: tbl-ud-info-values-masc
+#| tbl-cap: "MASC dataset variables."
+
+masc_exm <-
+  read_rds("data/ud-formats_masc_df.rds") # read in MASC example dataset
+
+masc_exm |>
+  slice_head(n = 10) |> # select 10 rows
+  mutate(num_letters = nchar(word)) |> # add num_letters column
+  select(title, modality, date, ref_num, word, pos, num_letters) |> # select columns
+  tt(width = 1) # print as table
+```
+
+We have seven variables listed as headers for each of the columns. We could go one-by-one left-to-right but let's take another tack. Instead, let's identify all those variables that cannot be numeric --these are all the non-numeral variables: `title`, `modality`, `word`, and `pos`. The question to ask of these variables is whether they represent an order or rank. Since titles, modalities, words, and parts-of-speech are not ordered values, they are all categorical.
+
+Now in relation to `date`, `ref_num`, and `num_letters`. All three are numerals, so they could be numeric. But they could also be numeral representations of ordinal data. Before we can move forward, we need to make sure we understand what each variable means and how it is measured, or **operationalized**. The variable name and the values can be helpful in this respect. `date` is what it sounds like, a date, and is operationalized as a year in the Gregorian calendar. And `num_letters` seems quite descriptive as well, number of letters, appearing as a letter count. But in some cases it may be opaque as to what is being measured by the variable name alone, for example `ref_num`,  and one will have to refer to the dataset documentation. In this case `ref_num` is a reference number operationalized as a unique identifier for each word per document in the corpus.
+
+With this in mind, let's return to the question of whether `date`, `ref_num`, and `num_letters` are numeric or ordinal. Starting with the trickiest one, `date`, we can ask the question to identify numeric data: "how much or how many?". In the case of `date`, the answer is neither. A date is a point in time, not a quantity. So `date` is not numeric. But it does provide information about order. Hence, `date` is ordinal. `ref_num` is also ordinal because the question "what order?" can be asked of it. Finally, `num_letters` is numeric because it answers the question "how many?".
+
+Let's turn to the second semantic value of a tidy dataset. In a tidy dataset, each row is an observation. But an observation of what? This depends on what the unit of observation is. That sounds circular, but its not. The **unit of observation** is simply the primary entity that is being observed or measured [@Sedgwick2015]. Even without context, it can often be identified in a dataset by looking at the level of specificity of the variable values and asking what each variable describes. When one variable appears to be the most individualized and other variables appear to describe that variable, then the most individualized variable is likely the unit of observation of the dataset, *i.e.* the meaning of each observation.
+
+Applying these strategies to the Table in [-@tbl-ud-info-values-masc], we can see that each observation at its core is a word. We see that the values of each observation are the attributes of each word. `word` is the most individualized variable and the `pos` (part-of-speech), `num_letters`, and `ref_num` all describe the word.
+
+The other variables `title`, `modality`, and `date` are not direct attributes of the word. Instead, they are attributes of the document in which the word appears. Together, however, they all provide information about the word.
+
+::: {.callout .halfsize}
+**{{< fa regular lightbulb >}} Consider this**
+
+Data can be organized in many ways. It is important to make clear that data in tabular format in itself does not constitute a dataset, in the tidy sense we will be using. Can you think of examples of tabular information that would not be in a tidy format? What would be the implications of this for data analysis?
+:::
+
+As we round out this section on data organization, it is important to stress that the purpose of curation is to represent the corpus data in an informative, tidy format. A curated dataset serves as a reference point making relationships explicit, enabling more efficient querying, and paving the way for further processing before analysis. In the subsequent section, we will highlight common approaches to modifying the curated dataset, either row-wise or column-wise, to make it more amenable to the particular aims of a given analysis leading to one or more *transformed datasets*.
+
+### Transformation {#sec-ud-transformation}
+
+At this point have introduced the first step towards creating a dataset ready for analysis, data curation. However, a curated dataset is rarely the final organizational step before proceeding to statistical analysis. Many times, if not always, the curated dataset requires **transformation** to derive or generate new data for the dataset. This process may incur row-wise (observation) or column-wise (variable) level changes, as illustrated in @fig-ud-transformations.
+
+```{r}
+#| label: fig-ud-transformations
+#| fig-cap: "Visualization of row-wise and column-wise transformation operations on a dataset."
+
+knitr::include_graphics("figures/ud-transformations.drawio.png")
+```
+
+The results build on and manipulate the curated dataset to produce a *transformed dataset*. While there is typically one curated dataset that serves as the base organizational dataset, there may be multiple transformed datasets, each aligning with the informational needs of specific analyses in the research project.
+
+In what follows, we will group common transformation processes into two purpose-based groupings: preparation and enrichment. The purpose of preparation transformations is to clean, standardize, and derive the key attributes of the dataset on which further processing will depend. Enrichment transformations, on the other hand, are designed to add new attributes to the dataset. These attributes may be derived from the existing attributes or may be integrated from other datasets. Together, the goal of these transformations is to make the dataset more informative and more amenable to the particular aims of a given analysis.
+
+#### Preparation
+
+Common preparation transformations include text normalization and text tokenization. **Text normalization** is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.
+
+Let's take a toy dataset, in @tbl-ud-text-dataset, as an example starting point. In this dataset, we have three variables, `text_id`, `sent_id`, and `sentence`. It has five observations.
+
+```{r}
+#| label: tbl-ud-text-dataset
+#| tbl-cap: "A toy dataset with three variables, `text_id`, `sent_id`, and `sentence`."
+#| tbl-colwidths: [10, 10, 80]
+
+library(tidytext)
+
+text_df <- tibble::tribble(
+  ~text_id, ~text,
+  "1", "It's a beautiful day in the US, and our group decided to visit the famous Grand Canyon. As we reached the destination, Jane said, \"I can't believe we're finally here!\" The breathtaking view left us speechless; indeed, it was a sight to behold. During our trip, we encountered tourists from different countries, sharing stories and laughter. For all of us, this experience will be cherished forever."
+) |>
+unnest_tokens(sentence, text, token = "sentences", to_lower = FALSE) |>
+mutate(sent_id = row_number()) |>
+select(text_id, sent_id, sentence)
+
+text_df |>
+  tt(width = 1)
+```
+
+The types of transformations we apply will depend on the specific needs of the project, but can include those found in @tbl-ud-text-normalization.
+
+| Task name                                     | Relevant example                                                 | Typical purpose                                                                                          |
+|-----------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| Lowercasing                                   | `"Text"` to `"text"`                                             | Minimizing case sensitivity in subsequent analysis                                                       |
+| Removal of Punctuation and Special Characters | `"Hello, World!"` to `"Hello World"`                             | Removing non-alphanumeric characters that may not carry semantic value                                   |
+| Adjustment of Forms                           | `"colour"` to `"color"`, `"it's"` to `"it is"`, `"1"` to `"one"` | Standardizing variations in spelling, contractions, and numeric forms to a common format                 |
+
+: Common text normalization tasks {#tbl-ud-text-normalization}{tbl-colwidths="[25, 30, 45]" .sm .striped}
+
+These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun).
+
+<!-- [ ] Or add token vs. type here from exploration? -->
+
+**Text tokenization** involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable.
+
+Text variables can be tokenized at any linguistic level, to the extent we can operationalize the linguistic unit. The operationalized linguistic unit is known as a **term**. For example, terms can be characters, words, sentences, *etc*. When we refer to the individual units of term, we use the expression **tokens**. Another key term to introduce is **types**, which refers to the unique tokens in a term variable. For example, in the sentence "The cat sat on the mat", there are five types and six tokens --as "the" is repeated twice. There will always be at least as many tokens as types, but there can be many more tokens than types for any given term variable.
+
+The choice of tokenization level often reflects the unit of observation of the dataset. For example, if the unit of observation is a word, then the tokens will be words. If the unit of observation is a sentence, then tokens will be sentences.
+
+Sequential groupings of characters and words are also common terms used in text analysis. These are known as **n-grams**, where *n* is the number of words or characters in the term. For example, a word bigram is a sequence of two words, and a character trigram is a sequence of three characters.
+
+In @tbl-ud-tokenization, we see examples of tokenization at word and character levels.
+
+```{r}
+#| label: tbl-ud-tokenization
+#| tbl-cap: "Examples of tokenization at word and character levels."
+#| tbl-subcap:
+#|  - "Word tokenization"
+#|  - "Word bigram tokenization"
+#|  - "Character trigram tokenization"
+#| layout-ncol: 3
+
+text_df |>
+  unnest_tokens(word, sentence, token = "words") |>
+  select(text_id, sent_id, word) |>
+  slice_head(n = 10) |>
+  tt(width = 1)
+
+text_df |>
+  unnest_tokens(bigram, sentence, token = "ngrams", n = 2) |>
+  select(text_id, sent_id, bigram) |>
+  slice_head(n = 10) |>
+  tt(width = 1)
+
+text_df |>
+  unnest_tokens(trigram, sentence, token = "character_shingles", n = 3) |>
+  select(text_id, sent_id, trigram) |>
+  slice_head(n = 10) |>
+  tt(width = 1)
+```
+
+At its core, tokenization is the process which enables the quantitative analysis of text. Choosing the right tokenization level is crucial for the success of the analysis.
+
+#### Enrichment
+
+Let's now turn to transformations that augment the variables of the dataset. Common enrichment transformations include recoding, generation, and integration of observations and/ or variables.
+
+**Recoding** is the process of transforming the values of one or more variables into new values which are more amenable to analysis. This is a column-wise operation which can be applied to categorical or numeric variables alike.
+
+The aim is to simplify complex variables, making it easier to identify patterns and trends relevant for the research question. Say for example, we have a variable in our datataset that represents the part-of-speech (POS) of each word token in the text. The measure is a POS tag from the Penn Treebank tagset [@Marcus1993]. This tagset makes twelve major and 45 minor grammatical class distinctions. In an analysis that aims to explore only major class distinctions, it would be useful to recode the POS variable into major classes only (*i.e.* noun, pronoun, adjective, verb, adverb, *etc.*) to facilitate queries, summaries, and visualizations.
+
+Along these lines, the surface forms of words can be recoded to their lemmatized or stemmed forms. **Stemming** is the process of reducing inflected words to their word stem, base, or root form. **Lemmatization** is the process of reducing inflected words to their dictionary form, or lemma.
+
+In @tbl-ud-recode-categorical-lemma, we see an example of recoding surface forms of words to their lemmatized forms.
+
+```{r}
+#| label: tbl-ud-recode-categorical-lemma
+#| tbl-cap: "A toy dataset illustrating recoding of surface forms of words to their lemmatized forms."
+
+text_df |>
+  unnest_tokens(word, sentence) |>
+  mutate(lemma = textstem::lemmatize_words(word)) |>
+  filter(sent_id == 2) |>
+  mutate(word = str_split(word, "'")) |>
+  unnest(word) |>
+  mutate(word = case_when(
+    word == "t" ~ "not",
+    word == "re" ~ "are",
+    TRUE ~ word
+  )) |>
+  mutate(lemma = case_when(
+    word == "can" ~ "can",
+    word == "we" ~ "we",
+    word == "not" ~ "not",
+    word == "are" ~ "be",
+    TRUE ~ lemma
+  )) |>
+  tt(width = 1)
+```
+
+::: {.callout .halfsize}
+**{{< fa regular file-alt >}} Case study**
+
+Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus [@Kostic2003]. @Baayen2006 found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.
+:::
+
+Recoding transformations can be useful for simplifying complex variables, making it easier to identify patterns, as we see in @tbl-ud-recode-categorical-lemma. However, it is important to note that recoding can also lead to loss of information. For example, recoding a variable with many levels into a binary variable can lead to loss of information about the original levels. It is important to consider the trade-offs of recoding and to ensure that the recoding aligns with the research question.
+
+Furthermore, it is important to note recoding can be used to create more nuanced variables instead of more simplified. This draws on the combination of level information from multiple variables creating a variable that reflects a more complex relationship that was previously implicit in the dataset.
+
+**Generation** is the process of creating new variables from existing variables, and as such it is a column-wise operation. Generation can include applying calculations or extracting relevant information from existing variables or enhancing text variables with linguistic annotation. Simplifying a bit, generation helps make implicit attributes explicit.
+
+
+Let's highlight a some common calculation and extraction examples that generate variables. First, let's look at the calculation of measures. In text analysis, measures are often used to describe the properties of a document or linguistic unit. For example, the number of words in a corpus document, the lengths of sentences, the number of clauses in a sentence, *etc.*. In turn, these measures can be used to calculate other measures, such as lexical diversity or syntactic complexity measures.
+
+In terms of extraction, the goal is to distill relevant information from existing variables. For example, extracting the year from a date variable, or extracting the first name from a full name variable. In text analysis, extraction is often used to extract information from text variables. Say we have a dataset with a variable containing conversation utterances. We may want to extract some characteristic from those utterances and capture their occurrence in a new variable.
+
+But what if we want to extract linguistic information from a text variable that is not explicitly present in the text? This is where linguistic annotation comes in. Linguistic annotation is the process of enriching text with linguistic information, such as part-of-speech tags, morphological features, syntactic structure, *etc.*. This can be done manually by linguist coders and/ or done using natural language processing (NLP) tools, such as part-of-speech taggers, parsers, *etc.*.
+
+```{r}
+#| label: functions-load-udpipe-model
+
+load_model_udpipe <- function(model_lang) {
+  cleanNLP::cnlp_init_udpipe(model_lang) # to download the model, if not downloaded
+  base_path <- system.file("extdata", package = "cleanNLP") # get the base path
+  model_name <- # extract the model_name
+    base_path |> # extract the base path
+    dir() |>
+    stringr::str_subset(pattern = paste0("^", model_lang))
+
+  model <-
+    udpipe::udpipe_load_model(file = file.path(base_path, model_name, fsep = "/"))
+
+  return(model)
+}
+```
+
+To illustrate the process of linguistic annotation, we will start with the dataset from @tbl-ud-text-dataset. Applying a pre-trained model from the [Universal Dependencies (UD)](https://universaldependencies.org/)[^ud-ud] project, we can generate linguistic annotation for each word in the `sentence` variable.
+
+[^ud-ud]: The Universal Dependency project is an effort to develop cross-linguistically consistent treebank annotation for many languages. The project has developed a set of annotation guidelines and a set of tools for generating linguistic annotation. The project has also developed a set of pre-trained models for many languages.
+
+
+```{r}
+#| label: tbl-ud-generate-annotation
+#| tbl-cap: 'Automatic linguistic annotation for grammatical category and syntactic structure for an example English sentence from the MASC.'
+#| tbl-colwidths: [7, 7, 5, 61, 20]
+
+eng_model <- load_model_udpipe("english-ewt")
+
+annotation <-
+  text_df |>
+  dplyr::filter(text_id == "1" & sent_id == 1) |>
+  cleanNLP::cnlp_annotate(text_name = "sentence", doc_name = "text_id")
+
+text_annotation <-
+  left_join(annotation$document, annotation$token) |>
+  select(token_id = tid, token, pos = xpos, features = feats, syn_relation = relation)
+
+text_annotation |>
+  tt(width = 1)
+```
+
+The annotated dataset now includes the key variables `pos` (Penn treebank tags), `features` (morphological features), and `syn_relation`. The results of this process can then be further transformed as need be to fit the needs of the analysis. The results of this process enables more direct access during analysis to features that were hidden or otherwise difficult to access.
+
+A word of caution: automated linguistic annotation offers rapid access to abundant and highly dependable linguistic data for numerous languages. However, linguistic annotation tools are not infallible. They are tools developed by training computational algorithms to identify patterns in previously annotated and verified datasets, resulting in a language model. This model is then employed to predict linguistic annotations for new language data (as seen in @tbl-ud-generate-annotation). The accuracy of the linguistic annotation heavily relies on the congruence between the language sampling frame of the trained data and that of the dataset to be automatically annotated.
+
+**Integration** is a transformation step which can be row-wise or column-wise. Row-wise integration is the process of combining datasets by appending observations from one dataset to another. Column-wise integration is the process of combining datasets by appending variables from one dataset to another.
+
+```{r}
+#| label: ud-integrate-dataset
+
+text_tbl <- tibble::tribble(
+  ~participant_id, ~text_id, ~modality, ~text,
+  "P1", "T1", "Written", "Technology has revolutionized our lives in many ways. It has made communication easier, faster, and more efficient.",
+  "P2", "T2", "Spoken", "Hello, my name is X. I am a software engineer working at XYZ company.",
+  "P3", "T3", "Written", "Climate change is a pressing issue that affects everyone on Earth. We must take immediate action to reduce our carbon footprint.",
+  "P4", "T4", "Spoken", "Hi, I'm X, and I work as a project manager. My main responsibility is to ensure that projects are completed on time and within budget.",
+  "P5", "T5", "Written", "Education is the key to personal and societal growth. Investing in quality education will lead to a brighter future for all.",
+  "P6", "T6", "Spoken", "Hi, my name is X, and I'm a teacher. I teach English at a local high school."
+)
+
+written_tbl <-
+  text_tbl |>
+  dplyr::filter(modality == "Written")
+
+spoken_tbl <-
+  text_tbl |>
+  dplyr::filter(modality == "Spoken")
+```
+
+To integrate in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as **concatenating datasets**. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the same variables and variable types is not the same has having the same values.
+
+Take, for example, a case when a corpus resource contains data for two populations. In the course of curating and transforming the datasets, it may make more sense to work with the datasets separately. However, when it comes time to analyze the data, it may be more convenient to work with the datasets as a single dataset. In this case, the datasets can be concatenated to create a single dataset.
+
+To illustate, consider the toy datasets in @tbl-ud-merge-dataset-written and @tbl-ud-merge-dataset-spoken.
+
+```{r}
+#| label: tbl-ud-merge-dataset-written
+#| tbl-cap: "Toy dataset of written text data."
+#| tbl-colwidths: [15, 15, 15, 55]
+
+written_tbl |>
+  tt(width = 1)
+```
+
+```{r}
+#| label: tbl-ud-merge-dataset-spoken
+#| tbl-cap: "Toy dataset of spoken text data."
+#| tbl-colwidths: [15, 15, 15, 55]
+
+spoken_tbl |>
+  tt(width = 1)
+```
+
+These datasets, in @tbl-ud-merge-dataset-written and @tbl-ud-merge-dataset-spoken, contain the same variables and variable types, but different observations --one in which the sample contains written language and the other spoken. Conveniently, they can be concatenated to create a single dataset that contains all of the observations, as seen in @tbl-ud-merge-dataset-concat.
+
+```{r}
+#| label: tbl-ud-merge-dataset-concat
+#| tbl-cap: "Toy dataset of written and spoken text data concatenated."
+#| tbl-colwidths: [15, 15, 15, 55]
+
+concat_tbl <-
+  bind_rows(written_tbl, spoken_tbl)
+
+concat_tbl |>
+  tt(width = 1)
+```
+
+Integrating datasets can be performed in a column-wise manner as well. In this process, the datasets need not have the exact same variables and variable types, rather it is required that the datasets share a common variable of the same informational type that can be used to index the datasets. This process is often referred to as **joining datasets**.
+
+Corpus resources often include metadata in stand-off annotation format. That is, the metadata is not embedded in the corpus files, but rather is stored in a separate file. The metatdata and corpus files will share a common variable  which is used to join the metadata with the corpus files.
+
+To exemplify, here's another toy dataset that shares the `participant_id` index with the previous dataset in @tbl-ud-merge-dataset-concat and includes the variables `eng_native`, `age`, and `gender`:
+
+```{r}
+#| label: tbl-ud-merge-vars-participant
+#| tbl-cap: "Toy dataset of participant data with a shared variable `participant_id` to index the datasets."
+
+participant_tbl <- tibble::tribble(
+  ~participant_id, ~eng_native, ~age, ~gender,
+  "P1", "Yes", 28, "M",
+  "P2", "No", 35, "M",
+  "P3", "Yes", 42, "F",
+  "P4", "No", 26, "F",
+  "P5", "Yes", 31, "M",
+  "P6", "No", 39, "F"
+)
+
+participant_tbl |>
+  tt(width = 1)
+```
+
+This dataset provides additional information about each participant, such as their English native speaker status, age, and gender.
+
+Since the two datasets share the `participant_id` variable, we can merge them to create a new dataset that combines the information from both datasets, as we see in @tbl-ud-merge-join.
+
+```{r}
+#| label: tbl-ud-merge-join
+#| tbl-cap: 'Joining variables from two datasets based on a shared index variable.'
+#| tbl-colwidths: [10, 10, 10, 60, 10, 10, 10]
+
+# Inner join text_tbl and participant_tbl based on participant_id
+text_participant_tbl <-
+  inner_join(concat_tbl, participant_tbl, by = "participant_id")
+
+# Show results
+text_participant_tbl |>
+  tt(width = 1)
+```
+
+Joining datasets is a powerful tool for enriching a dataset with additional column-wise information. It is important to note that integrating datasets can also remove information in a row-wise manner. For example, when merging two datasets with a shared variable, it is possible to remove observations that do not have a match one of the two datasets. This process effectively filters out observations not shared between the two datasets. On the other hand, an anti-join explicitly removes observations that are shared between the two datasets.
+
+::: {.callout}
+**{{< fa medal >}} Dive deeper**
+
+In some analyses, it may be useful to remove words with little semantic value, such as articles, prepositions, and conjunctions or words that are very common in the language. These are known as stopwords. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. Anti-joining a stopword list with a dataset of word tokens is often used to remove stopwords from the dataset.
+
+However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about approaches to identifying stopwords in @Kaur2018.
+:::
+
+---
+
+In sum, the transformation steps described here collectively aim to produce higher quality datasets that are relevant in content and structure to submit to analysis. The process may include one or more of the previous transformations but is rarely linear and is most often iterative. It is typical to do some normalization then generation, then recoding, and then return to normalizing, and so forth. This process is highly idiosyncratic given the characteristics of the curated dataset and the ultimate goal for the transformed dataset(s).
+
+## Documentation {#sec-ud-documentation}
+
+As we have seen in this chapter, acquiring corpus data and converting that data into information involves a number of conscious decisions and implementation steps. As a favor to ourselves, as researchers, and to the research community, it is crucial to document these decisions and steps. This makes it both possible to retrace our own steps and also provides a guide for future researchers that want to reproduce and/ or build on your research. A programmatic approach to quantitative research helps ensure that the implementation steps are documented and reproducible but it is also vital that the decisions that are made are documented as well. This includes data origin information for the acquired corpus data and data dictionaries for the curated and transformed datasets.
+
+### Data origin {#sec-ud-data-origin}
+
+Data acquired from corpus resources should be accompanied by information about the **data origin**. @tbl-ud-data-origin provides a list of the types of information that should be included in the data origin information.
+
+```{r}
+#| label: tbl-ud-data-origin
+#| tbl-cap: "Data origin information."
+#| tbl-colwidths: [25, 75]
+
+tibble::tribble(
+  ~Information, ~Description,
+  "Resource name", "Name of the corpus resource.",
+  "Data source", "URL, DOI, *etc.*",
+  "Data sampling frame", "Language, language variety, modality, genre, *etc.*",
+  "Data collection date(s)", "The date or date range of the data collection.",
+  "Data format", "Plain text, XML, HTML, *etc.*",
+  "Data schema", "Relationships between data elements: files, folders, *etc.*",
+  "License", "CC BY, CC BY-NC, *etc.*",
+  "Attribution", "Citation information for the data source."
+) |>
+  tt(width = 1)
+```
+
+For many corpus resources, the corpus documentation will include all or most of this information as part of the resource download or documented online. If this information is not present in the corpus resource or you compile your own, it is important to document this information yourself. This information can be documented in file, such as a plain text file or spreadsheet, that is included with the corpus resource.
+
+### Data dictionaries {#sec-ud-data-dictionaries}
+
+The process of organizing the data into a dataset, curation, and modifications to the dataset in preparation for analysis, transformation, each include a number of project-specific decisions. These decisions should be documented.
+
+On the one hand, each dataset that is created should have a **data dictionary** file. A data dictionary is a document, usually in a spreadsheet format, that describes the variables in a dataset. The key  information that should be included in a data dictionary is provided in @tbl-ud-data-dictionary.
+
+```{r}
+#| label: tbl-ud-data-dictionary
+#| tbl-cap: "Data dictionary information."
+#| tbl-colwidths: [25, 75]
+
+tibble::tribble(
+  ~Information, ~Description,
+  "Variable name", "The name of the variable as it appears in the dataset, *e.g.* `participant_id`, `modality`, *etc.*",
+  "Readable variable name", "A human-readable name for the variable, *e.g.* 'Participant ID', 'Language modality', *etc.*",
+  "Variable type", "The type of information that the variable contains, *e.g.* 'categorical', 'ordinal', *etc.*",
+  "Variable description", "A prose description expanding on the readable name and can include measurement units, allowed values, *etc.*"
+) |>
+  tt(width = 1)
+```
+
+Organizing this information in a tabular format, such as a spreadsheet, can make it easy for others to read and understand your data dictionary.
+
+::: {.callout}
+**{{< fa regular hand-point-up >}} Tip**
+
+It is conventional to work with variable names for datasets in R using the same conventions that are used for naming objects. It is a matter of taste which convention is used, but I have adopted [snake case](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html#snake_case) as my personal preference (*e.g* `ref_num`). There are also [alternatives](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html). Regardless of the convention you choose, it is good practice to be consistent.
+
+It is also of note that the variable names should be balanced for meaningfulness and brevity. This brevity is of practical concern but can be somewhat opaque. For questions into the meaning of the variable and is values consult the resource's dataset documentation.
+:::
+
+On the other hand, the data curation and transformation steps should be documented in the code that is used to create the dataset. This is one of the valuable features of a programmatic approach to quantitative research. The transparency of this documentation is enhanced by using **literate programming** strategies to intermingling prose descriptions and code the steps in the same, reproducible document.
+
+By providing a comprehensive data dictionary and using a programmatic approach to data curation and transformation, you ensure that others can easily understand and work with your dataset, facilitating collaboration and reproducibility.
+
+## Activities {.unnumbered}
+
+In the following activities, we will be tackle a common scenario in data analysis: to read, to inspect, and to write datasets. The recipe will discuss the necessary packages and functions to accomplish these tasks including `readr` and `dplyr`. The recipe will also refresh and expand on the elements of code blocks in Quarto documents such as the `label`, `echo`, `message`, and `include` options.
+
+::: {.callout}
+**{{< fa regular file-code >}} Recipe**
+
+**What**: [Reading, inspecting, and writing datasets](https://qtalr.github.io/qtalrkit/articles/recipe-2.html)\
+**How**: Read Recipe 2, complete comprehension check, and prepare for Lab 2.\
+**Why**: To use literate programming in Quarto to work with R coding strategies for reading, inspecting, and writing datasets.
+:::
+
+::: {.callout}
+**{{< fa flask >}} Lab**
+
+**What**: [Dive into datasets](https://github.com/qtalr/lab-02)\
+**How**: Clone, fork, and complete the steps in Lab 2.\
+**Why**: To read datasets from packages and from plain-text files, inspect and report characteristics of datasets, and write datasets to plain-text files.
+:::
+
+## Summary {.unnumbered}
+
+In this chapter we have focused on data and information --the first two components of DIKI Hierarchy. This process is visualized in @fig-understanding-data-vis-sum.
+
+```{r}
+#| label: fig-understanding-data-vis-sum
+#| fig-cap: 'Understanding data: visual summary'
+#| out.width: 75%
+
+knitr::include_graphics("figures/ud-diki.drawio.png")
+```
+
+First a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.
+
+Once a viable corpus is identified, then that corpus is converted into a curated dataset which adopts the tidy dataset format where each column is a variable, each row is an observation, and the intersection of columns and rows contain values. This curated dataset serves to establish the base informational relationships from which your research will stem.
+
+The curated dataset will most likely require transformations which may include  normalization, tokenization, recoding, generation, and/ or integration to enhance the usefulness of the information to analysis. A transformed dataset or set of datasets will the result from this process.
+
+Finally, documentation should be implemented at the acquisition, curation, and transformation stages of the analysis project process. The combination of data origin, data dictionary, and literate programming files establishes documentation of the data and implementation steps to ensure transparent and reproducible research.

@@ -3,7 +3,7 @@ execute:
   echo: false
 ---
 
-# Analysis {#sec-approaching-analysis}
+# Analysis {#sec-analysis-chapter}
 
 ```{r}
 #| label: setup-options
@@ -562,6 +562,7 @@ p2 <-
   ggplot(aes(x = ttr)) +
   geom_boxplot() +
   scale_x_continuous(limits = c(0.4, 1.02)) +
+  annotate("text", x = -0.38, y = 0.38, label = "Median", hjust = 0, vjust = 0) +
   geom_segment(aes(y = -0.38, yend = 0.38, x = mean(ttr), xend = mean(ttr)), linetype = "dashed", linewidth = 1) +
   labs(y = "", x = "") +
   theme(axis.text.y = element_blank())
@@ -623,7 +624,6 @@ ttr_median <-
   pull(ttr) |>
   median()
 
-
 belc_essay_tbl |>
   ggplot(aes(y = ttr)) +
   geom_boxplot() +
@@ -653,9 +653,9 @@ Stepping away from our BELC dataset, I've created simulated data that fit normal
 #| label: fig-aa-distributions
 #| fig-cap: "Mean and median for normal and skewed distributions."
 #| fig-subcap:
-#|  - "Left skewed distribution"
-#|  - "Normal distribution"
-#|  - "Right skewed distribution"
+#|  - "Left-skewed"
+#|  - "Normal"
+#|  - "Right-skewed"
 #| fig-height: 3
 #| layout-ncol: 3
 
@@ -670,9 +670,9 @@ ggplot(left_skew_data, aes(x = value)) +
   geom_function(fun = dbeta, args = list(shape1 = shape1, shape2 = shape2), color = "black", size = 1) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
-  theme(axis.text = element_blank()) +
   labs(x = "Values", y = "Density") +
-  theme_qtalr(font_size = 13)
+  theme_qtalr(font_size = 13) +
+  theme(axis.text = element_blank())
 
 # Normal distribution ----
 set.seed(123)
@@ -683,9 +683,8 @@ ggplot(norm_data, aes(x = value)) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
   labs(x = "Values", y = "Density") +
-  theme(axis.text = element_blank()) +
-  theme_qtalr(font_size = 13)
-
+  theme_qtalr(font_size = 13) +
+  theme(axis.text = element_blank())
 
 # Right skewed distribution ----
 set.seed(123)
@@ -695,9 +694,9 @@ ggplot(right_skew_data, aes(x = value)) +
   geom_function(fun = dbeta, args = list(shape1 = shape2, shape2 = shape1), color = "black", size = 1) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed", linewidth = 1) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid", linewidth = 1) +
-  theme(axis.text = element_blank()) +
   labs(x = "Values", y = "Density") +
-  theme_qtalr(font_size = 13)
+  theme_qtalr(font_size = 13) +
+  theme(axis.text = element_blank())
 
 ```
 
@@ -827,6 +826,7 @@ In @tbl-aa-belc-contingency-tables we see contingency tables for the categorical
 belc_essay_tbl |>
   tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
+  tibble() |>
   tt(width = 1, digits = 0)
 
 belc_essay_tbl |>
@@ -834,6 +834,7 @@ belc_essay_tbl |>
   adorn_totals(c("row", "col")) |>
   adorn_percentages("row") |>
   adorn_pct_formatting(digits = 2) |>
+  tibble() |>
   tt(width = 1, digits = 0)
 ```
 

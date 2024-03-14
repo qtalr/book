@@ -433,14 +433,7 @@ Another important aspect of these function is that they return data frame object
 Let's start by retrieving the utterance data for the CABNC and preview the data frame it returns using `glimpse()`.
 
 ::: {#exm-ad-get-utterances}
-<!--
-[ ] remove eval: false and store results to avoid depending on TBDBr
--->
-```{r}
-#| eval: false
-#| label: ad-get-utterances
-#| cache: true
-
+```r
 # Set corpus_name and corpus_path
 corpus_name <- "ca"
 corpus_path <- c("ca", "CABNC")
@@ -455,24 +448,48 @@ utterances <-
 # Preview the data
 glimpse(utterances)
 ```
+```{r}
+#| label: ad-get-utterances
+#| include: false
+#| eval: false
+
+# Set corpus_name and corpus_path
+corpus_name <- "ca"
+corpus_path <- c("ca", "CABNC")
+
+# Get utterance data
+utterances <-
+  getUtterances(
+    corpusName = corpus_name,
+    corpora = corpus_path
+    )
+
+# Write to disk
+dput(utterances, file = "data/ad-utterances")
+```
+
+```{r}
+#| label: ad-glimpse-utterances
+#| echo: false
+
+# Read from disk
+utterances <- dget("data/ad-utterances")
+
+# Preview the data
+glimpse(utterances)
+```
 :::
 
 <!-- Inspecting data  -->
 
-Inspecting the output from @exm-ad-get-utterances, we see that the data frame contains `format(nrow(utterances), big.mark=",")` observations and `ncol(utterances)` variables.
-
-<!-- [ ] add the 'r ...' back to the inline expressions -->
+Inspecting the output from @exm-ad-get-utterances, we see that the data frame contains `r format(nrow(utterances), big.mark=",")` observations and `r ncol(utterances)` variables.
 
 The summary provided by `glimpse()` also provides other useful information. First, we see the data type of each variable. Interestingly, the data type for each variable in the data frame is a list object. Being that a list is two-dimensional data type, like a data frame, we have two-dimensional data inside two-dimensional data. This is known as a **nested structure**. We will work with nested structures in more depth later, but for now it will suffice to say that we would like to 'unnest' these lists and reveal the list-contained vector types at the data frame level.
 
 To do this we will pass the `utterances` data frame to the, appropriately named, `unnest()` function from the `tidyr` package [@R-tidyr]. `unnest()` takes a data frame and a vector of variable names to unnest, `cols = c()`. To unnest all variables, we will use the `everything()` function from `dplyr` to select all variables at once. We will use the result to overwrite the `utterances` object with the unnested data frame.
 
 ::: {#exm-ad-unnest}
-<!--
-[ ] remove eval: false and store results to avoid depending on TBDBr
--->
 ```{r}
-#| eval: false
 #| label: ad-unnest
 
 # Unnest the data frame

@@ -333,7 +333,7 @@ The other variables `doc_id`, `modality`, and `date` are not direct attributes o
 Data can be organized in many ways. It is important to make clear that data in tabular format in itself does not constitute a dataset, in the tidy sense we will be using. Can you think of examples of tabular information that would not be in a tidy format? What would be the implications of this for data analysis?
 :::
 
-As we round out this section on data organization, it is important to stress that the purpose of curation is to represent the corpus data in an informative, tidy format. A curated dataset serves as a reference point making relationships explicit, enabling more efficient querying, and paving the way for further processing before analysis. In the subsequent section, we will highlight common approaches to modifying the curated dataset, either row-wise or column-wise, to make it more amenable to the particular aims of a given analysis leading to one or more *transformed datasets*.
+As we round out this section on data organization, it is important to stress that the purpose of curation is to represent the corpus data in an informative, tidy format. A curated dataset serves as a reference point making relationships explicit, enabling more efficient querying, and paving the way for further processing before analysis.
 
 ### Transformation {#sec-ud-transformation}
 
@@ -350,13 +350,13 @@ The results build on and manipulate the curated dataset to produce a *transforme
 
 <!-- Rethink this section below -->
 
-In what follows, we will group common transformation processes into two purpose-based groupings: preparation and enrichment. Together, the goal of these transformations is to make the dataset more informative and more amenable to the particular aims of a given analysis.
+In what follows, we will group common transformation processes into two purpose-based groupings: preparation and enrichment. The process may include one or more of the subsequent transformations but is rarely linear and is most often iterative. The bottom line is, however, to make the dataset more informative and more amenable to the particular aims of a given analysis.
 
 #### Preparation
 
-The purpose of preparation transformations is to clean, standardize, and derive the key attributes of the dataset on which further processing will depend. Common preparation transformations include text normalization and text tokenization. **Text normalization** is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.
+The purpose of preparation transformations is to clean, standardize, and derive the key attributes of the dataset on which further processing will depend. Common preparation transformations include text normalization and text tokenization.
 
-Let's take a toy dataset, in @tbl-ud-text-dataset, as an example starting point. In this dataset, we have three variables, `text_id`, `sent_id`, and `sentence`. It has five observations.
+Let's take a toy dataset, in @tbl-ud-text-dataset, as a starting point for exploring various transformations. In this dataset, we have three variables, `text_id`, `sent_id`, and `sentence`. It has five observations.
 
 ```{r}
 #| label: tbl-ud-text-dataset
@@ -377,15 +377,15 @@ text_df |>
   tt(width = 1)
 ```
 
+**Text normalization** is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.
+
 The normalization we apply will depend on the specific needs of the project, but can include operations such as changing the case of the text, removing punctuation, standardizing forms, *etc.* The goal is to reduce the noise in the text and make it more amenable to analysis.
 
-Normalization tends to preserve the number of rows and columns in the dataset but *does* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun).
+Normalization tends to preserve the number of rows and columns in the dataset but *does* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, looking at tbl-ud-text-dataset, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun).
 
 **Text tokenization** involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable.
 
-Text variables can be tokenized at any linguistic level, to the extent we can operationalize the linguistic unit. The operationalized linguistic unit is known as a **term**. For example, terms can be characters, words, sentences, *etc*. When we refer to the individual units of term, we use the expression **tokens**. Another key term to introduce is **types**, which refers to the unique tokens in a term variable. For example, in the sentence "The cat sat on the mat", there are five types and six tokens --as "the" is repeated twice. There will always be at least as many tokens as types, but there can be many more tokens than types for any given term variable.
-
-The choice of tokenization level often reflects the unit of observation of the dataset. For example, if the unit of observation is a word, then the tokens will be words. If the unit of observation is a sentence, then tokens will be sentences.
+Text variables can be tokenized at any linguistic level, to the extent we can operationalize the linguistic unit. The operationalized linguistic unit is known as a **term**. For example, terms can be characters, words, sentences, *etc*. When we refer to the individual units of term, we use the expression **tokens**. Another key term to introduce is **types**, which refers to the unique tokens in a term variable. For example, in the sentence 1 in @tbl-ud-text-dataset, there are 16 types and 17 tokens --as 'the' is repeated. Note that there will always be at least as many tokens as types, but there can be many more tokens than types for any given term variable.
 
 Sequential groupings of characters and words are also common terms used in text analysis. These are known as **n-grams**, where *n* is the number of words or characters in the term. For example, a word bigram is a sequence of two words, and a character trigram is a sequence of three characters.
 
@@ -480,9 +480,7 @@ Automated linguistic annotation can offer rapid access to abundant and highly de
 
 In terms of **extraction**, the goal is to distill relevant information from existing variables. For example, extracting the year from a date variable, or extracting the first name from a full name variable. In text analysis, extraction is often used to extract information from text variables. Say we have a dataset with a variable containing conversation utterances. We may want to extract some characteristic from those utterances and capture their occurrence in a new variable.
 
-**Reclassification** aims to simplify complex variables, making it easier to identify patterns and trends relevant for the research question. Say for example, we have a variable in our datataset that represents the part-of-speech (POS) of each word token in the text. The measure is a POS tag from the Penn Treebank tagset [@Marcus1993]. This tagset makes twelve major and 45 minor grammatical class distinctions. In an analysis that aims to explore only major class distinctions, it would be useful to recode the POS variable into major classes only (*i.e.* noun, pronoun, adjective, verb, adverb, *etc.*) to facilitate queries, summaries, and visualizations.
-
-Along these lines, the surface forms of words can be recoded to their lemmatized or stemmed forms. **Stemming** is the process of reducing inflected words to their word stem, base, or root form. **Lemmatization** is the process of reducing inflected words to their dictionary form, or lemma.
+**Reclassification** aims to simplify complex variables, making it easier to identify patterns and trends relevant for the research question. For example, the surface forms of words can be reduced to their stemmed or lemmatized forms. **Stemming** is the process of reducing inflected words to their word stem, base, or root form. **Lemmatization** is the process of reducing inflected words to their dictionary form, or lemma.
 
 In @tbl-ud-recode-categorical-lemma, we see an example of recoding surface forms of words to their stemmed and lemmatized forms.
 
@@ -547,23 +545,11 @@ Visual summary of row-wise and column-wise integration operations on datasets
 
 Integrating datasets can be performed in a column-wise manner as well. In this process, the datasets need not have the exact same variables and variable types, rather it is required that the datasets share a common variable of the same informational type that can be used to index the datasets. This process is often referred to as **joining datasets** and is visualized in @fig-joining.
 
-Corpus resources often include metadata in stand-off annotation format. That is, the metadata is not embedded in the corpus files, but rather is stored in a separate file. The metatdata and corpus files will share a common variable  which is used to join the metadata with the corpus files.
-
-Joining datasets is a powerful tool for enriching a dataset with additional column-wise information. It is important to note that integrating datasets can also remove information in a row-wise manner. For example, when merging two datasets with a shared variable, it is possible to remove observations that do not have a match one of the two datasets. This process effectively filters out observations not shared between the two datasets. On the other hand, an anti-join explicitly removes observations that are shared between the two datasets.
-
-::: {.callout .halfsize}
-**{{< fa medal >}} Dive deeper**
-
-In some analyses, it may be useful to remove words with little semantic value, such as articles, prepositions, and conjunctions or words that are very common in the language. These are known as stopwords. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. Anti-joining a stopword list with a dataset of word tokens is often used to remove stopwords from the dataset.
-
-However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about approaches to identifying stopwords in @Kaur2018.
-:::
-
-In sum, the transformation steps described here collectively aim to produce higher quality datasets that are relevant in content and structure to submit to analysis. The process may include one or more of the previous transformations but is rarely linear and is most often iterative. It is typical to do some normalization then generation, then recoding, and then return to normalizing, and so forth. This process is highly idiosyncratic given the characteristics of the curated dataset and the ultimate goal for the transformed dataset(s).
+Corpus resources often include metadata in stand-off annotation format. That is, the metadata is not embedded in the corpus files, but rather is stored in a separate file. The metatdata and corpus files will share a common variable which can be used to join the metadata with the corpus files, in turn creating a more informative dataset.
 
 ## Documentation {#sec-ud-documentation}
 
-As we have seen in this chapter, acquiring corpus data and converting that data into information involves a number of conscious decisions and implementation steps. As a favor to ourselves, as researchers, and to the research community, it is crucial to document these decisions and steps. This makes it both possible to retrace our own steps and also provides a guide for future researchers that want to reproduce and/ or build on your research. A programmatic approach to quantitative research helps ensure that the implementation steps are documented and reproducible but it is also vital that the decisions that are made are documented as well. This includes data origin information for the acquired corpus data and data dictionaries for the curated and transformed datasets.
+As we have seen in this chapter, acquiring corpus data and converting that data into information involves a number of conscious decisions and implementation steps. As a favor to ourselves, as researchers, and to the research community, it is crucial to document these decisions and steps.  Documentation includes a data origin file for the acquired corpus data, data dictionaries for the curated and transformed datasets, and well-documented code for the processing steps.
 
 ### Data origin {#sec-ud-data-origin}
 
@@ -616,14 +602,14 @@ Organizing this information in a tabular format, such as a spreadsheet, can make
 ::: {.callout}
 **{{< fa regular hand-point-up >}} Tip**
 
-It is conventional to work with variable names for datasets in R using the same conventions that are used for naming objects. It is a matter of taste which convention is used, but I have adopted [snake case](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html#snake_case) as my personal preference (*e.g* `ref_num`). There are also [alternatives](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html). Regardless of the convention you choose, it is good practice to be consistent.
+It is conventional to work with variable names for datasets in R using the same conventions that are used for naming objects. It is a matter of taste which convention is used, but I have adopted [snake case](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html#snake_case) as my personal preference (*e.g* `token_id`). There are also [alternatives](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html). Regardless of the convention you choose, it is good practice to be consistent.
 
-It is also of note that the variable names should be balanced for meaningfulness and brevity. This brevity is of practical concern but can be somewhat opaque. For questions into the meaning of the variable and is values consult the resource's dataset documentation.
+It is also of note that the variable names should be balanced for meaningfulness and brevity. This brevity is of practical concern but can lead to somewhat opaque variable names. Ensure you provide a description of your variables in a data dictionary.
 :::
 
 On the other hand, the data curation and transformation steps should be documented in the code that is used to create the dataset. This is one of the valuable features of a programmatic approach to quantitative research. The transparency of this documentation is enhanced by using **literate programming** strategies to intermingling prose descriptions and code the steps in the same, reproducible document.
 
-By providing a comprehensive data dictionary and using a programmatic approach to data curation and transformation, you ensure that others can easily understand and work with your dataset, facilitating collaboration and reproducibility.
+By providing a comprehensive data dictionary and using a programmatic approach to data curation and transformation, you ensure that you can retrace your own steps and others can easily understand and work with your dataset.
 
 ## Activities {.unnumbered}
 

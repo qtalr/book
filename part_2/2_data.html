@@ -122,6 +122,31 @@ div.csl-indent {
   window.document.addEventListener("DOMContentLoaded", function (_event) {
     document.body.classList.add('hypothesis-enabled');
   });
+</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
 </script><link rel="stylesheet" href="../assets/css/mini.css">
 </head>
 <body class="nav-sidebar docked">
@@ -475,7 +500,7 @@ Table&nbsp;2.2: Types of corpora
 <div>
 
 </div>
-<div class="quarto-layout-panel" data-layout-align="left" data-layout="[50, -3, 50]">
+<div class="quarto-layout-panel" data-layout="[50, -3, 50]" data-layout-align="left">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div id="first" class="quarto-layout-cell" style="flex-basis: 48.5%;justify-content: flex-start;">
 <p>The ‘Standard Sample of Present-Day American English’ (known commonly as the Brown Corpus) is widely recognized as one of the first large, machine-readable corpora. Compiled by <span class="citation" data-cites="Kucera1967">Kucera and Francis (<a href="../references.html#ref-Kucera1967" role="doc-biblioref">1967</a>)</span>, the corpus is comprised of 1,014,312 words from edited English prose published in the United States in 1961.<br><br>
@@ -589,18 +614,18 @@ Table&nbsp;2.3: Sources of corpus data
 <p>In <a href="#exm-masc-df" class="quarto-xref">Example&nbsp;<span>2.2</span></a> we see an example of an R data frame object which overlaps with the language in the plain text file in <a href="#exm-masc-text" class="quarto-xref">Example&nbsp;<span>2.1</span></a>:</p>
 <div id="exm-masc-df" class="theorem example">
 <p><span class="theorem-title"><strong>Example 2.2</strong></span> MASC data frame</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode xml code-with-copy"><code class="sourceCode xml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>   doc_id  date modality domain          token_id word       lemma      pos</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">int</span>&gt; &lt;<span class="kw">dbl</span>&gt; &lt;<span class="kw">fct</span>&gt;    &lt;<span class="kw">chr</span>&gt;              &lt;<span class="kw">int</span>&gt; &lt;<span class="kw">chr</span>&gt;      &lt;<span class="kw">chr</span>&gt;      &lt;<span class="kw">chr</span>&gt;</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a> 1      1  2008 Writing  General Fiction        1 Sound      sound      NNP</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a> 2      1  2008 Writing  General Fiction        2 is         be         VBZ</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a> 3      1  2008 Writing  General Fiction        3 a          a          DT</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a> 4      1  2008 Writing  General Fiction        4 vibration  vibration  NN</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a> 5      1  2008 Writing  General Fiction        5 .          .          .</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a> 6      1  2008 Writing  General Fiction        6 Sound      sound      NNP</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a> 7      1  2008 Writing  General Fiction        7 travels    travel     VBZ</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a> 8      1  2008 Writing  General Fiction        8 as         as         IN</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a> 9      1  2008 Writing  General Fiction        9 a          a          DT</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>10      1  2008 Writing  General Fiction       10 mechanical mechanical JJ</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode xml code-with-copy"><code class="sourceCode xml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>   doc_id  date modality token_id word       lemma      pos</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">int</span>&gt; &lt;<span class="kw">dbl</span>&gt; &lt;<span class="kw">fct</span>&gt;       &lt;<span class="kw">int</span>&gt; &lt;<span class="kw">chr</span>&gt;      &lt;<span class="kw">chr</span>&gt;      &lt;<span class="kw">chr</span>&gt;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a> 1      1  2008 Writing         1 Sound      sound      NNP</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a> 2      1  2008 Writing         2 is         be         VBZ</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a> 3      1  2008 Writing         3 a          a          DT</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a> 4      1  2008 Writing         4 vibration  vibration  NN</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a> 5      1  2008 Writing         5 .          .          .</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a> 6      1  2008 Writing         6 Sound      sound      NNP</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a> 7      1  2008 Writing         7 travels    travel     VBZ</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a> 8      1  2008 Writing         8 as         as         IN</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a> 9      1  2008 Writing         9 a          a          DT</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>10      1  2008 Writing        10 mechanical mechanical JJ</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here we see that the data is stored in a tabular format with each row representing a single observation (<code>word</code>) and each column representing a single attribute. This tabular structure supports the increased number of metadata attributes. Internally, R applies a schema to ensure the values in each column are of the same type (<em>e.g.</em> <code>&lt;chr&gt;</code>, <code>&lt;dbl&gt;</code>, <code>&lt;fct&gt;</code>, <em>etc.</em>). This structured format is designed to be easy to query and analyze and as such is the primary format for data analysis in R.</p>
 <p><strong>Semi-structured data</strong> falls between unstructured and structured data. This covers a wide range of file structuring approaches. For example, a otherwise plain text file with part-of-speech tags appended to each word is minimally structured (<a href="#exm-masc-pos" class="quarto-xref">Example&nbsp;<span>2.3</span></a>).</p>
@@ -666,7 +691,7 @@ Figure&nbsp;2.2: Visual summary of the tidy dataset format
 <div class="cell">
 <div id="tbl-ud-info-values-masc" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-info-values-masc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.4: MASC dataset variables.
+Table&nbsp;2.4: MASC dataset variables
 </figcaption><div aria-describedby="tbl-ud-info-values-masc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
@@ -815,9 +840,10 @@ Figure&nbsp;2.3: Visualization of row-wise and column-wise transformation operat
 </figcaption></figure>
 </div>
 <p>The results build on and manipulate the curated dataset to produce a <em>transformed dataset</em>. While there is typically one curated dataset that serves as the base organizational dataset, there may be multiple transformed datasets, each aligning with the informational needs of specific analyses in the research project.</p>
-<p>In what follows, we will group common transformation processes into two purpose-based groupings: preparation and enrichment. The purpose of preparation transformations is to clean, standardize, and derive the key attributes of the dataset on which further processing will depend. Enrichment transformations, on the other hand, are designed to add new attributes to the dataset. These attributes may be derived from the existing attributes or may be integrated from other datasets. Together, the goal of these transformations is to make the dataset more informative and more amenable to the particular aims of a given analysis.</p>
+<!-- Rethink this section below -->
+<p>In what follows, we will group common transformation processes into two purpose-based groupings: preparation and enrichment. Together, the goal of these transformations is to make the dataset more informative and more amenable to the particular aims of a given analysis.</p>
 <section id="preparation" class="level4"><h4 class="anchored" data-anchor-id="preparation">Preparation</h4>
-<p>Common preparation transformations include text normalization and text tokenization. <strong>Text normalization</strong> is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.</p>
+<p>The purpose of preparation transformations is to clean, standardize, and derive the key attributes of the dataset on which further processing will depend. Common preparation transformations include text normalization and text tokenization. <strong>Text normalization</strong> is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.</p>
 <p>Let’s take a toy dataset, in <a href="#tbl-ud-text-dataset" class="quarto-xref">Table&nbsp;<span>2.5</span></a>, as an example starting point. In this dataset, we have three variables, <code>text_id</code>, <code>sent_id</code>, and <code>sentence</code>. It has five observations.</p>
 <div class="cell" data-tbl-colwidths="[10,10,80]">
 <div id="tbl-ud-text-dataset" class="cell quarto-float anchored">
@@ -869,127 +895,84 @@ Table&nbsp;2.5: A toy dataset with three variables, <code>text_id</code>, <code>
 </figure>
 </div>
 </div>
-<p>The types of transformations we apply will depend on the specific needs of the project, but can include those found in <a href="#tbl-ud-text-normalization" class="quarto-xref">Table&nbsp;<span>2.6</span></a>.</p>
-<div id="tbl-ud-text-normalization" class="sm striped quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-text-normalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.6: Common text normalization tasks
-</figcaption><div aria-describedby="tbl-ud-text-normalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table-sm table-striped small table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 30%">
-<col style="width: 45%">
-</colgroup>
-<thead><tr class="header">
-<th>Task name</th>
-<th>Relevant example</th>
-<th>Typical purpose</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Lowercasing</td>
-<td>
-<code>"Text"</code> to <code>"text"</code>
-</td>
-<td>Minimizing case sensitivity in subsequent analysis</td>
-</tr>
-<tr class="even">
-<td>Removal of Punctuation and Special Characters</td>
-<td>
-<code>"Hello, World!"</code> to <code>"Hello World"</code>
-</td>
-<td>Removing non-alphanumeric characters that may not carry semantic value</td>
-</tr>
-<tr class="odd">
-<td>Adjustment of Forms</td>
-<td>
-<code>"colour"</code> to <code>"color"</code>, <code>"it's"</code> to <code>"it is"</code>, <code>"1"</code> to <code>"one"</code>
-</td>
-<td>Standardizing variations in spelling, contractions, and numeric forms to a common format</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but <em>do</em> change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence (“The” versus “the”). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of “US” (United States) and “us” (first person plural pronoun).</p>
-<!-- [ ] Or add token vs. type here from exploration? -->
+<p>The normalization we apply will depend on the specific needs of the project, but can include operations such as changing the case of the text, removing punctuation, standardizing forms, <em>etc.</em> The goal is to reduce the noise in the text and make it more amenable to analysis.</p>
+<p>Normalization tends to preserve the number of rows and columns in the dataset but <em>does</em> change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence (“The” versus “the”). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of “US” (United States) and “us” (first person plural pronoun).</p>
 <p><strong>Text tokenization</strong> involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable.</p>
 <p>Text variables can be tokenized at any linguistic level, to the extent we can operationalize the linguistic unit. The operationalized linguistic unit is known as a <strong>term</strong>. For example, terms can be characters, words, sentences, <em>etc</em>. When we refer to the individual units of term, we use the expression <strong>tokens</strong>. Another key term to introduce is <strong>types</strong>, which refers to the unique tokens in a term variable. For example, in the sentence “The cat sat on the mat”, there are five types and six tokens –as “the” is repeated twice. There will always be at least as many tokens as types, but there can be many more tokens than types for any given term variable.</p>
 <p>The choice of tokenization level often reflects the unit of observation of the dataset. For example, if the unit of observation is a word, then the tokens will be words. If the unit of observation is a sentence, then tokens will be sentences.</p>
 <p>Sequential groupings of characters and words are also common terms used in text analysis. These are known as <strong>n-grams</strong>, where <em>n</em> is the number of words or characters in the term. For example, a word bigram is a sequence of two words, and a character trigram is a sequence of three characters.</p>
-<p>In <a href="#tbl-ud-tokenization" class="quarto-xref">Table&nbsp;<span>2.7</span></a>, we see examples of tokenization at word and character levels.</p>
+<p>In <a href="#tbl-ud-tokenization" class="quarto-xref">Table&nbsp;<span>2.6</span></a>, we see examples of tokenization at word and character levels.</p>
 <div id="tbl-ud-tokenization" class="quarto-layout-panel anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-tokenization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.7: Examples of tokenization at word and character levels.
+Table&nbsp;2.6: Word and character tokenization examples
 </figcaption><div aria-describedby="tbl-ud-tokenization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-ud-tokenization" style="flex-basis: 33.3%;justify-content: center;">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-ud-tokenization" style="flex-basis: 50.0%;justify-content: center;">
 <div id="tbl-ud-tokenization-1" class="do-not-create-environment quarto-float anchored">
 <figure class="quarto-float quarto-subfloat-tbl figure"><figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-ud-tokenization-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Word tokenization
+(a) Character trigram tokenization
 </figcaption><div aria-describedby="tbl-ud-tokenization-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table id="tbl-ud-tokenization-1" class="do-not-create-environment table">
 <colgroup>
 <col style="width: 13%">
 <col style="width: 13%">
-<col style="width: 16%">
+<col style="width: 13%">
 </colgroup>
 <thead><tr class="header">
 <th style="text-align: left;">text_id</th>
 <th style="text-align: left;">sent_id</th>
-<th style="text-align: left;">word</th>
+<th style="text-align: left;">trigram</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">it’s</td>
+<td style="text-align: left;">its</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">a</td>
+<td style="text-align: left;">tsa</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">beautiful</td>
+<td style="text-align: left;">sab</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">day</td>
+<td style="text-align: left;">abe</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">in</td>
+<td style="text-align: left;">bea</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">the</td>
+<td style="text-align: left;">eau</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">us</td>
+<td style="text-align: left;">aut</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">and</td>
+<td style="text-align: left;">uti</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">our</td>
+<td style="text-align: left;">tif</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">group</td>
+<td style="text-align: left;">ifu</td>
 </tr>
 </tbody>
 </table>
@@ -997,7 +980,7 @@ Table&nbsp;2.7: Examples of tokenization at word and character levels.
 </figure>
 </div>
 </div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-ud-tokenization" style="flex-basis: 33.3%;justify-content: center;">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-ud-tokenization" style="flex-basis: 50.0%;justify-content: center;">
 <div id="tbl-ud-tokenization-2" class="do-not-create-environment quarto-float anchored">
 <figure class="quarto-float quarto-subfloat-tbl figure"><figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-ud-tokenization-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Word bigram tokenization
@@ -1070,206 +1053,9 @@ Table&nbsp;2.7: Examples of tokenization at word and character levels.
 </figure>
 </div>
 </div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-ud-tokenization" style="flex-basis: 33.3%;justify-content: center;">
-<div id="tbl-ud-tokenization-3" class="do-not-create-environment quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-tbl figure"><figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-ud-tokenization-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(c) Character trigram tokenization
-</figcaption><div aria-describedby="tbl-ud-tokenization-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table id="tbl-ud-tokenization-3" class="do-not-create-environment table">
-<colgroup>
-<col style="width: 13%">
-<col style="width: 13%">
-<col style="width: 13%">
-</colgroup>
-<thead><tr class="header">
-<th style="text-align: left;">text_id</th>
-<th style="text-align: left;">sent_id</th>
-<th style="text-align: left;">trigram</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">its</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">tsa</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">sab</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">abe</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">bea</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">eau</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">aut</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">uti</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">tif</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">ifu</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-</div>
 </div>
 </div>
 </figure>
-</div>
-<p>At its core, tokenization is the process which enables the quantitative analysis of text. Choosing the right tokenization level is crucial for the success of the analysis.</p>
-</section><section id="enrichment" class="level4"><h4 class="anchored" data-anchor-id="enrichment">Enrichment</h4>
-<p>Let’s now turn to transformations that augment the variables of the dataset. Common enrichment transformations include recoding, generation, and integration of observations and/ or variables.</p>
-<p><strong>Recoding</strong> is the process of transforming the values of one or more variables into new values which are more amenable to analysis. This is a column-wise operation which can be applied to categorical or numeric variables alike.</p>
-<p>The aim is to simplify complex variables, making it easier to identify patterns and trends relevant for the research question. Say for example, we have a variable in our datataset that represents the part-of-speech (POS) of each word token in the text. The measure is a POS tag from the Penn Treebank tagset <span class="citation" data-cites="Marcus1993">(<a href="../references.html#ref-Marcus1993" role="doc-biblioref">Marcus, Santorini, and Marcinkiewicz 1993</a>)</span>. This tagset makes twelve major and 45 minor grammatical class distinctions. In an analysis that aims to explore only major class distinctions, it would be useful to recode the POS variable into major classes only (<em>i.e.</em> noun, pronoun, adjective, verb, adverb, <em>etc.</em>) to facilitate queries, summaries, and visualizations.</p>
-<p>Along these lines, the surface forms of words can be recoded to their lemmatized or stemmed forms. <strong>Stemming</strong> is the process of reducing inflected words to their word stem, base, or root form. <strong>Lemmatization</strong> is the process of reducing inflected words to their dictionary form, or lemma.</p>
-<p>In <a href="#tbl-ud-recode-categorical-lemma" class="quarto-xref">Table&nbsp;<span>2.8</span></a>, we see an example of recoding surface forms of words to their lemmatized forms.</p>
-<div class="cell">
-<div id="tbl-ud-recode-categorical-lemma" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-recode-categorical-lemma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.8: A toy dataset illustrating recoding of surface forms of words to their lemmatized forms.
-</figcaption><div aria-describedby="tbl-ud-recode-categorical-lemma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="do-not-create-environment cell table table-sm table-striped small">
-<colgroup>
-<col style="width: 13%">
-<col style="width: 13%">
-<col style="width: 19%">
-<col style="width: 19%">
-</colgroup>
-<thead><tr class="header">
-<th>text_id</th>
-<th>sent_id</th>
-<th>word</th>
-<th>lemma</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>as</td>
-<td>as</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>2</td>
-<td>we</td>
-<td>we</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>reached</td>
-<td>reach</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>2</td>
-<td>the</td>
-<td>the</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>destination</td>
-<td>destination</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>2</td>
-<td>jane</td>
-<td>jane</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>said</td>
-<td>say</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>2</td>
-<td>i</td>
-<td>i</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>can</td>
-<td>can</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>2</td>
-<td>not</td>
-<td>not</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>believe</td>
-<td>believe</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>2</td>
-<td>we</td>
-<td>we</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>are</td>
-<td>be</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>2</td>
-<td>finally</td>
-<td>finally</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>here</td>
-<td>here</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</figure>
-</div>
 </div>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
@@ -1278,21 +1064,19 @@ Table&nbsp;2.8: A toy dataset illustrating recoding of surface forms of words to
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-file-alt" aria-label="file-alt"></i> Case study</strong></p>
-<p>Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus <span class="citation" data-cites="Kostic2003">(<a href="../references.html#ref-Kostic2003" role="doc-biblioref">Kostić, Marković, and Baucal 2003</a>)</span>. <span class="citation" data-cites="Baayen2006">Baayen, Feldman, and Schreuder (<a href="../references.html#ref-Baayen2006" role="doc-biblioref">2006</a>)</span> found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.</p>
+<p><span class="citation" data-cites="Serigos2020">Serigos (<a href="../references.html#ref-Serigos2020" role="doc-biblioref">2020</a>)</span> explores the social stratification of anglicisms in Argentine media. The author presents a method for automatically detecting anglicisms in Spanish texts. In combination with other methods, character <span class="math inline">\(n\)</span>-grams are used to determine the language of a word. The method is based on the observation that the distribution of character <span class="math inline">\(n\)</span>-grams is different between languages.</p>
 </div>
 </div>
 </div>
-<p>Recoding transformations can be useful for simplifying complex variables, making it easier to identify patterns, as we see in <a href="#tbl-ud-recode-categorical-lemma" class="quarto-xref">Table&nbsp;<span>2.8</span></a>. However, it is important to note that recoding can also lead to loss of information. For example, recoding a variable with many levels into a binary variable can lead to loss of information about the original levels. It is important to consider the trade-offs of recoding and to ensure that the recoding aligns with the research question.</p>
-<p>Furthermore, it is important to note recoding can be used to create more nuanced variables instead of more simplified. This draws on the combination of level information from multiple variables creating a variable that reflects a more complex relationship that was previously implicit in the dataset.</p>
-<p><strong>Generation</strong> is the process of creating new variables from existing variables, and as such it is a column-wise operation. Generation can include applying calculations or extracting relevant information from existing variables or enhancing text variables with linguistic annotation. Simplifying a bit, generation helps make implicit attributes explicit.</p>
-<p>Let’s highlight a some common calculation and extraction examples that generate variables. First, let’s look at the calculation of measures. In text analysis, measures are often used to describe the properties of a document or linguistic unit. For example, the number of words in a corpus document, the lengths of sentences, the number of clauses in a sentence, <em>etc.</em>. In turn, these measures can be used to calculate other measures, such as lexical diversity or syntactic complexity measures.</p>
-<p>In terms of extraction, the goal is to distill relevant information from existing variables. For example, extracting the year from a date variable, or extracting the first name from a full name variable. In text analysis, extraction is often used to extract information from text variables. Say we have a dataset with a variable containing conversation utterances. We may want to extract some characteristic from those utterances and capture their occurrence in a new variable.</p>
-<p>But what if we want to extract linguistic information from a text variable that is not explicitly present in the text? This is where linguistic annotation comes in. Linguistic annotation is the process of enriching text with linguistic information, such as part-of-speech tags, morphological features, syntactic structure, <em>etc.</em>. This can be done manually by linguist coders and/ or done using natural language processing (NLP) tools, such as part-of-speech taggers, parsers, <em>etc.</em>.</p>
-<p>To illustrate the process of linguistic annotation, we will start with the dataset from <a href="#tbl-ud-text-dataset" class="quarto-xref">Table&nbsp;<span>2.5</span></a>. Applying a pre-trained model from the <a href="https://universaldependencies.org/">Universal Dependencies (UD)</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> project, we can generate linguistic annotation for each word in the <code>sentence</code> variable.</p>
+<p>At its core, tokenization is the process which enables the quantitative analysis of text. Choosing the right tokenization level is crucial for the success of the analysis.</p>
+</section><section id="enrichment" class="level4"><h4 class="anchored" data-anchor-id="enrichment">Enrichment</h4>
+<p>Enrichment transformations are designed to add new attributes to the dataset. These attributes may be derived from the existing attributes or may be integrated from other datasets. Common enrichment transformations include generation, recoding, and integration of observations and/ or variables.</p>
+<p><strong>Generation</strong> is the process of creating new variables based on implicit information within existing variables. It is a row- and column-wise operation which in text analysis often includes linguistic annotation such as part-of-speech tagging, morphological analysis, syntactic parsing, <em>etc.</em> These annotations can be used to generate new variables that capture linguistic information that is not explicitly present in the text.</p>
+<p>Linguistic annotation can be done manually by linguist coders and/ or done automatically using natural language processing (NLP) tools. To illustrate the process of automatic linguistic annotation, we will start with the dataset from <a href="#tbl-ud-text-dataset" class="quarto-xref">Table&nbsp;<span>2.5</span></a>. Applying a pre-trained model from the <a href="https://universaldependencies.org/">Universal Dependencies (UD)</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> project, we can generate linguistic annotation for each word in the <code>sentence</code> variable.</p>
 <div class="cell" data-tbl-colwidths="[7,7,5,61,20]">
 <div id="tbl-ud-generate-annotation" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-generate-annotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.9: Automatic linguistic annotation for grammatical category and syntactic structure for an example English sentence from the MASC.
+Table&nbsp;2.7: Automatic linguistic annotation example
 </figcaption><div aria-describedby="tbl-ud-generate-annotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="cell table table-sm table-striped small">
@@ -1458,313 +1242,149 @@ Table&nbsp;2.9: Automatic linguistic annotation for grammatical category and syn
 </figure>
 </div>
 </div>
-<p>The annotated dataset now includes the key variables <code>pos</code> (Penn treebank tags), <code>features</code> (morphological features), and <code>syn_relation</code>. The results of this process can then be further transformed as need be to fit the needs of the analysis. The results of this process enables more direct access during analysis to features that were hidden or otherwise difficult to access.</p>
-<p>A word of caution: automated linguistic annotation offers rapid access to abundant and highly dependable linguistic data for numerous languages. However, linguistic annotation tools are not infallible. They are tools developed by training computational algorithms to identify patterns in previously annotated and verified datasets, resulting in a language model. This model is then employed to predict linguistic annotations for new language data (as seen in <a href="#tbl-ud-generate-annotation" class="quarto-xref">Table&nbsp;<span>2.9</span></a>). The accuracy of the linguistic annotation heavily relies on the congruence between the language sampling frame of the trained data and that of the dataset to be automatically annotated.</p>
-<p><strong>Integration</strong> is a transformation step which can be row-wise or column-wise. Row-wise integration is the process of combining datasets by appending observations from one dataset to another. Column-wise integration is the process of combining datasets by appending variables from one dataset to another.</p>
-<p>To integrate in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as <strong>concatenating datasets</strong>. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the same variables and variable types is not the same has having the same values.</p>
-<p>Take, for example, a case when a corpus resource contains data for two populations. In the course of curating and transforming the datasets, it may make more sense to work with the datasets separately. However, when it comes time to analyze the data, it may be more convenient to work with the datasets as a single dataset. In this case, the datasets can be concatenated to create a single dataset.</p>
-<p>To illustate, consider the toy datasets in <a href="#tbl-ud-merge-dataset-written" class="quarto-xref">Table&nbsp;<span>2.10</span></a> and <a href="#tbl-ud-merge-dataset-spoken" class="quarto-xref">Table&nbsp;<span>2.11</span></a>.</p>
-<div class="cell" data-tbl-colwidths="[15,15,15,55]">
-<div id="tbl-ud-merge-dataset-written" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-merge-dataset-written-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.10: Toy dataset of written text data.
-</figcaption><div aria-describedby="tbl-ud-merge-dataset-written-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="cell table table-sm table-striped small">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 15%">
-<col style="width: 15%">
-<col style="width: 55%">
-</colgroup>
-<thead><tr class="header">
-<th>participant_id</th>
-<th>text_id</th>
-<th>modality</th>
-<th>text</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>P1</td>
-<td>T1</td>
-<td>Written</td>
-<td>Technology has revolutionized our lives in many ways. It has made communication easier, faster, and more efficient.</td>
-</tr>
-<tr class="even">
-<td>P3</td>
-<td>T3</td>
-<td>Written</td>
-<td>Climate change is a pressing issue that affects everyone on Earth. We must take immediate action to reduce our carbon footprint.</td>
-</tr>
-<tr class="odd">
-<td>P5</td>
-<td>T5</td>
-<td>Written</td>
-<td>Education is the key to personal and societal growth. Investing in quality education will lead to a brighter future for all.</td>
-</tr>
-</tbody>
-</table>
+<p>The annotated dataset is now tokenized by word and includes the key variables <code>pos</code> (Penn treebank tags), <code>features</code> (morphological features), and <code>syn_relation</code> (dependency relations). These variables provide information about the grammatical category and syntactic structure of each word in the sentence. The results of this process enables more direct access during analysis to features that were hidden or otherwise difficult to access.</p>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-solid fa-exclamation-triangle" aria-label="exclamation-triangle"></i> Warning</strong></p>
+<p>Automated linguistic annotation can offer rapid access to abundant and highly dependable linguistic data for numerous languages. However, linguistic annotation tools are not infallible. They are tools developed by training computational algorithms to identify patterns in previously annotated and verified datasets, resulting in a language model. This model is then employed to predict linguistic annotations for new language data. The accuracy of the linguistic annotation heavily relies on the congruence between the language sampling frame of the trained data and that of the dataset to be automatically annotated.</p>
 </div>
 </div>
-</figure>
 </div>
-</div>
-<div class="cell" data-tbl-colwidths="[15,15,15,55]">
-<div id="tbl-ud-merge-dataset-spoken" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-merge-dataset-spoken-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.11: Toy dataset of spoken text data.
-</figcaption><div aria-describedby="tbl-ud-merge-dataset-spoken-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="cell table table-sm table-striped small">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 15%">
-<col style="width: 15%">
-<col style="width: 55%">
-</colgroup>
-<thead><tr class="header">
-<th>participant_id</th>
-<th>text_id</th>
-<th>modality</th>
-<th>text</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>P2</td>
-<td>T2</td>
-<td>Spoken</td>
-<td>Hello, my name is X. I am a software engineer working at XYZ company.</td>
-</tr>
-<tr class="even">
-<td>P4</td>
-<td>T4</td>
-<td>Spoken</td>
-<td>Hi, I’m X, and I work as a project manager. My main responsibility is to ensure that projects are completed on time and within budget.</td>
-</tr>
-<tr class="odd">
-<td>P6</td>
-<td>T6</td>
-<td>Spoken</td>
-<td>Hi, my name is X, and I’m a teacher. I teach English at a local high school.</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</figure>
-</div>
-</div>
-<p>These datasets, in <a href="#tbl-ud-merge-dataset-written" class="quarto-xref">Table&nbsp;<span>2.10</span></a> and <a href="#tbl-ud-merge-dataset-spoken" class="quarto-xref">Table&nbsp;<span>2.11</span></a>, contain the same variables and variable types, but different observations –one in which the sample contains written language and the other spoken. Conveniently, they can be concatenated to create a single dataset that contains all of the observations, as seen in <a href="#tbl-ud-merge-dataset-concat" class="quarto-xref">Table&nbsp;<span>2.12</span></a>.</p>
-<div class="cell" data-tbl-colwidths="[15,15,15,55]">
-<div id="tbl-ud-merge-dataset-concat" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-merge-dataset-concat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.12: Toy dataset of written and spoken text data concatenated.
-</figcaption><div aria-describedby="tbl-ud-merge-dataset-concat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="cell table table-sm table-striped small">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 15%">
-<col style="width: 15%">
-<col style="width: 55%">
-</colgroup>
-<thead><tr class="header">
-<th>participant_id</th>
-<th>text_id</th>
-<th>modality</th>
-<th>text</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>P1</td>
-<td>T1</td>
-<td>Written</td>
-<td>Technology has revolutionized our lives in many ways. It has made communication easier, faster, and more efficient.</td>
-</tr>
-<tr class="even">
-<td>P3</td>
-<td>T3</td>
-<td>Written</td>
-<td>Climate change is a pressing issue that affects everyone on Earth. We must take immediate action to reduce our carbon footprint.</td>
-</tr>
-<tr class="odd">
-<td>P5</td>
-<td>T5</td>
-<td>Written</td>
-<td>Education is the key to personal and societal growth. Investing in quality education will lead to a brighter future for all.</td>
-</tr>
-<tr class="even">
-<td>P2</td>
-<td>T2</td>
-<td>Spoken</td>
-<td>Hello, my name is X. I am a software engineer working at XYZ company.</td>
-</tr>
-<tr class="odd">
-<td>P4</td>
-<td>T4</td>
-<td>Spoken</td>
-<td>Hi, I’m X, and I work as a project manager. My main responsibility is to ensure that projects are completed on time and within budget.</td>
-</tr>
-<tr class="even">
-<td>P6</td>
-<td>T6</td>
-<td>Spoken</td>
-<td>Hi, my name is X, and I’m a teacher. I teach English at a local high school.</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</figure>
-</div>
-</div>
-<p>Integrating datasets can be performed in a column-wise manner as well. In this process, the datasets need not have the exact same variables and variable types, rather it is required that the datasets share a common variable of the same informational type that can be used to index the datasets. This process is often referred to as <strong>joining datasets</strong>.</p>
-<p>Corpus resources often include metadata in stand-off annotation format. That is, the metadata is not embedded in the corpus files, but rather is stored in a separate file. The metatdata and corpus files will share a common variable which is used to join the metadata with the corpus files.</p>
-<p>To exemplify, here’s another toy dataset that shares the <code>participant_id</code> index with the previous dataset in <a href="#tbl-ud-merge-dataset-concat" class="quarto-xref">Table&nbsp;<span>2.12</span></a> and includes the variables <code>eng_native</code>, <code>age</code>, and <code>gender</code>:</p>
+<p><strong>Recoding</strong> is the process of transforming the values of one or more variables into new values which are more amenable to analysis. This is a column-wise operation which is used to make explicit information more accessible. Typical operatins include extraction, reclassification, and calculation.</p>
+<p>In terms of <strong>extraction</strong>, the goal is to distill relevant information from existing variables. For example, extracting the year from a date variable, or extracting the first name from a full name variable. In text analysis, extraction is often used to extract information from text variables. Say we have a dataset with a variable containing conversation utterances. We may want to extract some characteristic from those utterances and capture their occurrence in a new variable.</p>
+<p><strong>Reclassification</strong> aims to simplify complex variables, making it easier to identify patterns and trends relevant for the research question. Say for example, we have a variable in our datataset that represents the part-of-speech (POS) of each word token in the text. The measure is a POS tag from the Penn Treebank tagset <span class="citation" data-cites="Marcus1993">(<a href="../references.html#ref-Marcus1993" role="doc-biblioref">Marcus, Santorini, and Marcinkiewicz 1993</a>)</span>. This tagset makes twelve major and 45 minor grammatical class distinctions. In an analysis that aims to explore only major class distinctions, it would be useful to recode the POS variable into major classes only (<em>i.e.</em> noun, pronoun, adjective, verb, adverb, <em>etc.</em>) to facilitate queries, summaries, and visualizations.</p>
+<p>Along these lines, the surface forms of words can be recoded to their lemmatized or stemmed forms. <strong>Stemming</strong> is the process of reducing inflected words to their word stem, base, or root form. <strong>Lemmatization</strong> is the process of reducing inflected words to their dictionary form, or lemma.</p>
+<p>In <a href="#tbl-ud-recode-categorical-lemma" class="quarto-xref">Table&nbsp;<span>2.8</span></a>, we see an example of recoding surface forms of words to their stemmed and lemmatized forms.</p>
 <div class="cell">
-<div id="tbl-ud-merge-vars-participant" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-merge-vars-participant-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.13: Toy dataset of participant data with a shared variable <code>participant_id</code> to index the datasets.
-</figcaption><div aria-describedby="tbl-ud-merge-vars-participant-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="tbl-ud-recode-categorical-lemma" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-recode-categorical-lemma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.8: Reclassification of surface forms of words to their stemmed and lemmatized forms
+</figcaption><div aria-describedby="tbl-ud-recode-categorical-lemma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 18%">
-<col style="width: 8%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 19%">
 <col style="width: 12%">
+<col style="width: 19%">
 </colgroup>
 <thead><tr class="header">
-<th>participant_id</th>
-<th>eng_native</th>
-<th>age</th>
-<th>gender</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>P1</td>
-<td>Yes</td>
-<td>28</td>
-<td>M</td>
-</tr>
-<tr class="even">
-<td>P2</td>
-<td>No</td>
-<td>35</td>
-<td>M</td>
-</tr>
-<tr class="odd">
-<td>P3</td>
-<td>Yes</td>
-<td>42</td>
-<td>F</td>
-</tr>
-<tr class="even">
-<td>P4</td>
-<td>No</td>
-<td>26</td>
-<td>F</td>
-</tr>
-<tr class="odd">
-<td>P5</td>
-<td>Yes</td>
-<td>31</td>
-<td>M</td>
-</tr>
-<tr class="even">
-<td>P6</td>
-<td>No</td>
-<td>39</td>
-<td>F</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</figure>
-</div>
-</div>
-<p>This dataset provides additional information about each participant, such as their English native speaker status, age, and gender.</p>
-<p>Since the two datasets share the <code>participant_id</code> variable, we can merge them to create a new dataset that combines the information from both datasets, as we see in <a href="#tbl-ud-merge-join" class="quarto-xref">Table&nbsp;<span>2.14</span></a>.</p>
-<div class="cell" data-tbl-colwidths="[10,10,10,60,10,10,10]">
-<div id="tbl-ud-merge-join" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-merge-join-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.14: Joining variables from two datasets based on a shared index variable.
-</figcaption><div aria-describedby="tbl-ud-merge-join-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="cell table table-sm table-striped small">
-<colgroup>
-<col style="width: 8%">
-<col style="width: 8%">
-<col style="width: 8%">
-<col style="width: 50%">
-<col style="width: 8%">
-<col style="width: 8%">
-<col style="width: 8%">
-</colgroup>
-<thead><tr class="header">
-<th>participant_id</th>
 <th>text_id</th>
-<th>modality</th>
-<th>text</th>
-<th>eng_native</th>
-<th>age</th>
-<th>gender</th>
+<th>sent_id</th>
+<th>word</th>
+<th>stem</th>
+<th>lemma</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>P1</td>
-<td>T1</td>
-<td>Written</td>
-<td>Technology has revolutionized our lives in many ways. It has made communication easier, faster, and more efficient.</td>
-<td>Yes</td>
-<td>28</td>
-<td>M</td>
+<td>1</td>
+<td>2</td>
+<td>as</td>
+<td>a</td>
+<td>as</td>
 </tr>
 <tr class="even">
-<td>P3</td>
-<td>T3</td>
-<td>Written</td>
-<td>Climate change is a pressing issue that affects everyone on Earth. We must take immediate action to reduce our carbon footprint.</td>
-<td>Yes</td>
-<td>42</td>
-<td>F</td>
+<td>1</td>
+<td>2</td>
+<td>we</td>
+<td>we</td>
+<td>we</td>
 </tr>
 <tr class="odd">
-<td>P5</td>
-<td>T5</td>
-<td>Written</td>
-<td>Education is the key to personal and societal growth. Investing in quality education will lead to a brighter future for all.</td>
-<td>Yes</td>
-<td>31</td>
-<td>M</td>
+<td>1</td>
+<td>2</td>
+<td>reached</td>
+<td>reach</td>
+<td>reach</td>
 </tr>
 <tr class="even">
-<td>P2</td>
-<td>T2</td>
-<td>Spoken</td>
-<td>Hello, my name is X. I am a software engineer working at XYZ company.</td>
-<td>No</td>
-<td>35</td>
-<td>M</td>
+<td>1</td>
+<td>2</td>
+<td>the</td>
+<td>the</td>
+<td>the</td>
 </tr>
 <tr class="odd">
-<td>P4</td>
-<td>T4</td>
-<td>Spoken</td>
-<td>Hi, I’m X, and I work as a project manager. My main responsibility is to ensure that projects are completed on time and within budget.</td>
-<td>No</td>
-<td>26</td>
-<td>F</td>
+<td>1</td>
+<td>2</td>
+<td>destination</td>
+<td>destin</td>
+<td>destination</td>
 </tr>
 <tr class="even">
-<td>P6</td>
-<td>T6</td>
-<td>Spoken</td>
-<td>Hi, my name is X, and I’m a teacher. I teach English at a local high school.</td>
-<td>No</td>
-<td>39</td>
-<td>F</td>
+<td>1</td>
+<td>2</td>
+<td>jane</td>
+<td>jane</td>
+<td>jane</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>2</td>
+<td>said</td>
+<td>said</td>
+<td>say</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>2</td>
+<td>i</td>
+<td>i</td>
+<td>i</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>2</td>
+<td>can</td>
+<td>can</td>
+<td>can</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>2</td>
+<td>not</td>
+<td>not</td>
+<td>not</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>2</td>
+<td>believe</td>
+<td>believ</td>
+<td>believe</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>2</td>
+<td>we</td>
+<td>we</td>
+<td>we</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>2</td>
+<td>are</td>
+<td>are</td>
+<td>be</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>2</td>
+<td>finally</td>
+<td>final</td>
+<td>finally</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>2</td>
+<td>here</td>
+<td>here</td>
+<td>here</td>
 </tr>
 </tbody>
 </table>
@@ -1773,8 +1393,55 @@ Table&nbsp;2.14: Joining variables from two datasets based on a shared index var
 </figure>
 </div>
 </div>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-regular fa-file-alt" aria-label="file-alt"></i> Case study</strong></p>
+<p>Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus <span class="citation" data-cites="Kostic2003">(<a href="../references.html#ref-Kostic2003" role="doc-biblioref">Kostić, Marković, and Baucal 2003</a>)</span>. <span class="citation" data-cites="Baayen2006">Baayen, Feldman, and Schreuder (<a href="../references.html#ref-Baayen2006" role="doc-biblioref">2006</a>)</span> found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.</p>
+</div>
+</div>
+</div>
+<p>Reclassification transformations can be useful for simplifying complex variables, making it easier to identify patterns, as we see in <a href="#tbl-ud-recode-categorical-lemma" class="quarto-xref">Table&nbsp;<span>2.8</span></a>. However, it is important to consider the trade-offs of reclassification and to ensure that the result aligns with the research question. For example, reclassifying a numeric variable to a categorical variable or a categorical variable into a variable with fewer levels variable can lead to loss of information about the original levels <span class="citation" data-cites="Baayen2010">(<a href="../references.html#ref-Baayen2010" role="doc-biblioref">Baayen 2010</a>)</span>.</p>
+<p><strong>Calculations</strong> of measures can also be seen as a recoding operation. In text analysis, measures are often used to describe the properties of a document or linguistic unit. For example, the number of words in a corpus document, the lengths of sentences, the number of clauses in a sentence, <em>etc.</em> In turn, these measures can be used to calculate other measures, such as lexical diversity or syntactic complexity measures. The end result makes the dataset more informative and amenable to analysis.</p>
+<p><strong>Integration</strong> is a transformation step which can be row-wise or column-wise. Row-wise integration is the process of combining datasets by appending observations from one dataset to another. Column-wise integration is the process of combining datasets by appending variables from one dataset to another.</p>
+<p>To integrate in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as <strong>concatenating datasets</strong>, and is visualized in <a href="#fig-concatenation" class="quarto-xref">Figure&nbsp;<span>2.4 (a)</span></a>. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the same variables and variable types is not the same has having the same values.</p>
+<p>Take, for example, a case when a corpus resource contains data for two populations. In the course of curating and transforming the datasets, it may make more sense to work with the datasets separately. However, when it comes time to analyze the data, it may be more convenient to work with the datasets as a single dataset. In this case, the datasets can be concatenated to create a single dataset.</p>
+<div id="fig-ud-integration" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ud-integration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ud-integration" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-concatenation" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-concatenation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/integration-concat-visual.drawio.png" class="img-fluid figure-img" data-ref-parent="fig-ud-integration">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-concatenation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Concatenation
+</figcaption></figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ud-integration" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-joining" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure"><div aria-describedby="fig-joining-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/integration-join-visual.drawio.png" class="img-fluid figure-img" data-ref-parent="fig-ud-integration">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-joining-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Joining
+</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ud-integration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.4: Visual summary of row-wise and column-wise integration operations on datasets
+</figcaption></figure>
+</div>
+<p>Integrating datasets can be performed in a column-wise manner as well. In this process, the datasets need not have the exact same variables and variable types, rather it is required that the datasets share a common variable of the same informational type that can be used to index the datasets. This process is often referred to as <strong>joining datasets</strong> and is visualized in <a href="#fig-joining" class="quarto-xref">Figure&nbsp;<span>2.4 (b)</span></a>.</p>
+<p>Corpus resources often include metadata in stand-off annotation format. That is, the metadata is not embedded in the corpus files, but rather is stored in a separate file. The metatdata and corpus files will share a common variable which is used to join the metadata with the corpus files.</p>
 <p>Joining datasets is a powerful tool for enriching a dataset with additional column-wise information. It is important to note that integrating datasets can also remove information in a row-wise manner. For example, when merging two datasets with a shared variable, it is possible to remove observations that do not have a match one of the two datasets. This process effectively filters out observations not shared between the two datasets. On the other hand, an anti-join explicitly removes observations that are shared between the two datasets.</p>
-<div class="callout callout-style-simple callout-none no-icon">
+<div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
@@ -1786,17 +1453,16 @@ Table&nbsp;2.14: Joining variables from two datasets based on a shared index var
 </div>
 </div>
 </div>
-<hr>
 <p>In sum, the transformation steps described here collectively aim to produce higher quality datasets that are relevant in content and structure to submit to analysis. The process may include one or more of the previous transformations but is rarely linear and is most often iterative. It is typical to do some normalization then generation, then recoding, and then return to normalizing, and so forth. This process is highly idiosyncratic given the characteristics of the curated dataset and the ultimate goal for the transformed dataset(s).</p>
 </section></section></section><section id="sec-ud-documentation" class="level2" data-number="2.3"><h2 data-number="2.3" class="anchored" data-anchor-id="sec-ud-documentation">
 <span class="header-section-number">2.3</span> Documentation</h2>
 <p>As we have seen in this chapter, acquiring corpus data and converting that data into information involves a number of conscious decisions and implementation steps. As a favor to ourselves, as researchers, and to the research community, it is crucial to document these decisions and steps. This makes it both possible to retrace our own steps and also provides a guide for future researchers that want to reproduce and/ or build on your research. A programmatic approach to quantitative research helps ensure that the implementation steps are documented and reproducible but it is also vital that the decisions that are made are documented as well. This includes data origin information for the acquired corpus data and data dictionaries for the curated and transformed datasets.</p>
 <section id="sec-ud-data-origin" class="level3"><h3 class="anchored" data-anchor-id="sec-ud-data-origin">Data origin</h3>
-<p>Data acquired from corpus resources should be accompanied by information about the <strong>data origin</strong>. <a href="#tbl-ud-data-origin" class="quarto-xref">Table&nbsp;<span>2.15</span></a> provides a list of the types of information that should be included in the data origin information.</p>
+<p>Data acquired from corpus resources should be accompanied by information about the <strong>data origin</strong>. <a href="#tbl-ud-data-origin" class="quarto-xref">Table&nbsp;<span>2.9</span></a> provides a list of the types of information that should be included in the data origin information.</p>
 <div class="cell" data-tbl-colwidths="[25,75]">
 <div id="tbl-ud-data-origin" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-data-origin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.15: Data origin information.
+Table&nbsp;2.9: Data origin information.
 </figcaption><div aria-describedby="tbl-ud-data-origin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="cell table table-sm table-striped small">
@@ -1856,11 +1522,11 @@ Table&nbsp;2.15: Data origin information.
 <p>For many corpus resources, the corpus documentation will include all or most of this information as part of the resource download or documented online. If this information is not present in the corpus resource or you compile your own, it is important to document this information yourself. This information can be documented in file, such as a plain text file or spreadsheet, that is included with the corpus resource.</p>
 </section><section id="sec-ud-data-dictionaries" class="level3"><h3 class="anchored" data-anchor-id="sec-ud-data-dictionaries">Data dictionaries</h3>
 <p>The process of organizing the data into a dataset, curation, and modifications to the dataset in preparation for analysis, transformation, each include a number of project-specific decisions. These decisions should be documented.</p>
-<p>On the one hand, each dataset that is created should have a <strong>data dictionary</strong> file. A data dictionary is a document, usually in a spreadsheet format, that describes the variables in a dataset. The key information that should be included in a data dictionary is provided in <a href="#tbl-ud-data-dictionary" class="quarto-xref">Table&nbsp;<span>2.16</span></a>.</p>
+<p>On the one hand, each dataset that is created should have a <strong>data dictionary</strong> file. A data dictionary is a document, usually in a spreadsheet format, that describes the variables in a dataset. The key information that should be included in a data dictionary is provided in <a href="#tbl-ud-data-dictionary" class="quarto-xref">Table&nbsp;<span>2.10</span></a>.</p>
 <div class="cell" data-tbl-colwidths="[25,75]">
 <div id="tbl-ud-data-dictionary" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ud-data-dictionary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.16: Data dictionary information.
+Table&nbsp;2.10: Data dictionary information.
 </figcaption><div aria-describedby="tbl-ud-data-dictionary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="cell table table-sm table-striped small">
@@ -1940,20 +1606,7 @@ Table&nbsp;2.16: Data dictionary information.
 </div>
 </div>
 </section><section id="summary" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="summary">Summary</h2>
-<p>In this chapter we have focused on data and information –the first two components of DIKI Hierarchy. This process is visualized in <a href="#fig-understanding-data-vis-sum" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div id="fig-understanding-data-vis-sum" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-understanding-data-vis-sum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/ud-diki.drawio.png" class="img-fluid figure-img" style="width:75.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-understanding-data-vis-sum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.4: Understanding data: visual summary
-</figcaption></figure>
-</div>
-</div>
-</div>
-<p>First a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.</p>
+<p>In this chapter we have focused on data and information –the first two components of DIKI Hierarchy. First, a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.</p>
 <p>Once a viable corpus is identified, then that corpus is converted into a curated dataset which adopts the tidy dataset format where each column is a variable, each row is an observation, and the intersection of columns and rows contain values. This curated dataset serves to establish the base informational relationships from which your research will stem.</p>
 <p>The curated dataset will most likely require transformations which may include normalization, tokenization, recoding, generation, and/ or integration to enhance the usefulness of the information to analysis. A transformed dataset or set of datasets will the result from this process.</p>
 <p>Finally, documentation should be implemented at the acquisition, curation, and transformation stages of the analysis project process. The combination of data origin, data dictionary, and literate programming files establishes documentation of the data and implementation steps to ensure transparent and reproducible research.</p>
@@ -1962,6 +1615,9 @@ Figure&nbsp;2.4: Understanding data: visual summary
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
 <div id="ref-Adel2020" class="csl-entry" role="listitem">
 Ädel, Annelie. 2020. <span>“Corpus Compilation.”</span> In <em>A Practical Handbook of Corpus Linguistics</em>, edited by Magali Paquot and Stefan Th. Gries, 3–24. Switzerland: Springer.
+</div>
+<div id="ref-Baayen2010" class="csl-entry" role="listitem">
+Baayen, R. Harald. 2010. <span>“A Real Experiment Is a Factorial Experiment?”</span> <em>The Mental Lexicon</em> 5 (1): 149–57. <a href="https://doi.org/10.1075/ml.5.1.06baa">https://doi.org/10.1075/ml.5.1.06baa</a>.
 </div>
 <div id="ref-Baayen2006" class="csl-entry" role="listitem">
 Baayen, R. Harald, L. B. Feldman, and R. Schreuder. 2006. <span>“Morphological Influences on the Recognition of Monosyllabic Monomorphemic Words.”</span> <em>Journal of Memory and Language</em> 55: 290–313. <a href="https://doi.org/10.1016/j.jml.2006.03.008">https://doi.org/10.1016/j.jml.2006.03.008</a>.
@@ -1992,6 +1648,9 @@ Marcus, Mitchell P, Beatrice Santorini, and Mary Ann Marcinkiewicz. 1993. <span>
 </div>
 <div id="ref-Sedgwick2015" class="csl-entry" role="listitem">
 Sedgwick, Philip. 2015. <span>“Units of Sampling, Observation, and Analysis.”</span> <em>BMJ (Online)</em> 351 (October): h5396. <a href="https://doi.org/10.1136/bmj.h5396">https://doi.org/10.1136/bmj.h5396</a>.
+</div>
+<div id="ref-Serigos2020" class="csl-entry" role="listitem">
+Serigos, Jacqueline. 2020. <span>“Using Automated Methods to Explore the Social Stratification of Anglicisms in Spanish.”</span> <em>Corpus Linguistics and Linguistic Theory</em> 0 (0): 000010151520190052. <a href="https://doi.org/10.1515/cllt-2019-0052">https://doi.org/10.1515/cllt-2019-0052</a>.
 </div>
 <div id="ref-Wickham2014a" class="csl-entry" role="listitem">
 Wickham, Hadley. 2014. <span>“Tidy Data.”</span> <em>Journal of Statistical Software</em> 59 (10). <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.

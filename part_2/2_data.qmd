@@ -200,18 +200,18 @@ In @exm-masc-df we see an example of an R data frame object which overlaps with 
 MASC data frame
 
 ```xml
-   doc_id  date modality domain          token_id word       lemma      pos
-    <int> <dbl> <fct>    <chr>              <int> <chr>      <chr>      <chr>
- 1      1  2008 Writing  General Fiction        1 Sound      sound      NNP
- 2      1  2008 Writing  General Fiction        2 is         be         VBZ
- 3      1  2008 Writing  General Fiction        3 a          a          DT
- 4      1  2008 Writing  General Fiction        4 vibration  vibration  NN
- 5      1  2008 Writing  General Fiction        5 .          .          .
- 6      1  2008 Writing  General Fiction        6 Sound      sound      NNP
- 7      1  2008 Writing  General Fiction        7 travels    travel     VBZ
- 8      1  2008 Writing  General Fiction        8 as         as         IN
- 9      1  2008 Writing  General Fiction        9 a          a          DT
-10      1  2008 Writing  General Fiction       10 mechanical mechanical JJ
+   doc_id  date modality token_id word       lemma      pos
+    <int> <dbl> <fct>       <int> <chr>      <chr>      <chr>
+ 1      1  2008 Writing         1 Sound      sound      NNP
+ 2      1  2008 Writing         2 is         be         VBZ
+ 3      1  2008 Writing         3 a          a          DT
+ 4      1  2008 Writing         4 vibration  vibration  NN
+ 5      1  2008 Writing         5 .          .          .
+ 6      1  2008 Writing         6 Sound      sound      NNP
+ 7      1  2008 Writing         7 travels    travel     VBZ
+ 8      1  2008 Writing         8 as         as         IN
+ 9      1  2008 Writing         9 a          a          DT
+10      1  2008 Writing        10 mechanical mechanical JJ
 ```
 :::
 
@@ -348,11 +348,13 @@ Visualization of row-wise and column-wise transformation operations on a dataset
 
 The results build on and manipulate the curated dataset to produce a *transformed dataset*. While there is typically one curated dataset that serves as the base organizational dataset, there may be multiple transformed datasets, each aligning with the informational needs of specific analyses in the research project.
 
-In what follows, we will group common transformation processes into two purpose-based groupings: preparation and enrichment. The purpose of preparation transformations is to clean, standardize, and derive the key attributes of the dataset on which further processing will depend. Enrichment transformations, on the other hand, are designed to add new attributes to the dataset. These attributes may be derived from the existing attributes or may be integrated from other datasets. Together, the goal of these transformations is to make the dataset more informative and more amenable to the particular aims of a given analysis.
+<!-- Rethink this section below -->
+
+In what follows, we will group common transformation processes into two purpose-based groupings: preparation and enrichment. Together, the goal of these transformations is to make the dataset more informative and more amenable to the particular aims of a given analysis.
 
 #### Preparation
 
-Common preparation transformations include text normalization and text tokenization. **Text normalization** is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.
+The purpose of preparation transformations is to clean, standardize, and derive the key attributes of the dataset on which further processing will depend. Common preparation transformations include text normalization and text tokenization. **Text normalization** is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.
 
 Let's take a toy dataset, in @tbl-ud-text-dataset, as an example starting point. In this dataset, we have three variables, `text_id`, `sent_id`, and `sentence`. It has five observations.
 
@@ -375,19 +377,9 @@ text_df |>
   tt(width = 1)
 ```
 
-The types of transformations we apply will depend on the specific needs of the project, but can include those found in @tbl-ud-text-normalization.
+The normalization we apply will depend on the specific needs of the project, but can include operations such as changing the case of the text, removing punctuation, standardizing forms, *etc.* The goal is to reduce the noise in the text and make it more amenable to analysis.
 
-| Task name                                     | Relevant example                                                 | Typical purpose                                                                                          |
-|-----------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| Lowercasing                                   | `"Text"` to `"text"`                                             | Minimizing case sensitivity in subsequent analysis                                                       |
-| Removal of Punctuation and Special Characters | `"Hello, World!"` to `"Hello World"`                             | Removing non-alphanumeric characters that may not carry semantic value                                   |
-| Adjustment of Forms                           | `"colour"` to `"color"`, `"it's"` to `"it is"`, `"1"` to `"one"` | Standardizing variations in spelling, contractions, and numeric forms to a common format                 |
-
-: Common text normalization tasks {#tbl-ud-text-normalization}{tbl-colwidths="[25, 30, 45]" .sm .striped}
-
-These transformations are column-wise operations, meaning they preserve the number of rows in the dataset. They also preserve the number of columns, but *do* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun).
-
-<!-- [ ] Or add token vs. type here from exploration? -->
+Normalization tends to preserve the number of rows and columns in the dataset but *does* change the values of the variables. These tasks should be applied with an understanding of how the changes will impact the analysis. For example, lowercasing can be useful for reducing differences between words that are otherwise identical, yet differ in case due to word position in a sentence ("The" versus "the"). However, lowercasing can also be problematic if the case of the word carries semantic value, such as in the case of "US" (United States) and "us" (first person plural pronoun).
 
 **Text tokenization** involves adapting the text such that it reflects the target linguistic unit that will be used in the analysis. This is a row-wise operation expanding the number of rows, if the linguistic unit is smaller than the original variable, or reducing the number of rows, if the linguistic unit is larger than the original variable.
 
@@ -401,16 +393,15 @@ In @tbl-ud-tokenization, we see examples of tokenization at word and character l
 
 ```{r}
 #| label: tbl-ud-tokenization
-#| tbl-cap: "Examples of tokenization at word and character levels."
+#| tbl-cap: "Word and character tokenization examples"
 #| tbl-subcap:
-#|  - "Word tokenization"
-#|  - "Word bigram tokenization"
 #|  - "Character trigram tokenization"
-#| layout-ncol: 3
+#|  - "Word bigram tokenization"
+#| layout-ncol: 2
 
 text_df |>
-  unnest_tokens(word, sentence, token = "words") |>
-  select(text_id, sent_id, word) |>
+  unnest_tokens(trigram, sentence, token = "character_shingles", n = 3) |>
+  select(text_id, sent_id, trigram) |>
   slice_head(n = 10) |>
   tt(width = 1)
 
@@ -419,71 +410,21 @@ text_df |>
   select(text_id, sent_id, bigram) |>
   slice_head(n = 10) |>
   tt(width = 1)
-
-text_df |>
-  unnest_tokens(trigram, sentence, token = "character_shingles", n = 3) |>
-  select(text_id, sent_id, trigram) |>
-  slice_head(n = 10) |>
-  tt(width = 1)
-```
-
-At its core, tokenization is the process which enables the quantitative analysis of text. Choosing the right tokenization level is crucial for the success of the analysis.
-
-#### Enrichment
-
-Let's now turn to transformations that augment the variables of the dataset. Common enrichment transformations include recoding, generation, and integration of observations and/ or variables.
-
-**Recoding** is the process of transforming the values of one or more variables into new values which are more amenable to analysis. This is a column-wise operation which can be applied to categorical or numeric variables alike.
-
-The aim is to simplify complex variables, making it easier to identify patterns and trends relevant for the research question. Say for example, we have a variable in our datataset that represents the part-of-speech (POS) of each word token in the text. The measure is a POS tag from the Penn Treebank tagset [@Marcus1993]. This tagset makes twelve major and 45 minor grammatical class distinctions. In an analysis that aims to explore only major class distinctions, it would be useful to recode the POS variable into major classes only (*i.e.* noun, pronoun, adjective, verb, adverb, *etc.*) to facilitate queries, summaries, and visualizations.
-
-Along these lines, the surface forms of words can be recoded to their lemmatized or stemmed forms. **Stemming** is the process of reducing inflected words to their word stem, base, or root form. **Lemmatization** is the process of reducing inflected words to their dictionary form, or lemma.
-
-In @tbl-ud-recode-categorical-lemma, we see an example of recoding surface forms of words to their lemmatized forms.
-
-```{r}
-#| label: tbl-ud-recode-categorical-lemma
-#| tbl-cap: "A toy dataset illustrating recoding of surface forms of words to their lemmatized forms."
-
-text_df |>
-  unnest_tokens(word, sentence) |>
-  mutate(lemma = textstem::lemmatize_words(word)) |>
-  filter(sent_id == 2) |>
-  mutate(word = str_split(word, "'")) |>
-  unnest(word) |>
-  mutate(word = case_when(
-    word == "t" ~ "not",
-    word == "re" ~ "are",
-    TRUE ~ word
-  )) |>
-  mutate(lemma = case_when(
-    word == "can" ~ "can",
-    word == "we" ~ "we",
-    word == "not" ~ "not",
-    word == "are" ~ "be",
-    TRUE ~ lemma
-  )) |>
-  tt(width = 1)
 ```
 
 ::: {.callout .halfsize}
 **{{< fa regular file-alt >}} Case study**
 
-Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus [@Kostic2003]. @Baayen2006 found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.
+@Serigos2020 explores the social stratification of anglicisms in Argentine media. The author presents a method for automatically detecting anglicisms in Spanish texts. In combination with other methods, character $n$-grams are used to determine the language of a word. The method is based on the observation that the distribution of character $n$-grams is different between languages.
 :::
 
-Recoding transformations can be useful for simplifying complex variables, making it easier to identify patterns, as we see in @tbl-ud-recode-categorical-lemma. However, it is important to note that recoding can also lead to loss of information. For example, recoding a variable with many levels into a binary variable can lead to loss of information about the original levels. It is important to consider the trade-offs of recoding and to ensure that the recoding aligns with the research question.
+At its core, tokenization is the process which enables the quantitative analysis of text. Choosing the right tokenization level is crucial for the success of the analysis.
 
-Furthermore, it is important to note recoding can be used to create more nuanced variables instead of more simplified. This draws on the combination of level information from multiple variables creating a variable that reflects a more complex relationship that was previously implicit in the dataset.
+#### Enrichment
 
-**Generation** is the process of creating new variables from existing variables, and as such it is a column-wise operation. Generation can include applying calculations or extracting relevant information from existing variables or enhancing text variables with linguistic annotation. Simplifying a bit, generation helps make implicit attributes explicit.
+Enrichment transformations are designed to add new attributes to the dataset. These attributes may be derived from the existing attributes or may be integrated from other datasets. Common enrichment transformations include generation, recoding, and integration of observations and/ or variables.
 
-
-Let's highlight a some common calculation and extraction examples that generate variables. First, let's look at the calculation of measures. In text analysis, measures are often used to describe the properties of a document or linguistic unit. For example, the number of words in a corpus document, the lengths of sentences, the number of clauses in a sentence, *etc.*. In turn, these measures can be used to calculate other measures, such as lexical diversity or syntactic complexity measures.
-
-In terms of extraction, the goal is to distill relevant information from existing variables. For example, extracting the year from a date variable, or extracting the first name from a full name variable. In text analysis, extraction is often used to extract information from text variables. Say we have a dataset with a variable containing conversation utterances. We may want to extract some characteristic from those utterances and capture their occurrence in a new variable.
-
-But what if we want to extract linguistic information from a text variable that is not explicitly present in the text? This is where linguistic annotation comes in. Linguistic annotation is the process of enriching text with linguistic information, such as part-of-speech tags, morphological features, syntactic structure, *etc.*. This can be done manually by linguist coders and/ or done using natural language processing (NLP) tools, such as part-of-speech taggers, parsers, *etc.*.
+**Generation** is the process of creating new variables based on implicit information within existing variables. It is a row- and column-wise operation which in text analysis often includes linguistic annotation such as part-of-speech tagging, morphological analysis, syntactic parsing, *etc.* These annotations can be used to generate new variables that capture linguistic information that is not explicitly present in the text.
 
 ```{r}
 #| label: functions-load-udpipe-model
@@ -503,14 +444,13 @@ load_model_udpipe <- function(model_lang) {
 }
 ```
 
-To illustrate the process of linguistic annotation, we will start with the dataset from @tbl-ud-text-dataset. Applying a pre-trained model from the [Universal Dependencies (UD)](https://universaldependencies.org/)[^ud-ud] project, we can generate linguistic annotation for each word in the `sentence` variable.
+Linguistic annotation can be done manually by linguist coders and/ or done automatically using natural language processing (NLP) tools. To illustrate the process of automatic linguistic annotation, we will start with the dataset from @tbl-ud-text-dataset. Applying a pre-trained model from the [Universal Dependencies (UD)](https://universaldependencies.org/)[^ud-ud] project, we can generate linguistic annotation for each word in the `sentence` variable.
 
 [^ud-ud]: The Universal Dependency project is an effort to develop cross-linguistically consistent treebank annotation for many languages. The project has developed a set of annotation guidelines and a set of tools for generating linguistic annotation. The project has also developed a set of pre-trained models for many languages.
 
-
 ```{r}
 #| label: tbl-ud-generate-annotation
-#| tbl-cap: 'Automatic linguistic annotation for grammatical category and syntactic structure for an example English sentence from the MASC.'
+#| tbl-cap: 'Automatic linguistic annotation example'
 #| tbl-colwidths: [7, 7, 5, 61, 20]
 
 eng_model <- load_model_udpipe("english-ewt")
@@ -528,125 +468,96 @@ text_annotation |>
   tt(width = 1)
 ```
 
-The annotated dataset now includes the key variables `pos` (Penn treebank tags), `features` (morphological features), and `syn_relation`. The results of this process can then be further transformed as need be to fit the needs of the analysis. The results of this process enables more direct access during analysis to features that were hidden or otherwise difficult to access.
+The annotated dataset is now tokenized by word and includes the key variables `pos` (Penn treebank tags), `features` (morphological features), and `syn_relation` (dependency relations). These variables provide information about the grammatical category and syntactic structure of each word in the sentence. The results of this process enables more direct access during analysis to features that were hidden or otherwise difficult to access.
 
-A word of caution: automated linguistic annotation offers rapid access to abundant and highly dependable linguistic data for numerous languages. However, linguistic annotation tools are not infallible. They are tools developed by training computational algorithms to identify patterns in previously annotated and verified datasets, resulting in a language model. This model is then employed to predict linguistic annotations for new language data (as seen in @tbl-ud-generate-annotation). The accuracy of the linguistic annotation heavily relies on the congruence between the language sampling frame of the trained data and that of the dataset to be automatically annotated.
+::: {.callout .halfsize}
+**{{< fa exclamation-triangle >}} Warning**
+
+Automated linguistic annotation can offer rapid access to abundant and highly dependable linguistic data for numerous languages. However, linguistic annotation tools are not infallible. They are tools developed by training computational algorithms to identify patterns in previously annotated and verified datasets, resulting in a language model. This model is then employed to predict linguistic annotations for new language data. The accuracy of the linguistic annotation heavily relies on the congruence between the language sampling frame of the trained data and that of the dataset to be automatically annotated.
+:::
+
+**Recoding** is the process of transforming the values of one or more variables into new values which are more amenable to analysis. This is a column-wise operation which is used to make explicit information more accessible. Typical operatins include extraction, reclassification, and calculation.
+
+In terms of **extraction**, the goal is to distill relevant information from existing variables. For example, extracting the year from a date variable, or extracting the first name from a full name variable. In text analysis, extraction is often used to extract information from text variables. Say we have a dataset with a variable containing conversation utterances. We may want to extract some characteristic from those utterances and capture their occurrence in a new variable.
+
+**Reclassification** aims to simplify complex variables, making it easier to identify patterns and trends relevant for the research question. Say for example, we have a variable in our datataset that represents the part-of-speech (POS) of each word token in the text. The measure is a POS tag from the Penn Treebank tagset [@Marcus1993]. This tagset makes twelve major and 45 minor grammatical class distinctions. In an analysis that aims to explore only major class distinctions, it would be useful to recode the POS variable into major classes only (*i.e.* noun, pronoun, adjective, verb, adverb, *etc.*) to facilitate queries, summaries, and visualizations.
+
+Along these lines, the surface forms of words can be recoded to their lemmatized or stemmed forms. **Stemming** is the process of reducing inflected words to their word stem, base, or root form. **Lemmatization** is the process of reducing inflected words to their dictionary form, or lemma.
+
+In @tbl-ud-recode-categorical-lemma, we see an example of recoding surface forms of words to their stemmed and lemmatized forms.
+
+```{r}
+#| label: tbl-ud-recode-categorical-lemma
+#| tbl-cap: "Reclassification of surface forms of words to their stemmed and lemmatized forms"
+
+text_df |>
+  unnest_tokens(word, sentence) |>
+  mutate(stem = textstem::stem_words(word)) |>
+  mutate(lemma = textstem::lemmatize_words(word)) |>
+  filter(sent_id == 2) |>
+  mutate(word = str_split(word, "'")) |>
+  unnest(word) |>
+  mutate(word = case_when(
+    word == "t" ~ "not",
+    word == "re" ~ "are",
+    TRUE ~ word
+  )) |>
+  mutate(stem = case_when(
+    word == "can" ~ "can",
+    word == "we" ~ "we",
+    word == "not" ~ "not",
+    word == "are" ~ "are",
+    TRUE ~ stem
+  )) |>
+  mutate(lemma = case_when(
+    word == "can" ~ "can",
+    word == "we" ~ "we",
+    word == "not" ~ "not",
+    word == "are" ~ "be",
+    TRUE ~ lemma
+  )) |>
+  tt(width = 1)
+```
+
+::: {.callout .halfsize}
+**{{< fa regular file-alt >}} Case study**
+
+Inflectional family size is the number of inflectional forms for a given word and can be calculated from a corpus by counting the number of surface forms for each lemma in the corpus [@Kostic2003]. @Baayen2006 found that words with larger inflectional family size are associated with faster word recognition times in lexical processing tasks.
+:::
+
+Reclassification transformations can be useful for simplifying complex variables, making it easier to identify patterns, as we see in @tbl-ud-recode-categorical-lemma. However, it is important to consider the trade-offs of reclassification and to ensure that the result aligns with the research question. For example, reclassifying a numeric variable to a categorical variable or a categorical variable into a variable with fewer levels variable can lead to loss of information about the original levels [@Baayen2010].
+
+**Calculations** of measures can also be seen as a recoding operation. In text analysis, measures are often used to describe the properties of a document or linguistic unit. For example, the number of words in a corpus document, the lengths of sentences, the number of clauses in a sentence, *etc.* In turn, these measures can be used to calculate other measures, such as lexical diversity or syntactic complexity measures. The end result makes the dataset more informative and amenable to analysis.
 
 **Integration** is a transformation step which can be row-wise or column-wise. Row-wise integration is the process of combining datasets by appending observations from one dataset to another. Column-wise integration is the process of combining datasets by appending variables from one dataset to another.
 
-```{r}
-#| label: ud-integrate-dataset
-
-text_tbl <- tibble::tribble(
-  ~participant_id, ~text_id, ~modality, ~text,
-  "P1", "T1", "Written", "Technology has revolutionized our lives in many ways. It has made communication easier, faster, and more efficient.",
-  "P2", "T2", "Spoken", "Hello, my name is X. I am a software engineer working at XYZ company.",
-  "P3", "T3", "Written", "Climate change is a pressing issue that affects everyone on Earth. We must take immediate action to reduce our carbon footprint.",
-  "P4", "T4", "Spoken", "Hi, I'm X, and I work as a project manager. My main responsibility is to ensure that projects are completed on time and within budget.",
-  "P5", "T5", "Written", "Education is the key to personal and societal growth. Investing in quality education will lead to a brighter future for all.",
-  "P6", "T6", "Spoken", "Hi, my name is X, and I'm a teacher. I teach English at a local high school."
-)
-
-written_tbl <-
-  text_tbl |>
-  dplyr::filter(modality == "Written")
-
-spoken_tbl <-
-  text_tbl |>
-  dplyr::filter(modality == "Spoken")
-```
-
-To integrate in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as **concatenating datasets**. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the same variables and variable types is not the same has having the same values.
+To integrate in row-wise manner the datasets involved in the process must have the same variables and variable types. This process is often referred to as **concatenating datasets**, and is visualized in @fig-concatenation. It can be thought of as stacking datasets on top of each other to create a larger dataset. Remember, having the same variables and variable types is not the same has having the same values.
 
 Take, for example, a case when a corpus resource contains data for two populations. In the course of curating and transforming the datasets, it may make more sense to work with the datasets separately. However, when it comes time to analyze the data, it may be more convenient to work with the datasets as a single dataset. In this case, the datasets can be concatenated to create a single dataset.
 
-To illustate, consider the toy datasets in @tbl-ud-merge-dataset-written and @tbl-ud-merge-dataset-spoken.
+::: {#fig-ud-integration layout-ncol=2}
 
-```{r}
-#| label: tbl-ud-merge-dataset-written
-#| tbl-cap: "Toy dataset of written text data."
-#| tbl-colwidths: [15, 15, 15, 55]
+![Concatenation](figures/integration-concat-visual.drawio.png){#fig-concatenation}
 
-written_tbl |>
-  tt(width = 1)
-```
+![Joining](figures/integration-join-visual.drawio.png){#fig-joining}
 
-```{r}
-#| label: tbl-ud-merge-dataset-spoken
-#| tbl-cap: "Toy dataset of spoken text data."
-#| tbl-colwidths: [15, 15, 15, 55]
+Visual summary of row-wise and column-wise integration operations on datasets
+:::
 
-spoken_tbl |>
-  tt(width = 1)
-```
 
-These datasets, in @tbl-ud-merge-dataset-written and @tbl-ud-merge-dataset-spoken, contain the same variables and variable types, but different observations --one in which the sample contains written language and the other spoken. Conveniently, they can be concatenated to create a single dataset that contains all of the observations, as seen in @tbl-ud-merge-dataset-concat.
-
-```{r}
-#| label: tbl-ud-merge-dataset-concat
-#| tbl-cap: "Toy dataset of written and spoken text data concatenated."
-#| tbl-colwidths: [15, 15, 15, 55]
-
-concat_tbl <-
-  bind_rows(written_tbl, spoken_tbl)
-
-concat_tbl |>
-  tt(width = 1)
-```
-
-Integrating datasets can be performed in a column-wise manner as well. In this process, the datasets need not have the exact same variables and variable types, rather it is required that the datasets share a common variable of the same informational type that can be used to index the datasets. This process is often referred to as **joining datasets**.
+Integrating datasets can be performed in a column-wise manner as well. In this process, the datasets need not have the exact same variables and variable types, rather it is required that the datasets share a common variable of the same informational type that can be used to index the datasets. This process is often referred to as **joining datasets** and is visualized in @fig-joining.
 
 Corpus resources often include metadata in stand-off annotation format. That is, the metadata is not embedded in the corpus files, but rather is stored in a separate file. The metatdata and corpus files will share a common variable  which is used to join the metadata with the corpus files.
 
-To exemplify, here's another toy dataset that shares the `participant_id` index with the previous dataset in @tbl-ud-merge-dataset-concat and includes the variables `eng_native`, `age`, and `gender`:
-
-```{r}
-#| label: tbl-ud-merge-vars-participant
-#| tbl-cap: "Toy dataset of participant data with a shared variable `participant_id` to index the datasets."
-
-participant_tbl <- tibble::tribble(
-  ~participant_id, ~eng_native, ~age, ~gender,
-  "P1", "Yes", 28, "M",
-  "P2", "No", 35, "M",
-  "P3", "Yes", 42, "F",
-  "P4", "No", 26, "F",
-  "P5", "Yes", 31, "M",
-  "P6", "No", 39, "F"
-)
-
-participant_tbl |>
-  tt(width = 1)
-```
-
-This dataset provides additional information about each participant, such as their English native speaker status, age, and gender.
-
-Since the two datasets share the `participant_id` variable, we can merge them to create a new dataset that combines the information from both datasets, as we see in @tbl-ud-merge-join.
-
-```{r}
-#| label: tbl-ud-merge-join
-#| tbl-cap: 'Joining variables from two datasets based on a shared index variable.'
-#| tbl-colwidths: [10, 10, 10, 60, 10, 10, 10]
-
-# Inner join text_tbl and participant_tbl based on participant_id
-text_participant_tbl <-
-  inner_join(concat_tbl, participant_tbl, by = "participant_id")
-
-# Show results
-text_participant_tbl |>
-  tt(width = 1)
-```
-
 Joining datasets is a powerful tool for enriching a dataset with additional column-wise information. It is important to note that integrating datasets can also remove information in a row-wise manner. For example, when merging two datasets with a shared variable, it is possible to remove observations that do not have a match one of the two datasets. This process effectively filters out observations not shared between the two datasets. On the other hand, an anti-join explicitly removes observations that are shared between the two datasets.
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
 In some analyses, it may be useful to remove words with little semantic value, such as articles, prepositions, and conjunctions or words that are very common in the language. These are known as stopwords. There are various predefined lists of stopwords for different languages available on the web and through R in the `stopwords` package [@R-stopwords]. Anti-joining a stopword list with a dataset of word tokens is often used to remove stopwords from the dataset.
 
 However, it is important to note the criteria used to determine which words are considered stopwords in a particular resource may not fit a researcher's needs or the characteristics of the data. Learn more about approaches to identifying stopwords in @Kaur2018.
 :::
-
----
 
 In sum, the transformation steps described here collectively aim to produce higher quality datasets that are relevant in content and structure to submit to analysis. The process may include one or more of the previous transformations but is rarely linear and is most often iterative. It is typical to do some normalization then generation, then recoding, and then return to normalizing, and so forth. This process is highly idiosyncratic given the characteristics of the curated dataset and the ultimate goal for the transformed dataset(s).
 
@@ -736,17 +647,7 @@ In the following activities, we will be tackle a common scenario in data analysi
 
 ## Summary {.unnumbered}
 
-In this chapter we have focused on data and information --the first two components of DIKI Hierarchy. This process is visualized in @fig-understanding-data-vis-sum.
-
-```{r}
-#| label: fig-understanding-data-vis-sum
-#| fig-cap: 'Understanding data: visual summary'
-#| out.width: 75%
-
-knitr::include_graphics("figures/ud-diki.drawio.png")
-```
-
-First a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.
+In this chapter we have focused on data and information --the first two components of DIKI Hierarchy. First, a distinction is made between populations and samples, the latter being a intentional and subjective selection of observations from the world which attempt to represent the population of interest. The result of this process is known as a corpus. Whether developing a corpus or selecting an existing a corpus it is important to vet the sampling frame for its applicability and viability as a resource for a given research project.
 
 Once a viable corpus is identified, then that corpus is converted into a curated dataset which adopts the tidy dataset format where each column is a variable, each row is an observation, and the intersection of columns and rows contain values. This curated dataset serves to establish the base informational relationships from which your research will stem.
 

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.551">
+<meta name="generator" content="quarto-1.4.552">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>An Introduction to Quantitative Text Analysis for Linguistics - 6&nbsp; Curate</title>
 <style>
@@ -395,15 +395,15 @@ Exercises:
 </div>
 <section id="unstructured" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="unstructured">
 <span class="header-section-number">6.1</span> Unstructured</h2>
-<p>The bulk of text ever created is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable. Remember that text in itself is not information. Only when given explicit context does text become informative. The explicit contextual information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data. This information needs to be added or derived for the purposes of the research, either through manual inspection or (semi-)automatic processes. For now, however, our job is just to get the unstructured data into a structured format with as much metadata as we can derive from the resource.</p>
+<p>The bulk of text ever created is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable. Remember that text in itself is not information. Only when given explicit context does text become informative. The explicit contextual information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data.</p>
 <section id="reading-data" class="level3"><h3 class="anchored" data-anchor-id="reading-data">Reading data</h3>
-<p>Some of the common file formats which contain unstructured data include TXT, PDF, and DOCX. Although these formats are unstructured, they are not all the same. Reading these files into R requires different techniques and tools.</p>
-<p>Many times TXT files have the <em>.txt</em> extension, but it is not required. There are many ways to read TXT files into R and many packages that can be used to do so. For example, using the <code>readr</code> package, we can choose to read the entire file into a single vector of character strings with <code><a href="https://readr.tidyverse.org/reference/read_file.html">read_file()</a></code> or read the file by lines with <code><a href="https://readr.tidyverse.org/reference/read_lines.html">read_lines()</a></code> in which each line is a character string in a vector.</p>
-<p>Less commonly used in prepared data resources, PDF and DOCX files are more complex than TXT files as they contain formatting and embedded metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Needless to say, we need an alternate strategy to extract the text content from these files and potentially some of the metadata. For example, using the <code>readtext</code> package <span class="citation" data-cites="R-readtext">(<a href="../references.html#ref-R-readtext" role="doc-biblioref">Benoit and Obeng 2024</a>)</span>, we can read the text content from PDF and DOCX files into a single vector of character strings with <code>readtext()</code>.</p>
-<p>Whether in TXT, PDF, or DOCX format, the resulting data structure will require further processing to convert the data into a tidy dataset. For example, we may need to split the data into multiple columns or rows, or extract metadata from the text content.</p>
+<p>Some of the common file formats which contain unstructured data include TXT, PDF, and DOCX. Although these formats are unstructured, they are not the same. Reading these files into R requires different techniques and tools.</p>
+<p>There are many ways to read TXT files into R and many packages that can be used to do so. For example, using the <code>readr</code> package, we can choose to read the entire file into a single vector of character strings with <code><a href="https://readr.tidyverse.org/reference/read_file.html">read_file()</a></code> or read the file by lines with <code><a href="https://readr.tidyverse.org/reference/read_lines.html">read_lines()</a></code> in which each line is a character string in a vector.</p>
+<p>Less commonly used in prepared data resources, PDF and DOCX files are more complex than TXT files as they contain formatting and embedded document metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Needless to say, we need an alternate strategy to extract the text content from these files and potentially some of the metadata. For example, using the <code>readtext</code> package <span class="citation" data-cites="R-readtext">(<a href="../references.html#ref-R-readtext" role="doc-biblioref">Benoit and Obeng 2024</a>)</span>, we can read the text content from PDF and DOCX files into a single vector of character strings with <code>readtext()</code>.</p>
+<p>Whether in TXT, PDF, or DOCX format, the resulting data structure will require further processing to convert the data into a tidy dataset.</p>
 </section><section id="orientation" class="level3"><h3 class="anchored" data-anchor-id="orientation">Orientation</h3>
 <p>As an example of curating an unstructured source of corpus data, let’s take a look at the <a href="https://www.statmt.org/europarl/">Europarl Parallel Corpus</a> <span class="citation" data-cites="Koehn2005">(<a href="../references.html#ref-Koehn2005" role="doc-biblioref">Koehn 2005</a>)</span>. This corpus contains parallel texts (source and translated documents) from the European Parliamentary proceedings between 1996-2011 for some 21 European languages.</p>
-<p>Let’s assume we selected this corpus because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the compressed file, and inspecting the decompressed structure, we have the the file structure seen in <a href="#exm-cd-europarl-file-structure" class="quarto-xref">Example&nbsp;<span>6.1</span></a>.</p>
+<p>Let’s assume we selected this corpus because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the archive file, and inspecting the unarchived structure, we have the the file structure seen in <a href="#exm-cd-europarl-file-structure" class="quarto-xref">Example&nbsp;<span>6.1</span></a>.</p>
 <div id="exm-cd-europarl-file-structure" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.1</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">project/</span></span>
@@ -479,7 +479,7 @@ Table&nbsp;6.1: Data origin: Europarl Corpus
 </div>
 <p>Now let’s get familiar with the corpus directory structure and the files. In <a href="#exm-cd-europarl-file-structure" class="quarto-xref">Example&nbsp;<span>6.1</span></a>, we see that there are two corpus files, <em>europarl-v7.es-en.es</em> and <em>europarl-v7.es-en.en</em>, that contain the source and target language texts, respectively. The file names indicate that the files contain Spanish-English parallel texts. The <em>.es</em> and <em>.en</em> extensions indicate the language of the text.</p>
 <p>Looking at the beginning of the <em>.es</em> and <em>.en</em> files, in <a href="#lst-cd-europarl-es" class="quarto-xref">File&nbsp;<span>6.1</span></a> and <a href="#lst-cd-europarl-en" class="quarto-xref">File&nbsp;<span>6.2</span></a>, we see that the files contain a series of lines in either the source or target language.</p>
-<div id="lst-cd-europarl-es" class="listing quarto-float">
+<div id="lst-cd-europarl-es" class="txt listing quarto-float">
 <figure class="quarto-float quarto-float-lst figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-cd-europarl-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 File&nbsp;6.1: Spanish source text
 </figcaption><div aria-describedby="lst-cd-europarl-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -491,7 +491,7 @@ File&nbsp;6.1: Spanish source text
 </div>
 </figure>
 </div>
-<div id="lst-cd-europarl-en" class="listing quarto-float">
+<div id="lst-cd-europarl-en" class="txt listing quarto-float">
 <figure class="quarto-float quarto-float-lst figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-cd-europarl-en-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 File&nbsp;6.2: English target text
 </figcaption><div aria-describedby="lst-cd-europarl-en-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -504,7 +504,7 @@ File&nbsp;6.2: English target text
 </figure>
 </div>
 <p>We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of character strings separated by lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.</p>
-<p>Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the “idealized structure” of the data. For a curated dataset, we want to maintain the original structure of the data as much as possible to maintain the integrity of the data and create a transparent and reproducible dataset.</p>
+<p>Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the “idealized structure” of the data. For a curated dataset, we want to reflect the contents of the original data, yet in a tidy format, to maintain the integrity of and connection with the data.</p>
 <p>Given what we know about the data, we can define the idealized structure of the data as seen in <a href="#tbl-cd-europarl-structure-example" class="quarto-xref">Table&nbsp;<span>6.2</span></a>.</p>
 <div class="cell" data-tbl-colwidths="[10,17,19,54]">
 <div id="tbl-cd-europarl-structure-example" class="cell quarto-float anchored">
@@ -547,7 +547,7 @@ Table&nbsp;6.2: Idealized structure for the curated Europarl Corpus datasets.
 </div>
 <p>Our task now is to develop code that will read the original data and render the idealized structure as a curated dataset for each corpus file. We will then write the datasets to the <em>data/derived/</em> directory. The code we develop will be added to the <em>2-curate-data.qmd</em> file. And finally, the datasets will be documented with a data dictionary file.</p>
 </section><section id="tidy-the-data" class="level3"><h3 class="anchored" data-anchor-id="tidy-the-data">Tidy the data</h3>
-<p>To create the idealized dataset structure in <a href="#tbl-cd-europarl-structure-example" class="quarto-xref">Table&nbsp;<span>6.2</span></a>, lets’s start by reading the files by lines into R. We will use the <code><a href="https://readr.tidyverse.org/reference/read_lines.html">read_lines()</a></code> function from the <code>readr</code> package.</p>
+<p>To create the idealized dataset structure in <a href="#tbl-cd-europarl-structure-example" class="quarto-xref">Table&nbsp;<span>6.2</span></a>, lets’s start by reading the files by lines into R. As the files are aligned by lines, we will use the <code><a href="https://readr.tidyverse.org/reference/read_lines.html">read_lines()</a></code> function to read the files into character vectors.</p>
 <div id="exm-cd-europarl-readr" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.2</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
@@ -589,7 +589,7 @@ Table&nbsp;6.2: Idealized structure for the curated Europarl Corpus datasets.
 </div>
 </div>
 <p>The output of <a href="#exm-cd-europarl-inspect-chr" class="quarto-xref">Example&nbsp;<span>6.3</span></a> shows that the number of lines in each file is the same. This is good. If the number of lines in each file was different, we would need to figure out why and fix it. We also see that the content of the files is aligned as expected.</p>
-<p>Let’s now create a dataset for each of the character vectors. We will use the <code><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble()</a></code> function from the <code>tibble</code> package to create a data frame object with the character vectors as the <code>line</code> column and add a <code>type</code> column with the value ‘Source’ for the Spanish file and ‘Target’ for the English file. We will assign the output two new objects <code>europarl_source_df</code> and <code>europarl_target_df</code>, respectively, as seen in <a href="#exm-cd-europarl-df" class="quarto-xref">Example&nbsp;<span>6.4</span></a>.</p>
+<p>Let’s now create a dataset for each of the character vectors. We will use the <code>tibble()</code> function from the <code>tibble</code> package to create a data frame object with the character vectors as the <code>line</code> column and add a <code>type</code> column with the value ‘Source’ for the Spanish file and ‘Target’ for the English file. We will assign the output two new objects <code>europarl_source_df</code> and <code>europarl_target_df</code>, respectively, as seen in <a href="#exm-cd-europarl-df" class="quarto-xref">Example&nbsp;<span>6.4</span></a>.</p>
 <div id="exm-cd-europarl-df" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.4</strong></span> &nbsp;</p>
 <div class="cell">
@@ -607,7 +607,7 @@ Table&nbsp;6.2: Idealized structure for the curated Europarl Corpus datasets.
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>Inspecting these data frames with <code><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse()</a></code> in <a href="#exm-cd-europarl-glimpse" class="quarto-xref">Example&nbsp;<span>6.5</span></a>, we can see if the data frames have the structure we expect.</p>
+<p>Inspecting these data frames with <code>glimpse()</code> in <a href="#exm-cd-europarl-glimpse" class="quarto-xref">Example&nbsp;<span>6.5</span></a>, we can see if the data frames have the structure we expect.</p>
 <div id="exm-cd-europarl-glimpse" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.5</strong></span> &nbsp;</p>
 <div class="cell">
@@ -743,7 +743,7 @@ Table&nbsp;6.3: Data origin: CABNC datasets
 <span>  <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/cabnc/original/participants.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>The next step is to inspect the structure of the datasets. We can use the <code><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse()</a></code> function for this task.</p>
+<p>The next step is to inspect the structure of the datasets. We can use the <code>glimpse()</code> function for this task.</p>
 <div id="exm-cd-cabnc-glimpse" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.9</strong></span> &nbsp;</p>
 <div class="cell">
@@ -814,7 +814,7 @@ Table&nbsp;6.3: Data origin: CABNC datasets
 <p>We see from the output in <a href="#exm-cd-cabnc-skim-character" class="quarto-xref">Example&nbsp;<span>6.10</span></a>, that the variables <code>role</code> and <code>language</code> have a single unique value. This means that these variables do not show any variation across observations. We will remove these variables from the dataset.</p>
 <p>Continuing on, let’s look for redundant variables. We see that the variables <code>filename</code> and <code>path</code> have the same number unique values. And if we combine this with the visual summary in <a href="#exm-cd-cabnc-glimpse" class="quarto-xref">Example&nbsp;<span>6.9</span></a>, we can see that the <code>path</code> variable is redundant. We will remove this variable from the dataset.</p>
 <p>Another potentially redundant set of variables are <code>who</code> and <code>name</code> –both of which are speaker identifiers. The <code>who</code> variable is a unique identifier, but there may be some redundancy with the <code>name</code> variable, that is there may be two speakers with the same name. We can check this by looking at the number of unique values in the <code>who</code> and <code>name</code> variables from the <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> output in <a href="#exm-cd-cabnc-skim-character" class="quarto-xref">Example&nbsp;<span>6.10</span></a>. <code>who</code> has 568 unique values and <code>name</code> has 269 unique values. This suggests that there are multiple speakers with the same name.</p>
-<p>Another way to explore this is to look at the number of unique values in the <code>who</code> variable for each unique value in the <code>name</code> variable. We can do this using the <code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize()</a></code> functions from the <code>dplyr</code> package. For each value of <code>name</code>, we will count the number of unique values in <code>who</code> and then sort the results in descending order.</p>
+<p>Another way to explore this is to look at the number of unique values in the <code>who</code> variable for each unique value in the <code>name</code> variable. We can do this using the <code>group_by()</code> and <code>summarize()</code> functions from the <code>dplyr</code> package. For each value of <code>name</code>, we will count the number of unique values in <code>who</code> and then sort the results in descending order.</p>
 <div id="exm-cd-cabnc-who-name" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.11</strong></span> &nbsp;</p>
 <div class="cell">
@@ -841,7 +841,7 @@ Table&nbsp;6.3: Data origin: CABNC datasets
 </div>
 </div>
 <p>It is good that we performed the check in <a href="#exm-cd-cabnc-who-name" class="quarto-xref">Example&nbsp;<span>6.11</span></a> beforehand. In addition to speakers with the same name, such as ‘Chris’ and ‘David’, we also have multiple speakers with generic codes, such as ‘None’ and ‘Unknown_speaker’. It is clear that <code>name</code> is redundant and we can safely remove it from the dataset.</p>
-<p>With this in mind, we can then safely remove the following variables from the dataset: <code>role</code>, <code>language</code>, <code>name</code>, and <code>path</code>. To drop variables from a data frame we can use the <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> function in combination with the <code>-</code> operator. The <code>-</code> operator tells the <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> function to drop the variables that follow it.</p>
+<p>With this in mind, we can then safely remove the following variables from the dataset: <code>role</code>, <code>language</code>, <code>name</code>, and <code>path</code>. To drop variables from a data frame we can use the <code>select()</code> function in combination with the <code>-</code> operator. The <code>-</code> operator tells the <code>select()</code> function to drop the variables that follow it.</p>
 <div id="exm-cd-cabnc-drop-vars" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.12</strong></span> &nbsp;</p>
 <div class="cell">
@@ -868,7 +868,7 @@ Table&nbsp;6.3: Data origin: CABNC datasets
 </div>
 </div>
 <p>Now we have a frame with 9 more informative variables which describe the participants. We would then repeat this process for the <code>cabnc_utterances</code> dataset to remove redundant and uninformative variables.</p>
-<p>Another, optional step, is to rename and/ or organize the order the variables to make the dataset more understandable. Let’s organize the columns to read left to right from most general to most specific. Again, we turn to the <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative.</p>
+<p>Another, optional step, is to rename and/ or organize the order the variables to make the dataset more understandable. Let’s organize the columns to read left to right from most general to most specific. Again, we turn to the <code>select()</code> function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative.</p>
 <div id="exm-cd-cabnc-rename-vars" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.13</strong></span> &nbsp;</p>
 <div class="cell">
@@ -902,7 +902,7 @@ Table&nbsp;6.3: Data origin: CABNC datasets
 </div>
 </div>
 </div>
-<p>The variable order is organized after running <a href="#exm-cd-cabnc-rename-vars" class="quarto-xref">Example&nbsp;<span>6.13</span></a>. Now let’s sort the rows by <code>doc_id</code> and <code>part_id</code> so that the dataset is sensibly organized. The <code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code> function takes a data frame and a list of variables to sort by, in the order they are listed.</p>
+<p>The variable order is organized after running <a href="#exm-cd-cabnc-rename-vars" class="quarto-xref">Example&nbsp;<span>6.13</span></a>. Now let’s sort the rows by <code>doc_id</code> and <code>part_id</code> so that the dataset is sensibly organized. The <code>arrange()</code> function takes a data frame and a list of variables to sort by, in the order they are listed.</p>
 <div id="exm-cd-cabnc-sort-rows" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.14</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1192,7 +1192,7 @@ Table&nbsp;6.5: Idealized structure for the curated ENNTT Corpus datasets.
 <code>session_seq</code> = <code>seq_speaker_id</code>
 </li>
 </ul>
-<p>We can do this one attribute at a time using the <code><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr()</a></code> function and then combine them into a data frame with the <code><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble()</a></code> function as in <a href="#exm-cd-enntt-extract-attributes" class="quarto-xref">Example&nbsp;<span>6.20</span></a>.</p>
+<p>We can do this one attribute at a time using the <code><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr()</a></code> function and then combine them into a data frame with the <code>tibble()</code> function as in <a href="#exm-cd-enntt-extract-attributes" class="quarto-xref">Example&nbsp;<span>6.20</span></a>.</p>
 <div id="exm-cd-enntt-extract-attributes" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.20</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1287,7 +1287,7 @@ Table&nbsp;6.5: Idealized structure for the curated ENNTT Corpus datasets.
 </div>
 </div>
 </div>
-<p>We can see that the <code>ns_dat_attrs</code> object is a data frame with 116,341 rows and 4 columns, just has we expected. We can now combine the <code>ns_dat_attrs</code> data frame with the <code>ns_tok_lines</code> vector to create a single data frame with the attributes and the text. This is done with the <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> function assigning the <code>ns_tok_lines</code> vector to a new column named <code>text</code> as in <a href="#exm-cd-enntt-combine-attributes-text" class="quarto-xref">Example&nbsp;<span>6.24</span></a>.</p>
+<p>We can see that the <code>ns_dat_attrs</code> object is a data frame with 116,341 rows and 4 columns, just has we expected. We can now combine the <code>ns_dat_attrs</code> data frame with the <code>ns_tok_lines</code> vector to create a single data frame with the attributes and the text. This is done with the <code>mutate()</code> function assigning the <code>ns_tok_lines</code> vector to a new column named <code>text</code> as in <a href="#exm-cd-enntt-combine-attributes-text" class="quarto-xref">Example&nbsp;<span>6.24</span></a>.</p>
 <div id="exm-cd-enntt-combine-attributes-text" class="theorem example">
 <p><span class="theorem-title"><strong>Example 6.24</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1309,121 +1309,37 @@ Table&nbsp;6.5: Idealized structure for the curated ENNTT Corpus datasets.
 </div>
 </div>
 </div>
-<p>This is the data for the native speakers. We can now repeat this process for the non-native speakers, <em>or</em> we can create a function to do it for us. Let’s explore the later option.</p>
-<p>I will name this function <code>combine_dat_tok()</code> and it will take two arguments: <code>dat_file</code> and <code>tok_file</code>. The <code>dat_file</code> argument will be the path to the <em>.dat</em> file and the <code>tok_file</code> argument will be the path to the <em>.tok</em> file. The function first reads both the files into R as lines. Then it extracts the attributes from the <em>.dat</em> file using the <code>extract_dat_attrs()</code> function we created earlier. Finally, it combines the attributes with the text from the <em>.tok</em> file and returns a data frame.</p>
-<p>Note that there is at least one tweak we need to make to our existing code base to generate our idealized curated structure. We will need to add a column <code>type</code> to which we will indicate what type of data it is (native or non-native).</p>
-<p>There are multiple ways to do this. We could add a column to the data frame in the function before we return it, or we could add a column to the data frame after we return it. I will opt for the former and embed it inside of our function <code>combine_dat_tok()</code>, as seen in <a href="#exm-cd-enntt-combine-dat-tok-function" class="quarto-xref">Example&nbsp;<span>6.25</span></a>.</p>
-<div id="exm-cd-enntt-combine-dat-tok-function" class="theorem example">
-<p><span class="theorem-title"><strong>Example 6.25</strong></span> &nbsp;</p>
-<div class="cell">
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span> <span class="co"># for data manipulation</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rvest.tidyverse.org/">rvest</a></span><span class="op">)</span> <span class="co"># for reading/parsing HTML</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/">purrr</a></span><span class="op">)</span> <span class="co"># for mapping functions</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://fs.r-lib.org">fs</a></span><span class="op">)</span> <span class="co"># for working with files</span></span>
-<span></span>
-<span><span class="co"># Function to combine *.dat* and *.tok* files</span></span>
-<span><span class="va">combine_dat_tok</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">dat_file</span>, <span class="va">tok_file</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Read in files by lines</span></span>
-<span>  <span class="va">dat</span> <span class="op">&lt;-</span></span>
-<span>    <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="va">dat_file</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rvest.tidyverse.org/reference/rename.html">html_nodes</a></span><span class="op">(</span><span class="st">"line"</span><span class="op">)</span></span>
-<span>  <span class="va">tok</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_lines.html">read_lines</a></span><span class="op">(</span><span class="va">tok_file</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Create function to extract attributes</span></span>
-<span>  <span class="va">extract_dat_attrs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">line_node</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">session_id</span> <span class="op">&lt;-</span> <span class="va">line_node</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"session_id"</span><span class="op">)</span></span>
-<span>    <span class="va">speaker_id</span> <span class="op">&lt;-</span> <span class="va">line_node</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"mepid"</span><span class="op">)</span></span>
-<span>    <span class="va">state</span> <span class="op">&lt;-</span> <span class="va">line_node</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"state"</span><span class="op">)</span></span>
-<span>    <span class="va">session_seq</span> <span class="op">&lt;-</span> <span class="va">line_node</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"seq_speaker_id"</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span><span class="va">session_id</span>, <span class="va">speaker_id</span>, <span class="va">state</span>, <span class="va">session_seq</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span></span>
-<span>  <span class="co"># Apply function to all line nodes</span></span>
-<span>  <span class="va">dat_attrs</span> <span class="op">&lt;-</span></span>
-<span>    <span class="va">dat</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html">map_dfr</a></span><span class="op">(</span><span class="va">extract_dat_attrs</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Combine attrs and text into data frame</span></span>
-<span>  <span class="va">dataset</span> <span class="op">&lt;-</span></span>
-<span>    <span class="va">dat_attrs</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">tok</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Add type column with value of file name (w/o extension)</span></span>
-<span>  <span class="va">type_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://fs.r-lib.org/reference/path_file.html">path_file</a></span><span class="op">(</span><span class="va">dat_file</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://fs.r-lib.org/reference/path_file.html">path_ext_remove</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">dataset</span> <span class="op">&lt;-</span></span>
-<span>    <span class="va">dataset</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="va">type_name</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Return data frame</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">dataset</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Apply the <code>combine_dat_tok()</code> function to read in the data for the native speakers and the non-native speakers in a few lines of code, as in <a href="#exm-cd-enntt-combine-dat-tok" class="quarto-xref">Example&nbsp;<span>6.26</span></a>.</p>
-<div id="exm-cd-enntt-combine-dat-tok" class="theorem example">
-<p><span class="theorem-title"><strong>Example 6.26</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Native speakers</span></span>
-<span><span class="va">enntt_ns_df</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">combine_dat_tok</span><span class="op">(</span></span>
-<span>    dat_file <span class="op">=</span> <span class="st">"../data/original/enntt/natives.dat"</span>,</span>
-<span>    tok_file <span class="op">=</span> <span class="st">"../data/original/enntt/natives.tok"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse</a></span><span class="op">(</span><span class="va">enntt_ns_df</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Non-native speakers</span></span>
-<span><span class="va">enntt_nns_df</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">combine_dat_tok</span><span class="op">(</span></span>
-<span>    dat_file <span class="op">=</span> <span class="st">"../data/original/enntt/nonnatives.dat"</span>,</span>
-<span>    tok_file <span class="op">=</span> <span class="st">"../data/original/enntt/nonnatives.tok"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse</a></span><span class="op">(</span><span class="va">enntt_nns_df</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 116,341
-&gt; Columns: 6
-&gt; $ session_id  &lt;chr&gt; "ep-00-01-17", "ep-00-01-17", "ep-00-01-17", "ep-00-01-17"…
-&gt; $ speaker_id  &lt;chr&gt; "2099", "2099", "2099", "4548", "4548", "4541", "4541", "4…
-&gt; $ state       &lt;chr&gt; "United Kingdom", "United Kingdom", "United Kingdom", "Uni…
-&gt; $ session_seq &lt;chr&gt; "2", "2", "2", "4", "4", "12", "12", "12", "12", "12", "12…
-&gt; $ text        &lt;chr&gt; "You will be aware from the press and television that ther…
-&gt; $ type        &lt;chr&gt; "natives", "natives", "natives", "natives", "natives", "na…</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 29,734
-&gt; Columns: 6
-&gt; $ session_id  &lt;chr&gt; "ep-00-01-18", "ep-00-01-18", "ep-00-01-18", "ep-00-01-18"…
-&gt; $ speaker_id  &lt;chr&gt; "653", "653", "653", "653", "653", "653", "653", "653", "6…
-&gt; $ state       &lt;chr&gt; "Belgium", "Belgium", "Belgium", "Belgium", "Belgium", "Be…
-&gt; $ session_seq &lt;chr&gt; "157", "157", "157", "157", "157", "157", "157", "157", "1…
-&gt; $ text        &lt;chr&gt; "The Commission is following with interest the planned con…
-&gt; $ type        &lt;chr&gt; "nonnatives", "nonnatives", "nonnatives", "nonnatives", "n…</code></pre>
-</div>
-</div>
-</div>
-<p>We now have met the idealized structure for the curated ENNTT Corpus datasets, as shown in <a href="#tbl-cd-enntt-ideal" class="quarto-xref">Table&nbsp;<span>6.5</span></a>. The <code>enntt_ns_df</code> and <code>enntt_nns_df</code> data frames are ready to be written to disk and documented.</p>
-</section></section><section id="documentation" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="documentation">
-<span class="header-section-number">6.4</span> Documentation</h2>
-<p>After applying the curation steps to our data, we will now want to write the dataset to disk and to do our best to document the process and the resulting dataset.</p>
-<p>Since data frames are a tabular, we will have various options for the file type to write. Many of these formats are software-specific, such as <code>*.xlsx</code> for Microsoft Excel, <code>*.sav</code> for SPSS, <code>*.dta</code> for Stata, and <code>*.rds</code> for R. We will use the <code>*.csv</code> format since it is a common format that can be read by many software packages. We will use the <code><a href="https://readr.tidyverse.org/reference/write_delim.html">write_csv()</a></code> function from the <code>readr</code> package to write the dataset to disk.</p>
-<p>Now the question is where to save our CSV file. Since our dataset is derived by our work, we will added it to the <code>derived/</code> directory. If you are working with multiple data sources within the same project, it is a good idea to create a subdirectory for each dataset. This will help keep the project organized and make it easier to find and access the datasets.</p>
-<p>The final step, as always, is to document the dataset. For datasets the documentation is a data dictionary, as discussed in <a href="../part_2/2_data.html#sec-ud-data-dictionaries" class="quarto-xref"><span>Section 2.3.2</span></a>. As with data origin files, you can use spreadsheet software to create and/ or edit the data dictionary.</p>
-<p>In the <code>qtkit</code> package we have a function, <code>create_data_dictionary()</code> that will generate the scaffolding for a data dictionary. The function takes two arguments, <code>data</code> and <code>file_path</code>. It reads the dataset columns and provides a template for the data dictionary.</p>
-<div class="callout callout-style-simple callout-none no-icon">
+<p>This is the data for the native speakers. We can now repeat this process for the non-native speakers, or we can create a function to do it for us.</p>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
-<p>The <code>create_data_dictionary()</code> function provides a rudimentary data dictionary template by default. However, you can take advantage of OpenAI’s text generation models to generate a more detailed data dictionary for you to edit. To do this create <a href="https://platform.openai.com/signup">an OpenAI account</a> and <a href="https://platform.openai.com/account/api-keys">an API key</a> and add this key to your R environment (<code>Sys.setenv(OPENAI_API_KEY = "sk..."</code>). Then you can specify the model you would like to use in the function with the <code>model =</code> argument. For example, <code>model = "gpt-3.5-turbo"</code> will use the GPT-3.5 Turbo model.</p>
+<p><strong><i class="fa-regular fa-lightbulb" aria-label="lightbulb"></i> Consider this</strong></p>
+<p>Using the previous code as a guide, consider what steps you would need to take to create a function to combine the <em>.dat</em> and <em>.tok</em> files for the non-native speakers (and/ or the translations). What arguments would the function take? What would the function return? What would the processing steps be? In what order would the steps be executed?</p>
 </div>
 </div>
 </div>
+<p>After applying the curation steps to both the native and non-native datasets, we will have two data frames, <code>enntt_ns_df</code> and <code>enntt_nns_df</code>, respectively that meet the idealized structure for the curated ENNTT Corpus datasets, as shown in <a href="#tbl-cd-enntt-ideal" class="quarto-xref">Table&nbsp;<span>6.5</span></a>. The <code>enntt_ns_df</code> and <code>enntt_nns_df</code> data frames are ready to be written to disk and documented.</p>
+</section></section><section id="documentation" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="documentation">
+<span class="header-section-number">6.4</span> Documentation</h2>
+<p>After applying the curation steps to our data, we will now want to write the dataset to disk and to do our best to document the process and the resulting dataset.</p>
+<p>Since data frames are a tabular, we will have various options for the file type to write. Many of these formats are software-specific, such as <code>*.xlsx</code> for Microsoft Excel, <code>*.sav</code> for SPSS, <code>*.dta</code> for Stata, and <code>*.rds</code> for R. We will use the <code>*.csv</code> format since it is a common format that can be read by many software packages. We will use the <code><a href="https://readr.tidyverse.org/reference/write_delim.html">write_csv()</a></code> function from the <code>readr</code> package to write the dataset to disk.</p>
+<p>Now the question is where to save our CSV file. Since our dataset is derived by our work, we will added it to the <code>derived/</code> directory. If you are working with multiple data sources within the same project, it is a good idea to create a subdirectory for each dataset. This will help keep the project organized and make it easier to find and access the datasets.</p>
+<p>The final step, as always, is to provide documentation. For datasets the documentation is a data dictionary, as discussed in <a href="../part_2/2_data.html#sec-ud-data-dictionaries" class="quarto-xref"><span>Section 2.3.2</span></a>. As with data origin files, you can use spreadsheet software to create and edit the data dictionary.</p>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
+<p>The <code>create_data_dictionary()</code> function provides a rudimentary data dictionary template by default. However, the <code>model</code> argument let’s you take advantage of OpenAI’s text generation models to generate a more detailed data dictionary for you to edit. See the function documentation for more information.</p>
+</div>
+</div>
+</div>
+<p>In the <code>qtkit</code> package we have a function, <code>create_data_dictionary()</code> that will generate the scaffolding for a data dictionary. The function takes two arguments, <code>data</code> and <code>file_path</code>. It reads the dataset columns and provides a template for the data dictionary.</p>
 <p>An example of a data dictionary, a data dictionary for the <code>enntt_ns_df</code> dataset is shown in <a href="#tbl-cd-unstructured-data-dictionary-example" class="quarto-xref">Table&nbsp;<span>6.6</span></a>.</p>
 <div class="cell" data-tbl-colwidths="[10,15,15,60]">
 <div id="tbl-cd-unstructured-data-dictionary-example" class="cell quarto-float anchored">

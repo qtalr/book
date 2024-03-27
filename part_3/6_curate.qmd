@@ -59,9 +59,9 @@ The bulk of text ever created is of the unstructured variety. Unstructured data 
 
 ### Reading data
 
-Some of the common file formats which contain unstructured data include TXT, PDF, and DOCX. Although these formats are unstructured, they are not all the same. Reading these files into R requires different techniques and tools.
+Some of the common file formats which contain unstructured data include TXT, PDF, and DOCX. Although these formats are unstructured, they are not the same. Reading these files into R requires different techniques and tools.
 
-Many times TXT files have the *.txt* extension, but it is not required. There are many ways to read TXT files into R and many packages that can be used to do so. For example, using the `readr` package, we can choose to read the entire file into a single vector of character strings with `read_file()` or read the file by lines with `read_lines()` in which each line is a character string in a vector.
+There are many ways to read TXT files into R and many packages that can be used to do so. For example, using the `readr` package, we can choose to read the entire file into a single vector of character strings with `read_file()` or read the file by lines with `read_lines()` in which each line is a character string in a vector.
 
 Less commonly used in prepared data resources, PDF and DOCX files are more complex than TXT files as they contain formatting and embedded document metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Needless to say, we need an alternate strategy to extract the text content from these files and potentially some of the metadata. For example, using the `readtext` package [@R-readtext], we can read the text content from PDF and DOCX files into a single vector of character strings with `readtext()`.
 
@@ -123,9 +123,8 @@ Now let's get familiar with the corpus directory structure and the files. In @ex
 
 Looking at the beginning of the *.es* and *.en* files, in @lst-cd-europarl-es and @lst-cd-europarl-en, we see that the files contain a series of lines in either the source or target language.
 
-::: {#lst-cd-europarl-es}
 
-```txt
+```{#lst-cd-europarl-es .txt lst-cap="Spanish source text"}
 Reanudación del período de sesiones
 Declaro reanudado el período de sesiones del Parlamento Europeo, interrumpido el viernes 17 de diciembre pasado, y reitero a Sus Señorías mi deseo de que hayan tenido unas buenas vacaciones.
 Como todos han podido comprobar, el gran "efecto del año 2000" no se ha producido. En cambio, los ciudadanos de varios de nuestros países han sido víctimas de catástrofes naturales verdaderamente terribles.
@@ -133,13 +132,7 @@ Sus Señorías han solicitado un debate sobre el tema para los próximos días, 
 A la espera de que se produzca, de acuerdo con muchos colegas que me lo han pedido, pido que hagamos un minuto de silencio en memoria de todas las víctimas de las tormentas, en los distintos países de la Unión Europea afectados.
 ```
 
-Spanish source text
-:::
-
-
-::: {#lst-cd-europarl-en}
-
-```txt
+```{#lst-cd-europarl-en .txt lst-cap="English target text"}
 Resumption of the session
 I declare resumed the session of the European Parliament adjourned on Friday 17 December 1999, and I would like once again to wish you a happy new year in the hope that you enjoyed a pleasant festive period.
 Although, as you will have seen, the dreaded 'millennium bug' failed to materialise, still the people in a number of countries suffered a series of natural disasters that truly were dreadful.
@@ -147,12 +140,9 @@ You have requested a debate on this subject in the course of the next few days, 
 In the meantime, I should like to observe a minute' s silence, as a number of Members have requested, on behalf of all the victims concerned, particularly those of the terrible storms, in the various countries of the European Union.
 ```
 
-English target text
-:::
-
 We can clearly appreciate that the data is unstructured. That is, there is no explicit metadata associated with the data. The data is just a series of character strings separated by lines. The only information that we can surmise from structure of the data is that the texts are line-aligned and that the data in each file corresponds to source and target languages.
 
-Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the "idealized structure" of the data. For a curated dataset, we want to maintain the original structure of the data as much as possible to maintain the integrity of the data and create a transparent and reproducible dataset.
+Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the "idealized structure" of the data. For a curated dataset, we want to reflect the contents of the original data, yet in a tidy format, to maintain the integrity of and connection with the data.
 
 Given what we know about the data, we can define the idealized structure of the data as seen in @tbl-cd-europarl-structure-example.
 
@@ -174,7 +164,7 @@ Our task now is to develop code that will read the original data and render the 
 
 ### Tidy the data
 
-To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files by lines into R. We will use the `read_lines()` function from the `readr` package.
+To create the idealized dataset structure in @tbl-cd-europarl-structure-example, lets's start by reading the files by lines into R. As the files are aligned by lines, we will use the `read_lines()` function to read the files into character vectors.
 
 ::: {#exm-cd-europarl-readr}
 ```r
@@ -774,114 +764,15 @@ glimpse(ns_dat)
 ```
 :::
 
-This is the data for the native speakers. We can now repeat this process for the non-native speakers, *or* we can create a function to do it for us. Let's explore the later option.
+This is the data for the native speakers. We can now repeat this process for the non-native speakers, or we can create a function to do it for us.
 
-I will name this function `combine_dat_tok()` and it will take two arguments: `dat_file` and `tok_file`. The `dat_file` argument will be the path to the *.dat* file and the `tok_file` argument will be the path to the *.tok* file. The function first reads both the files into R as lines. Then it extracts the attributes from the *.dat* file using the `extract_dat_attrs()` function we created earlier. Finally, it combines the attributes with the text from the *.tok* file and returns a data frame.
+::: {.callout .halfsize}
+**{{< fa regular lightbulb >}} Consider this**
 
-Note that there is at least one tweak we need to make to our existing code base to generate our idealized curated structure. We will need to add a column `type` to which we will indicate what type of data it is (native or non-native).
-
-There are multiple ways to do this. We could add a column to the data frame in the function before we return it, or we could add a column to the data frame after we return it. I will opt for the former and embed it inside of our function `combine_dat_tok()`, as seen in @exm-cd-enntt-combine-dat-tok-function.
-
-::: {#exm-cd-enntt-combine-dat-tok-function}
-```{r}
-#| label: cd-enntt-combine-dat-tok-function
-
-# Load packages
-library(dplyr) # for data manipulation
-library(rvest) # for reading/parsing HTML
-library(purrr) # for mapping functions
-library(fs) # for working with files
-
-# Function to combine *.dat* and *.tok* files
-combine_dat_tok <- function(dat_file, tok_file) {
-  # Read in files by lines
-  dat <-
-    read_html(dat_file) |>
-    html_nodes("line")
-  tok <- read_lines(tok_file)
-
-  # Create function to extract attributes
-  extract_dat_attrs <- function(line_node) {
-    session_id <- line_node |> html_attr("session_id")
-    speaker_id <- line_node |> html_attr("mepid")
-    state <- line_node |> html_attr("state")
-    session_seq <- line_node |> html_attr("seq_speaker_id")
-
-    tibble(session_id, speaker_id, state, session_seq)
-  }
-
-  # Apply function to all line nodes
-  dat_attrs <-
-    dat |>
-    map_dfr(extract_dat_attrs)
-
-  # Combine attrs and text into data frame
-  dataset <-
-    dat_attrs |>
-    mutate(text = tok)
-
-  # Add type column with value of file name (w/o extension)
-  type_name <- path_file(dat_file) |> path_ext_remove()
-
-  dataset <-
-    dataset |>
-    mutate(type = type_name)
-
-  # Return data frame
-  return(dataset)
-}
-```
+Using the previous code as a guide, consider what steps you would need to take to create a function to combine the *.dat* and *.tok* files for the non-native speakers (and/ or the translations). What arguments would the function take? What would the function return? What would the processing steps be? In what order would the steps be executed?
 :::
 
-Apply the `combine_dat_tok()` function to read in the data for the native speakers and the non-native speakers in a few lines of code, as in @exm-cd-enntt-combine-dat-tok.
-
-::: {#exm-cd-enntt-combine-dat-tok}
-```r
-# Native speakers
-enntt_ns_df <-
-  combine_dat_tok(
-    dat_file = "../data/original/enntt/natives.dat",
-    tok_file = "../data/original/enntt/natives.tok"
-  )
-# Preview
-glimpse(enntt_ns_df)
-
-# Non-native speakers
-enntt_nns_df <-
-  combine_dat_tok(
-    dat_file = "../data/original/enntt/nonnatives.dat",
-    tok_file = "../data/original/enntt/nonnatives.tok"
-  )
-# Preview
-glimpse(enntt_nns_df)
-```
-
-```{r}
-#| label: cd-enntt-combine-dat-tok
-#| echo: false
-#| cache: true
-
-# Native speakers
-enntt_ns_df <-
-  combine_dat_tok(
-    dat_file = "data/enntt/original/natives.dat",
-    tok_file = "data/enntt/original/natives.tok"
-  )
-# Preview
-glimpse(enntt_ns_df)
-
-# Non-native speakers
-enntt_nns_df <-
-  combine_dat_tok(
-    dat_file = "data/enntt/original/nonnatives.dat",
-    tok_file = "data/enntt/original/nonnatives.tok"
-  )
-# Preview
-glimpse(enntt_nns_df)
-```
-:::
-
-We now have met the idealized structure for the curated ENNTT Corpus datasets, as shown in @tbl-cd-enntt-ideal. The `enntt_ns_df` and `enntt_nns_df` data frames are ready to be written to disk and documented.
+After applying the curation steps to both the native and non-native datasets, we will have two data frames, `enntt_ns_df` and `enntt_nns_df`, respectively that meet the idealized structure for the curated ENNTT Corpus datasets, as shown in @tbl-cd-enntt-ideal. The `enntt_ns_df` and `enntt_nns_df` data frames are ready to be written to disk and documented.
 
 ## Documentation
 
@@ -891,15 +782,15 @@ Since data frames are a tabular, we will have various options for the file type 
 
 Now the question is where to save our CSV file. Since our dataset is derived by our work, we will added it to the `derived/` directory. If you are working with multiple data sources within the same project, it is a good idea to create a subdirectory for each dataset. This will help keep the project organized and make it easier to find and access the datasets.
 
-The final step, as always, is to document the dataset. For datasets the documentation is a data dictionary, as discussed in @sec-ud-data-dictionaries. As with data origin files, you can use spreadsheet software to create and/ or edit the data dictionary.
+The final step, as always, is to provide documentation. For datasets the documentation is a data dictionary, as discussed in @sec-ud-data-dictionaries. As with data origin files, you can use spreadsheet software to create and edit the data dictionary.
+
+::: {.callout .halfsize}
+**{{< fa regular hand-point-up >}} Tip**
+
+The `create_data_dictionary()` function provides a rudimentary data dictionary template by default. However, the `model` argument let's you take advantage of OpenAI's text generation models to generate a more detailed data dictionary for you to edit. See the function documentation for more information.
+:::
 
 In the `qtkit` package we have a function, `create_data_dictionary()` that will generate the scaffolding for a data dictionary. The function takes two arguments, `data` and `file_path`. It reads the dataset columns and provides a template for the data dictionary.
-
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
-
-The `create_data_dictionary()` function provides a rudimentary data dictionary template by default. However, you can take advantage of OpenAI's text generation models to generate a more detailed data dictionary for you to edit. To do this create [an OpenAI account](https://platform.openai.com/signup) and [an API key](https://platform.openai.com/account/api-keys) and add this key to your R environment (`Sys.setenv(OPENAI_API_KEY = "sk..."`). Then you can specify the model you would like to use in the function with the `model = ` argument. For example, `model = "gpt-3.5-turbo"` will use the GPT-3.5 Turbo model.
-:::
 
 An example of a data dictionary, a data dictionary for the `enntt_ns_df` dataset is shown in @tbl-cd-unstructured-data-dictionary-example.
 

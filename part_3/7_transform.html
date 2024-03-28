@@ -387,7 +387,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>In this chapter, we will focus on transforming curated datasets to refine and possibly expand their relational characteristics to align with our research. I will approach the transformation process by breaking it down into two sub-processes: preparation and enrichment. The preparation process involves normalizing and tokenizing text. The enrichment process involves recoding, generating, and integrating variables. These processes are not sequential but may occur in any order based on the researcher’s evaluation of the dataset characteristics and the desired outcome.</p>
+<p>In this chapter, we will focus on transforming curated datasets to refine and possibly expand their relational characteristics to align with our research. I will approach the transformation process by breaking it down into two sub-processes: preparation and enrichment. The preparation process involves normalizing and tokenizing text. The enrichment process involves generating, recoding, and integrating variables. These processes are not sequential but may occur in any order based on the researcher’s evaluation of the dataset characteristics and the desired outcome.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -536,11 +536,10 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </figure>
 </div>
 <p>These artifacts either may not be of interest or may introduce unwanted variability in the that could prove problematic for subsequent processing (<em>e.g</em> tokenization, calculating frequencies, <em>etc.</em>).</p>
-<p>Identifying our normalization goals is an important first step. In this case, let’s just focus on removing parlimentary session descriptions for demonstration purposes. The next step is to identify the procedures that will accomplish this goal.</p>
 <p>The majority of text normalization procedures incorporate the <code>stringr</code> package <span class="citation" data-cites="R-stringr">(<a href="../references.html#ref-R-stringr" role="doc-biblioref">Wickham 2023</a>)</span>. This package provides a number of functions for manipulating text strings. The workhorse functions we will use for our tasks are the <code><a href="https://stringr.tidyverse.org/reference/str_remove.html">str_remove()</a></code> and <code><a href="https://stringr.tidyverse.org/reference/str_replace.html">str_replace()</a></code> functions. As the these functions give us the ability to remove or replace text based on literal strings and Regular Expressions.</p>
-<p>Our first step, however, is to identify the patterns we want to remove or replace. For this, we can call on either the <code><a href="https://stringr.tidyverse.org/reference/str_view.html">str_view()</a></code> function or the <code><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect()</a></code> function inside a <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function to identify the lines that contain the patterns we want to remove. We can also use the <code><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract()</a></code> and/ or <code><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract_all()</a></code> functions inside a <code>mutate()</code> function to extract the text that matches the pattern. In any of these cases, it can be helpful to use the <code>slice_sample()</code> function work with a small sample of the dataset to get a sense of the patterns we are working with as we develop a search pattern that does not over- or under-generalize the text we want to remove or replace. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.</p>
-<p>Let’s start by identifying non-parlimentary speech. In <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span>7.2</span></a>, we use <code><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect()</a></code> which detects a pattern in a character vector and returns a logical vector, <code>TRUE</code> if the pattern is detected and <code>FALSE</code> if it is not. In combination with <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> we can identify a variable with rows that match a pattern.</p>
-<p>From the examples above, we can see that these instances are wrapped with parentheses <code>(</code> and <code>)</code>. The text within the parentheses can vary, so we need a Regular Expression to do the heavy lifting. To start out we can match any one or multiple characters with <code>.+</code>. But it is important to recognize the <code>+</code> (and also the <code>*</code>) operators are ‘greedy’, meaning that if there are multiple matches, the longest match will be returned. In this case, we want to match the shortest match. To do this we can use the <code>?</code> operator to make the <code>+</code> operator ‘lazy’. This will match the shortest match.</p>
+<p>Our first step, however, is to identify the patterns we want to remove or replace. For demonstration purposes, let’s focus on removing non-speech annotations from the <code>lines</code> variable. Do develop a search pattern to identify these annotations, there are various possibilities, <code><a href="https://stringr.tidyverse.org/reference/str_view.html">str_view()</a></code>, <code><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect()</a></code> inside a <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> call, or <code><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract()</a></code> inside a <code>mutate()</code> call. No matter which approach we choose, we need to be sure that our search pattern does not over- or under-generalize the text we want to remove or replace. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.</p>
+<p>In <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span>7.2</span></a>, I’ve used <code><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect()</a></code> which detects a pattern in a character vector and returns a logical vector, <code>TRUE</code> if the pattern is detected and <code>FALSE</code> if it is not. In combination with <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> we can identify a variable with rows that match a pattern. I’ve added the <code>slice_sample()</code> function at then end to return a small, random sample of the dataset to get a better sense how well our pattern works across the dataset.</p>
+<p>Now, how about our search pattern? From the examples above, we can see that these instances are wrapped with parentheses <code>(</code> and <code>)</code>. The text within the parentheses can vary, so we need a Regular Expression to do the heavy lifting. To start out we can match any one or multiple characters with <code>.+</code>. But it is important to recognize the <code>+</code> (and also the <code>*</code>) operators are ‘greedy’, meaning that if there are multiple matches (in this case multiple sets of parentheses) in a single line of text, the longest match will be returned. That is, the match will extend as far as possible. This is not what we want in this case. We want to match the shortest match. To do this we can append the <code>?</code> operator to make the <code>+</code> operator ‘lazy’. This will match the shortest match.</p>
 <div id="exm-td-europarl-search-non-speech" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.2</strong></span> &nbsp;</p>
 <div class="cell">
@@ -594,8 +593,8 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 </div>
-<p>OK, that might not be what you expected. The <code><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract_all()</a></code> function returns a list of character vectors. This is because for any given line in <code>lines</code> there may be a different number of matches. To maintain the data frame as rectangular, a list is returned for each value of <code>non_speech</code>. We could expand the list into a data frame with the <code>unnest()</code> function from the <code>tidyr</code> package if our goal were to work with these matches. But that is not our aim. Rather, we want to know if we have multiple matches per line. Note that the information provided for the <code>non_speech</code> column by the tibble object tells use that we have some lines with muliple matches, as we can see in line 6 of our small sample. So good thing we checked!</p>
-<p>Let’s now remove these parliamentary session description annotations from each line in the <code>lines</code> column. We turn to <code><a href="https://stringr.tidyverse.org/reference/str_remove.html">str_remove_all()</a></code>, a variant of <code><a href="https://stringr.tidyverse.org/reference/str_remove.html">str_remove()</a></code>, that, as you expect, will remove multiple matches in a single line. We will use the <code>mutate()</code> function to overwrite the <code>lines</code> column with the modified text. The code is seen in <a href="#exm-td-europarl-remove-non-speech" class="quarto-xref">Example&nbsp;<span>7.4</span></a>.</p>
+<p>OK, that might not be what you expected. The <code><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract_all()</a></code> function returns a list of character vectors. This is because for any given line in <code>lines</code> there may be a different number of matches. To maintain the data frame as rectangular, a list is returned for each value of <code>non_speech</code>. We could expand the list into a data frame with the <code>unnest()</code> function if our goal were to work with these matches. But that is not our aim. Rather, we want to know if we have multiple matches per line. Note that the information provided for the <code>non_speech</code> column by the tibble object tells use that we have some lines with muliple matches, as we can see in line 6 of our small sample. So good thing we checked!</p>
+<p>Let’s now remove these non-speech annotations from each line in the <code>lines</code> column. We turn to <code><a href="https://stringr.tidyverse.org/reference/str_remove.html">str_remove_all()</a></code>, a variant of <code><a href="https://stringr.tidyverse.org/reference/str_remove.html">str_remove()</a></code>, that, as you expect, will remove multiple matches in a single line. We will use the <code>mutate()</code> function to overwrite the <code>lines</code> column with the modified text. The code is seen in <a href="#exm-td-europarl-remove-non-speech" class="quarto-xref">Example&nbsp;<span>7.4</span></a>.</p>
 <div id="exm-td-europarl-remove-non-speech" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.4</strong></span> &nbsp;</p>
 <div class="cell">
@@ -606,7 +605,7 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 <p>I recommend spot checking the results of this normalization step by running the code in <a href="#exm-td-europarl-search-non-speech" class="quarto-xref">Example&nbsp;<span>7.2</span></a> again, if nothing appears we’ve done our job.</p>
-<p>When you are content with the results, drop the observations that have no text in the <code>lines</code> column given the entire line was non-speech. This can be done with the <code><a href="https://rdrr.io/r/base/NA.html">is.na()</a></code> function and the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function as seen in <a href="#exm-td-europarl-drop-empty-lines" class="quarto-xref">Example&nbsp;<span>7.5</span></a>.</p>
+<p>When you are content with the results, drop the observations that have no text in the <code>lines</code> column. These were rows where the entire line was non-speech annotation. This can be done with the <code><a href="https://rdrr.io/r/base/NA.html">is.na()</a></code> function and the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> function as seen in <a href="#exm-td-europarl-drop-empty-lines" class="quarto-xref">Example&nbsp;<span>7.5</span></a>.</p>
 <div id="exm-td-europarl-drop-empty-lines" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.5</strong></span> &nbsp;</p>
 <div class="cell">
@@ -616,10 +615,10 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">lines</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>Normalization goals will vary from dataset to dataset but the procedures often follow a similar line of attack to those outlined in this section. There are cases, however, in which normalization procedures are more easily accomplished after subsequent transformation steps or need to be post-poned to further the goals of other transformation steps. For example, standardizing abbreviated forms may be more easily accomplished after tokenization when each token is a word. Another example is the case of case conversion. Even if we are not directly interested in the case differences between words, certain generation procedures, Named Entity Recognition (NER) for example, may use case information to identify the names of people, locations, organizations, <em>etc.</em>. In these cases, it may be better to leave the case as is until after the generation step.</p>
+<p>Normalization goals will vary from dataset to dataset but the procedures often follow a similar line of attack to those outlined in this section.</p>
 </section><section id="sec-td-tokenization" class="level3"><h3 class="anchored" data-anchor-id="sec-td-tokenization">Tokenization</h3>
-<p>Another common transformation process that is particularly relevant for preparing text for analysis is tokenization. Tokenization is the process of segmenting units of language into components relevant for the research question. This includes breaking text in curated datasets into smaller units, such as words, <span class="math inline">\(n\)</span>-grams, sentences, <em>etc.</em> or combining text into larger units relative to the original text.</p>
-<p>The process of tokenization is fundamentally row-wise. By scaling the text units up or down, we change the unit of observation. It is important both for the research and the text processing to operationalize our language units. For example, while it may appear obvious to you what ‘word’ or ‘sentence’ means, a computer, and your reproducible research, needs a definition. This can prove tricker than it seems. For example, in English, we can segment text into words by splitting on whitespace. This works fairly well but there are some cases where this is not ideal. For example, in the case of contractions, such as <code>don't</code>, <code>won't</code>, <code>can't</code>, <em>etc.</em> the apostrophe is not a whitespace character. If we want to consider these contractions as separate words, then we need to consider a different tokenization strategy.</p>
+<p>Tokenization is the process of segmenting units of language into components relevant for the research question. This includes breaking text in curated datasets into smaller units, such as words, <span class="math inline">\(n\)</span>-grams, sentences, <em>etc.</em> or combining smaller units into larger units.</p>
+<p>The process of tokenization is fundamentally row-wise. Changing the unit of observation changes the number of rows. It is important both for the research and the text processing to operationalize our language units beforhand. For example, while it may appear obvious to you what ‘word’ or ‘sentence’ means, a computer, and your reproducible research, needs a working definition. This can prove tricker than it seems. For example, in English, we can segment text into words by splitting on whitespace. This works fairly well but there are some cases where this is not ideal. For example, in the case of contractions, such as <code>don't</code>, <code>won't</code>, <code>can't</code>, <em>etc.</em> the apostrophe is not a whitespace character. If we want to consider these contractions as separate words, then perhaps we need to entertain a different tokenization strategy.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -635,7 +634,7 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 </div>
-<p>Furthermore, tokenization strategies can vary between languages. For German words are often compounded together, meaning many ‘words’ will not be captured by the whitespace convention. Whitespace may not even be relevant for word tokenization in logographic writing systems such as Chinese. The take home message is there is no one-size-fits-all tokenization strategy.</p>
+<p>Furthermore, tokenization strategies can vary between languages. For German words are often compounded together, meaning many ‘words’ will not be captured by the whitespace convention. Whitespace may not even be relevant for word tokenization in logographic writing systems, such as Chinese. The take home message is there is no one-size-fits-all tokenization strategy.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -647,7 +646,7 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 </div>
 </div>
 </div>
-<p>Let’s say we continue to work with the Europarl Corpus dataset. We have already removed non-speech annotations from the <code>lines</code> variable. Now we want to tokenize the text. We will start by tokenizing the text into words. If we envision what this should look like, we might imagine something like <a href="#tbl-td-europarl-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.3</span></a>.</p>
+<p>Let’s continue to work with the Europarl Corpus dataset to demonstrate tokenization. We will start by tokenizing the text into words. If we envision what this should look like, we might imagine something like <a href="#tbl-td-europarl-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.3</span></a>.</p>
 <div id="tbl-td-europarl-tokenization-words-example" class="quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-europarl-tokenization-words-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.3: Example of tokenizing the <code>lines</code> variable into word tokens.
@@ -696,7 +695,7 @@ Table&nbsp;7.3: Example of tokenizing the <code>lines</code> variable into word 
 </figure>
 </div>
 <p>Comparing <a href="#tbl-td-europarl-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.3</span></a> to the fourth row of the output of <a href="#exm-tb-europarl-preview" class="quarto-xref">Example&nbsp;<span>7.1</span></a>, we can see that we want to segment the words in <code>lines</code> and then have each segment appear as a separate observation, retaining the relevant metadata variables.</p>
-<p>This is a very common strategy in text analysis. So common, in fact, that the <code>tidytext</code> package <span class="citation" data-cites="R-tidytext">(<a href="../references.html#ref-R-tidytext" role="doc-biblioref">Robinson and Silge 2023</a>)</span> includes a function, <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> that tokenizes text in just such a way. Various tokenization types can be specified including ‘characters’, ‘words’, ‘ngrams’, ‘sentences’ among others. We will use the ‘word’ tokenization type to recreate the structure we envisioned in <a href="#tbl-td-europarl-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.3</span></a>.</p>
+<p>Tokenization that maintains the tidy dataset structure very common strategy in text analysis using R. So common, in fact, that the <code>tidytext</code> package <span class="citation" data-cites="R-tidytext">(<a href="../references.html#ref-R-tidytext" role="doc-biblioref">Robinson and Silge 2023</a>)</span> includes a function, <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> that tokenizes text in just such a way. Various tokenization types can be specified including ‘characters’, ‘words’, ‘ngrams’, ‘sentences’ among others. We will use the ‘word’ tokenization type to recreate the structure we envisioned in <a href="#tbl-td-europarl-tokenization-words-example" class="quarto-xref">Table&nbsp;<span>7.3</span></a>.</p>
 <p>In <a href="#exm-td-europarl-tokenization-words-tidytext" class="quarto-xref">Example&nbsp;<span>7.6</span></a>, we see set our output variable to <code>token</code> and our input variable to <code>lines</code>.</p>
 <div id="exm-td-europarl-tokenization-words-tidytext" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.6</strong></span> &nbsp;</p>
@@ -736,18 +735,7 @@ Table&nbsp;7.3: Example of tokenizing the <code>lines</code> variable into word 
 &gt; 10      2 Target       2 adjourned</code></pre>
 </div>
 </div>
-<p>The <code>token</code> column now contains our word tokens. One thing to note, however, is that text is lowercased by default. If we want to retain the original case, keep the original variable, or change the tokenization strategy, we can update the <code>to_lower</code>, <code>drop</code>, and <code>token</code> parameters, respectively.</p>
-<div class="callout callout-style-simple callout-none no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
-<p><code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> approaches tokenization from a segmentation point of view. That is, the context separating our tokens is targeted and is removed. In some cases, it may be more feasible to turn the approach around and instead target the tokens to extract. The <code><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract_all()</a></code> can be used for this purpose. Note, however, the former approach is often more effective and effecient. The later requires a regular expression, or set of, which can be tricky to develop for some tokenization tasks.</p>
-</div>
-</div>
-</div>
+<p>The <code>token</code> column now contains our word tokens. One thing to note, however, is that text is lowercased and punctuation is stripped by default. If we want to retain the original case or punctuation, keep the original variable, or change the tokenization strategy, we can update the <code>to_lower</code>, <code>strip_punct</code>, <code>drop</code>, or <code>token</code> parameters, respectively.</p>
 <p>As we derive datasets to explore, let’s also create bigram tokens. We can do this by changing the <code>token</code> parameter to <code>"ngrams"</code> and specifying the value for <span class="math inline">\(n\)</span> with the <code>n</code> parameter. I will assign the result to <code>europarl_bigrams_tbl</code> as we will have two-word tokens, as seen in <a href="#exm-td-europarl-tokenization-bigrams-tidytext" class="quarto-xref">Example&nbsp;<span>7.7</span></a>.</p>
 <div id="exm-td-europarl-tokenization-bigrams-tidytext" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.7</strong></span> &nbsp;</p>
@@ -794,7 +782,36 @@ Table&nbsp;7.3: Example of tokenizing the <code>lines</code> variable into word 
 </div>
 </div>
 </div>
-<p>The most common tokenization strategy is to segment text into smaller units, often words. However, there are times when we may want text segements to be larger than the existing token unit, effectively collapsing over rows. For example, if we are working with a curated dataset which is tokenized by words, we may want to group the words into sentences. A couple considerations are in order, however. First, we need to be clear about what we mean by ‘sentence’ and how we will group the words into sentences. In some cases key cues for sentence boundaries, such as sentencial punctuation have been stripped from the text, making a simple defnition of a sentence difficult or impossible to be performed computationally. Second, we also need to be clear how we will handle the metadata variables. In other words, when we collapse over rows, we need to be aware and intentional about how we group these new units of observation.</p>
+<p>The most common tokenization strategy is to segment text into smaller units, often words. However, there are times when we may want text segements to be larger than the existing token unit, effectively collapsing over rows. Let’s say that we are working with a dataset like the one we created in <code>europarl_unigrams_tbl</code> and we want to group the words into sentences. We can again turn to the <code><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens()</a></code> function to accomplish this. In <a href="#exm-td-europarl-tokenization-sentences" class="quarto-xref">Example&nbsp;<span>7.8</span></a>, we use the <code>token = "sentences"</code> and <code>collapse = c("type", "line_id")</code> parameters to group the words into sentences by the <code>type</code> and <code>line_id</code> variables.</p>
+<div id="exm-td-europarl-tokenization-sentences" class="theorem example">
+<p><span class="theorem-title"><strong>Example 7.8</strong></span> &nbsp;</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tokenize the lines into sentences</span></span>
+<span><span class="va">europarl_sentences_tbl</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">europarl_unigrams_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tidytext/man/unnest_tokens.html">unnest_tokens</a></span><span class="op">(</span></span>
+<span>    output <span class="op">=</span> <span class="va">token</span>,</span>
+<span>    input <span class="op">=</span> <span class="va">token</span>,</span>
+<span>    token <span class="op">=</span> <span class="st">"sentences"</span>,</span>
+<span>    collapse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"type"</span>, <span class="st">"line_id"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview</span></span>
+<span><span class="va">europarl_sentences_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&gt; # A tibble: 5 × 3
+&gt;   type   line_id token                                                          
+&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                          
+&gt; 1 Source       1 reanudación del período de sesiones                            
+&gt; 2 Target       1 resumption of the session                                      
+&gt; 3 Source       2 declaro reanudado el período de sesiones del parlamento europe…
+&gt; 4 Target       2 i declare resumed the session of the european parliament adjou…
+&gt; 5 Source       3 como todos han podido comprobar el gran efecto del año 2000 no…</code></pre>
+</div>
+</div>
+</div>
+<p>In this example, we have collapsed the word tokens into sentences. But note, the <code>token</code> column contained no punctuation so all the tokens grouped by <code>type</code> and <code>line_id</code> were concatenated together. This works for our test dataset as lines are sentences. However, in other scenarios, we would need punctuation to ensure that the sentences are properly segmented –if, in fact, punctuation is the cue for sentence boundaries.</p>
 </section></section><section id="sec-td-enrichment" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-td-enrichment">
 <span class="header-section-number">7.2</span> Enrichment</h2>
 <p>Where preparation steps are focused on sanitizing and segmenting the text, enrichment steps are aimed towards augmenting the dataset either through recoding, generating, or integrating variables. These processes can prove invaluable for aligning the dataset with the research question and facilitating the analysis.</p>
@@ -920,7 +937,7 @@ Table&nbsp;7.5: Idealized transformed dataset for the syntactic simplification i
 </div>
 <p>We will be using the the native and translated datasets for our purposes so let’s go ahead and read in these datasets.</p>
 <div class="cell">
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in curated natives</span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in curated natives</span></span>
 <span><span class="va">enntt_natives_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">read_csv</span><span class="op">(</span><span class="st">"data/enntt_natives_curated.csv"</span><span class="op">)</span></span>
 <span></span>
@@ -930,7 +947,7 @@ Table&nbsp;7.5: Idealized transformed dataset for the syntactic simplification i
 </div>
 <section id="sec-td-generation" class="level3"><h3 class="anchored" data-anchor-id="sec-td-generation">Generation</h3>
 <p>The process of generation involves the addition of information to a dataset. This differs from other transformation procedures in that instead of manipulating, classifying, and/ or deriving information based on characteristics explicit in a dataset, generation involves deriving new information based on characteristics implicit in a dataset.</p>
-<p>The most common type of operation involved in the generation process is the addition of linguistic annotation. This process can be accomplished manually by a researcher or research team or automatically through the use of pre-trained linguistic resources and/ or software. Ideally, the annotation of linguistic information can be conducted automatically. It is important to note, however, that the quality of the annotations is contingent on the quality of the pre-trained resources, their alignment with the language variety and register to be annotated, and the quality of the text to be annotated. To be clear, no annotation method, whether manual or automatic is guaranteed to be perfectly accurate, but we must be aware of the limitations of the annotation method we choose.</p>
+<p>The most common type of operation involved in the generation process is the addition of linguistic annotation. This process can be accomplished manually by a researcher or research team or automatically through the use of pre-trained linguistic resources and/ or software. Ideally, the annotation of linguistic information can be conducted automatically.</p>
 <p>To identify the main clauses and their subordinate clauses in our datasets, we will need to derive syntactic annotation information from the ENNTT <code>text</code> variable.</p>
 <p>As fun as it would be to hand-annotate the ENNTT corpus, we will instead turn to automatic linguistic annotation. Specifically, we will use the <code>udpipe</code> package <span class="citation" data-cites="R-udpipe">(<a href="../references.html#ref-R-udpipe" role="doc-biblioref">Wijffels 2023</a>)</span> which provides an interface for annotating text using pre-trained models from the <a href="https://universaldependencies.org/">Universal Dependencies</a> (UD) project <span class="citation" data-cites="Nivre2020">(<a href="../references.html#ref-Nivre2020" role="doc-biblioref">Nivre et al. 2020</a>)</span>. The UD project is an effort to develop cross-linguistically consistent treebank annotation for a variety of languages.</p>
 <p>Our first step, then, is to peruse the available pre-trained models for the languages we are interested in and selected the most register-aligned models. The models, model names, and licensing information are documented in the <code>udpipe</code> package and can be accessed by running <code>?udpipe::udpipe_download_model()</code> in the R console. For illustrative purposes, the <code>english</code> treebank model from the <em>https://github.com/bnosac/udpipe.models.ud</em> repository which is released under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA license</a>. This model is trained on various sources including news, Wikipedia, and web data of various genres.</p>
@@ -941,17 +958,14 @@ Table&nbsp;7.5: Idealized transformed dataset for the syntactic simplification i
 <li>Prepare the dataset to be annotated (if necessary). This includes ensuring that the dataset has a column of text to be annotated and a grouping column. By default, the names of these columns are expected to be <code>text</code> and <code>doc_id</code>, respectively. The <code>text</code> column needs to be a character vector and the <code>doc_id</code> column needs to be a unique index for each text to be annotated.</li>
 <li>Annotate the dataset. The result returns a data frame.</li>
 </ol>
-<p>Steps 3 and 4 are repeated for the <code>enntt_natives_tbl</code> and the <code>enntt_translations_tbl</code> datasets. For brevity, I will only show the code for the dataset for the natives. Additionally, I will subset the dataset to 10,000 randomly selected lines for both datasets, as in <a href="#exm-td-generation-subset-natives" class="quarto-xref">Example&nbsp;<span>7.8</span></a> for the natives. Syntactic annotation is a computationally expensive operation and the natives and translations datasets contain 116,341 and 738,597 observations, respectively.</p>
-<div id="exm-td-generation-subset-natives" class="theorem example">
-<p><span class="theorem-title"><strong>Example 7.8</strong></span> &nbsp;</p>
-</div>
+<p>Steps 3 and 4 are repeated for the <code>enntt_natives_tbl</code> and the <code>enntt_translations_tbl</code> datasets. For brevity, I will only show the code for the dataset for the natives. Additionally, I will subset the dataset to 10,000 randomly selected lines for both datasets for the natives. Syntactic annotation is a computationally expensive operation and the natives and translations datasets contain 116,341 and 738,597 observations, respectively.</p>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong> Computational Performance</p>
+<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
 <p>In your own research computationally expensive cannot be avoided, but it can be managed. One strategy is to work with a subset of the data until your code is working as expected. Once you are confident that your code is working as expected, then you can scale up to the full dataset.</p>
 <p>If you are using Quarto, you can use the <code>cache: true</code> metadata field in your code blocks to cache the results of computationally expensive code blocks. This will allow you to run your code once and then use the cached results for subsequent runs.</p>
 <p>Parallel processing is another strategy for managing computationally expensive code. Some packages, such as <code>udpipe</code>, have built-in support for parallel processing. Other packages, such as <code>tidytext</code>, do not. In these cases, you can use the <code>future</code> package <span class="citation" data-cites="R-future">(<a href="../references.html#ref-R-future" role="doc-biblioref">Bengtsson 2023</a>)</span> to parallelize your code.</p>
@@ -961,7 +975,7 @@ Table&nbsp;7.5: Idealized transformed dataset for the syntactic simplification i
 <p>With the subsetted <code>enntt_natives_tbl</code> object, let’s execute steps 1-4, as seen in <a href="#exm-td-generation-udpipe-natives" class="quarto-xref">Example&nbsp;<span>7.9</span></a>.</p>
 <div id="exm-td-generation-udpipe-natives" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.9</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bnosac.github.io/udpipe/en/index.html">udpipe</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Model and directory</span></span>
@@ -1023,7 +1037,7 @@ Figure&nbsp;7.1: Plot of the syntactic tree for a sentence in the ENNTT natives 
 </div>
 </div>
 </div>
-<div class="callout callout-style-simple callout-none no-icon">
+<div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
@@ -1042,7 +1056,7 @@ Figure&nbsp;7.1: Plot of the syntactic tree for a sentence in the ENNTT natives 
 <div id="exm-td-generation-udpipe-natives-tunits-words" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.10</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate the number of T-units and words per sentence</span></span>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate the number of T-units and words per sentence</span></span>
 <span><span class="va">enntt_natives_syn_comp_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">enntt_natives_ann_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">sentence_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1082,21 +1096,10 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 </div>
 <p>Now we can drop the intermediate columns we created to calculate our key syntactic complexity measures using <code>select()</code> to indicate those that we do want to keep, as seen in <a href="#exm-td-generation-udpipe-natives-tunits-words-select" class="quarto-xref">Example&nbsp;<span>7.11</span></a>.</p>
-<div class="callout callout-style-simple callout-none no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong><i class="fa-regular fa-lightbulb" aria-label="lightbulb"></i> Consider this</strong></p>
-<p>As confident as we may be in our recoding process, it is always a good idea to perform some data checks to ensure that the recoding process was successful. In the process, we can also gain some insight into the data. Considering the structure in the transformed ENNTT Corpus dataset, what are some data checks we might want to perform? What are some insights we might gain from these data checks?</p>
-</div>
-</div>
-</div>
 <div id="exm-td-generation-udpipe-natives-tunits-words-select" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.11</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Select columns</span></span>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Select columns</span></span>
 <span><span class="va">enntt_natives_syn_comp_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">enntt_natives_syn_comp_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">sentence_id</span>, <span class="va">t_units</span>, <span class="va">word_len</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1109,7 +1112,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <p>There are a number of join types. The most common are left, full, semi, and anti. The type of join determines which observations are retained in the resulting dataset. Let’s see this in practice. First, let’s create two datasets to join with a common variable <code>key</code>, as seen in <a href="#exm-td-merging-join-dfs" class="quarto-xref">Example&nbsp;<span>7.12</span></a>.</p>
 <div id="exm-td-merging-join-dfs" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.12</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">a_tbl</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">a_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">tibble</span><span class="op">(</span></span>
 <span>    key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">8</span><span class="op">)</span>,</span>
 <span>    a <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
@@ -1161,7 +1164,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div id="exm-td-merging-join-left" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.13</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">left_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span>, by <span class="op">=</span> <span class="st">"key"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">left_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span>, by <span class="op">=</span> <span class="st">"key"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 5 × 3
 &gt;     key a     b    
@@ -1179,7 +1182,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div id="exm-td-merging-join-full" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.14</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">full_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">full_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 7 × 3
 &gt;     key a     b    
@@ -1198,7 +1201,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div id="exm-td-merging-join-semi" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.15</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">semi_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">semi_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 3 × 2
 &gt;     key a    
@@ -1213,7 +1216,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div id="exm-td-merging-join-anti" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.16</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">anti_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">anti_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 2 × 2
 &gt;     key a    
@@ -1224,7 +1227,7 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 </div>
 </div>
 <p>Of these join types, the left join and the anti join are some of the most common to encounter in research projects.</p>
-<div class="callout callout-style-simple callout-none no-icon">
+<div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
@@ -1282,7 +1285,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <div id="exm-td-merging-join-prepped-syn-comp" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.17</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview datasets to join</span></span>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview datasets to join</span></span>
 <span><span class="va">enntt_natives_ann_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1295,7 +1298,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 &gt; # ℹ 8 more variables: lemma &lt;chr&gt;, upos &lt;chr&gt;, xpos &lt;chr&gt;, feats &lt;chr&gt;,
 &gt; #   head_token_id &lt;chr&gt;, dep_rel &lt;chr&gt;, deps &lt;chr&gt;, misc &lt;chr&gt;</code></pre>
 </div>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">enntt_natives_syn_comp_tbl</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">enntt_natives_syn_comp_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; # A tibble: 3 × 4
@@ -1307,12 +1310,12 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 </div>
 </div>
 </div>
-<p>The <code>doc_id</code> and <code>sentence_id</code> variables are both keys that we will use to join the datasets. The reason being that if we only use one of the two we will not align the two datasets at the sentence level. Only the combination of <code>doc_id</code> and <code>sentence_id</code> isolates the sentences for which we have syntactic complexity measures. Beyond a having common variable (or variables in our case), we must also ensure that join key variables are of the same vector type in both data frames and that we are aware of any differences in the values. From the output in <a href="#exm-td-merging-join-prepped-syn-comp" class="quarto-xref">Example&nbsp;<span>7.17</span></a>, we can see that the <code>doc_id</code> and <code>sentence_id</code> variables aligned in terms of vector type; <code>doc_id</code> is character and <code>sentence_id</code> is integer in both data frames. If they happened not to be, there types would need to be adjusted.</p>
+<p>The <code>doc_id</code> and <code>sentence_id</code> variables are both keys that we will use to join the datasets. The reason being that if we only use one of the two we will not align the two datasets at the sentence level. Only the combination of <code>doc_id</code> and <code>sentence_id</code> isolates the sentences for which we have syntactic complexity measures. Beyond a having common variable (or variables in our case), we must also ensure that join key variables are of the same vector type in both data frames and that we are aware of any differences in the values. From the output in <a href="#exm-td-merging-join-prepped-syn-comp" class="quarto-xref">Example&nbsp;<span>7.17</span></a>, we can see that the <code>doc_id</code> and <code>sentence_id</code> variables aligned in terms of vector type; <code>doc_id</code> is character and <code>sentence_id</code> is integer in both data frames. If they happened not to be, their types would need to be adjusted.</p>
 <p>Now, we need to check for differences in the values. We can do this by using the <code><a href="https://rdrr.io/r/base/sets.html">setequal()</a></code> function. This function returns <code>TRUE</code> if the two vectors are equal and <code>FALSE</code> if they are not. If the two vectors are not equal, the function will return the values that are in one vector but not the other. So if one has <code>10001</code> and the other doesn’t we will get <code>FALSE</code>. Let’s see this in practice, as seen in <a href="#exm-td-merging-join-prepped-syn-comp-check" class="quarto-xref">Example&nbsp;<span>7.18</span></a>.</p>
 <div id="exm-td-merging-join-prepped-syn-comp-check" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.18</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check for differences in the values</span></span>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check for differences in the values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sets.html">setequal</a></span><span class="op">(</span></span>
 <span>  <span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">doc_id</span>,</span>
 <span>  <span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">doc_id</span></span>
@@ -1320,7 +1323,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; [1] TRUE</code></pre>
 </div>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sets.html">setequal</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sets.html">setequal</a></span><span class="op">(</span></span>
 <span>  <span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">sentence_id</span>,</span>
 <span>  <span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">sentence_id</span></span>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1333,13 +1336,13 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <div id="exm-td-merging-join-prepped-syn-comp-length" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.19</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check for differences in the length</span></span>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check for differences in the length</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">doc_id</span><span class="op">)</span> <span class="op">==</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">doc_id</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; [1] FALSE</code></pre>
 </div>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">sentence_id</span><span class="op">)</span> <span class="op">==</span></span>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">sentence_id</span><span class="op">)</span> <span class="op">==</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">sentence_id</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&gt; [1] FALSE</code></pre>
@@ -1351,7 +1354,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <div id="exm-td-merging-join-prepped-syn-comp-ann" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.20</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview the annotated dataset</span></span>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview the annotated dataset</span></span>
 <span><span class="va">enntt_natives_ann_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">sentence_id</span>, <span class="va">sentence</span>, <span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1376,7 +1379,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <div id="exm-td-merging-annotation-distinct" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.21</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Reduce annotated data frames to unique sentences</span></span>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Reduce annotated data frames to unique sentences</span></span>
 <span><span class="va">enntt_natives_ann_distinct</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">enntt_natives_ann_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">distinct</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">sentence_id</span>, <span class="va">sentence</span><span class="op">)</span></span>
@@ -1390,7 +1393,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <div id="exm-td-merging-join-left-syn-comp" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.22</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join the native datasets</span></span>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join the native datasets</span></span>
 <span><span class="va">enntt_natives_transformed_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">left_join</span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="va">enntt_natives_syn_comp_tbl</span>,</span>
@@ -1409,7 +1412,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 &gt; $ word_len    &lt;int&gt; 21, 25, 27, 15, 40, 43, 29, 23, 13, 30, 33, 9, 68, 35, 16,…
 &gt; $ sentence    &lt;chr&gt; "It is extremely important that action is taken to ensure …</code></pre>
 </div>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join the translations datasets</span></span>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join the translations datasets</span></span>
 <span><span class="va">enntt_translations_transformed_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">left_join</span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="va">enntt_translations_syn_comp_tbl</span>,</span>
@@ -1436,7 +1439,7 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <div id="exm-td-merging-concatenation" class="theorem example">
 <p><span class="theorem-title"><strong>Example 7.23</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add a type column</span></span>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add a type column</span></span>
 <span><span class="va">enntt_natives_transformed_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">enntt_natives_transformed_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"natives"</span><span class="op">)</span></span>

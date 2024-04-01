@@ -85,13 +85,19 @@ Next, we determine the informational values of the variables. The informational 
 
 With our design in place, we can now inspect the data. This involves assessing the distribution of the variables using descriptive statistics and visualizations. The goal of this step is to confirm the integrity of the data (missing data, anomalies, etc.), identify general patterns in the data, and identify potential outliers. As much as this is a verification step, it also serves to provide a sense of the data and the extent to which the data aligns with the hypothesis. This is particularly true when statistical designs are complex and involve multiple explanatory variables. An appropriate visualization provides context for interpreting the results of the statistical analysis.
 
-Interrogating the data involves applying the appropriate statistical procedure to the dataset. In the Null Hypothesis Significance Testing (NHST) paradigm, this process includes calculating a statistic from the data, comparing it to a null hypothesis distribution, and measuring the evidence against the null hypothesis. The null hypothesis distribution is a distribution of statistic values that we would expect if the null hypothesis were true, *i.e.* that there is no difference or relationship between the explanatory and/ or response variables. By comparing the observed statistic to the null hypothesis distribution, we can determine the likelihood of observing the observed statistic if the null hypothesis were true. This likelihood is known as the p-value. When the p-value is below a pre-determined threshold, typically 0.05, the result is considered statistically significant. This means that the observed statistic is sufficiently different from the null hypothesis distribution that we can reject the null hypothesis.
+Interrogating the data involves applying the appropriate statistical procedure to the dataset. In the **Null Hypothesis Significance Testing** (NHST) paradigm, this process includes calculating a statistic from the data, comparing it to a null hypothesis distribution, and measuring the evidence against the null hypothesis. The null hypothesis distribution is a distribution of statistic values that we would expect if the null hypothesis were true, *i.e.* that there is no difference or relationship between the explanatory and/ or response variables. By comparing the observed statistic to the null hypothesis distribution, we can determine the likelihood of observing the observed statistic, if the null hypothesis were true. The estimate of this likelihood is a **p-value**. When the p-value is below a pre-determined threshold, typically 0.05, the result is considered statistically significant. This means that the observed statistic is sufficiently different from the null hypothesis distribution that we can reject the null hypothesis.
 
-Now let's consider how to approach interpreting the results from a statistical test.  The p-value provides a probability that the results of our statistical test could be explained by the null hypothesis. When this probability crosses above the threshold of .05, the result is considered statistically significant, otherwise we have a 'null result' (i.e. non-significant).
+Now let's consider how to approach interpreting the results from a statistical test.  The p-value provides a probability that the results of our statistical test could be explained by the null hypothesis. When this probability is below the threshold of 0.05, the result is considered statistically significant, otherwise we have a 'null result' (*i.e.* non-significant).
 
-However, this sets up a binary distinction that can be problematic. On the one hand, what is one to do if a test returns a p-value of .051 or something 'marginally significant'? According to standard practice these results would not be statistically significant. On the other hand, if we get a statistically significant result, do we move on --case closed? To address both of these issues, it is important to calculate a confidence interval for the test statistic. The confidence interval is the range of values for our test statistic that we would expect the true statistic value to fall within some level of uncertainty. Again, 95% is the most common level of uncertainty. The upper and lower bounds of this range are called the confidence limits for the test statistic.
+However, this sets up a binary distinction that can be problematic. On the one hand, what is one to do if a test returns a p-value of 0.051?  According to standard practice these "marginally significant" results would not be statistically significant. On the other hand, if we get a statistically significant result, say a p-value of 0.49, do we move on --case closed? To address both of these issues, it is important to calculate a confidence interval for the test statistic. The **confidence interval** is the range of values for our test statistic that we would expect the true statistic value to fall within some level of uncertainty. Again, 95% is the most common level of uncertainty. The upper and lower bounds of this range are called the confidence limits for the test statistic.
 
 Used in conjunction with p-values, confidence intervals can provide a more nuanced interpretation of the results of a statistical test. For example, if we get a p-value of .051, but the confidence interval is very narrow, we can be more confident that the results are reliable. Conversely, if we get a p-value of .049, but the confidence interval is very wide, we can be less confident that the results are reliable. If our confidence interval contains the null value, then even a significant p-value will require a more nuanced interpretation.
+
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
+
+Overgeneralization and undergeneralization are more formally known as Type I and Type II error, respectively. Type I error (false positive) occurs when we reject the null hypothesis when it is true. That is, we erroneously detect a significant result, when in fact the tested relationship is not borne out in the population. Type II (false negative) error occurs when we fail to reject the null hypothesis when it is false. This is a case of missing a significant result due to the limitations of the analysis which can stem from the sample size, the design of the study, or the statistical test used.
+:::
 
 It is important to underscore that the purpose of IDA is to draw conclusions from a dataset which are generalizable to the population. These conclusions require that there are rigorous measures to ensure that the results of the analysis do not overgeneralize (suggest there is a relationship when there is not one) and balance that with the fact that we don't want to undergeneralize (miss the fact that there is an relationship in the population, but our analysis was not capable of detecting it).
 
@@ -117,7 +123,7 @@ The steps for implementing a simulation-based approach to significance testing a
 
 <!-- Setup: packages/ options/ data -->
 
-The `infer` package [@R-infer] provides a Tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the `tidyverse` [@R-tidyverse], `infer` provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution, calculate the p-value, and calculate the confidence interval.
+The `infer` package [@R-infer] provides a Tidyverse-friendly framework to implement simulation-based methods for statistical inference. Designed to be used in conjunction with the `tidyverse` [@R-tidyverse], `infer` provides a set of functions that can be used to specify the variables of interest, calculate the observed statistic, generate the null hypothesis distribution and calculate the p-value and the confidence interval.
 
 Let's load the necessary packages we will use in this section, as seen in @exm-ida-setup.
 
@@ -168,13 +174,13 @@ read_csv("data/dative_ida_dd.csv") |>
 
 We see that this dataset has four variables, two categorical and two numeric. In our demonstrations we are going to use the `realization_of_rcp` as the response variable, the variable whose variation we are investigating.
 
-For a bit more context, a dative is the phrase which reflects the entity that takes the recipient role in a ditransitive clause. In English, the recipient (dative) can be realized as either a prepositional phrase (PP) as seen in (1) or as a noun phrase (NP) as seen in (2) @exm-ida-cat-dative-examples.
+For a bit more context, a dative is the phrase which reflects the entity that takes the recipient role in a ditransitive clause. In English, the recipient (dative) can be realized as either a prepositional phrase (PP) as seen in @exm-ida-cat-dative-examples (1) or as a noun phrase (NP) as seen in (2).
 
 ::: {#exm-ida-cat-dative-examples}
-Example utterances:
+Dative examples
 
-1. John gave the book [to Mary ~PP~].
-2. John gave [Mary ~NP~] the book.
+(1) John gave the book [to Mary ~PP~].
+(2) John gave [Mary ~NP~] the book.
 :::
 
 Together these two syntactic options are known as the Dative Alternation [@Bresnan2007].
@@ -223,7 +229,7 @@ dative_tbl
 ```
 :::
 
-We can see that the dataset includes `r nrow(dative_tbl)` observations. We will take a closer look a the descriptive statistics for the variables as we prepare for each analysis.
+We can see that the dataset includes `r format(nrow(dative_tbl), big.mark=",")` observations. We will take a closer look a the descriptive statistics for the variables as we prepare for each analysis.
 
 #### Univariate analysis {#sec-ida-cat-univariate}
 
@@ -325,17 +331,22 @@ dative_null
 
 The result of @exm-ida-cat-null-hypothesis is a data frame with as many rows as there are samples. Each row contains the proportion statistic for each sample drawn from the hypothesized distribution that the proportion of NP realizations of the recipient clause is 0.5.
 
-To appreciate the null hypothesis distribution, we can visualize it using a histogram. The `infer` package provides a convenient `visualize()` function for visualizing distributions, as seen in @exm-ida-cat-null-hypothesis.
+To appreciate the null hypothesis distribution, we can visualize it using a histogram. The `infer` package provides a convenient `visualize()` function for visualizing distributions, as seen in @exm-ida-cat-null-hypothesis-vis.
 
-::: {#exm-ida-cat-null-hypothesis}
-```{r}
-#| label: fig-ida-cat-null-hypothesis
-#| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause."
-#| fig-width: 8
-#| fig-asp: 0.5
-
+::: {#exm-ida-cat-null-hypothesis-vis}
+```r
 # Visualize the null hypothesis distribution
 dative_null |> visualize()
+```
+```{r}
+#| label: fig-ida-cat-null-hypothesis
+#| fig-cap: "Simulation-based null distribution."
+#| fig-width: 8
+#| fig-asp: 0.5
+#| echo: false
+
+# Visualize the null hypothesis distribution
+dative_null |> visualize() + labs(title = "")
 ```
 
 ```{r}
@@ -348,7 +359,7 @@ null_sd <- round(sd(dative_null$stat), 2)
 ```
 :::
 
-On the x-axis is the proportion statistic of NP realizations of the recipient clause that we would expect if the null hypothesis were true. For the 1,000 samples, the proportion statistic ranges from `r null_range[1]` to `r null_range[2]`. Importantly we can appreciate that the most of the proportion statistics are around 0.5, in fact, the mean is `r null_mean` with a standard deviation of `r null_sd`, which is what we would expect if the null hypothesis were true. But there is variation, as we would also expect.
+In @fig-ida-cat-null-hypothesis, we see that on the x-axis is the proportion statistic of NP realizations of the recipient clause that we would expect if the null hypothesis were true. For the 1,000 samples, the proportion statistic ranges from `r null_range[1]` to `r null_range[2]`. Importantly we can appreciate that the most of the proportion statistics are around 0.5, in fact, the mean is `r null_mean` with a standard deviation of `r null_sd`, which is what we would expect if the null hypothesis were true. But there is variation, as we would also expect.
 
 Why would we expect variation? Consider the following analogy. If we were to flip a fair coin 10 times, we would expect to get 5 heads and 5 tails. But this doesn't always happen. Sometimes we get 6 heads and 4 tails. Sometimes we get 7 heads and 3 tails, and so on. As the number of flips increases, however, we would expect the proportion of heads to be closer to 0.5, but there would still be variation. The same is true for the null hypothesis distribution. As the number of samples increases, we would expect the proportion of NP realizations of the recipient clause to be closer to 0.5, but there would still be variation. The question is whether the observed statistic we obtained from our data, in @exm-ida-cat-calculate, is within some level of variation that we would expect if the null hypothesis were true.
 
@@ -365,10 +376,10 @@ dative_null |>
 ```
 ```{r}
 #| label: fig-ida-cat-null-hypothesis-obs
-#| fig-cap: "Null hypothesis distribution of the proportion of NP realizations of the recipient clause with the observed statistic."
-#| echo: false
+#| fig-cap: "Simulation-based null distribution with the observed statistic."
 #| fig-width: 8
 #| fig-asp: 0.5
+#| echo: false
 
 # Visualize the null hypothesis distribution with the observed statistic
 dative_null |>
@@ -390,7 +401,7 @@ Just from a visual inspection, we can see that the observed statistic lies far a
 The direction of the alternative hypothesis is important because it determines the p-value range. The "two-sided" direction means that we are interested in the proportion being different from 0.5. If we were only interested in the proportion of one outcome being greater than 0.5, then we would use the "greater" direction, or "less" in the opposite scenario.
 :::
 
-But we need to quantify this. We need to calculate the probability of observing the observed statistic or a more extreme statistic if the null hypothesis were true. This is called the p-value, and calculating this estimate is step 4 in the workflow. The **p-value** is calculated by counting the number of samples in the null hypothesis distribution that are more extreme than expected within some level of uncertainty. 95% is the most common level of uncertainty, which is called the alpha level. The remain 5% of the distribution is the space where the likelihood that the null hypothesis accounts for the statistic is below This means that if the p-value is less than 0.05, then we reject the null hypothesis. If the p-value is greater than 0.05, then we fail to reject the null hypothesis.
+But we need to quantify this. We need to calculate the probability of observing the observed statistic or a more extreme statistic if the null hypothesis were true, the p-value. Calculating this estimate is step 4 in the workflow. The p-value is calculated by counting the number of samples in the null hypothesis distribution that are more extreme than expected within some level of uncertainty. 95% is the most common level of uncertainty, which is called the alpha level. The remaining 5% of the distribution is the space where the likelihood that the null hypothesis accounts for the statistic is below This means that if the p-value is less than 0.05, then we reject the null hypothesis. If the p-value is greater than 0.05, then we fail to reject the null hypothesis.
 
 With `infer` we can calculate the p-value using the `get_p_value()` function. Let's calculate the p-value for our observed statistic, as seen in @exm-ida-cat-p-value.
 
@@ -404,6 +415,11 @@ dative_null |>
     obs_stat = dative_obs, # the observed statistic
     direction = "greater" # the direction of the alternative hypothesis
   )
+```
+```r
+Warning message:
+Please be cautious in reporting a p-value of 0. This result is an approximation based on the number of `reps` chosen in the
+`generate()` step.
 ```
 :::
 
@@ -469,7 +485,7 @@ Our stat is `r dative_obs$stat` and the confidence interval limits are `r dative
 
 #### Bivariate analysis {#sec-ida-cat-bivariate}
 
-The univarite case is not very interesting or common in statistical inference, but it is a good place to start to understand the simulation-based process and the logic of statistical inference. The bivariate case, on the other hand, is much more common and interesting. The bivariate case includes two variables. The goal is to describe the relationship between the two variables.
+The univarite case is not very interesting or common in statistical inference, but it is a good place to start to understand the simulation-based process and the logic of statistical inference. The bivariate case, on the other hand, is much more common and interesting. The bivariate case includes two variables. The goal is to test the relationship between the two variables.
 
 Using the `dative_tbl` dataset, we can imagine making the claim that:
 
@@ -477,7 +493,7 @@ Using the `dative_tbl` dataset, we can imagine making the claim that:
 
 This hypothesis can be approached using a **difference in proportions** test, as both variables are binomial (have two levels). The null hypothesis is that there is no difference in the proportion of NP and PP realizations of the recipient clause by modality. The alternative hypothesis is that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality.
 
-We can cross-tabulate or visualize, but let's cross-tabulate this relationship as it is a basic 2-by-2 contingency table. In @exm-ida-cat-bivariate-tbl, we see the code for the cross-tabulation of the `realization_of_rcp` and `modality` variables.
+We can cross-tabulate or visualize, but let's cross-tabulate this relationship as it is a basic 2-by-2 contingency table. In @exm-ida-cat-bivariate-tbl, we see the code for the cross-tabulation of the `realization_of_rcp` and `modality` variables. Note I've made use of the `janitor` package to adorn this table with percentages, totals, and observation numbers.
 
 ::: {#exm-ida-cat-bivariate-tbl}
 ```r
@@ -509,7 +525,7 @@ dative_tbl |>
 ```
 :::
 
-In @tbl-ida-cat-bivariate, both the proportions and raw counts adorn the table. We can appreciate that the proportion of NP realizations of the recipient clause is higher in both modalities, as we might expect from our univariate analysis. However, the proportion appears to be different with the spoken modality having a higher proportion of NP realizations of the recipient clause than the written modality. But we cannot conclude that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality. We need to conduct a statistical test to determine if the difference is statistically significant.
+In @tbl-ida-cat-bivariate, we can appreciate that the proportion of NP realizations of the recipient clause is higher in both modalities, as we might expect from our univariate analysis. However, the proportion appears to be different with the spoken modality having a higher proportion of NP realizations of the recipient clause than the written modality. But we cannot conclude that there is a difference in the proportion of NP and PP realizations of the recipient clause by modality. We need to conduct a statistical test to determine if the difference is statistically significant.
 
 To determine if the distribution of the levels of the `realization_of_rcp` variable by the levels of the `modality` variable is different from what we would expect if the null hypothesis were true, we need to calculate the difference observed in the sample and compare it to the differences observed in many samples where the null hypothesis is true.
 
@@ -563,7 +579,7 @@ dative_obs
 
 Two differences are that our statistic is now a difference in proportions and that we are asked to specify the order of the levels of `modality`. The statistic is clear, we are investigating whether the proportion of NP realizations of the recipient clause is different between the spoken and written modalities. The order of the levels of `modality` is important because it determines the direction of the alternative hypothesis, specifically how the statistic is calculated (the order of the subtraction).
 
-So our observed statistic `r round(dative_obs$stat, 2)` is the proportion of NP realizations of the recipient clause in the spoken modality minus the proportion of NP realizations of the recipient clause in the written modality, so the NP realization appears `r round(dative_obs$stat * 100, 0)`% more in the spoken modality compared to the written modality.
+So our observed statistic `r round(dative_obs$stat, 3)` is the proportion of NP realizations of the recipient clause in the spoken modality minus the proportion of NP realizations of the recipient clause in the written modality, so the NP realization appears `r round(dative_obs$stat * 100, 0)`% more in the spoken modality compared to the written modality.
 
 The question remains, is this difference statistically significant? To answer this question, we generate the null hypothesis distribution and calculate the p-value, as seen in @exm-ida-cat-null-hypothesis-bivariate.
 
@@ -623,14 +639,13 @@ To explore this scenario, let's posit that:
 
 The length ratio gets at the length of the recipient clause relative to the length of the theme clause. This ratio is an operationalization of a phenomenon known as 'Heavy NP' shift. There are many ways to operationalize this phenomenon, but the length ratio is a simple method to approximate the phenomenon. It attempts to capture the idea that the longer the theme clause is relative to the recipient clause, the more likely the recipient clause will be realized as an NP --in other words, when the theme is relatively longer than the recipient, the theme is ordered last in the sentence, and the recipient is ordered first in the sentence and takes the form of an NP (instead of a PP).
 
-For example,
+The hypothesis, then, is that @exm-heavy-np-shift (2) would be less likely than (1) because the theme is relatively longer than the recipient.
 
-1. John gave the book [to Mary]. (PP)
-2. John gave [Mary] the large book that I showed you in class yesterday. (NP)
+::: {#exm-heavy-np-shift}
 
-The hypothesis, then, is that the example in (3) would be less likely than (2) because the theme is relatively longer than the recipient.
-
-3. John gave the book that I showed you in class yesterday [to Mary]. (PP)
+(1) John gave [Mary ~NP~] the large book that I showed you in class yesterday.
+(2) John gave the large book that I showed you in class yesterday [to Mary ~PP~].
+:::
 
 Let's consider this variable `length_ratio` and `modality` together as explanatory variables for the realizations of the recipient clause `realization_of_rcp`.
 
@@ -968,7 +983,7 @@ Another approach is to add a small value to the `fillers_per_100` variable, for 
 
 Adding values can be done in one of two ways. We can add a small constant value to all speakers, or we can add a small random value to all speakers. The former is easier to implement, but means that we will still have a spike in the distribution at the value of the constant. Since we do not expect that speakers that did not use fillers at all would never do so and that when they do we would not expect them to be at exactly the same rate as other speakers, we can add a small random value to all speakers.
 
-In R, we can use the `jitter()` function to add a small amount of random noise to the variable. Note, however, this random noise can be positive or negative. When a negative value is added to a zero value, we are still in trouble. So we need to make sure that none of the jitter produces negative values. We can do this by simply taking the absolute value of the jittered variable with the `abs()` function. Let's see how this works in @exm-ida-num-uni-jitter.
+In R, we can use the `jitter()` function to add a small amount of random noise to the variable. Note, however, this random noise can be positive or negative. When a negative value is added to a zero value, we are still in trouble when we go to log-transform. So we need to make sure that none of the jitter produces negative values. We can do this by simply taking the absolute value of the jittered variable with the `abs()` function. Let's see how this works in @exm-ida-num-uni-jitter.
 
 ::: {#exm-ida-num-uni-jitter}
 ```{r}
@@ -1090,7 +1105,14 @@ fillers_null <-
 
 # Calculate the p-value
 fillers_null |>
-  get_p_value(obs_stat = fillers_obs, direction = "two-sided")
+  get_p_value(obs_stat = fillers_obs, direction = "greater")
+```
+```{r}
+#| include: false
+
+p_value <-
+  fillers_null |>
+  get_p_value(obs_stat = fillers_obs, direction = "greater")
 ```
 :::
 
@@ -1127,7 +1149,8 @@ First, we visualize the distribution of the `fillers_per_100_log` variable by `e
 ```{r}
 #| label: fig-ida-num-bi-edu-vis
 #| fig-cap: "Visualizations of the `fillers_per_100_log` variable by `education`"
-#| fig-height: 4
+#| fig-width: 4
+#| fig-asp: 0.75
 
 # Boxplot
 fillers_tbl |>

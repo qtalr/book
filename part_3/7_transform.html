@@ -414,13 +414,13 @@ Table&nbsp;7.1: Data dictionary for the curated Europarl Corpus.
 <colgroup>
 <col style="width: 9%">
 <col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 60%">
+<col style="width: 12%">
+<col style="width: 61%">
 </colgroup>
 <thead><tr class="header">
 <th>variable</th>
 <th>name</th>
-<th>variable_type</th>
+<th>type</th>
 <th>description</th>
 </tr></thead>
 <tbody>
@@ -467,19 +467,19 @@ Table&nbsp;7.1: Data dictionary for the curated Europarl Corpus.
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 4
-&gt;     doc_id type   line_id lines                                                 
-&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                 
-&gt;  1 1965735 Source       1 "Reanudación del período de sesiones"                 
-&gt;  2       1 Target       1 "Resumption of the session"                           
-&gt;  3 1965736 Source       2 "Declaro reanudado el período de sesiones del Parlame…
-&gt;  4       2 Target       2 "I declare resumed the session of the European Parlia…
-&gt;  5 1965737 Source       3 "Como todos han podido comprobar, el gran \"efecto de…
-&gt;  6       3 Target       3 "Although, as you will have seen, the dreaded 'millen…
-&gt;  7 1965738 Source       4 "Sus Señorías han solicitado un debate sobre el tema …
-&gt;  8       4 Target       4 "You have requested a debate on this subject in the c…
-&gt;  9 1965739 Source       5 "A la espera de que se produzca, de acuerdo con mucho…
-&gt; 10       5 Target       5 "In the meantime, I should like to observe a minute' …</code></pre>
+<pre><code># A tibble: 10 × 4
+    doc_id type   line_id lines                                                 
+     &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                 
+ 1 1965735 Source       1 "Reanudación del período de sesiones"                 
+ 2       1 Target       1 "Resumption of the session"                           
+ 3 1965736 Source       2 "Declaro reanudado el período de sesiones del Parlame…
+ 4       2 Target       2 "I declare resumed the session of the European Parlia…
+ 5 1965737 Source       3 "Como todos han podido comprobar, el gran \"efecto de…
+ 6       3 Target       3 "Although, as you will have seen, the dreaded 'millen…
+ 7 1965738 Source       4 "Sus Señorías han solicitado un debate sobre el tema …
+ 8       4 Target       4 "You have requested a debate on this subject in the c…
+ 9 1965739 Source       5 "A la espera de que se produzca, de acuerdo con mucho…
+10       5 Target       5 "In the meantime, I should like to observe a minute' …</code></pre>
 </div>
 </div>
 </div>
@@ -488,11 +488,11 @@ Table&nbsp;7.1: Data dictionary for the curated Europarl Corpus.
 <p>The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis.</p>
 <p>Simply looking at the first 10 lines of the dataset from <a href="#exm-tb-europarl-preview" class="quarto-xref">Example&nbsp;<span>7.1</span></a> gives us a clearer sense of the dataset structure, but, in terms of normalization procedures we might apply, it is likely not sufficient. We want to get a sense of any potential inconsistencies in the dataset, in particular in the <code>lines</code> variable. Since this is a large dataset with 3,931,468 observations, we will need to explore the dataset in more detail using procedures for summarizing and filtering data.</p>
 <p>After exploring variations in the <code>lines</code> variable, I identified a number of artifacts in this dataset that we will want to consider addressing. These are included in <a href="#tbl-td-europarl-normalization" class="quarto-xref">Table&nbsp;<span>7.2</span></a>.</p>
-<div id="tbl-td-europarl-normalization" class="sm striped quarto-float anchored">
+<div id="tbl-td-europarl-normalization" class="striped quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-europarl-normalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require normalization.
 </figcaption><div aria-describedby="tbl-td-europarl-normalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table-sm table-striped small table">
+<table class="table-striped table">
 <colgroup>
 <col style="width: 30%">
 <col style="width: 70%">
@@ -551,19 +551,19 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect</a></span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 4
-&gt;     doc_id type   line_id lines                                                 
-&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                 
-&gt;  1 3225772 Source 1260038 (PT) Señor Presidente, quisiera plantear dos pregunta…
-&gt;  2 3715842 Source 1750108 (El Parlamento decide la devolución a la Comisión)    
-&gt;  3 1961715 Target 1961715 (Parliament adopted the resolution)                   
-&gt;  4 1429470 Target 1429470 27, originally Greens/EFA amendment in FEMM); binding…
-&gt;  5   51632 Target   51632 Question No 8 by (H-0376/00):                         
-&gt;  6 2482671 Source  516937 La Comisión propone proporcionar a las Agencias nacio…
-&gt;  7 1059628 Target 1059628 (The President cut off the speaker)                   
-&gt;  8 1507254 Target 1507254 in writing. - (LT) I welcomed this document, because …
-&gt;  9 2765325 Source  799591 (Aplausos)                                            
-&gt; 10 2668536 Source  702802 &nbsp;&nbsp; Las preguntas que, por falta de tiempo, no han rec…</code></pre>
+<pre><code># A tibble: 10 × 4
+    doc_id type   line_id lines                                                 
+     &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                 
+ 1 3225772 Source 1260038 (PT) Señor Presidente, quisiera plantear dos pregunta…
+ 2 3715842 Source 1750108 (El Parlamento decide la devolución a la Comisión)    
+ 3 1961715 Target 1961715 (Parliament adopted the resolution)                   
+ 4 1429470 Target 1429470 27, originally Greens/EFA amendment in FEMM); binding…
+ 5   51632 Target   51632 Question No 8 by (H-0376/00):                         
+ 6 2482671 Source  516937 La Comisión propone proporcionar a las Agencias nacio…
+ 7 1059628 Target 1059628 (The President cut off the speaker)                   
+ 8 1507254 Target 1507254 in writing. - (LT) I welcomed this document, because …
+ 9 2765325 Source  799591 (Aplausos)                                            
+10 2668536 Source  702802 &nbsp;&nbsp; Las preguntas que, por falta de tiempo, no han rec…</code></pre>
 </div>
 </div>
 </div>
@@ -577,19 +577,19 @@ Table&nbsp;7.2: Characteristics of the Europarl Corpus dataset that may require 
 <span>  <span class="fu">mutate</span><span class="op">(</span>non_speech <span class="op">=</span> <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html">str_extract_all</a></span><span class="op">(</span><span class="va">lines</span>, <span class="st">"\\(.+?\\)"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 5
-&gt;     doc_id type   line_id lines                                       non_speech
-&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                       &lt;list&gt;    
-&gt;  1 3225772 Source 1260038 (PT) Señor Presidente, quisiera plantear d… &lt;chr [1]&gt; 
-&gt;  2 3715842 Source 1750108 (El Parlamento decide la devolución a la C… &lt;chr [1]&gt; 
-&gt;  3 1961715 Target 1961715 (Parliament adopted the resolution)         &lt;chr [1]&gt; 
-&gt;  4 1429470 Target 1429470 27, originally Greens/EFA amendment in FEM… &lt;chr [1]&gt; 
-&gt;  5   51632 Target   51632 Question No 8 by (H-0376/00):               &lt;chr [1]&gt; 
-&gt;  6 2482671 Source  516937 La Comisión propone proporcionar a las Age… &lt;chr [2]&gt; 
-&gt;  7 1059628 Target 1059628 (The President cut off the speaker)         &lt;chr [1]&gt; 
-&gt;  8 1507254 Target 1507254 in writing. - (LT) I welcomed this documen… &lt;chr [1]&gt; 
-&gt;  9 2765325 Source  799591 (Aplausos)                                  &lt;chr [1]&gt; 
-&gt; 10 2668536 Source  702802 &nbsp;&nbsp; Las preguntas que, por falta de tiempo,… &lt;chr [1]&gt;</code></pre>
+<pre><code># A tibble: 10 × 5
+    doc_id type   line_id lines                                       non_speech
+     &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                       &lt;list&gt;    
+ 1 3225772 Source 1260038 (PT) Señor Presidente, quisiera plantear d… &lt;chr [1]&gt; 
+ 2 3715842 Source 1750108 (El Parlamento decide la devolución a la C… &lt;chr [1]&gt; 
+ 3 1961715 Target 1961715 (Parliament adopted the resolution)         &lt;chr [1]&gt; 
+ 4 1429470 Target 1429470 27, originally Greens/EFA amendment in FEM… &lt;chr [1]&gt; 
+ 5   51632 Target   51632 Question No 8 by (H-0376/00):               &lt;chr [1]&gt; 
+ 6 2482671 Source  516937 La Comisión propone proporcionar a las Age… &lt;chr [2]&gt; 
+ 7 1059628 Target 1059628 (The President cut off the speaker)         &lt;chr [1]&gt; 
+ 8 1507254 Target 1507254 in writing. - (LT) I welcomed this documen… &lt;chr [1]&gt; 
+ 9 2765325 Source  799591 (Aplausos)                                  &lt;chr [1]&gt; 
+10 2668536 Source  702802 &nbsp;&nbsp; Las preguntas que, por falta de tiempo,… &lt;chr [1]&gt; </code></pre>
 </div>
 </div>
 </div>
@@ -720,19 +720,19 @@ Table&nbsp;7.3: Example of tokenizing the <code>lines</code> variable into word 
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"Target"</span>, <span class="va">line_id</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 4
-&gt;    doc_id type   line_id token     
-&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;     
-&gt;  1      2 Target       2 i         
-&gt;  2      2 Target       2 declare   
-&gt;  3      2 Target       2 resumed   
-&gt;  4      2 Target       2 the       
-&gt;  5      2 Target       2 session   
-&gt;  6      2 Target       2 of        
-&gt;  7      2 Target       2 the       
-&gt;  8      2 Target       2 european  
-&gt;  9      2 Target       2 parliament
-&gt; 10      2 Target       2 adjourned</code></pre>
+<pre><code># A tibble: 10 × 4
+   doc_id type   line_id token     
+    &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;     
+ 1      2 Target       2 i         
+ 2      2 Target       2 declare   
+ 3      2 Target       2 resumed   
+ 4      2 Target       2 the       
+ 5      2 Target       2 session   
+ 6      2 Target       2 of        
+ 7      2 Target       2 the       
+ 8      2 Target       2 european  
+ 9      2 Target       2 parliament
+10      2 Target       2 adjourned </code></pre>
 </div>
 </div>
 <p>The <code>token</code> column now contains our word tokens. One thing to note, however, is that text is lowercased and punctuation is stripped by default. If we want to retain the original case or punctuation, keep the original variable, or change the tokenization strategy, we can update the <code>to_lower</code>, <code>strip_punct</code>, <code>drop</code>, or <code>token</code> parameters, respectively.</p>
@@ -754,19 +754,19 @@ Table&nbsp;7.3: Example of tokenizing the <code>lines</code> variable into word 
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"Target"</span>, <span class="va">line_id</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 4
-&gt;    doc_id type   line_id token               
-&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;               
-&gt;  1      2 Target       2 i declare           
-&gt;  2      2 Target       2 declare resumed     
-&gt;  3      2 Target       2 resumed the         
-&gt;  4      2 Target       2 the session         
-&gt;  5      2 Target       2 session of          
-&gt;  6      2 Target       2 of the              
-&gt;  7      2 Target       2 the european        
-&gt;  8      2 Target       2 european parliament 
-&gt;  9      2 Target       2 parliament adjourned
-&gt; 10      2 Target       2 adjourned on</code></pre>
+<pre><code># A tibble: 10 × 4
+   doc_id type   line_id token               
+    &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;               
+ 1      2 Target       2 i declare           
+ 2      2 Target       2 declare resumed     
+ 3      2 Target       2 resumed the         
+ 4      2 Target       2 the session         
+ 5      2 Target       2 session of          
+ 6      2 Target       2 of the              
+ 7      2 Target       2 the european        
+ 8      2 Target       2 european parliament 
+ 9      2 Target       2 parliament adjourned
+10      2 Target       2 adjourned on        </code></pre>
 </div>
 </div>
 </div>
@@ -800,14 +800,14 @@ Table&nbsp;7.3: Example of tokenizing the <code>lines</code> variable into word 
 <span><span class="va">europarl_sentences_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 3
-&gt;   type   line_id token                                                          
-&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                          
-&gt; 1 Source       1 reanudación del período de sesiones                            
-&gt; 2 Target       1 resumption of the session                                      
-&gt; 3 Source       2 declaro reanudado el período de sesiones del parlamento europe…
-&gt; 4 Target       2 i declare resumed the session of the european parliament adjou…
-&gt; 5 Source       3 como todos han podido comprobar el gran efecto del año 2000 no…</code></pre>
+<pre><code># A tibble: 5 × 3
+  type   line_id token                                                          
+  &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;                                                          
+1 Source       1 reanudación del período de sesiones                            
+2 Target       1 resumption of the session                                      
+3 Source       2 declaro reanudado el período de sesiones del parlamento europe…
+4 Target       2 i declare resumed the session of the european parliament adjou…
+5 Source       3 como todos han podido comprobar el gran efecto del año 2000 no…</code></pre>
 </div>
 </div>
 </div>
@@ -828,13 +828,13 @@ Table&nbsp;7.4: Data dictionary for the curated native ENNTT dataset.
 <colgroup>
 <col style="width: 14%">
 <col style="width: 19%">
-<col style="width: 16%">
-<col style="width: 48%">
+<col style="width: 14%">
+<col style="width: 49%">
 </colgroup>
 <thead><tr class="header">
 <th>variable</th>
 <th>name</th>
-<th>variable_type</th>
+<th>type</th>
 <th>description</th>
 </tr></thead>
 <tbody>
@@ -899,8 +899,8 @@ Table&nbsp;7.5: Idealized transformed dataset for the syntactic simplification i
 </colgroup>
 <thead><tr class="header">
 <th>variable</th>
-<th>variable_name</th>
-<th>variable_type</th>
+<th>name</th>
+<th>type</th>
 <th>description</th>
 </tr></thead>
 <tbody>
@@ -1001,25 +1001,25 @@ Table&nbsp;7.5: Idealized transformed dataset for the syntactic simplification i
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">enntt_natives_ann_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 264,124
-&gt; Columns: 17
-&gt; $ doc_id        &lt;chr&gt; "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "…
-&gt; $ paragraph_id  &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
-&gt; $ sentence_id   &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
-&gt; $ sentence      &lt;chr&gt; "It is extremely important that action is taken to ensur…
-&gt; $ start         &lt;int&gt; 1, 4, 7, 17, 27, 32, 39, 42, 48, 51, 58, 63, 66, 73, 77,…
-&gt; $ end           &lt;int&gt; 2, 5, 15, 25, 30, 37, 40, 46, 49, 56, 61, 64, 71, 75, 82…
-&gt; $ term_id       &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1…
-&gt; $ token_id      &lt;chr&gt; "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",…
-&gt; $ token         &lt;chr&gt; "It", "is", "extremely", "important", "that", "action", …
-&gt; $ lemma         &lt;chr&gt; "it", "be", "extremely", "important", "that", "action", …
-&gt; $ upos          &lt;chr&gt; "PRON", "AUX", "ADV", "ADJ", "SCONJ", "NOUN", "AUX", "VE…
-&gt; $ xpos          &lt;chr&gt; "PRP", "VBZ", "RB", "JJ", "IN", "NN", "VBZ", "VBN", "TO"…
-&gt; $ feats         &lt;chr&gt; "Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs"…
-&gt; $ head_token_id &lt;chr&gt; "4", "4", "4", "0", "8", "8", "8", "4", "10", "8", "13",…
-&gt; $ dep_rel       &lt;chr&gt; "expl", "cop", "advmod", "root", "mark", "nsubj:pass", "…
-&gt; $ deps          &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-&gt; $ misc          &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …</code></pre>
+<pre><code>Rows: 264,124
+Columns: 17
+$ doc_id        &lt;chr&gt; "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "…
+$ paragraph_id  &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ sentence_id   &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ sentence      &lt;chr&gt; "It is extremely important that action is taken to ensur…
+$ start         &lt;int&gt; 1, 4, 7, 17, 27, 32, 39, 42, 48, 51, 58, 63, 66, 73, 77,…
+$ end           &lt;int&gt; 2, 5, 15, 25, 30, 37, 40, 46, 49, 56, 61, 64, 71, 75, 82…
+$ term_id       &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1…
+$ token_id      &lt;chr&gt; "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",…
+$ token         &lt;chr&gt; "It", "is", "extremely", "important", "that", "action", …
+$ lemma         &lt;chr&gt; "it", "be", "extremely", "important", "that", "action", …
+$ upos          &lt;chr&gt; "PRON", "AUX", "ADV", "ADJ", "SCONJ", "NOUN", "AUX", "VE…
+$ xpos          &lt;chr&gt; "PRP", "VBZ", "RB", "JJ", "IN", "NN", "VBZ", "VBN", "TO"…
+$ feats         &lt;chr&gt; "Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs"…
+$ head_token_id &lt;chr&gt; "4", "4", "4", "0", "8", "8", "8", "4", "10", "8", "13",…
+$ dep_rel       &lt;chr&gt; "expl", "cop", "advmod", "root", "mark", "nsubj:pass", "…
+$ deps          &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+$ misc          &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …</code></pre>
 </div>
 </div>
 </div>
@@ -1071,14 +1071,14 @@ Figure&nbsp;7.1: Plot of the syntactic tree for a sentence in the ENNTT natives 
 <span><span class="co"># Preview</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">enntt_natives_syn_comp_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 10,199
-&gt; Columns: 6
-&gt; $ doc_id         &lt;chr&gt; "1", "10", "100", "1000", "10000", "1001", "1002", "100…
-&gt; $ sentence_id    &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
-&gt; $ main_clauses   &lt;int&gt; 1, 0, 0, 0, 2, 0, 0, 1, 1, 0, 1, 1, 1, 0, 2, 0, 1, 1, 1…
-&gt; $ subord_clauses &lt;int&gt; 3, 2, 1, 0, 1, 2, 1, 1, 0, 2, 1, 0, 3, 2, 0, 4, 2, 1, 1…
-&gt; $ t_units        &lt;int&gt; 4, 2, 1, 0, 3, 2, 1, 2, 1, 2, 2, 1, 4, 2, 2, 4, 3, 2, 2…
-&gt; $ word_len       &lt;int&gt; 21, 25, 27, 15, 40, 43, 29, 23, 13, 30, 33, 9, 68, 35, …</code></pre>
+<pre><code>Rows: 10,199
+Columns: 6
+$ doc_id         &lt;chr&gt; "1", "10", "100", "1000", "10000", "1001", "1002", "100…
+$ sentence_id    &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+$ main_clauses   &lt;int&gt; 1, 0, 0, 0, 2, 0, 0, 1, 1, 0, 1, 1, 1, 0, 2, 0, 1, 1, 1…
+$ subord_clauses &lt;int&gt; 3, 2, 1, 0, 1, 2, 1, 1, 0, 2, 1, 0, 3, 2, 0, 4, 2, 1, 1…
+$ t_units        &lt;int&gt; 4, 2, 1, 0, 3, 2, 1, 2, 1, 2, 2, 1, 4, 2, 2, 4, 3, 2, 2…
+$ word_len       &lt;int&gt; 21, 25, 27, 15, 40, 43, 29, 23, 13, 30, 33, 9, 68, 35, …</code></pre>
 </div>
 </div>
 </div>
@@ -1131,28 +1131,28 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div id="first" class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 2
-&gt;     key a    
-&gt;   &lt;dbl&gt; &lt;chr&gt;
-&gt; 1     1 a    
-&gt; 2     2 b    
-&gt; 3     3 c    
-&gt; 4     5 d    
-&gt; 5     8 e</code></pre>
+<pre><code># A tibble: 5 × 2
+    key a    
+  &lt;dbl&gt; &lt;chr&gt;
+1     1 a    
+2     2 b    
+3     3 c    
+4     5 d    
+5     8 e    </code></pre>
 </div>
 </div>
 </div>
 <div id="second" class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 2
-&gt;     key b    
-&gt;   &lt;dbl&gt; &lt;chr&gt;
-&gt; 1     1 f    
-&gt; 2     2 g    
-&gt; 3     4 h    
-&gt; 4     6 i    
-&gt; 5     8 j</code></pre>
+<pre><code># A tibble: 5 × 2
+    key b    
+  &lt;dbl&gt; &lt;chr&gt;
+1     1 f    
+2     2 g    
+3     4 h    
+4     6 i    
+5     8 j    </code></pre>
 </div>
 </div>
 </div>
@@ -1166,14 +1166,14 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div class="cell">
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">left_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span>, by <span class="op">=</span> <span class="st">"key"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 3
-&gt;     key a     b    
-&gt;   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
-&gt; 1     1 a     f    
-&gt; 2     2 b     g    
-&gt; 3     3 c     &lt;NA&gt; 
-&gt; 4     5 d     &lt;NA&gt; 
-&gt; 5     8 e     j</code></pre>
+<pre><code># A tibble: 5 × 3
+    key a     b    
+  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+1     1 a     f    
+2     2 b     g    
+3     3 c     &lt;NA&gt; 
+4     5 d     &lt;NA&gt; 
+5     8 e     j    </code></pre>
 </div>
 </div>
 </div>
@@ -1184,16 +1184,16 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div class="cell">
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">full_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 7 × 3
-&gt;     key a     b    
-&gt;   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
-&gt; 1     1 a     f    
-&gt; 2     2 b     g    
-&gt; 3     3 c     &lt;NA&gt; 
-&gt; 4     5 d     &lt;NA&gt; 
-&gt; 5     8 e     j    
-&gt; 6     4 &lt;NA&gt;  h    
-&gt; 7     6 &lt;NA&gt;  i</code></pre>
+<pre><code># A tibble: 7 × 3
+    key a     b    
+  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+1     1 a     f    
+2     2 b     g    
+3     3 c     &lt;NA&gt; 
+4     5 d     &lt;NA&gt; 
+5     8 e     j    
+6     4 &lt;NA&gt;  h    
+7     6 &lt;NA&gt;  i    </code></pre>
 </div>
 </div>
 </div>
@@ -1203,12 +1203,12 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div class="cell">
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">semi_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 3 × 2
-&gt;     key a    
-&gt;   &lt;dbl&gt; &lt;chr&gt;
-&gt; 1     1 a    
-&gt; 2     2 b    
-&gt; 3     8 e</code></pre>
+<pre><code># A tibble: 3 × 2
+    key a    
+  &lt;dbl&gt; &lt;chr&gt;
+1     1 a    
+2     2 b    
+3     8 e    </code></pre>
 </div>
 </div>
 </div>
@@ -1218,11 +1218,11 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <div class="cell">
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">anti_join</span><span class="op">(</span>x <span class="op">=</span> <span class="va">a_tbl</span>, y <span class="op">=</span> <span class="va">b_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 2 × 2
-&gt;     key a    
-&gt;   &lt;dbl&gt; &lt;chr&gt;
-&gt; 1     3 c    
-&gt; 2     5 d</code></pre>
+<pre><code># A tibble: 2 × 2
+    key a    
+  &lt;dbl&gt; &lt;chr&gt;
+1     3 c    
+2     5 d    </code></pre>
 </div>
 </div>
 </div>
@@ -1241,11 +1241,11 @@ Figure&nbsp;7.2: Sentence with a word length of 13 and a T-unit value of 5.
 <p>With this in mind, let’s return to our syntactic simplification investigation. Recall that we started with two curated ENNTT datasets: the natives and translations. We manipulated these datasets subsetting them to 10,000 randomly selected lines, prepped them for annotation by adding a <code>doc_id</code> column and dropping all columns except <code>text</code>, and then annotated them using the <code>udpipe</code> package. We then calculated the number of T-units and words per sentence and created the variables <code>t_units</code> and <code>word_len</code> for each.</p>
 <p>These steps produced two datasets for both the natives and for the translations. The first dataset for each is the annotated data frame. The second is the data frame with the sytactic complexity measures we calculated. The annotated data frames are named <code>enntt_natives_ann_tbl</code> and <code>enntt_translations_ann_tbl</code>. The data frames with the syntactic complexity measures are named <code>enntt_natives_syn_comp_tbl</code> and <code>enntt_translations_syn_comp_tbl</code>.</p>
 <p>In the end, we want a dataset that looks something like <a href="#tbl-td-integration-idealized" class="quarto-xref">Table&nbsp;<span>7.6</span></a>.</p>
-<div id="tbl-td-integration-idealized" class="sm striped quarto-float anchored">
+<div id="tbl-td-integration-idealized" class="striped quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-td-integration-idealized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification investigation.
 </figcaption><div aria-describedby="tbl-td-integration-idealized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table-sm table-striped small table">
+<table class="table-striped table">
 <colgroup>
 <col style="width: 6%">
 <col style="width: 12%">
@@ -1289,24 +1289,24 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <span><span class="va">enntt_natives_ann_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 3 × 17
-&gt;   doc_id paragraph_id sentence_id sentence    start   end term_id token_id token
-&gt;   &lt;chr&gt;         &lt;int&gt;       &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;
-&gt; 1 1                 1           1 It is extr…     1     2       1 1        It   
-&gt; 2 1                 1           1 It is extr…     4     5       2 2        is   
-&gt; 3 1                 1           1 It is extr…     7    15       3 3        extr…
-&gt; # ℹ 8 more variables: lemma &lt;chr&gt;, upos &lt;chr&gt;, xpos &lt;chr&gt;, feats &lt;chr&gt;,
-&gt; #   head_token_id &lt;chr&gt;, dep_rel &lt;chr&gt;, deps &lt;chr&gt;, misc &lt;chr&gt;</code></pre>
+<pre><code># A tibble: 3 × 17
+  doc_id paragraph_id sentence_id sentence    start   end term_id token_id token
+  &lt;chr&gt;         &lt;int&gt;       &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;
+1 1                 1           1 It is extr…     1     2       1 1        It   
+2 1                 1           1 It is extr…     4     5       2 2        is   
+3 1                 1           1 It is extr…     7    15       3 3        extr…
+# ℹ 8 more variables: lemma &lt;chr&gt;, upos &lt;chr&gt;, xpos &lt;chr&gt;, feats &lt;chr&gt;,
+#   head_token_id &lt;chr&gt;, dep_rel &lt;chr&gt;, deps &lt;chr&gt;, misc &lt;chr&gt;</code></pre>
 </div>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">enntt_natives_syn_comp_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 3 × 4
-&gt;   doc_id sentence_id t_units word_len
-&gt;   &lt;chr&gt;        &lt;int&gt;   &lt;int&gt;    &lt;int&gt;
-&gt; 1 1                1       4       21
-&gt; 2 10               1       2       25
-&gt; 3 100              1       1       27</code></pre>
+<pre><code># A tibble: 3 × 4
+  doc_id sentence_id t_units word_len
+  &lt;chr&gt;        &lt;int&gt;   &lt;int&gt;    &lt;int&gt;
+1 1                1       4       21
+2 10               1       2       25
+3 100              1       1       27</code></pre>
 </div>
 </div>
 </div>
@@ -1321,14 +1321,14 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <span>  <span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">doc_id</span></span>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] TRUE</code></pre>
+<pre><code>[1] TRUE</code></pre>
 </div>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sets.html">setequal</a></span><span class="op">(</span></span>
 <span>  <span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">sentence_id</span>,</span>
 <span>  <span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">sentence_id</span></span>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] TRUE</code></pre>
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 </div>
@@ -1340,12 +1340,12 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">doc_id</span><span class="op">)</span> <span class="op">==</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">doc_id</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] FALSE</code></pre>
+<pre><code>[1] FALSE</code></pre>
 </div>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_ann_tbl</span><span class="op">$</span><span class="va">sentence_id</span><span class="op">)</span> <span class="op">==</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">enntt_natives_syn_comp_tbl</span><span class="op">$</span><span class="va">sentence_id</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] FALSE</code></pre>
+<pre><code>[1] FALSE</code></pre>
 </div>
 </div>
 </div>
@@ -1359,19 +1359,19 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">sentence_id</span>, <span class="va">sentence</span>, <span class="va">token</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 4
-&gt;    doc_id sentence_id sentence                                             token
-&gt;    &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;                                                &lt;chr&gt;
-&gt;  1 1                1 It is extremely important that action is taken to e… It   
-&gt;  2 1                1 It is extremely important that action is taken to e… is   
-&gt;  3 1                1 It is extremely important that action is taken to e… extr…
-&gt;  4 1                1 It is extremely important that action is taken to e… impo…
-&gt;  5 1                1 It is extremely important that action is taken to e… that 
-&gt;  6 1                1 It is extremely important that action is taken to e… acti…
-&gt;  7 1                1 It is extremely important that action is taken to e… is   
-&gt;  8 1                1 It is extremely important that action is taken to e… taken
-&gt;  9 1                1 It is extremely important that action is taken to e… to   
-&gt; 10 1                1 It is extremely important that action is taken to e… ensu…</code></pre>
+<pre><code># A tibble: 10 × 4
+   doc_id sentence_id sentence                                             token
+   &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;                                                &lt;chr&gt;
+ 1 1                1 It is extremely important that action is taken to e… It   
+ 2 1                1 It is extremely important that action is taken to e… is   
+ 3 1                1 It is extremely important that action is taken to e… extr…
+ 4 1                1 It is extremely important that action is taken to e… impo…
+ 5 1                1 It is extremely important that action is taken to e… that 
+ 6 1                1 It is extremely important that action is taken to e… acti…
+ 7 1                1 It is extremely important that action is taken to e… is   
+ 8 1                1 It is extremely important that action is taken to e… taken
+ 9 1                1 It is extremely important that action is taken to e… to   
+10 1                1 It is extremely important that action is taken to e… ensu…</code></pre>
 </div>
 </div>
 </div>
@@ -1404,13 +1404,13 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <span><span class="co"># Preview</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">enntt_natives_transformed_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 10,199
-&gt; Columns: 5
-&gt; $ doc_id      &lt;chr&gt; "1", "10", "100", "1000", "10000", "1001", "1002", "1003",…
-&gt; $ sentence_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
-&gt; $ t_units     &lt;int&gt; 4, 2, 1, 0, 3, 2, 1, 2, 1, 2, 2, 1, 4, 2, 2, 4, 3, 2, 2, 1…
-&gt; $ word_len    &lt;int&gt; 21, 25, 27, 15, 40, 43, 29, 23, 13, 30, 33, 9, 68, 35, 16,…
-&gt; $ sentence    &lt;chr&gt; "It is extremely important that action is taken to ensure …</code></pre>
+<pre><code>Rows: 10,199
+Columns: 5
+$ doc_id      &lt;chr&gt; "1", "10", "100", "1000", "10000", "1001", "1002", "1003",…
+$ sentence_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+$ t_units     &lt;int&gt; 4, 2, 1, 0, 3, 2, 1, 2, 1, 2, 2, 1, 4, 2, 2, 4, 3, 2, 2, 1…
+$ word_len    &lt;int&gt; 21, 25, 27, 15, 40, 43, 29, 23, 13, 30, 33, 9, 68, 35, 16,…
+$ sentence    &lt;chr&gt; "It is extremely important that action is taken to ensure …</code></pre>
 </div>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join the translations datasets</span></span>
 <span><span class="va">enntt_translations_transformed_tbl</span> <span class="op">&lt;-</span></span>
@@ -1423,13 +1423,13 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <span><span class="co"># Preview</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">enntt_translations_transformed_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 10,392
-&gt; Columns: 5
-&gt; $ doc_id      &lt;chr&gt; "1", "10", "100", "1000", "10000", "1001", "1002", "1003",…
-&gt; $ sentence_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
-&gt; $ t_units     &lt;int&gt; 0, 2, 0, 1, 3, 0, 3, 2, 3, 3, 2, 0, 1, 0, 3, 1, 0, 1, 2, 2…
-&gt; $ word_len    &lt;int&gt; 24, 31, 5, 39, 44, 26, 67, 23, 46, 28, 24, 68, 19, 18, 36,…
-&gt; $ sentence    &lt;chr&gt; "To my great surprise , on leaving the sitting , I found t…</code></pre>
+<pre><code>Rows: 10,392
+Columns: 5
+$ doc_id      &lt;chr&gt; "1", "10", "100", "1000", "10000", "1001", "1002", "1003",…
+$ sentence_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+$ t_units     &lt;int&gt; 0, 2, 0, 1, 3, 0, 3, 2, 3, 3, 2, 0, 1, 0, 3, 1, 0, 1, 2, 2…
+$ word_len    &lt;int&gt; 24, 31, 5, 39, 44, 26, 67, 23, 46, 28, 24, 68, 19, 18, 36,…
+$ sentence    &lt;chr&gt; "To my great surprise , on leaving the sitting , I found t…</code></pre>
 </div>
 </div>
 </div>
@@ -1464,13 +1464,13 @@ Table&nbsp;7.6: Idealized integrated dataset for the syntactic simplification in
 <span><span class="co"># Preview</span></span>
 <span><span class="fu">glimpse</span><span class="op">(</span><span class="va">enntt_transformed_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 20,591
-&gt; Columns: 5
-&gt; $ doc_id   &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18…
-&gt; $ type     &lt;chr&gt; "natives", "natives", "natives", "natives", "natives", "nativ…
-&gt; $ t_units  &lt;int&gt; 4, 2, 1, 0, 3, 2, 1, 2, 1, 2, 2, 1, 4, 2, 2, 4, 3, 2, 2, 1, 1…
-&gt; $ word_len &lt;int&gt; 21, 25, 27, 15, 40, 43, 29, 23, 13, 30, 33, 9, 68, 35, 16, 53…
-&gt; $ text     &lt;chr&gt; "It is extremely important that action is taken to ensure tha…</code></pre>
+<pre><code>Rows: 20,591
+Columns: 5
+$ doc_id   &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18…
+$ type     &lt;chr&gt; "natives", "natives", "natives", "natives", "natives", "nativ…
+$ t_units  &lt;int&gt; 4, 2, 1, 0, 3, 2, 1, 2, 1, 2, 2, 1, 4, 2, 2, 4, 3, 2, 2, 1, 1…
+$ word_len &lt;int&gt; 21, 25, 27, 15, 40, 43, 29, 23, 13, 30, 33, 9, 68, 35, 16, 53…
+$ text     &lt;chr&gt; "It is extremely important that action is taken to ensure tha…</code></pre>
 </div>
 </div>
 </div>

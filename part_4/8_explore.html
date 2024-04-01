@@ -404,8 +404,8 @@ Table&nbsp;8.1: Workflow for exploratory data analysis
 <table class="table-striped table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 10%">
-<col style="width: 85%">
+<col style="width: 15%">
+<col style="width: 80%">
 </colgroup>
 <thead><tr class="header">
 <th style="text-align: center;">Step</th>
@@ -466,7 +466,7 @@ Table&nbsp;8.2: Data dictionary for the MASC dataset.
 <thead><tr class="header">
 <th>variable</th>
 <th>name</th>
-<th>variable_type</th>
+<th>type</th>
 <th>description</th>
 </tr></thead>
 <tbody>
@@ -531,15 +531,15 @@ Table&nbsp;8.2: Data dictionary for the MASC dataset.
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 591,036
-&gt; Columns: 7
-&gt; $ doc_id   &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
-&gt; $ modality &lt;chr&gt; "Written", "Written", "Written", "Written", "Written", "Writt…
-&gt; $ genre    &lt;chr&gt; "Letters", "Letters", "Letters", "Letters", "Letters", "Lette…
-&gt; $ term_num &lt;dbl&gt; 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,…
-&gt; $ term     &lt;chr&gt; "December", "1998", "Your", "contribution", "to", "Goodwill",…
-&gt; $ lemma    &lt;chr&gt; "december", "1998", "your", "contribution", "to", "goodwill",…
-&gt; $ pos      &lt;chr&gt; "NNP", "CD", "PRP$", "NN", "TO", "NNP", "MD", "VB", "JJR", "I…</code></pre>
+<pre><code>Rows: 591,036
+Columns: 7
+$ doc_id   &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+$ modality &lt;chr&gt; "Written", "Written", "Written", "Written", "Written", "Writt…
+$ genre    &lt;chr&gt; "Letters", "Letters", "Letters", "Letters", "Letters", "Lette…
+$ term_num &lt;dbl&gt; 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,…
+$ term     &lt;chr&gt; "December", "1998", "Your", "contribution", "to", "Goodwill",…
+$ lemma    &lt;chr&gt; "december", "1998", "your", "contribution", "to", "goodwill",…
+$ pos      &lt;chr&gt; "NNP", "CD", "PRP$", "NN", "TO", "NNP", "MD", "VB", "JJR", "I…</code></pre>
 </div>
 </div>
 </div>
@@ -569,20 +569,20 @@ Table&nbsp;8.2: Data dictionary for the MASC dataset.
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 25,923 × 2
-&gt;    lemma     n
-&gt;    &lt;chr&gt; &lt;int&gt;
-&gt;  1 the   26137
-&gt;  2 be    19466
-&gt;  3 to    13548
-&gt;  4 and   12528
-&gt;  5 of    12005
-&gt;  6 a     10461
-&gt;  7 in     8374
-&gt;  8 i      7783
-&gt;  9 that   7082
-&gt; 10 you    5276
-&gt; # ℹ 25,913 more rows</code></pre>
+<pre><code># A tibble: 25,923 × 2
+   lemma     n
+   &lt;chr&gt; &lt;int&gt;
+ 1 the   26137
+ 2 be    19466
+ 3 to    13548
+ 4 and   12528
+ 5 of    12005
+ 6 a     10461
+ 7 in     8374
+ 8 i      7783
+ 9 that   7082
+10 you    5276
+# ℹ 25,913 more rows</code></pre>
 </div>
 </div>
 </div>
@@ -606,80 +606,99 @@ Figure&nbsp;8.1: Cumulative frequency of lemmas in the MASC dataset
 <p>If we look at the types that appear within the first 50 most frequent, you can likely also appreciate another thing about language use. Let’s list the top 50 types in <a href="#exm-eda-masc-count-top-50" class="quarto-xref">Example&nbsp;<span>8.4</span></a>.</p>
 <div id="exm-eda-masc-count-top-50" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.4</strong></span> &nbsp;</p>
-<div class="cell">
+<div class="cell" data-tbl-colwidths="[20,20,20,20,20]">
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Top 50 types</span></span>
 <span><span class="va">lemma_cumul_freq</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="tbl-eda-masc-count-top-50" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-eda-masc-count-top-50-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;8.3: Top 50 lemma types in the MASC dataset.
 </figcaption><div aria-describedby="tbl-eda-masc-count-top-50-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="do-not-create-environment cell table table-sm table-striped small"><tbody>
+<table class="cell table table-sm table-striped small">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<tbody>
 <tr class="odd">
 <td style="text-align: left;">the</td>
-<td style="text-align: left;">a</td>
 <td style="text-align: left;">have</td>
-<td style="text-align: left;">with</td>
 <td style="text-align: left;">at</td>
-<td style="text-align: left;">will</td>
 <td style="text-align: left;">your</td>
-<td style="text-align: left;">his</td>
 <td style="text-align: left;">all</td>
-<td style="text-align: left;">know</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">be</td>
-<td style="text-align: left;">in</td>
 <td style="text-align: left;">it</td>
-<td style="text-align: left;">we</td>
 <td style="text-align: left;">from</td>
-<td style="text-align: left;">my</td>
 <td style="text-align: left;">an</td>
-<td style="text-align: left;">if</td>
 <td style="text-align: left;">there</td>
-<td style="text-align: left;">get</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">to</td>
-<td style="text-align: left;">i</td>
 <td style="text-align: left;">for</td>
-<td style="text-align: left;">as</td>
 <td style="text-align: left;">he</td>
-<td style="text-align: left;">or</td>
 <td style="text-align: left;">say</td>
-<td style="text-align: left;">’s</td>
 <td style="text-align: left;">me</td>
-<td style="text-align: left;">make</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">and</td>
-<td style="text-align: left;">that</td>
 <td style="text-align: left;">on</td>
-<td style="text-align: left;">this</td>
 <td style="text-align: left;">but</td>
-<td style="text-align: left;">n’t</td>
 <td style="text-align: left;">what</td>
-<td style="text-align: left;">can</td>
 <td style="text-align: left;">would</td>
-<td style="text-align: left;">out</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">of</td>
-<td style="text-align: left;">you</td>
 <td style="text-align: left;">do</td>
-<td style="text-align: left;">not</td>
 <td style="text-align: left;">by</td>
-<td style="text-align: left;">they</td>
 <td style="text-align: left;">so</td>
-<td style="text-align: left;">go</td>
 <td style="text-align: left;">about</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">a</td>
+<td style="text-align: left;">with</td>
+<td style="text-align: left;">will</td>
+<td style="text-align: left;">his</td>
+<td style="text-align: left;">know</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">in</td>
+<td style="text-align: left;">we</td>
+<td style="text-align: left;">my</td>
+<td style="text-align: left;">if</td>
+<td style="text-align: left;">get</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">i</td>
+<td style="text-align: left;">as</td>
+<td style="text-align: left;">or</td>
+<td style="text-align: left;">’s</td>
+<td style="text-align: left;">make</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">that</td>
+<td style="text-align: left;">this</td>
+<td style="text-align: left;">n’t</td>
+<td style="text-align: left;">can</td>
+<td style="text-align: left;">out</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">you</td>
+<td style="text-align: left;">not</td>
+<td style="text-align: left;">they</td>
+<td style="text-align: left;">go</td>
 <td style="text-align: left;">up</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 </div>
 </figure>
@@ -707,7 +726,7 @@ Table&nbsp;8.3: Top 50 lemma types in the MASC dataset.
 <p>We need to consult the Penn Tagset again, to ensure we are selecting the correct tags. I will assign this data frame to <code>masc_content_tbl</code> to keep it separate from our main data frame <code>masc_tbl</code>, seen in <a href="#exm-eda-masc-filter-pos" class="quarto-xref">Example&nbsp;<span>8.5</span></a>.</p>
 <div id="exm-eda-masc-filter-pos" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.5</strong></span> &nbsp;</p>
-<div class="cell">
+<div class="cell" data-tbl-colwidths="[20,20,20,20,20]">
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Penn Tagset for content words</span></span>
 <span><span class="co"># Nouns: NN, NNS,</span></span>
 <span><span class="co"># Verbs: VB, VBD, VBG, VBN, VBP, VBZ</span></span>
@@ -726,75 +745,94 @@ Table&nbsp;8.3: Top 50 lemma types in the MASC dataset.
 <span>  <span class="fu">count</span><span class="op">(</span><span class="va">lemma</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">lemma</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="tbl-eda-masc-filter-pos" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-eda-masc-filter-pos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;8.4: Frequency of tokens in the MASC dataset after filtering out lemmas with POS tags that are not content words
 </figcaption><div aria-describedby="tbl-eda-masc-filter-pos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="do-not-create-environment cell table table-sm table-striped small"><tbody>
+<table class="cell table table-sm table-striped small">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<tbody>
 <tr class="odd">
 <td style="text-align: left;">be</td>
-<td style="text-align: left;">say</td>
 <td style="text-align: left;">think</td>
-<td style="text-align: left;">other</td>
 <td style="text-align: left;">work</td>
-<td style="text-align: left;">look</td>
 <td style="text-align: left;">also</td>
-<td style="text-align: left;">new</td>
 <td style="text-align: left;">t</td>
-<td style="text-align: left;">man</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">have</td>
-<td style="text-align: left;">go</td>
 <td style="text-align: left;">more</td>
-<td style="text-align: left;">see</td>
 <td style="text-align: left;">year</td>
-<td style="text-align: left;">then</td>
 <td style="text-align: left;">need</td>
-<td style="text-align: left;">find</td>
 <td style="text-align: left;">first</td>
-<td style="text-align: left;">ask</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">do</td>
-<td style="text-align: left;">know</td>
 <td style="text-align: left;">just</td>
-<td style="text-align: left;">people</td>
 <td style="text-align: left;">come</td>
-<td style="text-align: left;">right</td>
 <td style="text-align: left;">way</td>
-<td style="text-align: left;">give</td>
 <td style="text-align: left;">help</td>
-<td style="text-align: left;">very</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">not</td>
-<td style="text-align: left;">get</td>
 <td style="text-align: left;">time</td>
-<td style="text-align: left;">take</td>
 <td style="text-align: left;">use</td>
-<td style="text-align: left;">only</td>
 <td style="text-align: left;">back</td>
-<td style="text-align: left;">thing</td>
 <td style="text-align: left;">day</td>
-<td style="text-align: left;">much</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">n’t</td>
-<td style="text-align: left;">make</td>
 <td style="text-align: left;">so</td>
-<td style="text-align: left;">now</td>
 <td style="text-align: left;">well</td>
-<td style="text-align: left;">want</td>
 <td style="text-align: left;">here</td>
-<td style="text-align: left;">tell</td>
 <td style="text-align: left;">many</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">say</td>
+<td style="text-align: left;">other</td>
+<td style="text-align: left;">look</td>
+<td style="text-align: left;">new</td>
+<td style="text-align: left;">man</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go</td>
+<td style="text-align: left;">see</td>
+<td style="text-align: left;">then</td>
+<td style="text-align: left;">find</td>
+<td style="text-align: left;">ask</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">know</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">right</td>
+<td style="text-align: left;">give</td>
+<td style="text-align: left;">very</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">get</td>
+<td style="text-align: left;">take</td>
+<td style="text-align: left;">only</td>
+<td style="text-align: left;">thing</td>
+<td style="text-align: left;">much</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">make</td>
+<td style="text-align: left;">now</td>
+<td style="text-align: left;">want</td>
+<td style="text-align: left;">tell</td>
 <td style="text-align: left;">even</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 </div>
 </figure>
@@ -847,19 +885,19 @@ C. Nine of the documents constitute 99% of the corpus. The type appears once in 
 <span><span class="va">masc_lemma_disp</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 3
-&gt;    type      n    dp
-&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
-&gt;  1 be    19231 0.123
-&gt;  2 have   5136 0.189
-&gt;  3 not    2279 0.240
-&gt;  4 make   1149 0.266
-&gt;  5 other   882 0.269
-&gt;  6 more   1005 0.276
-&gt;  7 take    769 0.286
-&gt;  8 only    627 0.286
-&gt;  9 time    931 0.314
-&gt; 10 see     865 0.327</code></pre>
+<pre><code># A tibble: 10 × 3
+   type      n    dp
+   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1 be    19231 0.123
+ 2 have   5136 0.189
+ 3 not    2279 0.240
+ 4 make   1149 0.266
+ 5 other   882 0.269
+ 6 more   1005 0.276
+ 7 take    769 0.286
+ 8 only    627 0.286
+ 9 time    931 0.314
+10 see     865 0.327</code></pre>
 </div>
 </div>
 </div>
@@ -899,18 +937,18 @@ Figure&nbsp;8.2: Density plot of Deviation of Proportions for lemmas in the MASC
 </div>
 </div>
 <p>Then in <a href="#tbl-eda-masc-dp-filter-preview" class="quarto-xref">Table&nbsp;<span>8.5</span></a>, I preview the top and bottom 50 lemmas in the dataset.</p>
-<div class="cell" data-layout-nrow="2">
+<div class="cell" data-layout-nrow="2" data-tbl-colwidths="[20,20,20,20,20]">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview top</span></span>
 <span><span class="va">masc_lemma_disp_thr</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span><span class="co"># Preview bottom</span></span>
 <span><span class="va">masc_lemma_disp_thr</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_tail</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="tbl-eda-masc-dp-filter-preview" class="quarto-layout-panel anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-eda-masc-dp-filter-preview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -922,68 +960,87 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <figure class="quarto-float quarto-subfloat-tbl figure"><figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-eda-masc-dp-filter-preview-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Top 50 lemmas
 </figcaption><div aria-describedby="tbl-eda-masc-dp-filter-preview-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table id="tbl-eda-masc-dp-filter-preview-1" class="do-not-create-environment table table-sm table-striped small"><tbody>
+<table class="do-not-create-environment table table-sm table-striped small">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<tbody>
 <tr class="odd">
 <td style="text-align: left;">be</td>
-<td style="text-align: left;">say</td>
 <td style="text-align: left;">think</td>
-<td style="text-align: left;">other</td>
 <td style="text-align: left;">work</td>
-<td style="text-align: left;">look</td>
 <td style="text-align: left;">also</td>
-<td style="text-align: left;">new</td>
 <td style="text-align: left;">t</td>
-<td style="text-align: left;">man</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">have</td>
-<td style="text-align: left;">go</td>
 <td style="text-align: left;">more</td>
-<td style="text-align: left;">see</td>
 <td style="text-align: left;">year</td>
-<td style="text-align: left;">then</td>
 <td style="text-align: left;">way</td>
-<td style="text-align: left;">find</td>
 <td style="text-align: left;">first</td>
-<td style="text-align: left;">ask</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">do</td>
-<td style="text-align: left;">know</td>
 <td style="text-align: left;">just</td>
-<td style="text-align: left;">people</td>
 <td style="text-align: left;">come</td>
-<td style="text-align: left;">right</td>
 <td style="text-align: left;">need</td>
-<td style="text-align: left;">give</td>
 <td style="text-align: left;">help</td>
-<td style="text-align: left;">very</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">not</td>
-<td style="text-align: left;">get</td>
 <td style="text-align: left;">time</td>
-<td style="text-align: left;">take</td>
 <td style="text-align: left;">use</td>
-<td style="text-align: left;">only</td>
 <td style="text-align: left;">back</td>
-<td style="text-align: left;">thing</td>
 <td style="text-align: left;">day</td>
-<td style="text-align: left;">much</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">n’t</td>
-<td style="text-align: left;">make</td>
 <td style="text-align: left;">so</td>
-<td style="text-align: left;">now</td>
 <td style="text-align: left;">well</td>
-<td style="text-align: left;">want</td>
 <td style="text-align: left;">here</td>
-<td style="text-align: left;">tell</td>
 <td style="text-align: left;">many</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">say</td>
+<td style="text-align: left;">other</td>
+<td style="text-align: left;">look</td>
+<td style="text-align: left;">new</td>
+<td style="text-align: left;">man</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go</td>
+<td style="text-align: left;">see</td>
+<td style="text-align: left;">then</td>
+<td style="text-align: left;">find</td>
+<td style="text-align: left;">ask</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">know</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">right</td>
+<td style="text-align: left;">give</td>
+<td style="text-align: left;">very</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">get</td>
+<td style="text-align: left;">take</td>
+<td style="text-align: left;">only</td>
+<td style="text-align: left;">thing</td>
+<td style="text-align: left;">much</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">make</td>
+<td style="text-align: left;">now</td>
+<td style="text-align: left;">want</td>
+<td style="text-align: left;">tell</td>
 <td style="text-align: left;">even</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 </figure>
 </div>
@@ -995,78 +1052,83 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <figure class="quarto-float quarto-subfloat-tbl figure"><figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-eda-masc-dp-filter-preview-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Bottom 50 lemmas
 </figcaption><div aria-describedby="tbl-eda-masc-dp-filter-preview-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table id="tbl-eda-masc-dp-filter-preview-2" class="do-not-create-environment table table-sm table-striped small">
+<table class="do-not-create-environment table table-sm table-striped small">
 <colgroup>
-<col style="width: 9%">
-<col style="width: 9%">
-<col style="width: 7%">
-<col style="width: 9%">
-<col style="width: 9%">
-<col style="width: 9%">
-<col style="width: 11%">
-<col style="width: 9%">
-<col style="width: 11%">
-<col style="width: 10%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
 </colgroup>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">dump</td>
-<td style="text-align: left;">sting</td>
 <td style="text-align: left;">tuition</td>
-<td style="text-align: left;">unleash</td>
 <td style="text-align: left;">blur</td>
-<td style="text-align: left;">liberty</td>
 <td style="text-align: left;">wound</td>
-<td style="text-align: left;">nostalgic</td>
 <td style="text-align: left;">accidentally</td>
-<td style="text-align: left;">wax</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">instrument</td>
-<td style="text-align: left;">mainstream</td>
 <td style="text-align: left;">awaken</td>
-<td style="text-align: left;">prosperous</td>
 <td style="text-align: left;">litigation</td>
-<td style="text-align: left;">going</td>
 <td style="text-align: left;">devote</td>
-<td style="text-align: left;">shy</td>
 <td style="text-align: left;">protective</td>
-<td style="text-align: left;">faith-based</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">triumph</td>
-<td style="text-align: left;">wildly</td>
 <td style="text-align: left;">hook</td>
-<td style="text-align: left;">buzz</td>
 <td style="text-align: left;">resistance</td>
-<td style="text-align: left;">awkward</td>
 <td style="text-align: left;">alright</td>
-<td style="text-align: left;">proximity</td>
 <td style="text-align: left;">preside</td>
-<td style="text-align: left;">decidedly</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">harsh</td>
-<td style="text-align: left;">dismiss</td>
 <td style="text-align: left;">fetch</td>
-<td style="text-align: left;">presume</td>
 <td style="text-align: left;">absurd</td>
-<td style="text-align: left;">afterwards</td>
 <td style="text-align: left;">evolutionary</td>
-<td style="text-align: left;">sandy</td>
 <td style="text-align: left;">rethink</td>
-<td style="text-align: left;">resolute</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ignorance</td>
-<td style="text-align: left;">liability</td>
 <td style="text-align: left;">brave</td>
-<td style="text-align: left;">summarize</td>
 <td style="text-align: left;">qualify</td>
-<td style="text-align: left;">eve</td>
 <td style="text-align: left;">envy</td>
-<td style="text-align: left;">interfere</td>
 <td style="text-align: left;">strictly</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sting</td>
+<td style="text-align: left;">unleash</td>
+<td style="text-align: left;">liberty</td>
+<td style="text-align: left;">nostalgic</td>
+<td style="text-align: left;">wax</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mainstream</td>
+<td style="text-align: left;">prosperous</td>
+<td style="text-align: left;">going</td>
+<td style="text-align: left;">shy</td>
+<td style="text-align: left;">faith-based</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wildly</td>
+<td style="text-align: left;">buzz</td>
+<td style="text-align: left;">awkward</td>
+<td style="text-align: left;">proximity</td>
+<td style="text-align: left;">decidedly</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">dismiss</td>
+<td style="text-align: left;">presume</td>
+<td style="text-align: left;">afterwards</td>
+<td style="text-align: left;">sandy</td>
+<td style="text-align: left;">resolute</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">liability</td>
+<td style="text-align: left;">summarize</td>
+<td style="text-align: left;">eve</td>
+<td style="text-align: left;">interfere</td>
 <td style="text-align: left;">evidently</td>
 </tr>
 </tbody>
@@ -1112,14 +1174,14 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <span><span class="va">masc_content_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 8
-&gt;   doc_id modality genre   term_num term         lemma        pos   lemma_pos    
-&gt;   &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt; &lt;chr&gt;        
-&gt; 1 1      Written  Letters        3 contribution contribution NN    contribution…
-&gt; 2 1      Written  Letters        7 mean         mean         VB    mean_VB      
-&gt; 3 1      Written  Letters        8 more         more         JJR   more_JJR     
-&gt; 4 1      Written  Letters       12 know         know         VB    know_VB      
-&gt; 5 1      Written  Letters       15 help         help         VB    help_VB</code></pre>
+<pre><code># A tibble: 5 × 8
+  doc_id modality genre   term_num term         lemma        pos   lemma_pos    
+  &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt; &lt;chr&gt;        
+1 1      Written  Letters        3 contribution contribution NN    contribution…
+2 1      Written  Letters        7 mean         mean         VB    mean_VB      
+3 1      Written  Letters        8 more         more         JJR   more_JJR     
+4 1      Written  Letters       12 know         know         VB    know_VB      
+5 1      Written  Letters       15 help         help         VB    help_VB      </code></pre>
 </div>
 </div>
 </div>
@@ -1163,14 +1225,14 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <span><span class="va">masc_metrics</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 5
-&gt;   type         n     rf     dp modality
-&gt;   &lt;chr&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;   
-&gt; 1 be_VBZ    2612 0.0489 0.0843 Spoken  
-&gt; 2 be_VBP    1282 0.0240 0.111  Spoken  
-&gt; 3 be_VBD    1020 0.0191 0.300  Spoken  
-&gt; 4 n't_RB     829 0.0155 0.139  Spoken  
-&gt; 5 have_VBP   766 0.0143 0.152  Spoken</code></pre>
+<pre><code># A tibble: 5 × 5
+  type         n     rf     dp modality
+  &lt;chr&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;   
+1 be_VBZ    2612 0.0489 0.0843 Spoken  
+2 be_VBP    1282 0.0240 0.111  Spoken  
+3 be_VBD    1020 0.0191 0.300  Spoken  
+4 n't_RB     829 0.0155 0.139  Spoken  
+5 have_VBP   766 0.0143 0.152  Spoken  </code></pre>
 </div>
 </div>
 </div>
@@ -1184,29 +1246,29 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <span>  <span class="fu">slice_max</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, order_by <span class="op">=</span> <span class="va">rf</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 20 × 5
-&gt;    type         n      rf     dp modality
-&gt;    &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;   
-&gt;  1 be_VBZ    2612 0.0489  0.0843 Spoken  
-&gt;  2 be_VBP    1282 0.0240  0.111  Spoken  
-&gt;  3 be_VBD    1020 0.0191  0.300  Spoken  
-&gt;  4 n't_RB     829 0.0155  0.139  Spoken  
-&gt;  5 have_VBP   766 0.0143  0.152  Spoken  
-&gt;  6 do_VBP     728 0.0136  0.180  Spoken  
-&gt;  7 be_VB      655 0.0123  0.147  Spoken  
-&gt;  8 not_RB     638 0.0119  0.137  Spoken  
-&gt;  9 just_RB    404 0.00757 0.267  Spoken  
-&gt; 10 so_RB      387 0.00725 0.357  Spoken  
-&gt; 11 be_VBZ    4745 0.0249  0.230  Written 
-&gt; 12 be_VBD    3317 0.0174  0.366  Written 
-&gt; 13 be_VBP    2617 0.0137  0.237  Written 
-&gt; 14 be_VB     1863 0.00976 0.218  Written 
-&gt; 15 not_RB    1640 0.00859 0.259  Written 
-&gt; 16 have_VBP  1227 0.00643 0.291  Written 
-&gt; 17 n't_RB     905 0.00474 0.540  Written 
-&gt; 18 have_VBD   859 0.00450 0.446  Written 
-&gt; 19 have_VBZ   777 0.00407 0.335  Written 
-&gt; 20 say_VBD    710 0.00372 0.609  Written</code></pre>
+<pre><code># A tibble: 20 × 5
+   type         n      rf     dp modality
+   &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;   
+ 1 be_VBZ    2612 0.0489  0.0843 Spoken  
+ 2 be_VBP    1282 0.0240  0.111  Spoken  
+ 3 be_VBD    1020 0.0191  0.300  Spoken  
+ 4 n't_RB     829 0.0155  0.139  Spoken  
+ 5 have_VBP   766 0.0143  0.152  Spoken  
+ 6 do_VBP     728 0.0136  0.180  Spoken  
+ 7 be_VB      655 0.0123  0.147  Spoken  
+ 8 not_RB     638 0.0119  0.137  Spoken  
+ 9 just_RB    404 0.00757 0.267  Spoken  
+10 so_RB      387 0.00725 0.357  Spoken  
+11 be_VBZ    4745 0.0249  0.230  Written 
+12 be_VBD    3317 0.0174  0.366  Written 
+13 be_VBP    2617 0.0137  0.237  Written 
+14 be_VB     1863 0.00976 0.218  Written 
+15 not_RB    1640 0.00859 0.259  Written 
+16 have_VBP  1227 0.00643 0.291  Written 
+17 n't_RB     905 0.00474 0.540  Written 
+18 have_VBD   859 0.00450 0.446  Written 
+19 have_VBZ   777 0.00407 0.335  Written 
+20 say_VBD    710 0.00372 0.609  Written </code></pre>
 </div>
 </div>
 </div>
@@ -1254,29 +1316,29 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <span>  <span class="fu">slice_max</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, order_by <span class="op">=</span> <span class="va">log_odds_weighted</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 20 × 6
-&gt;    type                 n       rf     dp modality log_odds_weighted
-&gt;    &lt;chr&gt;            &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt;
-&gt;  1 be_VBZ            2612 0.0489   0.0843 Spoken               14.0 
-&gt;  2 n't_RB             829 0.0155   0.139  Spoken               10.4 
-&gt;  3 do_VBP             728 0.0136   0.180  Spoken               10.3 
-&gt;  4 be_VBP            1282 0.0240   0.111  Spoken                8.67
-&gt;  5 think_VBP          350 0.00655  0.259  Spoken                8.32
-&gt;  6 have_VBP           766 0.0143   0.152  Spoken                8.01
-&gt;  7 know_VBP           282 0.00528  0.260  Spoken                7.04
-&gt;  8 well_RB            334 0.00626  0.283  Spoken                6.91
-&gt;  9 go_VBG             285 0.00534  0.207  Spoken                6.47
-&gt; 10 understanding_NN    45 0.000843 0.649  Spoken                6.41
-&gt; 11 t_NN               475 0.00249  0.778  Written              10.6 
-&gt; 12 figure_NN          140 0.000733 0.868  Written               5.75
-&gt; 13 financial_JJ       138 0.000723 0.880  Written               5.71
-&gt; 14 city_NN            137 0.000718 0.766  Written               5.69
-&gt; 15 email_NN           133 0.000697 0.866  Written               5.61
-&gt; 16 eye_NNS            129 0.000676 0.731  Written               5.52
-&gt; 17 style_NN           108 0.000566 0.829  Written               5.05
-&gt; 18 mail_NN            106 0.000555 0.876  Written               5.00
-&gt; 19 text_NN            103 0.000540 0.845  Written               4.93
-&gt; 20 gift_NN             98 0.000513 0.826  Written               4.81</code></pre>
+<pre><code># A tibble: 20 × 6
+   type                 n       rf     dp modality log_odds_weighted
+   &lt;chr&gt;            &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt;
+ 1 be_VBZ            2612 0.0489   0.0843 Spoken               14.0 
+ 2 n't_RB             829 0.0155   0.139  Spoken               10.4 
+ 3 do_VBP             728 0.0136   0.180  Spoken               10.3 
+ 4 be_VBP            1282 0.0240   0.111  Spoken                8.67
+ 5 think_VBP          350 0.00655  0.259  Spoken                8.32
+ 6 have_VBP           766 0.0143   0.152  Spoken                8.01
+ 7 know_VBP           282 0.00528  0.260  Spoken                7.04
+ 8 well_RB            334 0.00626  0.283  Spoken                6.91
+ 9 go_VBG             285 0.00534  0.207  Spoken                6.47
+10 understanding_NN    45 0.000843 0.649  Spoken                6.41
+11 t_NN               475 0.00249  0.778  Written              10.6 
+12 figure_NN          140 0.000733 0.868  Written               5.75
+13 financial_JJ       138 0.000723 0.880  Written               5.71
+14 city_NN            137 0.000718 0.766  Written               5.69
+15 email_NN           133 0.000697 0.866  Written               5.61
+16 eye_NNS            129 0.000676 0.731  Written               5.52
+17 style_NN           108 0.000566 0.829  Written               5.05
+18 mail_NN            106 0.000555 0.876  Written               5.00
+19 text_NN            103 0.000540 0.845  Written               4.93
+20 gift_NN             98 0.000513 0.826  Written               4.81</code></pre>
 </div>
 </div>
 </div>
@@ -1292,29 +1354,29 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 20 × 5
-&gt;    type                rf     dp modality log_odds_weighted
-&gt;    &lt;chr&gt;            &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt;
-&gt;  1 be_VBZ        0.0489   0.0843 Spoken               14.0 
-&gt;  2 do_VBP        0.0136   0.180  Spoken               10.3 
-&gt;  3 be_VBP        0.0240   0.111  Spoken                8.67
-&gt;  4 think_VBP     0.00655  0.259  Spoken                8.32
-&gt;  5 have_VBP      0.0143   0.152  Spoken                8.01
-&gt;  6 know_VBP      0.00528  0.260  Spoken                7.04
-&gt;  7 go_VBG        0.00534  0.207  Spoken                6.47
-&gt;  8 do_VBD        0.00603  0.321  Spoken                5.97
-&gt;  9 mean_VBP      0.00247  0.543  Spoken                5.95
-&gt; 10 do_VB         0.00455  0.207  Spoken                5.61
-&gt; 11 don_VB        0.000361 0.839  Written               4.04
-&gt; 12 doe_VBZ       0.000351 0.870  Written               3.98
-&gt; 13 walk_VBD      0.000320 0.790  Written               3.79
-&gt; 14 associate_VBN 0.000304 0.777  Written               3.70
-&gt; 15 reply_VBD     0.000293 0.837  Written               3.64
-&gt; 16 develop_VBG   0.000288 0.812  Written               3.60
-&gt; 17 require_VBN   0.000272 0.793  Written               3.50
-&gt; 18 fall_VBD      0.000267 0.757  Written               3.47
-&gt; 19 meet_VB       0.000241 0.729  Written               3.30
-&gt; 20 regard_VBG    0.000225 0.823  Written               3.19</code></pre>
+<pre><code># A tibble: 20 × 5
+   type                rf     dp modality log_odds_weighted
+   &lt;chr&gt;            &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt;
+ 1 be_VBZ        0.0489   0.0843 Spoken               14.0 
+ 2 do_VBP        0.0136   0.180  Spoken               10.3 
+ 3 be_VBP        0.0240   0.111  Spoken                8.67
+ 4 think_VBP     0.00655  0.259  Spoken                8.32
+ 5 have_VBP      0.0143   0.152  Spoken                8.01
+ 6 know_VBP      0.00528  0.260  Spoken                7.04
+ 7 go_VBG        0.00534  0.207  Spoken                6.47
+ 8 do_VBD        0.00603  0.321  Spoken                5.97
+ 9 mean_VBP      0.00247  0.543  Spoken                5.95
+10 do_VB         0.00455  0.207  Spoken                5.61
+11 don_VB        0.000361 0.839  Written               4.04
+12 doe_VBZ       0.000351 0.870  Written               3.98
+13 walk_VBD      0.000320 0.790  Written               3.79
+14 associate_VBN 0.000304 0.777  Written               3.70
+15 reply_VBD     0.000293 0.837  Written               3.64
+16 develop_VBG   0.000288 0.812  Written               3.60
+17 require_VBN   0.000272 0.793  Written               3.50
+18 fall_VBD      0.000267 0.757  Written               3.47
+19 meet_VB       0.000241 0.729  Written               3.30
+20 regard_VBG    0.000225 0.823  Written               3.19</code></pre>
 </div>
 </div>
 </div>
@@ -1373,19 +1435,19 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">pmi</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 4
-&gt;    x               y                   n   pmi
-&gt;    &lt;chr&gt;           &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt;
-&gt;  1 #Christian_NN   bigot_NN            1  12.4
-&gt;  2 #FAIL_NN        phenomenally_RB     1  12.4
-&gt;  3 #NASCAR_NN      #indycar_NN         1  12.4
-&gt;  4 #PALM_NN        merchan_NN          1  12.4
-&gt;  5 #Twitter_NN     #growth_NN          1  12.4
-&gt;  6 #college_NN     #jobs_NN            1  12.4
-&gt;  7 #education_NN   #teaching_NN        1  12.4
-&gt;  8 #faculty_NN     #cites_NN           1  12.4
-&gt;  9 #fb_NN          siebel_NNP          1  12.4
-&gt; 10 #glitchmyass_NN reps_NNP            1  12.4</code></pre>
+<pre><code># A tibble: 10 × 4
+   x               y                   n   pmi
+   &lt;chr&gt;           &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt;
+ 1 #Christian_NN   bigot_NN            1  12.4
+ 2 #FAIL_NN        phenomenally_RB     1  12.4
+ 3 #NASCAR_NN      #indycar_NN         1  12.4
+ 4 #PALM_NN        merchan_NN          1  12.4
+ 5 #Twitter_NN     #growth_NN          1  12.4
+ 6 #college_NN     #jobs_NN            1  12.4
+ 7 #education_NN   #teaching_NN        1  12.4
+ 8 #faculty_NN     #cites_NN           1  12.4
+ 9 #fb_NN          siebel_NNP          1  12.4
+10 #glitchmyass_NN reps_NNP            1  12.4</code></pre>
 </div>
 </div>
 </div>
@@ -1406,19 +1468,19 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <span><span class="va">masc_verb_part_assoc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 10 × 4
-&gt;    x           y            n   pmi
-&gt;    &lt;chr&gt;       &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;
-&gt;  1 figure_V    out_IN      17  4.93
-&gt;  2 worry_V     about_IN    27  4.78
-&gt;  3 walk_V      up_IN       10  4.62
-&gt;  4 talk_V      about_IN   114  4.57
-&gt;  5 sound_V     like_IN     15  4.42
-&gt;  6 post_V      by_IN       57  4.29
-&gt;  7 derive_V    from_IN     17  4.27
-&gt;  8 stem_V      from_IN     10  4.13
-&gt;  9 deal_V      with_IN     53  4.12
-&gt; 10 associate_V with_IN     48  4.05</code></pre>
+<pre><code># A tibble: 10 × 4
+   x           y            n   pmi
+   &lt;chr&gt;       &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;
+ 1 figure_V    out_IN      17  4.93
+ 2 worry_V     about_IN    27  4.78
+ 3 walk_V      up_IN       10  4.62
+ 4 talk_V      about_IN   114  4.57
+ 5 sound_V     like_IN     15  4.42
+ 6 post_V      by_IN       57  4.29
+ 7 derive_V    from_IN     17  4.27
+ 8 stem_V      from_IN     10  4.13
+ 9 deal_V      with_IN     53  4.12
+10 associate_V with_IN     48  4.05</code></pre>
 </div>
 </div>
 </div>
@@ -1470,18 +1532,18 @@ Figure&nbsp;8.3: Network plot of verb particle constructions in the MASC dataset
 <span><span class="co"># Inpsect</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">masc_pos_dtm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] 392  32</code></pre>
+<pre><code>[1] 392  32</code></pre>
 </div>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
 <span><span class="va">masc_pos_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt;      Terms
-&gt; Docs  CC DT EX IN JJ
-&gt;   1   14 35  1 44 27
-&gt;   10  11 38  0 39 18
-&gt;   100  0  2  0  2  3
-&gt;   101  3 16  0 23  7
-&gt;   102 20 29  0 34 20</code></pre>
+<pre><code>     Terms
+Docs  CC DT EX IN JJ
+  1   14 35  1 44 27
+  10  11 38  0 39 18
+  100  0  2  0  2  3
+  101  3 16  0 23  7
+  102 20 29  0 34 20</code></pre>
 </div>
 </div>
 </div>
@@ -1563,9 +1625,7 @@ Figure&nbsp;8.4: Scree plot of the principle components of the POS relative freq
 <p>One way to assess the fit of the clustering algorithm is to visualize the results, interpret, and adjust the number of clusters, if necessary, any number of times. Another, more efficient, approach is to algorithmically assess the variability of the clusters based on differing number of clusters and then select the number of clusters that best fits the data.</p>
 <p>We will take the later approach and plot the <strong>within-cluster sum of squares</strong> (WSS) for a range of values for <span class="math inline">\(k\)</span>. The WSS is the sum of the squared distance between each observation and its cluster center. With a plot of the WSS for a range of values for <span class="math inline">\(k\)</span>, we can identify the value for <span class="math inline">\(k\)</span> where the WSS begins to level off, using the elbow method. It is not always clear where the elbow is, yet it is a good starting point for identifying the optimal number of clusters.</p>
 <p>The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function can be used to plot the WSS for a range of values for <span class="math inline">\(k\)</span>. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function takes the <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> function as its first argument and the matrix of features as its second argument. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function also takes arguments <code>method = "wss"</code> to specify the WSS method and <code>k.max = 20</code> to specify the maximum number of clusters to plot. Let’s plot the WSS for a range of values for <span class="math inline">\(k\)</span>, as seen in <a href="#fig-eda-masc-pos-kmeans-elbow" class="quarto-xref">Figure&nbsp;<span>8.5</span></a>.</p>
-<div class="cell">
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Determine the optimal number of clusters</span></span>
-<span><span class="va">masc_pos_pca_pc</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_pos_pca_pc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust</a></span><span class="op">(</span></span>
 <span>    FUNcluster <span class="op">=</span> <span class="va">kmeans</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"wss"</span>, <span class="co"># method</span></span>
@@ -1573,6 +1633,7 @@ Figure&nbsp;8.4: Scree plot of the principle components of the POS relative freq
 <span>    nstart <span class="op">=</span> <span class="fl">25</span>,</span>
 <span>    iter.max <span class="op">=</span> <span class="fl">20</span></span>
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
 <div class="cell-output-display">
 <div id="fig-eda-masc-pos-kmeans-elbow" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-eda-masc-pos-kmeans-elbow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1604,8 +1665,8 @@ Figure&nbsp;8.5: Elbow method for k-means clustering of the MASC dataset
 <span><span class="co"># Preview</span></span>
 <span><span class="va">masc_pos_kmeans_fit</span><span class="op">$</span><span class="va">cluster</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt;   1  10 100 101 102 103 104 105 106 107 
-&gt;   1   1   2   3   3   2   2   2   4   3</code></pre>
+<pre><code>  1  10 100 101 102 103 104 105 106 107 
+  1   1   2   3   3   2   2   2   4   3 </code></pre>
 </div>
 </div>
 </div>
@@ -1634,14 +1695,14 @@ Figure&nbsp;8.5: Elbow method for k-means clustering of the MASC dataset
 <span><span class="va">masc_cluster_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; # A tibble: 5 × 8
-&gt;   doc_id modality genre   term_num term         lemma        pos   cluster
-&gt;   &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;   &lt;int&gt;
-&gt; 1 1      Written  Letters        2 Your         your         PRP$        1
-&gt; 2 1      Written  Letters        3 contribution contribution NN          1
-&gt; 3 1      Written  Letters        4 to           to           TO          1
-&gt; 4 1      Written  Letters        6 will         will         MD          1
-&gt; 5 1      Written  Letters        7 mean         mean         VB          1</code></pre>
+<pre><code># A tibble: 5 × 8
+  doc_id modality genre   term_num term         lemma        pos   cluster
+  &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;   &lt;int&gt;
+1 1      Written  Letters        2 Your         your         PRP$        1
+2 1      Written  Letters        3 contribution contribution NN          1
+3 1      Written  Letters        4 to           to           TO          1
+4 1      Written  Letters        6 will         will         MD          1
+5 1      Written  Letters        7 mean         mean         VB          1</code></pre>
 </div>
 </div>
 </div>
@@ -1924,20 +1985,20 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">masc_model</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] 5808  100</code></pre>
+<pre><code>[1] 5808  100</code></pre>
 </div>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
 <span><span class="va">masc_model</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; A VectorSpaceModel object of  5  words and  5  vectors
-&gt;                    [,1]   [,2]    [,3]   [,4]    [,5]
-&gt; abbreviated_ADJ   1.068  1.103 -0.3439  0.386 -1.0062
-&gt; absent_ADJ       -1.839 -1.753  0.0658  0.119  0.9376
-&gt; absorb_VERB      -1.772 -1.528 -0.0554  0.664 -1.2453
-&gt; accidentally_ADV -1.264 -0.742 -0.6870  0.613 -1.0750
-&gt; aesthetic_ADJ     0.567  0.524  1.0638 -0.332 -0.0424
-&gt; attr(,".cache")
-&gt; &lt;environment: 0x7f8dd9ca51d8&gt;</code></pre>
+<pre><code>A VectorSpaceModel object of  5  words and  5  vectors
+                   [,1]   [,2]    [,3]   [,4]    [,5]
+abbreviated_ADJ   1.068  1.103 -0.3439  0.386 -1.0062
+absent_ADJ       -1.839 -1.753  0.0658  0.119  0.9376
+absorb_VERB      -1.772 -1.528 -0.0554  0.664 -1.2453
+accidentally_ADV -1.264 -0.742 -0.6870  0.613 -1.0750
+aesthetic_ADJ     0.567  0.524  1.0638 -0.332 -0.0424
+attr(,".cache")
+&lt;environment: 0x7f8adb0168d0&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -1979,7 +2040,7 @@ Figure&nbsp;8.6: Similarity between ‘run’ and ‘walk’ in the MASC dataset
 </div>
 </div>
 </div>
-<p>From <a href="#fig-eda-masc-vsm-word2vec-similarity" class="quarto-xref">Figure&nbsp;<span>8.6</span></a>, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC2, we can see that there is a distinction between POS. Looking along PC1, we see some pariety between lemma meanings. Given these features, we can see that meaning and grammatical category can be approximated in the vector space.</p>
+<p>From <a href="#fig-eda-masc-vsm-word2vec-similarity" class="quarto-xref">Figure&nbsp;<span>8.6</span></a>, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC1, we can see that there is a distinction between POS. Looking along PC2, we see some pariety between lemma meanings. Given these features, we can see that meaning and grammatical category can be approximated in the vector space.</p>
 <p>An interesting property of vector space models is that we can build up a dimension of meaning by adding vectors that we expect to approximate that meaning. For example, we can add the vectors for typical motion verbs to create a vector for motion-similarity and one for manner-similarity. We can then compare the feature vectors for all verbs and assess their motion-similarity and manner-similarity.</p>
 <p>To do this let’s first subset the model to only include verbs, as in <a href="#exm-eda-masc-vsm-word2vec-verbs" class="quarto-xref">Example&nbsp;<span>8.31</span></a>. We will also remove the POS tags from the rownames of the matrix as they are no longer needed.</p>
 <div id="exm-eda-masc-vsm-word2vec-verbs" class="theorem example">
@@ -1998,20 +2059,20 @@ Figure&nbsp;8.6: Similarity between ‘run’ and ‘walk’ in the MASC dataset
 <span><span class="co"># Inspect</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">verb_vectors</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; [1] 1115  100</code></pre>
+<pre><code>[1] 1115  100</code></pre>
 </div>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
 <span><span class="va">verb_vectors</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; A VectorSpaceModel object of  5  words and  5  vectors
-&gt;           [,1]   [,2]    [,3]    [,4]   [,5]
-&gt; absorb  -1.772 -1.528 -0.0554  0.6642 -1.245
-&gt; auction -2.083 -0.977 -0.2505 -0.0204 -0.874
-&gt; bid      0.217 -0.490 -0.4588  0.1373  0.247
-&gt; brief    1.215 -0.674 -0.7121  0.5072 -0.445
-&gt; cap     -0.135  0.884  0.2278 -0.2563 -0.207
-&gt; attr(,".cache")
-&gt; &lt;environment: 0x7f8ddd518590&gt;</code></pre>
+<pre><code>A VectorSpaceModel object of  5  words and  5  vectors
+          [,1]   [,2]    [,3]    [,4]   [,5]
+absorb  -1.772 -1.528 -0.0554  0.6642 -1.245
+auction -2.083 -0.977 -0.2505 -0.0204 -0.874
+bid      0.217 -0.490 -0.4588  0.1373  0.247
+brief    1.215 -0.674 -0.7121  0.5072 -0.445
+cap     -0.135  0.884  0.2278 -0.2563 -0.207
+attr(,".cache")
+&lt;environment: 0x7f8af3289218&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -2029,10 +2090,10 @@ Figure&nbsp;8.6: Similarity between ‘run’ and ‘walk’ in the MASC dataset
 <span><span class="co"># Preview</span></span>
 <span><span class="va">motion_similarity</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 1,115
-&gt; Columns: 2
-&gt; $ word                   &lt;chr&gt; "walk", "step", "return", "enter", "leave", "le…
-&gt; $ `similarity to motion` &lt;dbl&gt; 0.742, 0.741, 0.732, 0.727, 0.682, 0.669, 0.664…</code></pre>
+<pre><code>Rows: 1,115
+Columns: 2
+$ word                   &lt;chr&gt; "walk", "step", "return", "enter", "leave", "le…
+$ `similarity to motion` &lt;dbl&gt; 0.742, 0.741, 0.732, 0.727, 0.682, 0.669, 0.664…</code></pre>
 </div>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">manner</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"run"</span>, <span class="st">"walk"</span>, <span class="st">"jump"</span>, <span class="st">"crawl"</span>, <span class="st">"swim"</span>, <span class="st">"fly"</span>, <span class="st">"drive"</span>, <span class="st">"ride"</span><span class="op">)</span></span>
@@ -2043,10 +2104,10 @@ Figure&nbsp;8.6: Similarity between ‘run’ and ‘walk’ in the MASC dataset
 <span><span class="co"># Preview</span></span>
 <span><span class="va">manner_similarity</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 1,115
-&gt; Columns: 2
-&gt; $ word                   &lt;chr&gt; "walk", "drop", "step", "hang", "rub", "shut", …
-&gt; $ `similarity to manner` &lt;dbl&gt; 0.865, 0.841, 0.831, 0.826, 0.826, 0.824, 0.820…</code></pre>
+<pre><code>Rows: 1,115
+Columns: 2
+$ word                   &lt;chr&gt; "walk", "drop", "step", "hang", "rub", "shut", …
+$ `similarity to manner` &lt;dbl&gt; 0.865, 0.841, 0.831, 0.826, 0.826, 0.824, 0.820…</code></pre>
 </div>
 </div>
 </div>
@@ -2062,11 +2123,11 @@ Figure&nbsp;8.6: Similarity between ‘run’ and ‘walk’ in the MASC dataset
 <span><span class="co"># Preview</span></span>
 <span><span class="va">manner_motion_similarity</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&gt; Rows: 1,115
-&gt; Columns: 3
-&gt; $ word                   &lt;chr&gt; "walk", "drop", "step", "hang", "rub", "shut", …
-&gt; $ `similarity to manner` &lt;dbl&gt; 0.865, 0.841, 0.831, 0.826, 0.826, 0.824, 0.820…
-&gt; $ `similarity to motion` &lt;dbl&gt; 0.742, 0.642, 0.741, 0.635, 0.624, 0.589, 0.561…</code></pre>
+<pre><code>Rows: 1,115
+Columns: 3
+$ word                   &lt;chr&gt; "walk", "drop", "step", "hang", "rub", "shut", …
+$ `similarity to manner` &lt;dbl&gt; 0.865, 0.841, 0.831, 0.826, 0.826, 0.824, 0.820…
+$ `similarity to motion` &lt;dbl&gt; 0.742, 0.642, 0.741, 0.635, 0.624, 0.589, 0.561…</code></pre>
 </div>
 </div>
 </div>

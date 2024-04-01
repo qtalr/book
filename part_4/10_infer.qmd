@@ -26,7 +26,6 @@ execute:
 ```{r}
 #| label: inference-data-packages
 #| echo: false
-#| message: false
 # Packages
 
 ```
@@ -64,7 +63,7 @@ The methodological approach to inferential data analysis (IDA) is the most strai
 | 3 | Interrogate | Apply the appropriate statistical procedure to the dataset. |
 | 4 | Interpret | Review the statistical results and interpret them in the context of the hypothesis. |
 
-: Workflow for inferential data analysis {#tbl-ida-workflow tbl-colwidths="[5, 10, 85]" .striped}
+: Workflow for inferential data analysis {#tbl-ida-workflow tbl-colwidths="[5, 15, 80]" .striped}
 
 Based on the hypothesis statement, we first identify and operationalize the variables. The response variable whose variation we aim to explain. In most statistical designs, one or more explanatory variables are included in the analysis in an attempt to gauge the extent to which these variables account for the variation in the response variable. For both response and explanatory variables, it is key to confirm that your operationalization of the variables is well-defined and that the data aligns.
 
@@ -133,7 +132,6 @@ library(janitor)    # for cross-tabulation
 ```{r}
 #| label: ida-setup
 #| echo: false
-#| message: false
 
 # Load packages
 library(infer)      # for statistical inference
@@ -153,20 +151,19 @@ Here we demonstrate the application of inferential data analysis (IDA) to catego
 | Bivariate (>2 levels) | Categorical (3+ levels) | Chi-square | `chisq` |
 | Multivariate  | Categorical or Numeric<br>(2+ variables) | Logistic regression | `fit()` |
 
-: Statistical test designs for categorical response variables {#tbl-ida-cat-design tbl-colwidths="[10, 35, 35, 20]" .striped}
+: Statistical test designs for categorical response variables {#tbl-ida-cat-design tbl-colwidths="[20, 35, 35, 10]" .striped}
 
 We will use a derived version of the `dative` dataset from the `languageR` package [@R-languageR]. It contains over 3k observations describing the realization of the recipient clause in English dative constructions. To familiarize ourselves with the dataset, let's consider the data dictionary in @tbl-ida-cat-data-dict.
 
 ```{r}
 #| label: tbl-ida-cat-data-dict
 #| tbl-cap: "Data dictionary for the `dative_tbl` dataset."
-#| message: false
+#| tbl-colwidths: [15, 15, 15, 55]
 #| echo: false
 
 # Data dictionary for the `dative_tbl` dataset
 read_csv("data/dative_ida_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 We see that this dataset has four variables, two categorical and two numeric. In our demonstrations we are going to use the `realization_of_rcp` as the response variable, the variable whose variation we are investigating.
@@ -220,7 +217,6 @@ In preparation for statistical analysis, I performed a statistical overview and 
 ::: {#exm-ida-cat-dative-preview}
 ```{r}
 #| label: ida-cat-dative-preview
-#| echo: false
 
 # Preview of the dataset
 dative_tbl
@@ -240,16 +236,25 @@ This hypothesis can be tested using a **difference in proportion test**. The nul
 Before we get into statistical analysis, it is always a good idea to cross-tabulate or visualize the question, depending on the complexity of the relationship. In @exm-ida-cat-univariate-tbl, we see the code the shows the distribution of the levels of the `realization_of_rcp` variable in a cross-table.
 
 ::: {#exm-ida-cat-univariate-tbl}
-```{r}
-#| label: tbl-ida-cat-univariate
-#| tbl-cap: "Distribution of the levels of the `realization_of_rcp` variable."
-
+```r
 # Cross-tabulation of `realization_of_rcp`
 dative_tbl |>
   tabyl(realization_of_rcp) |>
   adorn_pct_formatting(digits = 2) |>
   kable() |>
   kable_styling()
+```
+```{r}
+#| label: tbl-ida-cat-univariate
+#| tbl-cap: "Distribution of the levels of the `realization_of_rcp` variable."
+#| tbl-colwidths: [50, 25, 25]
+#| echo: false
+
+dative_tbl |>
+  tabyl(realization_of_rcp) |>
+  adorn_pct_formatting(digits = 2) |>
+  as_tibble() |>
+  tt(width = 1)
 ```
 :::
 
@@ -475,10 +480,7 @@ This hypothesis can be approached using a **difference in proportions** test, as
 We can cross-tabulate or visualize, but let's cross-tabulate this relationship as it is a basic 2-by-2 contingency table. In @exm-ida-cat-bivariate-tbl, we see the code for the cross-tabulation of the `realization_of_rcp` and `modality` variables.
 
 ::: {#exm-ida-cat-bivariate-tbl}
-```{r}
-#| label: tbl-ida-cat-bivariate
-#| tbl-cap: "Contingency table for `realization_of_rcp` and `modality`."
-
+```r
 dative_tbl |>
   tabyl(realization_of_rcp, modality) |> # cross-tabulate
   adorn_totals(c("row", "col")) |> # provide row and column totals
@@ -488,6 +490,22 @@ dative_tbl |>
   adorn_title("combined") |> # add a header title
   kable(booktabs = TRUE) |>  # pretty table)
   kable_styling()
+```
+```{r}
+#| label: tbl-ida-cat-bivariate
+#| tbl-cap: "Contingency table for `realization_of_rcp` and `modality`."
+#| tbl-colwidths: [25, 25, 25, 25]
+#| echo: false
+
+dative_tbl |>
+  tabyl(realization_of_rcp, modality) |> # cross-tabulate
+  adorn_totals(c("row", "col")) |> # provide row and column totals
+  adorn_percentages("col") |> # add percentages to the columns
+  adorn_pct_formatting(rounding = "half up", digits = 0) |> # round the digits
+  adorn_ns() |> # add observation number
+  adorn_title("combined") |> # add a header title
+  as_tibble() |>
+  tt(width = 1)
 ```
 :::
 
@@ -552,7 +570,6 @@ The question remains, is this difference statistically significant? To answer th
 ::: {#exm-ida-cat-null-hypothesis-bivariate}
 ```{r}
 #| label: ida-cat-null-hypothesis-bivariate
-#| message: false
 
 # Generate the null hypothesis distribution
 dative_null <-
@@ -710,7 +727,6 @@ Now let's generate the null hypothesis distribution and calculate the p-value fo
 ::: {#exm-ida-cat-null-hypothesis-logistic-regression}
 ```{r}
 #| label: ida-cat-null-hypothesis-logistic-regression
-#| message: false
 
 # Generate the null hypothesis distribution
 dative_null <-
@@ -820,7 +836,7 @@ We now turn our attention to the analysis scenarios where the response variable 
 | Bivariate | Categorical (3+ levels ) | ANOVA | `f` |
 | Multivariate  | Numeric or Categorical (2+) | Linear regression | `fit()` |
 
-: Statistical test design for numeric response variables {#tbl-ida-num-design tbl-colwidths="[10, 35, 35, 20]" .striped}
+: Statistical test design for numeric response variables {#tbl-ida-num-design tbl-colwidths="[20, 35, 35, 10]" .striped}
 
 The dataset will will use is drawn from the Switchboard Dialog Act Corpus [@SWDA2008]. This dataset contains over 200k utterances from 1,155 5-minute telephone conversations and includes information about the use of fillers in the conversations. The data dictionary is found in @tbl-ida-num-data-dict.
 
@@ -828,13 +844,13 @@ The dataset will will use is drawn from the Switchboard Dialog Act Corpus [@SWDA
 ```{r}
 #| label: tbl-ida-num-data-dict
 #| tbl-cap: "Data dictionary for the transformed SWDA dataset"
+#| tbl-colwidths: [15, 15, 15, 55]
 #| echo: false
-#| message: false
+
 
 # Data dictionary for the `fillers_tbl` dataset
 read_csv("data/swda_fillers_ida_dd.csv") |>
-  kable() |>
-  kable_styling()
+  tt(width = 1)
 ```
 
 We see the dataset has seven variables. The `fillers_per_100` will be used as our reponse variable and corresponds to the rate of filler usage per speaker, normalized by the number of utterances. The other variables we will consider as explanatory variables are `age`, `sex`, and `education`, providing us a mix of numeric and categorical variables.
@@ -843,7 +859,6 @@ The context for these analysis demonstrations comes from the socio-linguistic li
 
 ```{r}
 #| label: ida-num-diagnostics
-#| message: false
 #| echo: false
 
 # Read the dataset

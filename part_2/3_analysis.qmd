@@ -165,7 +165,6 @@ create_data_dictionary(belc_essay_tbl, "data/aa-belc_essay_tbl_dd.csv", model = 
 
 ```{r}
 #| label: aa-belc-dataset-data-dictionary
-#| message: false
 
 # Dataset
 belc_essay_tbl <- read_rds("data/aa-belc_essay_tbl.rds")
@@ -216,13 +215,13 @@ belc_essay_tbl |>
   tt(width = 1)
 ```
 
-In @tbl-aa-belc-overview, each of the variable are attributes or measures of the `essay_id` variable. `tokens` is the number of total words, `types` is the number of unique words, `ttr` is the ratio of unique words to total words. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity. Finally, the proportion of L2 words (English) to the total words (tokens) is provided in `prop_l2`.
-
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular file-alt >}} Case study**
 
-Type-Token Ratio is a standard metric for measuring lexical diversity, but it is not without its flaws. Most importantly, TTR is highly sensitive to the word length of the text. @Duran2004 discuss this limitation, and the limitations of other lexical diversity measures and propose a new measure $D$ which shows a stronger correlation with language proficiency in their comparative studies.
+Type-Token Ratio (TTR) is a standard metric for measuring lexical diversity, but it is not without its flaws. Most importantly, TTR is highly sensitive to the word length of the text. @Duran2004 discuss this limitation, and the limitations of other lexical diversity measures and propose a new measure $D$ which shows a stronger correlation with language proficiency in their comparative studies.
 :::
+
+In @tbl-aa-belc-overview, each of the variable are attributes or measures of the `essay_id` variable. `tokens` is the number of total words, `types` is the number of unique words, `ttr` is the ratio of unique words to total words. This is known as the Type-Token Ratio and it is a standard metric for measuring lexical diversity. Finally, the proportion of L2 words (English) to the total words (tokens) is provided in `prop_l2`.
 
 Let's now turn our attention to exploring descriptive measures using the BELC dataset.
 
@@ -270,7 +269,7 @@ The **mode** is the value that appears most frequently in a set of values. If th
 ::: {.callout}
 **{{< fa lightbulb >}} Consider this**
 
-::: {layout="[60, -3, 40]" layout-valign="top" layout-align="left"}
+::: {layout="[55, -3, 45]" layout-valign="top" layout-align="left"}
 
 ::: {#first}
 @Grieve2018 compiled a 8.9 billion-word corpus of geotagged posts from Twitter between 2013-2014 in the United States. The authors provide a [search interface](https://isogloss.shinyapps.io/isogloss/) to explore relationship between lexical usage and geographic location. Explore this corpus searching for terms related to slang ("hella", "wicked"), geographical ("mountain", "river"), meteorological ("snow", "rain"), and/ or any other term types. What types of patterns do you find? What are the benefits and/ or limitations of this type of data, data summarization, and/ or interface?
@@ -280,8 +279,7 @@ The **mode** is the value that appears most frequently in a set of values. If th
 ```{r}
 #| label: fig-ud-word-mapper
 #| fig-cap: "Example distribution of the term 'Ya'll' the Word Mapper project."
-#| out-width: '80%'
-#| echo: false
+#| out-width: '100%'
 
 include_graphics("figures/a-word-mapper.png")
 ```
@@ -302,7 +300,7 @@ The mode, mean, and median appear in @tbl-aa-belc-central-tendency for the BELC 
 #|  - "Categorical variables"
 #|  - "Numeric variables"
 #| layout-ncol: 2
-#| echo: false
+#| tbl-colwidths: auto
 
 # Skim function ----
 aa_skim <- skim_with(
@@ -318,7 +316,7 @@ belc_essay_tbl |>
   select(-n_missing, -complete_rate) |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
-  tt(width = 1, digits = 2)
+  tt(width = 1, digits = 2, theme = "striped")
 
 
 belc_essay_tbl |>
@@ -328,7 +326,7 @@ belc_essay_tbl |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
   select(variable, mean, median) |>
-  tt(width = 1, digits = 2)
+  tt(width = 1, digits = 2, theme = "striped")
 ```
 
 As the mode is the most frequent value, the `top_counts` measure in @tbl-aa-belc-central-tendency provides the most frequent value for the categorical variables. Mean and median appear but we notice that the mean and median are not the same for the numeric variables. Differences that appear between the mean and median will be of interest to us later in this chapter.
@@ -350,7 +348,7 @@ Let's now consider the relevant central tendency and dispersion of the variables
 #|  - "Categorical variables"
 #|  - "Numeric variables"
 #| layout-ncol: 2
-#| echo: false
+#| tbl-colwidths: auto
 
 # Skim function ----
 aa_skim <- skim_with(
@@ -414,19 +412,20 @@ When assessing the distribution of categorical variables, we can use a frequency
 #|  - "Sex"
 #|  - "Time group"
 #| layout-ncol: 2
-#| echo: false
+#| layout-valign: top
+#| tbl-colwidths: [33, 33, 33]
 
 belc_essay_tbl |>
   tabyl(sex) |>
   tibble() |>
   select(sex, frequency = n, proportion = percent) |>
-  tt(width = 1)
+  tt(width = 1, theme = "striped")
 
 belc_essay_tbl |>
   tabyl(group) |>
   tibble() |>
   select(group, frequency = n, proportion = percent) |>
-  tt(width = 1)
+  tt(width = 1, theme = "striped")
 ```
 
 A **bar plot** is a type of plot where the x-axis is a categorical variable and the y-axis is the frequency of the values. The frequency is represented by the height of the bar. The variables can be ordered by frequency, alphabetically, or some other order. @fig-aa-belc-barplots is a bar chart for the variables `sex` and `group` ordered alphabetically.
@@ -737,7 +736,7 @@ The directionality of a relationship will take the form of a tabular or graphic 
 | **Ordinal**     | -                 | Contingency table/ Bar plot | Pivot table/ Boxplot |
 | **Numeric**     | -                 | -                           | Scatterplot          |
 
-: Appropriate summary types for different combinations of variable types. {#tbl-aa-summary-types}{tbl-colwidths="[14, 22, 30, 22]" .sm .striped}
+: Appropriate summary types for different combinations of variable types. {#tbl-aa-summary-types}{tbl-colwidths="[10, 30, 30, 30]" .striped}
 
 <!-- Nominal + ? -->
 
@@ -754,11 +753,13 @@ In @tbl-aa-belc-contingency-tables we see contingency tables for the categorical
 #|  - "Counts"
 #|  - "Percentages"
 #| layout-ncol: 2
+#| layout-valign: top
+#| tbl-colwidths: [25, 25, 25, 25]
 
 belc_essay_tbl |>
   tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
-  tibble() |>
+  as_tibble() |>
   tt(width = 1, digits = 0)
 
 belc_essay_tbl |>
@@ -766,7 +767,7 @@ belc_essay_tbl |>
   adorn_totals(c("row", "col")) |>
   adorn_percentages("row") |>
   adorn_pct_formatting(digits = 2) |>
-  tibble() |>
+  as_tibble() |>
   tt(width = 1, digits = 0)
 ```
 
@@ -808,6 +809,7 @@ In @tbl-aa-belc-pivot-table, we see a pivot table for the relationship between `
 ```{r}
 #| label: tbl-aa-belc-pivot-table
 #| tbl-cap: "Pivot table for the relationship between `group` and `tokens` in the BELC dataset."
+#| tbl-colwidths: [50, 50]
 
 belc_essay_tbl |>
   group_by(group) |>
@@ -887,7 +889,7 @@ The goal of analysis, generally, is to generate knowledge from information. The 
 | Predictive | Predict: validate associations | Semi-deductive, data-/ theory-driven, and iterative | Predictive modeling with machine learning (supervised) | Model performance, feature importance, and associative |
 | Inferential | Explain: test hypotheses | Deductive, theory-driven, and non-iterative | Hypothesis testing with statistical tests | Causal |
 
-: Overview of analysis types. {#tbl-aa-analysis-types}{tbl-colwidths="[10, 15, 15, 20, 20]" .striped}
+: Overview of analysis types. {#tbl-aa-analysis-types}{tbl-colwidths="[12, 22, 22, 22, 22]" .striped}
 
 In this section, I will elaborate briefly on the distinctions between analysis types seen in @tbl-aa-analysis-types. I will structure the discussion moving from the least structured (inductive) to most structured (deductive) approach to deriving knowledge from information with the aim to provide enough information for you to identify these research approaches in the literature and to make appropriate decisions as to which approach your research should adopt.
 
@@ -913,6 +915,7 @@ By the same token, approaches for interrogating the dataset can differ significa
 ```{r}
 #| label: tbl-eda-methods
 #| tbl-cap: 'Some common EDA methods'
+#| tbl-colwidths: [50, 50]
 
 eda_approaches <-
   tribble(
@@ -960,7 +963,7 @@ There are many different types of machine learning algorithms, each with their o
 | Support Vector Machine | Support Vector Regression |
 | Neural Network Classifier  | Neural Network Regressor     |
 
-: Some common supervised learning algorithms used in PDA. {#tbl-pda-algorithms tbl-colwidths="[33, 33, 33]" .sm .striped}
+: Some common supervised learning algorithms used in PDA. {#tbl-pda-algorithms tbl-colwidths="[50, 50]" .striped}
 
 There are a number of algorithm-specific strengths and weaknesses to be considered in the process of model selection. These hinge on characteristics of the data, such as the size of the dataset, the number of features, the type of features, and the expected type of relationships between features or on computing resources, such as the amount of time available to train the model or the amount of memory available to store the model.
 

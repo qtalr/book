@@ -37,7 +37,6 @@ Exercises:
 ```{r}
 #| label: curate-data-packages
 #| echo: false
-#| message: false
 
 ```
 
@@ -100,6 +99,7 @@ The *europarl_do.csv* file contains the data origin information documented as pa
 ```{r}
 #| label: tbl-cd-europarl-data-origin
 #| tbl-cap: "Data origin: Europarl Corpus"
+#| tbl-colwidths: [25, 75]
 #| echo: false
 
 # Read in the data origin file and display it as a table
@@ -154,19 +154,13 @@ Now, before embarking on a data curation process, it is recommendable to define 
 
 Given what we know about the data, we can define the idealized structure of the data as seen in @tbl-cd-europarl-structure-example.
 
-```{r}
-#| label: tbl-cd-europarl-structure-example
-#| tbl-cap: "Idealized structure for the curated Europarl Corpus datasets."
-#| tbl-colwidths: [10, 17, 19, 54]
-#| echo: false
 
-tribble(
-  ~variable, ~name, ~variable_type, ~description,
-  "type", "Document type", "character", "Contains the type of document, either 'Source' or 'Target'",
-  "line", "Line", "character", "Contains the text of each line in the document",
-) |>
-  tt(width = 1)
-```
+| variable | name | type | description |
+|----------|------|---------------|-------------|
+| type | Document type | character | Contains the type of document, either 'Source' or 'Target' |
+| line | Line | character | Contains the text of each line in the document |
+
+: Idealized structure for the curated Europarl Corpus datasets {#tbl-cd-europarl-structure-example tbl-colwidths="[10, 17, 19, 54]" .striped}
 
 Our task now is to develop code that will read the original data and render the idealized structure as a curated dataset for each corpus file. We will then write the datasets to the *data/derived/* directory. The code we develop will be added to the *2-curate-data.qmd* file. And finally, the datasets will be documented with a data dictionary file.
 
@@ -190,7 +184,6 @@ europarl_en_chr <-
 ```{r}
 #| label: cd-europarl-readr
 #| echo: false
-#| message: false
 
 # Load package
 library(readr)
@@ -211,7 +204,6 @@ Let's inspect our character vectors to ensure that they are of the length and ap
 ::: {#exm-cd-europarl-inspect-chr}
 ```{r}
 #| label: cd-europarl-inspect-chr
-#| results: hold
 
 # Inspect Spanish character vector
 length(europarl_es_chr)
@@ -319,6 +311,7 @@ In addition to other important information, the data origin file *cabnc_do.csv* 
 ```{r}
 #| label: tbl-cd-cabnc-do
 #| tbl-cap: "Data origin: CABNC datasets"
+#| tbl-colwidths: [25, 75]
 #| echo: false
 
 read_csv("data/cd-cabnc_do.csv") |>
@@ -374,7 +367,7 @@ cabnc_participants |>
   yank("character")
 ```
 
-```{r, comment=">"}
+```{r, comment=""}
 #| label: skim-test
 #| echo: false
 
@@ -531,9 +524,9 @@ Example *.dat* file for the non-native speakers.
 
 :::
 
-We see that the *.dat* file contains annotations for various session and speaker attributes. The format of the annotations is XML-like. XML is a form of markup language, such as YAML, JSON, *etc.* **Markup languages** are used to annotate text with additional information about the structure, meaning, and/ or presentation of text. In XML, structure is built up by nesting of nodes. The nodes are named with tags, which are enclosed in angle brackets, `<` and `>`. Nodes are opened with `<TAG>` and closed with `</TAG>`. In @exm-cd-xml we see an example of a simple XML file structure.
+We see that the *.dat* file contains annotations for various session and speaker attributes. The format of the annotations is XML-like. XML is a form of markup language, such as YAML, JSON, *etc.* **Markup languages** are used to annotate text with additional information about the structure, meaning, and/ or presentation of text. In XML, structure is built up by nesting of nodes. The nodes are named with tags, which are enclosed in angle brackets, `<` and `>`. Nodes are opened with `<TAG>` and closed with `</TAG>`. In @lst-cd-xml we see an example of a simple XML file structure.
 
-::: {#exm-cd-xml}
+::: {#lst-cd-xml}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <book category="fiction">
@@ -542,9 +535,12 @@ We see that the *.dat* file contains annotations for various session and speaker
   <year>1951</year>
 </book>
 ```
+
+Example XML file structure
+
 :::
 
-In @exm-cd-xml there are four nodes, three of which are nested inside of the `<book>` node. The `<book>` node in this example is the root node. XML files require a root node. Nodes can also have attributes, such as the `category` attribute in the `<book>` node, but they are not required. Furthermore, XML files also require a declaration, which is the first line in @exm-cd-xml. The declaration specifies the version of XML used and the encoding.
+In @lst-cd-xml there are four nodes, three of which are nested inside of the `<book>` node. The `<book>` node in this example is the root node. XML files require a root node. Nodes can also have attributes, such as the `category` attribute in the `<book>` node, but they are not required. Furthermore, XML files also require a declaration, which is the first line in @lst-cd-xml. The declaration specifies the version of XML used and the encoding.
 
 So the *.dat* file is not strict XML, but is similar in that it contains nodes and attributes. An XML variant you a likely familiar with, HTML, has more relaxed rules than XML. HTML is a markup language used to annotate text with information about the organization and presentation of text on the web that does not require a root node or a declaration --much like our *.dat* file. So suffice it to say that the *.dat* file can safely be treated as HTML.
 
@@ -567,23 +563,16 @@ The question is what attributes we want to include in the curated dataset. Given
 
 An idealized version of the curated dataset based on this criteria is shown in @tbl-cd-enntt-ideal.
 
-```{r}
-#| label: tbl-cd-enntt-ideal
-#| tbl-cap: "Idealized structure for the curated ENNTT Corpus datasets."
-#| tbl-colwidths: [10, 17, 19, 54]
-#| echo: false
+| variable | name | type | description |
+|----------|------|---------------|-------------|
+| session_id | Session ID | character | Unique identifier for each session. |
+| speaker_id | Speaker ID | integer | Unique identifier for each speaker. |
+| state | State | character | The political state of the speaker. |
+| type | Type | character | Indicates whether the text is native or non-native |
+| session_seq | Session Sequence | integer | The sequence of the text in the session. |
+| text | Text | character | Contains the text of the line, and maintains the structure of the original data. |
 
-tibble::tribble(
-  ~variable, ~variable_name, ~variable_type, ~description,
-  "session_id", "Session ID", "character", "Unique identifier for each session.",
-  "speaker_id", "Speaker ID", "integer", "Unique identifier for each speaker.",
-  "state", "State", "character", "The political state of the speaker.",
-  "type", "Type", "character", "Indicates whether the text is native or non-native",
-  "session_seq", "Session Sequence", "integer", "The sequence of the text in the session.",
-  "text", "Text", "character", "Contains the text of the line, and maintains the structure of the original data."
-) |>
-  tt(width = 1)
-```
+: Idealized structure for the curated ENNTT Corpus datasets {#tbl-cd-enntt-ideal tbl-colwidths="[15, 18, 17, 50]" .striped}
 
 ### Tidy the data
 

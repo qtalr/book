@@ -97,7 +97,8 @@ Given the sampling frame and the strata and balance for this corpus visualized i
 ```{r}
 #| label: fig-ud-brown-distribution
 #| fig-cap: "Overview of the sampling characteristics of the Brown Corpus."
-#| fig-height: 3
+#| fig-width: 4
+#| fig-asp: 1
 #| fig-alt: "The Brown Corpus sampling frame, strata, and balance is shown as a bar plot comprised of 15 main categories (strata) of text on the y-axis. The relative size of each category is shown as a percentage of the total number of words in the corpus on the x-axis (balance). The largest categories are 'Fiction' (23%) and 'Press' (18%) and the smallest categories are 'Religion' (0.3%) and 'Learned' (0.2%)."
 
 brown <- read_csv("data/ud-brown.csv")
@@ -180,24 +181,24 @@ Whether you are using a published corpus or developing your own, it is important
 
 A corpus may include various types of linguistic (*e.g.* part of speech, syntactic structure, named entities, *etc.*) or non-linguistic (*e.g.* source, dates, speaker information, *etc.*) attributes. These attributes are known as **metadata**, or data about data. As a general rule, files which include more metadata tend to be more internally structured. Internal file structure refers to the degree to which the content is easy to query and analyze by a computer. Let's review characteristics of the three main types of file structure types and associate common file extensions that files in each have.
 
-**Unstructured data** is data which does not have a machine-readable internal structure. This is the case for plain text files (*.txt*), which are simply a sequence of characters. For example, in @exm-masc-text we see a snippet of a plain text file from the the Manually Annotated Sub-Corpus of American English (MASC) [@Ide2008]:
+**Unstructured data** is data which does not have a machine-readable internal structure. This is the case for plain text files (*.txt*), which are simply a sequence of characters. For example, in @lst-masc-text we see plain text file from the the Manually Annotated Sub-Corpus of American English (MASC) [@Ide2008]:
 
-::: {#exm-masc-text}
-MASC plain text
+::: {#lst-masc-text}
 
 ```xml
 Sound is a vibration. Sound travels as a mechanical wave through a medium, and in space, there is no medium. So when my shuttle malfunctioned and the airlocks didn't keep the air in, I heard nothing.
 ```
+
+MASC plain text
 :::
 
 Other examples of files which often contain unstructured data include *.pdf* and *.docx* files. While these file types may contain data which appears structured to the human eye, the structure is not designed to be machine-readable. As such the data would typically be read into R as a vector of **character strings**. It is possible to perform only the most rudimentary queries on this type of data, such as string matches. For anything more informative, it is necessary to further process this data, as we will see in @sec-ud-organization and @sec-ud-transformation.
 
 On the other end of the spectrum, **structured data** is data which conforms to a tabular format in which elements in tables and relationships between tables are defined. This makes querying and analyzing easy and efficient. Relational databases (*e.g.* MySQL, PostgreSQL, *etc*.) are designed to store and query structured data. The data frame object in R is also a structured data format. In each case, the data is stored in a tabular format in which each row represents a single observation and each column represents a single attribute whose values are of the same type.
 
-In @exm-masc-df we see an example of an R data frame object which overlaps with the language in the plain text file in @exm-masc-text:
+In @lst-masc-df we see an example of an R data frame object which overlaps with the language in the plain text file in @lst-masc-text:
 
-::: {#exm-masc-df}
-MASC data frame
+::: {#lst-masc-df}
 
 ```xml
    doc_id  date modality token_id word       lemma      pos
@@ -213,26 +214,28 @@ MASC data frame
  9      1  2008 Writing         9 a          a          DT
 10      1  2008 Writing        10 mechanical mechanical JJ
 ```
+
+MASC data frame
 :::
 
 Here we see that the data is stored in a tabular format with each row representing a single observation (`word`) and each column representing a single attribute. This tabular structure supports the increased number of metadata attributes. Internally, R applies a schema to ensure the values in each column are of the same type (*e.g.* `<chr>`, `<dbl>`, `<fct>`, *etc.*). This structured format is designed to be easy to query and analyze and as such is the primary format for data analysis in R.
 
-**Semi-structured data** falls between unstructured and structured data. This covers a wide range of file structuring approaches. For example, a otherwise plain text file with part-of-speech tags appended to each word is minimally structured (@exm-masc-pos).
+**Semi-structured data** falls between unstructured and structured data. This covers a wide range of file structuring approaches. For example, a otherwise plain text file with part-of-speech tags appended to each word is minimally structured (@lst-masc-pos).
 
-::: {#exm-masc-pos}
-MASC plain text with part-of-speech tags
+::: {#lst-masc-pos}
 
 ```xml
 Sound/NNP is/VBZ a/DT vibration/NN ./. Sound/NNP travels/VBZ as/IN a/DT mechanical/JJ wave/NN through/IN a/DT medium/NN ,/, and/CC in/IN space/NN ,/, there/EX is/VBZ no/DT medium/NN ./. So/RB when/WRB my/PRP$ shuttle/NN malfunctioned/JJ and/CC the/DT airlocks/NNS did/VBD n't/RB keep/VB the/DT air/NN in/IN ,/, I/PRP heard/VBD nothing/NN ./.
 ```
+
+MASC plain text with part-of-speech tags
 :::
 
-Towards the more structured end of semi-structured data, many file formats including *.xml* and *.json* contain hierarchical data. For example, in @exm-masc-xml shows a snippet from a *.xml* file from the MASC corpus.
+Towards the more structured end of semi-structured data, many file formats including *.xml* and *.json* contain hierarchical data. For example, in @lst-masc-xml shows a snippet from a *.xml* file from the MASC corpus.
 
-::: {#exm-masc-xml}
-MASC XML
+::: {#lst-masc-xml}
 
-```xml
+```{.xml}
 <a xml:id="penn-N264215" label="tok" ref="penn-n7345" as="anc">
   <fs>
     <f name="base" value="sound"/>
@@ -254,12 +257,13 @@ MASC XML
   <link targets="seg-r13154"/>
 </node>
 ```
+
+MASC XML
 :::
 
-The format of semi-structured data is often influenced by characteristics of the data or reflect an author's individual preferences. It is sometimes the case that data will be semi-structured in a less-standard format. For example, the SWDA corpus includes a *.utt* file extension for files which contain utterances annotated with dialog act tags.
+The format of semi-structured data is often influenced by characteristics of the data or reflect an author's individual preferences. It is sometimes the case that data will be semi-structured in a less-standard format. For example, the SWDA corpus, in @lst-swda-utt, includes a *.utt* file extension for files which contain utterances annotated with dialog act tags.
 
-::: {#exm-swda-utt}
-SWDA *.utt* file
+::: {#lst-swda-utt}
 
 ```xml
 o      A.1 utt1: Okay.  /
@@ -270,6 +274,8 @@ qy^d   B.2 utt1: [ [ I guess, +
 +      B.4 utt1: I think, ] + {F uh, } I wonder ] if that worked. /
 qy     A.5 utt1: Does it say something? /
 ```
+
+SWDA *.utt* file
 :::
 
 Whether standard or not, semi-structured data is often designed to be machine-readable. As with unstructured data, the ultimate goal is to convert the data into a structured format and augment the data where necessary to prepare it for a particular research analysis.
@@ -304,6 +310,7 @@ Let's look at an example of a tidy dataset. Using the criteria just described, l
 ```{r}
 #| label: tbl-ud-info-values-masc
 #| tbl-cap: "MASC dataset variables"
+#| tbl-colwidths: [14, 14, 14, 14, 16, 14, 14]
 
 masc_exm <-
   read_rds("data/ud-formats_masc_df.rds") # read in MASC example dataset
@@ -398,6 +405,7 @@ In @tbl-ud-tokenization, we see examples of tokenization at word and character l
 #|  - "Character trigram tokenization"
 #|  - "Word bigram tokenization"
 #| layout-ncol: 2
+#| tbl-colwidths: [33, 33, 33]
 
 text_df |>
   unnest_tokens(trigram, sentence, token = "character_shingles", n = 3) |>
@@ -449,7 +457,7 @@ Linguistic annotation can be done manually by linguist coders and/ or done autom
 ```{r}
 #| label: tbl-ud-generate-annotation
 #| tbl-cap: 'Automatic linguistic annotation example'
-#| tbl-colwidths: [7, 7, 5, 61, 20]
+#| tbl-colwidths: [7, 7, 5, 71, 10]
 
 eng_model <- load_model_udpipe("english-ewt")
 
@@ -460,13 +468,13 @@ annotation <-
 
 text_annotation <-
   left_join(annotation$document, annotation$token) |>
-  select(token_id = tid, token, pos = xpos, features = feats, syn_relation = relation)
+  select(id = tid, token, pos = xpos, feats, relation)
 
 text_annotation |>
   tt(width = 1)
 ```
 
-The annotated dataset is now tokenized by word and includes the key variables `pos` (Penn treebank tags), `features` (morphological features), and `syn_relation` (dependency relations). These variables provide information about the grammatical category and syntactic structure of each word in the sentence. The results of this process enables more direct access during analysis to features that were hidden or otherwise difficult to access.
+The annotated dataset is now tokenized by word and includes the key variables `pos` (Penn treebank tags), `feats` (morphological features), and `relation` (dependency relations). These variables provide information about the grammatical category and syntactic structure of each word in the sentence. The results of this process enables more direct access during analysis to features that were hidden or otherwise difficult to access.
 
 ::: {.callout .halfsize}
 **{{< fa exclamation-triangle >}} Warning**
@@ -485,6 +493,7 @@ In @tbl-ud-recode-categorical-lemma, we see an example of recoding surface forms
 ```{r}
 #| label: tbl-ud-recode-categorical-lemma
 #| tbl-cap: "Reclassification of surface forms of words to their stemmed and lemmatized forms"
+#| tbl-colwidths: [20, 20, 20, 20, 20]
 
 text_df |>
   unnest_tokens(word, sentence) |>
@@ -597,7 +606,7 @@ tibble::tribble(
 
 Organizing this information in a tabular format, such as a spreadsheet, can make it easy for others to read and understand your data dictionary.
 
-::: {.callout}
+::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
 It is conventional to work with variable names for datasets in R using the same conventions that are used for naming objects. It is a matter of taste which convention is used, but I have adopted [snake case](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html#snake_case) as my personal preference (*e.g* `token_id`). There are also [alternatives](https://bookdown.org/content/d1e53ac9-28ce-472f-bc2c-f499f18264a3/names.html). Regardless of the convention you choose, it is good practice to be consistent.

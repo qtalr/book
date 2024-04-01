@@ -26,7 +26,6 @@ execute:
 ```{r}
 #| label: exploration-data-packages
 #| echo: false
-#| message: false
 
 ```
 
@@ -56,7 +55,7 @@ The general workflow for exploratory data analysis is shown in @tbl-eda-workflow
 | 4 | Interpret | Evaluate the results and determine if they are valid and meaningful to respond to the research question. |
 | 5 | Iterate (Optional) | Repeat steps 1-4 as new questions emerge from your interpretation. |
 
-: Workflow for exploratory data analysis {#tbl-eda-workflow tbl-colwidths="[5, 10, 85]" .striped}
+: Workflow for exploratory data analysis {#tbl-eda-workflow tbl-colwidths="[5, 15, 80]" .striped}
 
 Let's now demonstrate the workflow in practice.
 
@@ -73,9 +72,8 @@ The data dictionary for the dataset we will use as our point of departure is sho
 ```{r}
 #| label: tbl-eda-masc-dd-show
 #| tbl-cap: "Data dictionary for the MASC dataset."
-#| message: false
-#| echo: false
 #| tbl-colwidths: [15, 15, 15, 55]
+#| echo: false
 
 # Read in the data dictionary
 read_csv("data/masc_transformed_dd.csv") |>
@@ -100,7 +98,6 @@ masc_tbl |> glimpse()
 
 ```{r}
 #| label: eda-masc-read
-#| message: false
 #| echo: false
 
 # Read and subset the MASC dataset
@@ -286,12 +283,13 @@ If we look at the types that appear within the first 50 most frequent, you can l
 ```{r}
 #| label: tbl-eda-masc-count-top-50
 #| tbl-cap: "Top 50 lemma types in the MASC dataset."
+#| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Top 50 types
 lemma_cumul_freq |>
   slice_head(n = 50) |>
   pull(lemma) |>
-  matrix(ncol = 10) |>
+  matrix(ncol = 5) |>
   kable(col.names = NULL)
 ```
 :::
@@ -323,6 +321,7 @@ We need to consult the Penn Tagset again, to ensure we are selecting the correct
 ```{r}
 #| label: tbl-eda-masc-filter-pos
 #| tbl-cap: "Frequency of tokens in the MASC dataset after filtering out lemmas with POS tags that are not content words"
+#| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Penn Tagset for content words
 # Nouns: NN, NNS,
@@ -342,7 +341,7 @@ masc_content_tbl |>
   count(lemma, sort = TRUE) |>
   slice_head(n = 50) |>
   pull(lemma) |>
-  matrix(ncol = 10) |>
+  matrix(ncol = 5) |>
   kable(col.names = NULL)
 ```
 :::
@@ -449,19 +448,20 @@ Then in @tbl-eda-masc-dp-filter-preview, I preview the top and bottom 50 lemmas 
 #| - "Top 50 lemmas"
 #| - "Bottom 50 lemmas"
 #| layout-nrow: 2
+#| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Preview top
 masc_lemma_disp_thr |>
   slice_head(n = 50) |>
   pull(type) |>
-  matrix(ncol = 10) |>
+  matrix(ncol = 5) |>
   kable(col.names = NULL)
 
 # Preview bottom
 masc_lemma_disp_thr |>
   slice_tail(n = 50) |>
   pull(type) |>
-  matrix(ncol = 10) |>
+  matrix(ncol = 5) |>
   kable(col.names = NULL)
 ```
 
@@ -885,7 +885,8 @@ fviz_eig(masc_pos_pca, ncp = 10)
 library(factoextra)
 
 # Scree plot: POS relative frequency
-fviz_eig(masc_pos_pca, ncp = 10) + labs(title = "")
+fviz_eig(masc_pos_pca, ncp = 10, barfill = "grey50", barcolor = "grey50") +
+labs(title = "")
 ```
 :::
 
@@ -928,13 +929,7 @@ We will take the later approach and plot the **within-cluster sum of squares** (
 
 The `fviz_nbclust()` function can be used to plot the WSS for a range of values for $k$. The `fviz_nbclust()` function takes the `kmeans()` function as its first argument and the matrix of features as its second argument. The `fviz_nbclust()` function also takes arguments `method = "wss"` to specify the WSS method and `k.max = 20` to specify the maximum number of clusters to plot. Let's plot the WSS for a range of values for $k$, as seen in @fig-eda-masc-pos-kmeans-elbow.
 
-```{r}
-#| label: fig-eda-masc-pos-kmeans-elbow
-#| fig-cap: "Elbow method for k-means clustering of the MASC dataset"
-#| fig-width: 8
-#| fig-asp: 0.35
-
-# Determine the optimal number of clusters
+```r
 masc_pos_pca_pc |>
   fviz_nbclust(
     FUNcluster = kmeans,
@@ -943,6 +938,26 @@ masc_pos_pca_pc |>
     nstart = 25,
     iter.max = 20
   )
+```
+
+```{r}
+#| label: fig-eda-masc-pos-kmeans-elbow
+#| fig-cap: "Elbow method for k-means clustering of the MASC dataset"
+#| fig-width: 8
+#| fig-asp: 0.35
+#| echo: false
+
+# Determine the optimal number of clusters
+masc_pos_pca_pc |>
+  fviz_nbclust(
+    FUNcluster = kmeans,
+    method = "wss", # method
+    k.max = 20,
+    nstart = 25,
+    iter.max = 20,
+    linecolor = "black"
+  ) +
+  labs(title = "")
 ```
 
 It is clear that there is significant gains in cluster fit from 1 to 4 clusters, but the gains begin to level off after 5-7 clusters.
@@ -1290,7 +1305,7 @@ pca_tbl |>
 ```
 :::
 
-From @fig-eda-masc-vsm-word2vec-similarity, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC2, we can see that there is a distinction between POS. Looking along PC1, we see some pariety between lemma meanings. Given these features, we can see that meaning and grammatical category can be approximated in the vector space.
+From @fig-eda-masc-vsm-word2vec-similarity, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC1, we can see that there is a distinction between POS. Looking along PC2, we see some pariety between lemma meanings. Given these features, we can see that meaning and grammatical category can be approximated in the vector space.
 
 An interesting property of vector space models is that we can build up a dimension of meaning by adding vectors that we expect to approximate that meaning. For example, we can add the vectors for typical motion verbs to create a vector for motion-similarity and one for manner-similarity. We can then compare the feature vectors for all verbs and assess their motion-similarity and manner-similarity.
 
@@ -1368,7 +1383,7 @@ The result of @exm-eda-masc-vsm-word2vec-manner-motion is a data frame with the 
 #| label: fig-eda-masc-vsm-word2vec-manner-motion-compare
 #| fig-cap: "Motion-similarity and manner-similarity of verbs in the MASC dataset"
 #| fig-width: 8
-#| fig-asp: 0.5
+#| fig-asp: 0.75
 #| echo: false
 
 # Set seed

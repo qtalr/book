@@ -35,13 +35,13 @@ As we start down the path to executing our research blueprint, our first step is
 **{{< fa terminal >}} Lessons**
 
 **What**: Control Statements, Custom Functions\
-**How**: In an R console, load `swirl`, run `swirl()`, and follow prompts to select the lesson.\
+**How**: In an R console, load {swirl}, run `swirl()`, and follow prompts to select the lesson.\
 **Why**: To recognize the logic behind code that can make dynamic choices and to recall how functions serve to produce efficient, reusable, and more legible code.
 :::
 
 ## Downloads
 
-The most common and straightforward method for acquiring corpus data is through direct downloads. In a nutshell, this method involves navigating to a website, locating the data, and downloading it to your computing environment. In some cases access to the data requires manual intervention and in others the process can be implemented programmatically. The data may be contained in a single file or multiple files. The files may be compressed or uncompressed. The data may be hierarchically organized or not. Each resource will have its own unique characteristics that will influence the process of acquiring the data. In this section we will work through a few examples to demonstrate the general process of acquiring data through downloads.
+The most common and straightforward method for acquiring corpus data is through direct downloads. In a nutshell, this method involves navigating to a website, locating the data, and downloading it to your computing environment. In some cases access to the data requires manual intervention and in others the process can be implemented programmatically. The data may be contained in a single file or multiple files. The files may be archived or unarchived. The data may be hierarchically organized or not. Each resource will have its own unique characteristics that will influence the process of acquiring the data. In this section we will work through a few examples to demonstrate the general process of acquiring data through downloads.
 
 ### Manual
 
@@ -93,7 +93,7 @@ Now, after downloading the L2 learner and the native speaker data into the appro
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
-There are many ways to create and edit CSV files. You can use a spreadsheet program like MS Excel or Google Sheets, a text editor like Notepad or TextEdit, or a code editor like RStudio or VS Code. The `qtkit` package provides a convenient function, `create_data_origin()` to create a CSV file with the data origin boilerplate structure. This CSV file then can be edited to add the relevant information in any of the above mentioned programs.
+There are many ways to create and edit CSV files. You can use a spreadsheet program like MS Excel or Google Sheets, a text editor like Notepad or TextEdit, or a code editor like RStudio or VS Code. The {qtkit} package provides a convenient function, `create_data_origin()` to create a CSV file with the data origin boilerplate structure. This CSV file then can be edited to add the relevant information in any of the above mentioned programs.
 
 Using a spreadsheet program is the easiest method for editing tabular data. The key is to save the file as a CSV file, and not as an Excel file, to maintain our adherence to the principle of using open formats for reproducible research.
 :::
@@ -158,15 +158,15 @@ From the documentation we learn that the corpus contains transcripts for 1155 5-
 
 This corpus, as you can image, could support a wide range of interesting reseach questions. Let's assume we are following research conducted by @Tottie2011 to explore the use of filled pauses such as "um" and "uh" and traditional sociolinguistic variables such as sex, age, and education in spontaneous speech by American English speakers.
 
-With this goal in mind, let's get started writing the code to download and organize the data in our project directory. First, we need to identify the URL (Uniform Resource Locator) for the data that we want to download. More often than not this file will be some type of archive file with an extension such as *.zip* (Zipped file), *.tar* (Tarball file), or *tar.gz* (Gzipped tarball file), which is the case for the SWDA corpus. Archive files make downloading multiple files easy by grouping files and directories into one file.
-
-::: {.callout}
-**{{< fa regular lightbulb >}} Consider this**
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
 
 You may be wondering what the difference betwen *.zip*, *.tar*, and *.tar.gz* files are. The *.zip* file format is the most common. It groups file and directories into one file (an archive) and compresses it to reduce the size of the file in one step when the file is created.
 
 The *.tar* file format is used archive files and folders, it does not perform compression. Gzipping peforms the compression to the *.tar* file resulting in a file with the *.tar.gz* extension. Notably the *.gz* compression is highly efficient for large files. Take the *swda.tar.gz* file for example. It has a compressed file size of 4.6 MB, but when uncompressed it is 16.9 MB. This is a 73% reduction in file size.
 :::
+
+With this goal in mind, let's get started writing the code to download and organize the data in our project directory. First, we need to identify the URL (Uniform Resource Locator) for the data that we want to download. More often than not this file will be some type of archive file with an extension such as *.zip* (Zipped file), *.tar* (Tarball file), or *tar.gz* (Gzipped tarball file), which is the case for the SWDA corpus. Archive files make downloading multiple files easy by grouping files and directories into one file.
 
 In R, we can use the `download.file()` function from base R. The `download.file()` function minimally requires two arguments: `url` and `destfile`. These correspond to the file to download and the location where it is to be saved to disk. To break out the process a bit, I will assign the URL and destination file path to variables and then use the `download.file()` function to download the file.
 
@@ -220,14 +220,14 @@ tar_file <- "../data/original/swda.tar.gz"
 # Relative path to the directory to extract to
 extract_to_dir <- "../data/original/swda/"
 
-# Decompress .zip file and extract to our target directory
+# Unarchive/ decompress .zip file and extract to our target directory
 untar(tar_file, extract_to_dir)
 ```
 :::
 
-The directory structure of *data/* in @exm-ad-swda-decompress-location now shows the *swda.tar.gz* file and the *swda* directory that contains the decompressed directories and files.
+The directory structure of *data/* in @exm-ad-swda-unarchive-location now shows the *swda.tar.gz* file and the *swda* directory that contains the unarchived directories and files.
 
-::: {#exm-ad-swda-decompress-location}
+::: {#exm-ad-swda-unarchive-location}
 ```bash
 data/
 ├── analysis/
@@ -256,9 +256,9 @@ data/
 
 At this point we have acquired the data programmatically and with this code as part of our workflow anyone could run this code and reproduce the same results.
 
-The code as it is, however, is not ideally efficient. First, the *swda.tar.gz* file is not strictly needed after we decompress it and it occupies disk space, if we keep it. And second, each time we run this code the file will be downloaded from the remote server and overwrite the existing data. This leads to unnecessary data transfer and server traffic and will overwrite the data if it already exists in our project directory which could be problematic if the data changes on the remote server. Let's tackle each of these issues in turn.
+The code as it is, however, is not ideally efficient. First, the *swda.tar.gz* file is not strictly needed after we unarchive it and it occupies disk space, if we keep it. And second, each time we run this code the file will be downloaded from the remote server and overwrite the existing data. This leads to unnecessary data transfer and server traffic and will overwrite the data if it already exists in our project directory which could be problematic if the data changes on the remote server. Let's tackle each of these issues in turn.
 
-To avoid writing the *swda.tar.gz* file to disk (long-term) we can use the `tempfile()` function to open a temporary holding space for the file in the computing environment. This space can then be used to store the file, decompress it, and then the temporary file will automatically be deleted. We assign the temporary space to an R object we will name `temp_file` with the `tempfile()` function. This object can now be used as the value of the argument `destfile` in the `download.file()` function.
+To avoid writing the *swda.tar.gz* file to disk (long-term) we can use the `tempfile()` function to open a temporary holding space for the file in the computing environment. This space can then be used to store the file, unarchive it, and then the temporary file will automatically be deleted. We assign the temporary space to an R object we will name `temp_file` with the `tempfile()` function. This object can now be used as the value of the argument `destfile` in the `download.file()` function.
 
 ::: {#exm-ad-swda-temp-file}
 ```{r}
@@ -283,7 +283,7 @@ download.file(file_url, temp_file)
 In @exm-ad-swda-temp-file, I've used the values stored in the objects `file_url` and `temp_file` in the `download.file()` function without specifying the argument names --only providing the names of the objects. R will assume that values of a function map to the ordering of the arguments. If your values do not map to ordering of the arguments you are required to specify the argument name and the value. To view the ordering of objects hit {{< kbd tab >}} after entering the function name or consult the function documentation by prefixing the function name with `?` and hitting {{< kbd enter >}}.
 :::
 
-At this point our downloaded file is stored temporarily on disk and can be accessed and decompressed to our target directory using *temp_file* as the value for the argument `tarfile` from the `untar()` function. I've assigned our target directory path to `extract_to_dir` and used it as the value for the argument `exdir`.
+At this point our downloaded file is stored temporarily on disk and can be accessed and unarchived to our target directory using *temp_file* as the value for the argument `tarfile` from the `untar()` function. I've assigned our target directory path to `extract_to_dir` and used it as the value for the argument `exdir`.
 
 ::: {#exm-ad-swda-untar-temp}
 ```{r}
@@ -293,12 +293,12 @@ At this point our downloaded file is stored temporarily on disk and can be acces
 # Assign our target directory to `extract_to_dir`
 extract_to_dir <- "../data/original/swda/"
 
-# Decompress .tar.gz file and extract to our target directory
+# Unarchive/ decompress .tar.gz file and extract to our target directory
 untar(tarfile = temp_file, exdir = target_dir)
 ```
 :::
 
-Our directory structure in @exm-ad-swda-untar-temp is the same as in @exm-ad-swda-decompress-location, minus the *swda.tar.gz* file.
+Our directory structure in @exm-ad-swda-untar-temp is the same as in @exm-ad-swda-unarchive-location, minus the *swda.tar.gz* file.
 
 The second issue I raised concerns the fact that running this code as part of our project will repeat the download each time our script is run. Since we would like to be good citizens and avoid unnecessary traffic on the web and avoid potential issues in overwriting data, it would be nice if our code checked to see if we already have the data on disk and if it exists, then skip the download, if not then download it.
 
@@ -326,7 +326,7 @@ if (!DIRECTORY_EXISTS) {
 ```
 :::
 
-Now, to determine if a directory exists in our project directory we will turn to the `fs` package [@R-fs]. The `fs` package provides a set of functions for interacting with the file system, including `dir_exists()`. `dir_exists()` takes a path to a directory as an argument and returns the logical value, `TRUE`, if that directory exists, and `FALSE` if it does not.
+Now, to determine if a directory exists in our project directory we will turn to {fs} [@R-fs]. {fs} provides a set of functions for interacting with the file system, including `dir_exists()`. `dir_exists()` takes a path to a directory as an argument and returns the logical value, `TRUE`, if that directory exists, and `FALSE` if it does not.
 
 We can use this function to evaluate whether the directory exists and then use the `if()` function to process the subsequent code based on the logical flow we set out in @exm-ad-if-dir-exists-simplified. Applied to our project, the code will look like @exm-ad-swda-if-dir-exists.
 
@@ -335,7 +335,7 @@ We can use this function to evaluate whether the directory exists and then use t
 #| label: ad-swda-if-dir-exists
 #| eval: false
 
-# Load the `fs` package
+# Load the {fs} package
 library(fs)
 
 # URL to SWDA corpus archive file
@@ -354,7 +354,7 @@ if (!dir_exists(extract_to_dir)) {
   # Download SWDA corpus archive file
   download.file(file_url, temp_file)
 
-  # Decompress .tar.gz file and extract to our target directory
+  # Unarchive/ decompress .tar.gz file and extract to our target directory
   untar(tarfile = temp_file, exdir = extract_to_dir)
 }
 ```
@@ -384,11 +384,11 @@ ROpenSci maintains a curated list of R packages that provide access to data from
 
 <!-- APIs of interest to linguists -->
 
-In addition to popular public APIs, there are also APIs that provide access to repositories and databases which are of particular interest to linguists. For example, [Wordbank](http://wordbank.stanford.edu/) provides access to a large collection of child language corpora through the `wordbankr` package [@R-wordbankr], and [Glottolog](https://glottolog.org/), [World Atlas of Language Structures](https://wals.info/) (WALS), and [PHOIBLE](https://phoible.org/) provide access to large collections of language metadata that can be accessed through the `lingtypology` package [@R-lingtypology].
+In addition to popular public APIs, there are also APIs that provide access to repositories and databases which are of particular interest to linguists. For example, [Wordbank](http://wordbank.stanford.edu/) provides access to a large collection of child language corpora through {wordbankr} [@R-wordbankr], and [Glottolog](https://glottolog.org/), [World Atlas of Language Structures](https://wals.info/) (WALS), and [PHOIBLE](https://phoible.org/) provide access to large collections of language metadata that can be accessed through {lingtypology} [@R-lingtypology].
 
 <!-- TalkBank -->
 
-Let's work with an R package that provides access to the [TalkBank](https://talkbank.org/) database. The TalkBank project [@Macwhinney2003] contains a large collection of spoken language corpora from various contexts: conversation, child language, multilinguals, *etc*. Resource information, web interfaces, and links to download data in various formats can be found by perusing individual resources linked from the main page. However, the `TBDBr` package [@R-TBDBr] provides convenient access to corpora using R once a corpus resource is identified.
+Let's work with an R package that provides access to the [TalkBank](https://talkbank.org/) database. The TalkBank project [@Macwhinney2024] contains a large collection of spoken language corpora from various contexts: conversation, child language, multilinguals, *etc*. Resource information, web interfaces, and links to download data in various formats can be found by perusing individual resources linked from the main page. However, {TBDBr} [@R-TBDBr] provides convenient access to corpora using R once a corpus resource is identified.
 
 <!-- CABNC -->
 
@@ -396,7 +396,7 @@ The CABNC [@Albert2015] contains the [demographically sampled portion](http://ww
 
 Useful for a study aiming to research spoken British English, either in isoloation or in comparison to American English (SWDA).
 
-First, we need to install and load the `TBDBr` package. @exm-ad-load-pacman.
+First, we need to install and load {TBDBr}, as in @exm-ad-load-pacman.
 
 ::: {#exm-ad-load-pacman}
 ```{r}
@@ -409,7 +409,7 @@ library(TBDBr)
 
 <!-- TBDBr functions -->
 
-The `TBDBr` package provides a set of common `get*()` functions for acquiring data from the TalkBank corpus resources. These include:
+{TBDBr}  provides a set of common `get*()` functions for acquiring data from the TalkBank corpus resources. These include:
 
 - `getParticipants()`
 - `getTranscripts()`
@@ -421,7 +421,7 @@ The `TBDBr` package provides a set of common `get*()` functions for acquiring da
 **{{< fa regular hand-point-up >}} Tip**
 List functions and arguments
 
-For any package loaded in your R session, you can list all of its functions and datasets using the `ls()` function. For example, `ls("package:TBDBr")` will list all of the functions and datasets in the `TBDBr` package.
+For any package loaded in your R session, you can list all of its functions and datasets using the `ls()` function. For example, `ls("package:TBDBr")` will list all of the functions and datasets in {TBDBr}.
 
 To view all of the arguments for a function, use the `args()` function. For example, `args(getUtterances)` will list all of the arguments for the `getUtterances()` function.
 :::
@@ -486,7 +486,7 @@ Inspecting the output from @exm-ad-get-utterances, we see that the data frame co
 
 The summary provided by `glimpse()` also provides other useful information. First, we see the data type of each variable. Interestingly, the data type for each variable in the data frame is a list object. Being that a list is two-dimensional data type, like a data frame, we have two-dimensional data inside two-dimensional data. This is known as a **nested structure**. We will work with nested structures in more depth later, but for now it will suffice to say that we would like to 'unnest' these lists and reveal the list-contained vector types at the data frame level.
 
-To do this we will pass the `utterances` data frame to the, appropriately named, `unnest()` function from the `tidyr` package [@R-tidyr]. `unnest()` takes a data frame and a vector of variable names to unnest, `cols = c()`. To unnest all variables, we will use the `everything()` function from `dplyr` to select all variables at once. We will use the result to overwrite the `utterances` object with the unnested data frame.
+To do this we will pass the `utterances` data frame to the, appropriately named, `unnest()` function from {tidyr} [@R-tidyr]. `unnest()` takes a data frame and a vector of variable names to unnest, `cols = c()`. To unnest all variables, we will use the `everything()` function from {dplyr} to select all variables at once. We will use the result to overwrite the `utterances` object with the unnested data frame.
 
 ::: {#exm-ad-unnest}
 ```{r}
@@ -512,9 +512,9 @@ For now, however, we want to acquire and store the data in its original form (or
 
 Since we are working in R, we could store this data as an R object, in the form of an RDS file. An RDS file is a binary file that can be read back into R as an R object. This is a good option if we want to store the data for use in R, but not if we want to share the data with others or use it in other software. Another option is to store the data as a spreadsheet file, such as XSLX (MS Excel). This may make viewing and editing the contents more convenient, but it depends on the software available to you and others. A third, more viable option, is to store the data as a CSV file. CSV files are plain text files that can be read and written by most software. This makes CSV files one of the most popular for sharing tablular data. For this reason, we will store the data as a CSV file.
 
-The `readr` package provides the `write_csv()` function for writing data frames to CSV files. The first argument is the data frame to write, and the second argument is the path to the file to write. Note, however, that the directories in the path we specify need to exist. If they do not, we will get an error.
+{readr} provides the `write_csv()` function for writing data frames to CSV files. The first argument is the data frame to write, and the second argument is the path to the file to write. Note, however, that the directories in the path we specify need to exist. If they do not, we will get an error.
 
-In this case, I would like to write the file *utterances.csv* to the *../data/original/cabnc/* directory. The original project structure does not contain a *cabnc/* directory, so I need to create one. To do this, I will use `dir_create()` from the `fs` package.
+In this case, I would like to write the file *utterances.csv* to the *../data/original/cabnc/* directory. The original project structure does not contain a *cabnc/* directory, so I need to create one. To do this, I will use `dir_create()` from {fs}.
 
 ::: {#exm-ad-write-csv}
 ```{r}
@@ -663,6 +663,14 @@ From this point, we add the functionality to acquire and write the other data av
 
 <!-- Function location -->
 
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
+
+If you are interested in learning more about writing functions, check out the [Writing Functions chapter](https://r4ds.had.co.nz/functions.html) in the [R for Data Science](https://r4ds.had.co.nz/) book.
+
+If you find yourself writing functions that are useful for multiple projects, you may want to consider creating an R package. R packages are a great way to share your code with others. If you are interested in learning more about creating R packages, check out the [R Packages book](https://r-pkgs.org/) by Hadley Wickham and Jenny Bryan.
+:::
+
 Before we leave the topic of functions, let's consider where to put functions after we write them. Here are a few options:
 
 1. In the same script as the code that uses the function.
@@ -670,14 +678,6 @@ Before we leave the topic of functions, let's consider where to put functions af
 3. In a package, which is loaded by the script that uses the function.
 
 The general heuristic for choosing where to put functions is to put them in the same script as the code that uses them if the function is only used in that script. If the function is used in multiple scripts or the function or number of functions clutters the readability of the code, then put it in a separate script. If the function is used in multiple projects, then put it in an R package.
-
-::: {.callout}
-**{{< fa medal >}} Dive deeper**
-
-If you are interested in learning more about writing functions, check out the [Writing Functions chapter](https://r4ds.had.co.nz/functions.html) in the [R for Data Science](https://r4ds.had.co.nz/) book.
-
-If you find yourself writing functions that are useful for multiple projects, you may want to consider creating an R package. R packages are a great way to share your code with others. If you are interested in learning more about creating R packages, check out the [R Packages book](https://r-pkgs.org/) by Hadley Wickham and Jenny Bryan.
-:::
 
 In this case, we will put the function in a separate file, *functions.R*, in the same directory as the other process files as in @exm-ad-functions-r.
 
@@ -691,9 +691,9 @@ process/
 :::
 
 ::: {.callout}
-**{{< fa regular hand-point-up >}} Tip**
+**{{< fa exclamation-triangle >}} Warning**
 
-Note that that the *functions.R* file is an R script, not a Quarto document. Therefore code blocks that are used in *.qmd* files are not used, only the R code and code comments.
+Note that the *functions.R* file is an R script, not a Quarto document. Therefore code blocks that are used in *.qmd* files are not used, only the R code and code comments.
 :::
 
 To include this, or other functions in in the R session of the process file that uses them, use the `source()` function, as seen in @exm-ad-source-functions.
@@ -710,7 +710,7 @@ source("functions.R")
 
 It is common to source functions at the top of the process file as part of the package setup.
 
-Given the utility of this function to my projects and potentially others', I've included the `get_talkbank_data()` function in the `qtkit` package. You can view the source code by calling the function without parentheses `()`, or on the `qtkit` GitHub repository.
+Given the utility of this function to my projects and potentially others', I've included the `get_talkbank_data()` function in the {qtkit} package. You can view the source code by calling the function without parentheses `()`, or on the {qtkit} GitHub repository.
 
 After running the `get_talkbank_data()` function, we can see that the data has been acquired and written to the *data/original/cabnc/* directory.
 
@@ -755,8 +755,8 @@ Building on the activities in the previous chapter, these activities will focus 
 
 ## Summary {.unnumbered}
 
-In this chapter, we have covered a lot of ground. On the surface we have discussed a few methods for acquiring corpus data for use in text analysis. In the process we have delved into various aspects of the R programming language. Some key concepts include writing control statements and custom functions. We have also considered topics that are more general in nature and concern interacting with data found on the internet.
+In this chapter, we have covered a lot of ground. On the surface, we have discussed a few methods for acquiring corpus data for use in text analysis. In the process, we have delved into various aspects of the R programming language. Some key concepts include writing control statements and custom functions. We have also considered topics that are more general in nature and concern interacting with data found on the internet.
 
-Each of these methods should be approached in a way that is transparent to the researcher and to would-be collaborators and the general research community. For this reason the documentation of the steps taken to acquire data are key both in the code and in human-facing documentation.
+Each of these methods should be approached in a way that is transparent to the researcher and to would-be collaborators and the general research community. For this reason, the documentation of the steps taken to acquire data are key both in the code and in human-facing documentation.
 
 At this point you have both a bird’s eye view of the data available on the web and strategies on how to access a great majority of it. It is now time to turn to the next step in our data analysis project: data curation. In the next chapter, I will cover how to wrangle your raw data into a tidy dataset.

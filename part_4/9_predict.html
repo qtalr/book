@@ -495,7 +495,7 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <thead><tr class="header">
 <th>variable</th>
 <th>name</th>
-<th>variable_type</th>
+<th>type</th>
 <th>description</th>
 </tr></thead>
 <tbody>
@@ -585,7 +585,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 </div>
 </div>
 <!-- Step 1: identify features -->
-<p>Let’s begin the workflow from <a href="#tbl-pda-workflow" class="quarto-xref">Table&nbsp;<span>9.1</span></a> by identifying the features that we will use to classify the texts. There may be many features that we could use. These could be features derived from raw text (<em>e.g.</em> characters, words, n-grams, <em>etc.</em>), feature vectors (<em>e.g.</em> word embeddings), or meta-linguistic features (<em>e.g.</em> part-of-speech tags, syntactic parses, or semantic features) that have been derived from these through manual or automatic annotation.</p>
+<p>Let’s begin the workflow from <a href="#tbl-pda-workflow" class="quarto-xref">Table&nbsp;<span>9.1</span></a> by identifying the features that we will use to classify the texts. There may be many features that we could use. These could be features derived from raw text (<em>e.g.</em> characters, words, <span class="math inline">\(n\)</span>-grams, <em>etc.</em>), feature vectors (<em>e.g.</em> word embeddings), or meta-linguistic features (<em>e.g.</em> part-of-speech tags, syntactic parses, or semantic features) that have been derived from these through manual or automatic annotation.</p>
 <p>If as part of our research question the types of features is included, then we should proceed toward deriving those features. If not, a simple approach is to use words as the predictor features. This will serve as a baseline for more complex models, if necessary.</p>
 <p>This provides us the linguistic unit we will use but we still need to decide how to operationalize what we mean by ‘use’ in our research statement. Do we use raw token counts? Do we use normalized frequencies? Do we use some type of weighting scheme? These are questions that we need to consider as we embark on this analysis. Since we are exploring, we can use trial-and-error or consider the implications of each approach and choose the one that best fits our research question –or both.</p>
 <p>Let’s approach this with a bit more nuance as we already have some domain knowledge about word use. First, we know that in the frequency distribution of words is highly skewed, meaning that a few words occur very frequently and most words occur very infrequently. Second, we know that the most frequent words in a language are often function words (<em>e.g.</em> ‘the’, ‘and’, ‘of’, <em>etc.</em>) and that these words are tend not very informative for distinguishing between classes of texts. Third, we know that comparing raw counts across texts conflates the influence text class lengths.</p>
@@ -1020,7 +1020,7 @@ Table&nbsp;9.3: Common classification algorithms
 </div>
 <p>The 10 values chosen to be in the grid range from nearly zero to 1, where 0 indicates no penalty and 1 indicates a strong penalty.</p>
 <p>Now to perform the tuning and arrive at an optimal value for <code>penalty</code> we need to create a tuning workflow. We do this by calling the <code>tune_grid()</code> function using our tuning model specification workflow, a resampling object, and our hyperparameter grid and returns a <code>tune_grid</code> object.</p>
-<p>Resampling is a strategy that allows us to generate multiple training and testing sets from a single data set –in this case the training data we split at the outset. Each generated training-testing pairs is called a fold. Which is why this type of resampling is called k-fold cross-validation. The <code>vfold_cv()</code> function from the <code>rsample</code> package takes a data frame and a number of folds and returns a <code>vfold_cv</code> object. We will apply the <code>cls_wf</code> workflow to the 10 folds of the training set with <code>tune_grid()</code>. For each fold, each of the 10 values of the penalty hyperparameter will be tried and the model’s performance will be evaluated. The code is seen in <a href="#exm-pda-class-model-spec-tune-grid-cv" class="quarto-xref">Example&nbsp;<span>9.15</span></a>.</p>
+<p>Resampling is a strategy that allows us to generate multiple training and testing sets from a single data set –in this case the training data we split at the outset. Each generated training-testing pairs is called a fold. Which is why this type of resampling is called <span class="math inline">\(k\)</span>-fold cross-validation. The <code>vfold_cv()</code> function from the <code>rsample</code> package takes a data frame and a number of folds and returns a <code>vfold_cv</code> object. We will apply the <code>cls_wf</code> workflow to the 10 folds of the training set with <code>tune_grid()</code>. For each fold, each of the 10 values of the penalty hyperparameter will be tried and the model’s performance will be evaluated. The code is seen in <a href="#exm-pda-class-model-spec-tune-grid-cv" class="quarto-xref">Example&nbsp;<span>9.15</span></a>.</p>
 <div id="exm-pda-class-model-spec-tune-grid-cv" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.15</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1073,7 +1073,7 @@ Table&nbsp;9.3: Common classification algorithms
 <div class="cell-output-display quarto-layout-cell" style="flex-basis: 100.0%;justify-content: flex-start;">
 <div id="fig-pda-class-model-spec-tune-grid-collect" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-class-model-spec-tune-grid-collect-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-pda-class-model-spec-tune-grid-collect-1.png" class="img-fluid figure-img" width="768">
+<img src="9_predict_files/figure-html/fig-pda-class-model-spec-tune-grid-collect-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-class-model-spec-tune-grid-collect-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.1: Metrics for each fold of the tuning process.
@@ -1209,7 +1209,7 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process.
 <div class="cell-output-display">
 <div id="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" width="768">
+<img src="9_predict_files/figure-html/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validation.
@@ -1326,7 +1326,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <div class="cell-output-display">
 <div id="fig-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" width="768">
+<img src="9_predict_files/figure-html/fig-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validation.
@@ -1375,7 +1375,7 @@ Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validati
 <div class="cell-output-display">
 <div id="fig-pda-class-tune-hyperparameters-evaluate-test-confusion" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-class-tune-hyperparameters-evaluate-test-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-pda-class-tune-hyperparameters-evaluate-test-confusion-1.png" class="img-fluid figure-img" width="768">
+<img src="9_predict_files/figure-html/fig-pda-class-tune-hyperparameters-evaluate-test-confusion-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-class-tune-hyperparameters-evaluate-test-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.4: Confusion matrix for the test set.
@@ -1557,7 +1557,7 @@ $ text          &lt;chr&gt; "Sanaa Lathan es muy famosa persona. Ella es en de t
 <div class="cell-output-display">
 <div id="fig-pda-class-tune-hyperparameters-evaluate-test-vip-plot" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-class-tune-hyperparameters-evaluate-test-vip-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-pda-class-tune-hyperparameters-evaluate-test-vip-plot-1.png" class="img-fluid figure-img" width="768">
+<img src="9_predict_files/figure-html/fig-pda-class-tune-hyperparameters-evaluate-test-vip-plot-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-class-tune-hyperparameters-evaluate-test-vip-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.5: Most important features for predicting the outcome.
@@ -1723,7 +1723,7 @@ Table&nbsp;9.4: Steps to build and tune a model
 <div class="cell-output-display">
 <div id="fig-pda-reg-lr-eval-rmse" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-reg-lr-eval-rmse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-pda-reg-lr-eval-rmse-1.png" class="img-fluid figure-img" width="768">
+<img src="9_predict_files/figure-html/fig-pda-reg-lr-eval-rmse-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-reg-lr-eval-rmse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.6: Distribution of the RMSE for the cross-validated linear regression model.
@@ -1970,7 +1970,7 @@ Snippet&nbsp;9.3: Tuning values for the learning rate hyperparameter
 <div class="cell-output-display">
 <div id="fig-pda-reg-final-fit-vip-visualize" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pda-reg-final-fit-vip-visualize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-pda-reg-final-fit-vip-visualize-1.png" class="img-fluid figure-img" width="768">
+<img src="9_predict_files/figure-html/fig-pda-reg-final-fit-vip-visualize-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pda-reg-final-fit-vip-visualize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.7: Feature importance of the random forest model.

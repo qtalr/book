@@ -47,6 +47,8 @@ While exploratory data analysis allows flexibility, it is essential to have a gu
 
 The general workflow for exploratory data analysis is shown in @tbl-eda-workflow.
 
+::: {#tbl-eda-workflow tbl-colwidths="[5, 15, 80]" .striped}
+
 | Step | Name | Description |
 |:----:|:-----|:------------|
 | 1 | Identify | Consider the research question and identify variables of potential interest to provide insight into our question. |
@@ -55,7 +57,8 @@ The general workflow for exploratory data analysis is shown in @tbl-eda-workflow
 | 4 | Interpret | Evaluate the results and determine if they are valid and meaningful to respond to the research question. |
 | 5 | Iterate (Optional) | Repeat steps 1-4 as new questions emerge from your interpretation. |
 
-: Workflow for exploratory data analysis {#tbl-eda-workflow tbl-colwidths="[5, 15, 80]" .striped}
+Workflow for exploratory data analysis
+:::
 
 Let's now demonstrate the workflow in practice.
 
@@ -243,8 +246,10 @@ As we discussed in @sec-aa-distributions, the frequency of linguistic units in a
 ::: {#exm-eda-masc-count-cumulative}
 ```{r}
 #| label: fig-eda-masc-count-cumulative
-#| echo: false
 #| fig-cap: "Cumulative frequency of lemmas in the MASC dataset"
+#| fig-width: 8
+#| fig-asp: 0.5
+#| echo: false
 
 # Calculate cumulative frequency
 lemma_cumul_freq <-
@@ -378,11 +383,17 @@ You may wonder why we would want to use $df$ or $idf$ at all. The answer is some
 So for our task we will use $dp$ as our measure of dispersion. The `qtkit` package includes the `calc_type_metrics()` function which calculates, among other metrics, the dispersion metrics $df$, $idf$, and/ or $dp$. Let's select `dp` and assign the result to `masc_lemma_disp`, as seen in @exm-eda-masc-dp.
 
 ::: {#exm-eda-masc-dp}
+
+```{r}
+#| label: qtalrkit-remove-later
+#| include: false
+
+library(qtalrkit) # [ ] remove
+```
 ```{r}
 #| label: eda-masc-dp
 
 # Load package
-library(qtalrkit) # [ ] remove
 library(qtkit)
 
 # Calculate deviance of proportions (DP)
@@ -437,6 +448,22 @@ masc_lemma_disp_thr <-
 
 Then in @tbl-eda-masc-dp-filter-preview, I preview the top and bottom 50 lemmas in the dataset.
 
+```r
+# Preview top
+masc_lemma_disp_thr |>
+  slice_head(n = 50) |>
+  pull(type) |>
+  matrix(ncol = 5) |>
+  kable(col.names = NULL)
+
+# Preview bottom
+masc_lemma_disp_thr |>
+  slice_tail(n = 50) |>
+  pull(type) |>
+  matrix(ncol = 5) |>
+  kable(col.names = NULL)
+```
+
 ```{r}
 #| label: tbl-eda-masc-dp-filter-preview
 #| tbl-cap: "Frequency of tokens in the MASC dataset after our dispersion threshold"
@@ -451,14 +478,18 @@ masc_lemma_disp_thr |>
   slice_head(n = 50) |>
   pull(type) |>
   matrix(ncol = 5) |>
-  kable(col.names = NULL)
+  kable(col.names = NULL) |>
+  as_tibble() |>
+  tt(width = 1)
 
 # Preview bottom
 masc_lemma_disp_thr |>
   slice_tail(n = 50) |>
   pull(type) |>
   matrix(ncol = 5) |>
-  kable(col.names = NULL)
+  kable(col.names = NULL) |>
+  as_tibble() |>
+  tt(width = 1)
 ```
 
 We now have a good candidate list of common vocabulary that is spread well across the corpus.
@@ -723,6 +754,8 @@ We have a working method for identify verb particle constructions. We can clean 
 ```{r}
 #| label: fig-eda-masc-verb-part-network
 #| fig-cap: "Network plot of verb particle constructions in the MASC dataset"
+#| fig-width: 8
+#| fig-asp: 0.75
 #| echo: false
 
 # Clean up results removing POS tags
@@ -871,6 +904,8 @@ fviz_eig(masc_pos_pca, ncp = 10)
 ```{r}
 #| label: fig-eda-masc-dtms-pca-scree
 #| fig-cap: "Scree plot of the principle components of the POS relative frequency"
+#| fig-width: 8
+#| fig-asp: 0.5
 #| echo: false
 
 # Load package
@@ -935,6 +970,8 @@ masc_pos_pca_pc |>
 ```{r}
 #| label: fig-eda-masc-pos-kmeans-elbow
 #| fig-cap: "Elbow method for $k$-means clustering of the MASC dataset"
+#| fig-width: 8
+#| fig-asp: 0.5
 #| echo: false
 
 # Determine the optimal number of clusters
@@ -1012,6 +1049,7 @@ We now see that the cluster assignments from the $k$-means algorithm have been j
 ```{r}
 #| label: tbl-eda-masc-pos-kmeans-genre
 #| tbl-cap: "Distribution of clusters by genre in the MASC dataset"
+#| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Load package
 library(janitor)
@@ -1268,6 +1306,8 @@ As an example, let's compare the vectors for noun-verb pairs for the lemmas 'run
 ```{r}
 #| label: fig-eda-masc-vsm-word2vec-similarity
 #| fig-cap: "Similarity between 'run' and 'walk' in the MASC dataset"
+#| fig-width: 6
+#| fig-asp: 0.5
 
 # Extract vectors
 word_vectors <-
@@ -1370,6 +1410,8 @@ The result of @exm-eda-masc-vsm-word2vec-manner-motion is a data frame with the 
 ```{r}
 #| label: fig-eda-masc-vsm-word2vec-manner-motion-compare
 #| fig-cap: "Motion-similarity and manner-similarity of verbs in the MASC dataset"
+#| fig-width: 6
+#| fig-asp: 1
 #| echo: false
 
 # Set seed

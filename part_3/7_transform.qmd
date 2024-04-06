@@ -93,6 +93,8 @@ Simply looking at the first 10 lines of the dataset from @exm-tb-europarl-previe
 
 After exploring variations in the `lines` variable, I identified a number of artifacts in this dataset that we will want to consider addressing. These are included in @tbl-td-europarl-normalization.
 
+::: {#tbl-td-europarl-normalization tbl-colwidths="[30, 70]" .striped}
+
 | Description | Examples |
 |:---|:---|
 | Non-speech annotations | `(Abucheos)`, `(A4-0247/98)`, `(The sitting was opened at 09:00)` |
@@ -101,7 +103,8 @@ After exploring variations in the `lines` variable, I identified a number of art
 | Abbreviations | `Mr.`, `Sr.`, `Mme.`, `Mr`, `Sr`, `Mme`, `Mister`, `Señor`, `Madam` |
 | Text case | `The`, `the`, `White`, `white` |
 
-: Characteristics of the Europarl Corpus dataset that may require normalization. {#tbl-td-europarl-normalization tbl-colwidths="[30, 70]" .striped}
+Characteristics of the Europarl Corpus dataset that may require normalization
+:::
 
 These artifacts either may not be of interest or may introduce unwanted variability in the that could prove problematic for subsequent processing (*e.g* tokenization, calculating frequencies, *etc.*).
 
@@ -214,7 +217,7 @@ For processing Chinese text, including tokenization, see the `jiebaR` package [@
 
 Let's continue to work with the Europarl Corpus dataset to demonstrate tokenization. We will start by tokenizing the text into words. If we envision what this should look like, we might imagine something like @tbl-td-europarl-tokenization-words-example.
 
-::: {#tbl-td-europarl-tokenization-words-example}
+::: {#tbl-td-europarl-tokenization-words-example tbl-colwidths="[25, 25, 25, 25]" .striped}
 
 |  doc_id   | type | line_id | token |
 |----------|--------|----------|------|
@@ -224,7 +227,7 @@ Let's continue to work with the Europarl Corpus dataset to demonstrate tokenizat
 | 1 | Target | 2 | the |
 | 1 | Target | 2 | session |
 
-Example of tokenizing the `lines` variable into word tokens.
+Example of tokenizing the `lines` variable into word tokens
 :::
 
 Comparing @tbl-td-europarl-tokenization-words-example to the fourth row of the output of @exm-tb-europarl-preview, we can see that we want to segment the words in `lines` and then have each segment appear as a separate observation, retaining the relevant metadata variables.
@@ -353,22 +356,18 @@ Before we get started, let's consider what the transformed dataset might look li
 
 An idealized transformed dataset dictionary for this investigation should look something like @tbl-td-generation-idealized.
 
-```{r}
-#| label: tbl-td-generation-idealized
-#| tbl-cap: "Idealized transformed dataset for the syntactic simplification investigation."
-#| tbl-colwidths: [10, 17, 19, 54]
-#| echo: false
 
-tibble::tribble(
-  ~variable, ~name, ~type, ~description,
-  "doc_id", "Document ID", "integer", "Unique identifier for each document.",
-  "type", "Type", "character", "Type of text (native or translated).",
-  "t_units", "T-units", "integer", "Number of T-units in the text.",
-  "word_len", "Word Length", "integer", "Number of words in the text."
-) |>
-  tt(width = 1)
+::: {#tbl-td-generation-idealized tbl-colwidths="[15, 20, 10, 55]" .striped}
 
-```
+| variable | name | type | description |
+|----------|------|------|-------------|
+| doc_id | Document ID | integer | Unique identifier for each document. |
+| type | Type | character | Type of text (native or translated). |
+| t_units | T-units | integer | Number of T-units in the text. |
+| word_len | Word Length | integer | Number of words in the text. |
+
+Idealized transformed dataset for the syntactic simplification investigation
+:::
 
 We will be using the the native and translated datasets for our purposes so let's go ahead and read in these datasets.
 
@@ -767,12 +766,15 @@ These steps produced two datasets for both the natives and for the translations.
 
 In the end, we want a dataset that looks something like @tbl-td-integration-idealized.
 
+::: {#tbl-td-integration-idealized tbl-colwidths="[15, 15, 15, 15, 40]" .striped}
+
 | doc_id | type        | t_units | word_len | text                                                   |
 | ------ | ----------- | ------- | -------- | ------------------------------------------------------ |
 | 1      | natives     | 1       | 5        | I am happy right now.                                  |
 | 2      | translation | 3       | 11       | I think that John believes that Mary is a good person. |
 
-: Idealized integrated dataset for the syntactic simplification investigation. {#tbl-td-integration-idealized .striped}
+Idealized integrated dataset for the syntactic simplification investigation
+:::
 
 To create this unified dataset, we will need to apply joins and concatenation. First, we will join the prepped datasets with the annotated datasets. Then, we will concatenate the two resulting datasets.
 

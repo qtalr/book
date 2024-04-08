@@ -199,7 +199,7 @@ doc_id <- filter(masc_skm_obj, skim_variable == "doc_id")
 
 ```
 
-After a descriptive and diagnostic assessment of the dataset, I identified and addressed missing data and anomalies (including many non-words). I also recoded the `doc_id` variable to a character variable. The dataset now has `r format(masc_new_obs, big.mark = ",")` observations, a reduction from the original `r format(masc_org_obs, big.mark = ",")` observations. There are 392 documents, 2 modalities, 18 genres, almost 38k unique terms (which are words), almost 26k lemmas (word base forms), and 34 distinct part of speech (POS) tags.
+After a descriptive and diagnostic assessment of the dataset, not included here, I identified and addressed missing data and anomalies (including many non-words). I also recoded the `doc_id` variable to a character variable. The dataset now has `r format(masc_new_obs, big.mark = ",")` observations, a reduction from the original `r format(masc_org_obs, big.mark = ",")` observations. There are 392 documents, 2 modalities, 18 genres, almost 38k unique terms (which are words), almost 26k lemmas (word base forms), and 34 distinct part of speech (POS) tags.
 
 ### Descriptive analysis {#sec-explore-descriptive}
 
@@ -209,7 +209,7 @@ Using the MASC dataset, we will entertain questions such as:
 
 - What are the most common terms a beginning ELL should learn?
 - Are there term differences between spoken and written discourses that should be emphasized?
-- What are the most common verb particle constructions?
+- What are some of the most common verb particle constructions?
 
 Along the way, we will introduce touch on frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.
 
@@ -241,7 +241,7 @@ masc_tbl |>
 
 The output of this frequency tabulation in @exm-explore-masc-count is a data frame with two columns: `lemma` and `n`.
 
-As we discussed in @sec-analysis-distributions, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution, approximating the Zipf distribution. If we calculate the cumulative frequency of the lemmas in the `masc_tbl` data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus --by 100 types that increases to near 50% and 1,000 around 75%, as seen in @exm-explore-masc-count-cumulative.
+As we discussed in @sec-analysis-distributions, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution, approximating the Zipf distribution. If we calculate the **cumulative frequency**, a rolling sum of the frequency term by term, of the lemmas in the `masc_tbl` data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus --by 100 types that increases to near 50% and 1,000 around 75%, as seen in @exm-explore-masc-count-cumulative.
 
 ::: {#exm-explore-masc-count-cumulative}
 ```{r}
@@ -362,7 +362,7 @@ The most basic measure is **document frequency** ($df$). This is the number of d
 
 A nuanced version of document frequency is **inverse document frequency** ($idf$). This measure takes the total number of documents and divides it by the document frequency. This results in a measure that is inversely proportional to the document frequency. That is, the higher the document frequency, the lower the inverse document frequency. This measure is often log-transformed to spread out the values.
 
-One thing to consider about $df$ and $idf$ is that niether takes into account the length of the documents in which the type appears nor the spread of the type within each document. To take these factors into account, we can use Gries' Deviation of Proportions ($dp$) measure [@Gries2023, pp. 87-88]. The $dp$ measure considers the proportion of a type's frequency in each document relative to its total frequency. This produces a measure that is more sensitive to the distribution of a type within and across documents in a corpus.
+One thing to consider about $df$ and $idf$ is that niether takes into account the length of the documents in which the type appears nor the spread of the type within each document. To take these factors into account, we can use Gries' **Deviation of Proportions** ($dp$) measure [@Gries2023, pp. 87-88]. The $dp$ measure considers the proportion of a type's frequency in each document relative to its total frequency. This produces a measure that is more sensitive to the distribution of a type within and across documents in a corpus.
 
 Let's consider how these measures differ with three scenarios:
 
@@ -449,23 +449,6 @@ masc_lemma_disp_thr <-
 :::
 
 Then in @tbl-explore-masc-dp-filter-preview, I preview the top and bottom 50 lemmas in the dataset.
-
-```r
-# Preview top
-masc_lemma_disp_thr |>
-  slice_head(n = 50) |>
-  pull(type) |>
-  matrix(ncol = 5) |>
-  kable(col.names = NULL)
-
-# Preview bottom
-masc_lemma_disp_thr |>
-  slice_tail(n = 50) |>
-  pull(type) |>
-  matrix(ncol = 5) |>
-  kable(col.names = NULL)
-```
-
 ```{r}
 #| label: tbl-explore-masc-dp-filter-preview
 #| tbl-cap: "Frequency of tokens in the MASC dataset after our dispersion threshold"
@@ -480,18 +463,14 @@ masc_lemma_disp_thr |>
   slice_head(n = 50) |>
   pull(type) |>
   matrix(ncol = 5) |>
-  kable(col.names = NULL) |>
-  as_tibble() |>
-  tt(width = 1)
+  kable(col.names = NULL)
 
 # Preview bottom
 masc_lemma_disp_thr |>
   slice_tail(n = 50) |>
   pull(type) |>
   matrix(ncol = 5) |>
-  kable(col.names = NULL) |>
-  as_tibble() |>
-  tt(width = 1)
+  kable(col.names = NULL)
 ```
 
 We now have a good candidate list of common vocabulary that is spread well across the corpus.
@@ -510,9 +489,9 @@ A variable in the MASC dataset that has yet to be used is the `pos` POS variable
 Hint: consider lemma forms that may be tagged with different parts-of-speech.
 :::
 
-To normalize the frequency of linguistic units across sub-corpora, we can use the **relative frequency** measure. This is the frequency of a linguistic unit divided by the total number of linguistic units in the sub-corpus. This bakes in the size of the sub-corpus into the measure. The notion of relative frequency is key to all research working with text, as it is the basis for the statistical approach to text analysis where comparisons are made.
+To normalize the frequency of linguistic units across sub-corpora, we can use the **relative frequency** ($rf$) measure. This is the frequency of a linguistic unit divided by the total number of linguistic units in the sub-corpus. This bakes in the size of the sub-corpus into the measure. The notion of relative frequency is key to all research working with text, as it is the basis for the statistical approach to text analysis where comparisons are made.
 
-There are some field-specific terms that are used to refer to relative frequency measures. For example, in information retrieval and Natural Language Processing, the relative frequency measure is often referred to as the **term frequency**. In corpus linguistics, the relative frequency measure is often modified slightly to include a constant (*e.g.* $rf * 100$) which is known as the **observed relative frequency**. Athough the observed relative frequency per number of tokens is not strictly necessary, it is often used to make the values more interpretable as we can now talk about an observed relative frequency of 1.5 as a linguistic unit that occurs 1.5 times per 100 linguistic units.
+There are some field-specific terms that are used to refer to relative frequency measures. For example, in information retrieval and Natural Language Processing, the relative frequency measure is often referred to as the **term frequency** ($tf$). In corpus linguistics, the relative frequency measure is often modified slightly to include a constant (*e.g.* $rf * 100$) which is known as the **observed relative frequency** ($orf$). Athough the observed relative frequency per number of tokens is not strictly necessary, it is often used to make the values more interpretable as we can now talk about an observed relative frequency of 1.5 as a linguistic unit that occurs 1.5 times per 100 linguistic units.
 
 Let's consider how we might compare the frequency and dispersion of lemmas across the two modalities in the MASC dataset, spoken and written. To make this a bit more interesting and more relevant, let's add the `pos` variable to our analysis. The intent, then, will be to identify lemmas tagged with particular parts of speech that are particularly indicative of each of the modaliites.
 
@@ -535,7 +514,7 @@ masc_content_tbl |>
 
 Now this will increase the number of lemma types in the dataset as we are now considering lemmas where the same lemma form is tagged with different parts-of-speech.
 
-Getting back to calculating the frequency and dispersion of lemmas in each modality, we can use the `calc_type_metrics()` function with `lemma_pos` as our type argument. We will, however, need to apply this function to each sub-corpus independently and then concatenate the two data frames. This function returns a (raw) frequency measure by default, but we can specify the`frequency` argument to `rf` to calculate the relative frequency of the linguistic units as in @exm-explore-masc-metrics-modality.
+Getting back to calculating the frequency and dispersion of lemmas in each modality, we can use the `calc_type_metrics()` function with `lemma_pos` as our type argument. We will, however, need to apply this function to each sub-corpus independently and then concatenate the two data frames. This function returns a (raw) frequency ($n$) measure by default, but we can specify the`frequency` argument to `rf` to calculate the relative frequency of the linguistic units as in @exm-explore-masc-metrics-modality.
 
 ::: {#exm-explore-masc-metrics-modality}
 ```{r}
@@ -647,7 +626,7 @@ masc_metrics_thr |>
 ```
 :::
 
-Let's imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regular expression magic. Let's use the `str_subset()` function to filter for lemmas that contain `_V` and then use `slice_max()` to extract the top 10 most indicative verb lemmas, as seen in @exm-explore-masc-log-odds-weighted-verbs.
+Let's imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regex magic. Let's use the `str_subset()` function to filter for lemmas that contain `_V` and then use `slice_max()` to extract the top 10 most indicative verb lemmas, as seen in @exm-explore-masc-log-odds-weighted-verbs.
 
 ::: {#exm-explore-masc-log-odds-weighted-verbs}
 ```{r}
@@ -673,7 +652,7 @@ In cases such as this, we are aiming to do a co-occurrence analysis. Co-occurren
 
 <!-- Concordances -->
 
-An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). This is a table that displays the target word in the center of the table and the words that appear before and after the target word within some defined window. This is a useful approach for spot identifying collocations of a target word or phrase, however it can be time-consuming to inspect and is not suitable for large datasets.
+An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). **KWIC** is a table that displays the target word in the center of the table and the words that appear before and after the target word within some defined window. This is a useful approach for spot identifying collocations of a target word or phrase, however it can be time-consuming to inspect and is not suitable for large datasets.
 
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
@@ -751,7 +730,7 @@ masc_verb_part_assoc |>
 ```
 :::
 
-We have a working method for identify verb particle constructions. We can clean up the results a bit by removing the POS tags from the `x` and `y` variables, up our minimum PMI value, and create a network plot to visualize the results in @fig-explore-masc-verb-part-network.
+We have a working method for identify verb particle constructions. We can clean up the results a bit by removing the POS tags from the `x` and `y` variables, up our minimum PMI value, and create a network plot to visualize the results. A **network plot** is a type of graph that shows relationships between entities. In this case, the entities are verbs and particles, and the relationships are the PMI values between them. The connections between are represented by edges, and the thickness of the edges is proportional to the PMI value.
 
 ```{r}
 #| label: fig-explore-masc-verb-part-network
@@ -789,6 +768,12 @@ masc_verb_part_assoc_plot |>
   scale_edge_color_gradient(low = "grey90", high = "grey20") +
   theme_void()
 ```
+
+::: {.callout .halfsize}
+**{{< fa medal >}} Dive deeper**
+
+{ggplot2} cannot create network plots directly, so we use {ggraph} [@R-ggraph] and {igraph} [@R-igraph] to create the network plot. For more information on creating network plots, see the {ggraph} documentation.
+:::
 
 From @fig-explore-masc-verb-part-network, and from the underlying data, we can explore verb particle constructions. We could go further and apply our co-occurrence methods to each modality separately, if we wanted to identify verb particle constructions that are distinctive to each modality. We could also apply our co-occurrence methods to other parts-of-speech, such as adjectives and nouns, to identify collocations of these parts-of-speech. There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be addressed.
 
@@ -870,7 +855,7 @@ masc_pos_dtm <-
 
 There are two concerns to address before we can proceed with clustering. First, clustering algorithm performance tends to degrade with the number of features. Second, clustering algorithms perform better with more informative features. That is to say, features that are more distinct across the documents provide better information for deriving useful clusters.
 
-We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use **dimensionality reduction**. Dimensionality reduction is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is **principle component analysis** (PCA). PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principle components. The principle components are ordered by the amount of variance that they explain in the data. The first principle component explains the most variance, the second principle component explains the second most variance, and so on.
+We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use dimensionality reduction. **Dimensionality reduction** is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is **principle component analysis** (PCA). PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principle components. The principle components are ordered by the amount of variance that they explain in the data. The first principle component explains the most variance, the second principle component explains the second most variance, and so on.
 
 We can apply PCA to the matrix and assess how well it accounts for the variation in the data and how the variation is distributed across components. The `prcomp()` function from base R can be used to perform PCA.
 
@@ -890,9 +875,7 @@ masc_pos_pca <-
 ```
 :::
 
-We can visualize the amount of variance explained by each principle component with a scree plot. The `fviz_eig()` function from {factoextra} implements a scree plot on a PCA object. We can set the number of number of components to visualize with `ncp =`.
-
-Let's create a scree plot for the matrix, as seen in @exm-explore-masc-dtms-pca-scree.
+We can visualize the amount of variance explained by each principle component with a scree plot. A **scree plot** is a bar plot ordered by the amount of variance explained by each principle component. The `fviz_eig()` function from {factoextra} implements a scree plot on a PCA object. We can set the number of number of components to visualize with `ncp =`.
 
 ::: {#exm-explore-masc-dtms-pca-scree}
 
@@ -928,7 +911,7 @@ labs(title = "")
 As with many modeling techniques we will encounter, it is possible to extract the importance of features that contribute to the model. In the case of PCA, we can extract the feature values from the principle components using the `get_pca_var()` function from {factoextra}. Feature importance provides more detailed insight into the inner workings of the algorithms we employ in our research and therefore can serve to inform our interpretation of the results.
 :::
 
-From @fig-explore-masc-dtms-pca-scree, we can see that the first component shows the most variance explained, around 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears hhe variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
+From the scree plot for the matrix, in @fig-explore-masc-dtms-pca-scree, we can see that the first component shows the most variance explained, around 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears hhe variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
 
 Let's go ahead and create a matrix of the first four principle components for the POS data, as seen in @exm-explore-masc-pos-pca-pc.
 
@@ -1305,7 +1288,7 @@ terms <-
 masc_model <- masc_model[terms, ]
 ```
 
-As an example, let's compare the vectors for noun-verb pairs for the lemmas 'run' and 'walk'. To do this we extract these features from the model. To appreciate the relatedness of these features it is best to visualize them. We can do this by first reducing the dimensionality of the vectors using principal components analysis (PCA). We can then plot the first two principle components, as seen in @fig-explore-masc-vsm-word2vec-similarity.
+As an example, let's compare the vectors for noun-verb pairs for the lemmas 'run' and 'walk'. To do this we extract these features from the model. To appreciate the relatedness of these features it is best to visualize them. We can do this by first reducing the dimensionality of the vectors using principal components analysis. We can then plot the first two principle components, as seen in @fig-explore-masc-vsm-word2vec-similarity.
 
 ::: {#exm-explore-masc-vsm-word2vec-similarity}
 ```{r}

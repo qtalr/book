@@ -110,13 +110,13 @@ Characteristics of the Europarl Corpus dataset that may require normalization
 
 These artifacts either may not be of interest or may introduce unwanted variability in the that could prove problematic for subsequent processing (*e.g* tokenization, calculating frequencies, *etc.*).
 
-The majority of text normalization procedures incorporate {stringr} [@R-stringr]. This package provides a number of functions for manipulating text strings. The workhorse functions we will use for our tasks are the `str_remove()` and `str_replace()` functions. As the these functions give us the ability to remove or replace text based on literal strings and Regular Expressions.
+The majority of text normalization procedures incorporate {stringr} [@R-stringr]. This package provides a number of functions for manipulating text strings. The workhorse functions we will use for our tasks are the `str_remove()` and `str_replace()` functions. As the these functions give us the ability to remove or replace text based on literal strings, actual text, or Regular Expressions. **Regular Expressions** (regex, *pl.* regexes) are a powerful tool for pattern matching and text manipulation which employs a syntax that allows for the specification of complex search patterns.
 
 Our first step, however, is to identify the patterns we want to remove or replace. For demonstration purposes, let's focus on removing non-speech annotations from the `lines` variable. Do develop a search pattern to identify these annotations, there are various possibilities, `str_view()`, `str_detect()` inside a `filter()` call, or `str_extract()` inside a `mutate()` call. No matter which approach we choose, we need to be sure that our search pattern does not over- or under-generalize the text we want to remove or replace. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.
 
 In @exm-transform-europarl-search-non-speech, I've used `str_detect()` which detects a pattern in a character vector and returns a logical vector, `TRUE` if the pattern is detected and `FALSE` if it is not. In combination with `filter()` we can identify a variable with rows that match a pattern. I've added the `slice_sample()` function at then end to return a small, random sample of the dataset to get a better sense how well our pattern works across the dataset.
 
-Now, how about our search pattern? From the examples above, we can see that these instances are wrapped with parentheses `(` and `)`. The text within the parentheses can vary, so we need a Regular Expression to do the heavy lifting. To start out we can match any one or multiple characters with `.+`. But it is important to recognize the `+` (and also the `*`) operators are 'greedy', meaning that if there are multiple matches (in this case multiple sets of parentheses) in a single line of text, the longest match will be returned. That is, the match will extend as far as possible. This is not what we want in this case. We want to match the shortest match. To do this we can append the `?` operator to make the `+` operator 'lazy'. This will match the shortest match.
+Now, how about our search pattern? From the examples above, we can see that these instances are wrapped with parentheses `(` and `)`. The text within the parentheses can vary, so we need a regex to do the heavy lifting. To start out we can match any one or multiple characters with `.+`. But it is important to recognize the `+` (and also the `*`) operators are '**greedy**', meaning that if there are multiple matches (in this case multiple sets of parentheses) in a single line of text, the longest match will be returned. That is, the match will extend as far as possible. This is not what we want in this case. We want to match the shortest match. To do this we can append the `?` operator to make the `+` operator '**lazy**'. This will match the shortest match.
 
 ```{r}
 #| label: set-seed-sample-3
@@ -545,7 +545,9 @@ enntt_translations_ann_tbl <-
 glimpse(enntt_translations_ann_tbl)
 ```
 
-There is quite a bit of information which is returned from `udpipe()`. Note that the input lines have been tokenized by word. Each token includes the `token`, `lemma`, part of speech (`upos` and `xpos`), morphological features (`feats`), and syntactic relationships (`head_token_id` and `dep_rel`). The `token_id` keeps track of the token's position in the sentence and the `sentence_id` keeps track of the sentence's position in the original text. Finally, the `doc_id` column and its values correspond to the `doc_id` in the `enntt_natives_tbl` dataset.
+There is quite a bit of information which is returned from `udpipe()`. Note that the input lines have been tokenized by word. Each token includes the `token`, `lemma`, part of speech (`upos` and `xpos`)[^upos], morphological features (`feats`), and syntactic relationships (`head_token_id` and `dep_rel`). The `token_id` keeps track of the token's position in the sentence and the `sentence_id` keeps track of the sentence's position in the original text. Finally, the `doc_id` column and its values correspond to the `doc_id` in the `enntt_natives_tbl` dataset.
+
+[^upos]: The [Universal POS tags](https://universaldependencies.org/u/pos/) are defined by the Universal Dependencies project. The `upos` tag is a coarse-grained POS tag and the `xpos` (Penn) tag is a fine-grained POS tag.
 
 The number of variables in the `udpipe()` annotation output is quite overwhelming. However, these attributes come in handy for manipulating, extracting, and plotting information based on lexical and syntactic patterns. See the dependency tree in @fig-transform-generation-udpipe-english-plot-tree for an example of the syntactic information that can be extracted from the `udpipe()` annotation output.
 
@@ -955,7 +957,7 @@ In the following activities, you will review the concept of transforming data to
 
 **What**: Dataset alchemy\
 **How**: Fork, clone, and complete the steps in Lab 7.\
-**Why**: To gain experience working with coding strategies for transforming datasets using tidyverse functions and regular expressions, practice reading/ writing data from/ to disk, and implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
+**Why**: To gain experience working with coding strategies for transforming datasets using tidyverse functions and regexes, practice reading/ writing data from/ to disk, and implement organizational strategies for organizing and documenting a dataset in reproducible fashion.
 :::
 
 ## Summary {.unnumbered}

@@ -30,7 +30,7 @@ execute:
 
 ```
 
-In this chapter, we consider approaches to deriving knowledge from information which can be generalized to the population from which the data is sampled. This process is known as statistical inference. The discussion here implements descriptive assessments, statistical tests, and evaluation procedures for a series of contexts which are common in the analysis of corpus-based data. During our treatment of these contexts, we will establish a foundational understanding of the null hypothesis signficance testing (NHST) framework using a simulation-based approach.
+In this chapter, we consider approaches to deriving knowledge from information which can be generalized to the population from which the data is sampled. This process is known as statistical inference. The discussion here implements descriptive assessments, statistical tests, and evaluation procedures for a series of contexts which are common in the analysis of corpus-based data. During our treatment of these contexts, we will establish a foundational understanding of statistical inference using a simulation-based approach.
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
@@ -86,9 +86,9 @@ What are the explanatory and/ or response variables in each of these statements?
 
 Next, we determine the informational values of the variables. The informational value of each variable will condition how we approach visualization, interrogation, and ultimately interpretation of the results. Note, that some informational types can be converted to other types, specifically higher-order types can be converted to lower-order types. For example, a continuous variable can be converted to a categorical variable, but not vice versa. It is preferable, however, to use the highest informational value of a variable. Simplifying data results in a loss of information --which will result in a loss of information and hence statistical power which may lead to results that obscure meaningful patterns in the data [@Baayen2004].
 
-With our design in place, we can now inspect the data. This involves assessing the distribution of the variables using descriptive statistics and visualizations. The goal of this step is to confirm the integrity of the data (missing data, anomalies, etc.), identify general patterns in the data, and identify potential outliers. As much as this is a verification step, it also serves to provide a sense of the data and the extent to which the data aligns with the hypothesis. This is particularly true when statistical designs are complex and involve multiple explanatory variables. An appropriate visualization provides context for interpreting the results of the statistical analysis.
+With our design in place, we can now inspect the data. This involves assessing the distribution of the variables using descriptive statistics and visualizations. The goal of this step is to confirm the integrity of the data (missing data, anomalies, *etc*.), identify general patterns in the data, and identify potential outliers. As much as this is a verification step, it also serves to provide a sense of the data and the extent to which the data aligns with the hypothesis. This is particularly true when statistical designs are complex and involve multiple explanatory variables. An appropriate visualization provides context for interpreting the results of the statistical analysis.
 
-Interrogating the data involves applying the appropriate statistical procedure to the dataset. In the **Null Hypothesis Significance Testing** (NHST) paradigm, this process includes calculating a statistic from the data, comparing it to a null hypothesis distribution, and measuring the evidence against the null hypothesis. The null hypothesis distribution is a distribution of statistic values that we would expect if the null hypothesis were true, *i.e.* that there is no difference or relationship between the explanatory and/ or response variables. By comparing the observed statistic to the null hypothesis distribution, we can determine the likelihood of observing the observed statistic, if the null hypothesis were true. The estimate of this likelihood is a **p-value**. When the $p$-value is below a pre-determined threshold, typically 0.05, the result is considered statistically significant. This means that the observed statistic is sufficiently different from the null hypothesis distribution that we can reject the null hypothesis.
+Interrogating the data involves applying the appropriate statistical procedure to the dataset. In the **Null Hypothesis Significance Testing** (NHST) paradigm, this process includes calculating a statistic from the data, comparing it to a null hypothesis distribution, and measuring the evidence against the null hypothesis. The null hypothesis distribution is a distribution of statistic values that we would expect if the null hypothesis were true, *i.e.* that there is no difference or relationship between the explanatory and/ or response variables. By comparing the observed statistic to the null hypothesis distribution, we can determine the likelihood of observing the observed statistic, if the null hypothesis were true. The estimate of this likelihood is a **$p$-value**. When the $p$-value is below a pre-determined threshold, typically 0.05, the result is considered statistically significant. This means that the observed statistic is sufficiently different from the null hypothesis distribution that we can reject the null hypothesis.
 
 Now let's consider how to approach interpreting the results from a statistical test.  The $p$-value provides a probability that the results of our statistical test could be explained by the null hypothesis. When this probability is below the threshold of 0.05, the result is considered statistically significant, otherwise we have a 'null result' (*i.e.* non-significant).
 
@@ -99,7 +99,7 @@ Used in conjunction with $p$-values, confidence intervals can provide a more nua
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
-Overgeneralization and undergeneralization are more formally known as Type I and Type II error, respectively. Type I error (false positive) occurs when we reject the null hypothesis when it is true. That is, we erroneously detect a significant result, when in fact the tested relationship is not borne out in the population. Type II (false negative) error occurs when we fail to reject the null hypothesis when it is false. This is a case of missing a significant result due to the limitations of the analysis which can stem from the sample size, the design of the study, or the statistical test used.
+Overgeneralization and undergeneralization are more formally known as Type I and Type II error, respectively. **Type I error** (false positive) occurs when we reject the null hypothesis when it is true. That is, we erroneously detect a significant result, when in fact the tested relationship is not borne out in the population. **Type II error** (false negative) occurs when we fail to reject the null hypothesis when it is false. This is a case of missing a significant result due to the limitations of the analysis which can stem from the sample size, the design of the study, or the statistical test used.
 :::
 
 It is important to underscore that the purpose of IDA is to draw conclusions from a dataset which are generalizable to the population. These conclusions require that there are rigorous measures to ensure that the results of the analysis do not overgeneralize (suggest there is a relationship when there is not one) and balance that with the fact that we don't want to undergeneralize (miss the fact that there is an relationship in the population, but our analysis was not capable of detecting it).
@@ -154,7 +154,7 @@ library(janitor)    # for cross-tabulation
 
 ### Categorical {#sec-infer-categorical}
 
-Here we demonstrate the application of inferential data analysis (IDA) to categorical response variables. This will include various common statistical designs and analyses. In @tbl-infer-cat-design, we see common design scenarios, the variables involved, and the statistic used in the analysis.
+Here we demonstrate the application of IDA to categorical response variables. This will include various common statistical designs and analyses. In @tbl-infer-cat-design, we see common design scenarios, the variables involved, and the statistic used in the analysis.
 
 ::: {#tbl-infer-cat-design tbl-colwidths="[20, 35, 35, 10]" .striped}
 
@@ -543,12 +543,6 @@ To determine if the distribution of the levels of the `rcp_real` variable by the
 
 {infer} provides a pipeline, steps 1-5, which maintains a consistent workflow for statistical inference. As such, the procedure is very similar to the univarite analysis we performed, with some adjustments. Let's focus on the adjustments. First, our `specify()` call needs to include the relationship between two variables: `rcp_real` and `modality`. The `response` argument is the response variable, which is `rcp_real`. The `explanatory` argument is the explanatory variable, which is `modality`.
 
-::: {.callout .halfsize}
-**{{< fa regular hand-point-up >}} Tip**
-
-The formula syntax `y ~ x` can be read as 'y' as a function of 'x'.
-:::
-
 There are two approaches to specifying the relationship between the response and explanatory variables. The first approach is to specify the response variable and the explanatory variable separately as values of the arguments `response` and `explanatory`. The second approach is to specify the response variable and the explanatory variable as a formula using the `~` operator. The formula approach is more flexible and allows for more complex relationships between the response and explanatory variables. In @exm-infer-cat-specify-bivariate, we see the code for the `specify()` call using the formula approach.
 
 ::: {#exm-infer-cat-specify-bivariate}
@@ -742,7 +736,7 @@ dative_fit
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
-The reference level in R is assumed to be the first level alphabetically, unless otherwise specified. We can override this default by using the `fct_relevel()` function from {forcats}. The reason we would want to do this is to make the reference level more interpretable. In our case, we would want to make the spoken modality the reference level it allows us to estimate the difference of the proportion of NP realizations of the recipient as a positive value. Remember that in @fig-infer-cat-bivariate-length-ratio-log-1, the proportion of NP realizations of the recipient clause is higher in the spoken modality than in the written modality. If we were to use the written modality as the reference level, the difference would be negative. Not that we couldn't interpret this, but working with positive integers is easier to interpret.
+The reference level in R is assumed to be the first level alphabetically, unless otherwise specified. We can override this default by using the `fct_relevel()` function from {forcats} [@R-forcats]. The reason we would want to do this is to make the reference level more interpretable. In our case, we would want to make the spoken modality the reference level it allows us to estimate the difference of the proportion of NP realizations of the recipient as a positive value. Remember that in @fig-infer-cat-bivariate-length-ratio-log-1, the proportion of NP realizations of the recipient clause is higher in the spoken modality than in the written modality. If we were to use the written modality as the reference level, the difference would be negative. Not that we couldn't interpret this, but working with positive integers is easier to interpret.
 :::
 
 Note I pointed out statistics, not statistic. In logistic regression models, there the number of statistic reported depends on the number of explanatory variables. If there are two variables there will be at least three terms, one for each variable and the intercept term. If one or more variables are categorical, however, there will be additional terms when the categorical variable has three or more levels.
@@ -802,7 +796,7 @@ The confidence intervals for the main effects, `modality` and `length_ratio_log`
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
-Significance tests are not the only way to evaluate the evidence for the null hypothesis. We can also quantify the effect size of each of the explanatory variables using the odds ratio to calculate the $r$ (correlation coefficient) and $R^2$ (coefficient of determination) values. {effectsize} provides a function `logoddsratio_to_r()` to calculate the $r$ and $R^2$ values for logistic regression models.
+Significance tests are not the only way to evaluate the evidence for the null hypothesis. We can also quantify the effect size of each of the explanatory variables using the odds ratio to calculate the $r$ (correlation coefficient) and $R^2$ (coefficient of determination) values. {effectsize} [@R-effectsize] provides a function `logoddsratio_to_r()` to calculate the $r$ and $R^2$ values for logistic regression models.
 
 It can be important to use these measures to distinguish between statistically significant and practically significant results. A statistically significant result is one that is unlikely to have occurred by chance. A practically significant result is one that has a meaningful effect.
 :::
@@ -1276,7 +1270,7 @@ fillers_type_df <-
 
 While bivariate analysis is useful for exploring the relationship between two variables, it is often the case that we want to consider relationships between more than two variables. In this case, we can use multivariate analysis. Linear regression is a common multivariate analysis technique.
 
-In linear regression, we are interested in predicting the value of a numeric response variable based on the values of the explanatory variables. The contribution of the explanatory variables can be considered individually, as an interaction, or as a combination of both.
+In **linear regression**, we are interested in predicting the value of a numeric response variable based on the values of the explanatory variables. The contribution of the explanatory variables can be considered individually, as an interaction, or as a combination of both.
 
 Let's now introduce a variation of the SWDA dataset which includes a variable `filler_type` which has two levels, 'uh' and 'um', corresponding to the use of each filler. Here's a preview of the dataset in @exm-infer-num-fillers-type-dataset.
 

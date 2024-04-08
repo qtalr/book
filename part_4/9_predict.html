@@ -610,7 +610,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 <p>If as part of our research question the types of features is included, then we should proceed toward deriving those features. If not, a simple approach is to use words as the predictor features. This will serve as a baseline for more complex models, if necessary.</p>
 <p>This provides us the linguistic unit we will use but we still need to decide how to operationalize what we mean by ‘use’ in our research statement. Do we use raw token counts? Do we use normalized frequencies? Do we use some type of weighting scheme? These are questions that we need to consider as we embark on this analysis. Since we are exploring, we can use trial-and-error or consider the implications of each approach and choose the one that best fits our research question –or both.</p>
 <p>Let’s approach this with a bit more nuance as we already have some domain knowledge about word use. First, we know that in the frequency distribution of words is highly skewed, meaning that a few words occur very frequently and most words occur very infrequently. Second, we know that the most frequent words in a language are often function words (<em>e.g.</em> ‘the’, ‘and’, ‘of’, <em>etc.</em>) and that these words are tend not very informative for distinguishing between classes of texts. Third, we know that comparing raw counts across texts conflates the influence text class lengths.</p>
-<p>With these considerations in mind, we will tokenize the text into words and then use the term frequency-inverse document frequency (TF-IDF) weighting scheme to represent word use. This feature engineering will down weight words that are common across all documents and up weight words that are unique to a document. It also mitigates the varying lengths of the documents. This is a common approach in text classification and is a good starting point for our analysis.</p>
+<p>With these considerations in mind, we will tokenize the text into words and then use the term frequency-inverse document frequency (<span class="math inline">\(tf\)</span>-<span class="math inline">\(idf\)</span>) weighting scheme to represent word use. This feature engineering will down weight words that are common across all documents and up weight words that are unique to a document. It also mitigates the varying lengths of the documents. This is a common approach in text classification and is a good starting point for our analysis.</p>
 <!-- Step 2: Initial split -->
 <p>With our features and engineering approach identified, we can move on to step 2 of our workflow and split the data into training and testing sets. We make the splits to our data at this point to draw a line in the sand between the data we will use to train the model and the data we will use to test the model. A typical approach in supervised machine learning is to allocate around 75-80% of the data to the training set and the remaining 20-25% to the testing set, depending on the number of observations. We have 2957 observations in our data set, so we can allocate 80% of the data to the training set and 20% of the data to the testing set.</p>
 <p>In <a href="#exm-predict-class-split" class="quarto-xref">Example&nbsp;<span>9.4</span></a>, we will use the <code>initial_split()</code> function from {rsample} to split the data into training and testing sets. The <code>initial_split()</code> function takes a data frame and a proportion and returns a <code>split</code> object which contains the training and testing sets. We will use the <code>strata</code> argument to stratify the data by the <code>outcome</code> variable. This will ensure that the training and testing sets have the same proportion of native and learner texts.</p>
@@ -635,7 +635,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 <span><span class="va">cls_test</span> <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">cls_split</span><span class="op">)</span>    <span class="co"># 20% of data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>A confirmation of the distribution of the data across the training and testing sets as well as a break down of the outcome variable, created by {janitor}s <code>tabyl()</code> function, can be seen in <a href="#exm-predict-class-split-tabyl" class="quarto-xref">Example&nbsp;<span>9.5</span></a>.</p>
+<p>A confirmation of the distribution of the data across the training and testing sets as well as a break down of the outcome variable, created by {janitor}’s <code>tabyl()</code> function, can be seen in <a href="#exm-predict-class-split-tabyl" class="quarto-xref">Example&nbsp;<span>9.5</span></a>.</p>
 <div id="exm-predict-class-split-tabyl" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.5</strong></span> &nbsp;</p>
 <div class="cell">
@@ -667,7 +667,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 <p>We can see that the split was successful. The training and testing sets have very similiar proportion of native and learner texts.</p>
 <!-- Step 3: Integrate: plan to select and engineer features -->
 <p>We are now ready to create a ‘recipe’, step 3 in our analysis. A recipe is tidymodels terminology for a set of instructions or blueprint which specify the outcome variable and the predictor variable and determines how to preprocess and engineer the feature variables.</p>
-<p>We will use the <code><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe()</a></code> function from {recipes} to create the recipe. The <code><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe()</a></code> function minimally takes a formula and a data frame and returns a <code>recipe</code> object. The formula specifies the outcome variable (<span class="math inline">\(y\)</span>) and the predictor variable(s) (<span class="math inline">\(x_1 .. x_n\)</span>). For example <code>y ~ x</code> can be read as “y as a function of x”. In our particular case, we will use the formula <code>outcome ~ text</code> to specify that the outcome variable is the <code>outcome</code> variable and the predictor variable is the <code>text</code> variable. The code is seen in <a href="#exm-predict-class-recipe" class="quarto-xref">Example&nbsp;<span>9.6</span></a>.</p>
+<p>We will use the <code><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe()</a></code> function from {recipes} to create the recipe. The <code><a href="https://recipes.tidymodels.org/reference/recipe.html">recipe()</a></code> function minimally takes a formula and a data frame and returns a <code>recipe</code> object. <strong>R formulas</strong> provide a way to specify relationships between variables and are used extensively in R data modeling. Formulas specify the outcome variable (<span class="math inline">\(y\)</span>) and the predictor variable(s) (<span class="math inline">\(x_1 .. x_n\)</span>). For example, <code>y ~ x</code> can be read as “y as a function of x”. In our particular case, we will use the formula <code>outcome ~ text</code> to specify that the outcome variable is the <code>outcome</code> variable and the predictor variable is the <code>text</code> variable. The code is seen in <a href="#exm-predict-class-recipe" class="quarto-xref">Example&nbsp;<span>9.6</span></a>.</p>
 <div id="exm-predict-class-recipe" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.6</strong></span> &nbsp;</p>
 <div class="cell">
@@ -766,7 +766,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
-<p>The <code><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf()</a></code> function by default add a <em>smoothing term</em> to the inverse document frequency (IDF) calculation. This setting has the effect of reducing the influence of the IDF calculation. Thus, terms that appear in many (or all) documents will not be downweighted as much as they would be if the smoothing term was not added. For our purposes, we want to downweight or eliminate the influence of the most frequent terms, so we will set <code>smooth_idf = FALSE</code>.</p>
+<p>The <code><a href="https://textrecipes.tidymodels.org/reference/step_tfidf.html">step_tfidf()</a></code> function by default add a <em>smoothing term</em> to the inverse document frequency (<span class="math inline">\(idf\)</span>) calculation. This setting has the effect of reducing the influence of the <span class="math inline">\(idf\)</span> calculation. Thus, terms that appear in many (or all) documents will not be downweighted as much as they would be if the smoothing term was not added. For our purposes, we want to downweight or eliminate the influence of the most frequent terms, so we will set <code>smooth_idf = FALSE</code>.</p>
 </div>
 </div>
 </div>
@@ -788,7 +788,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 </div>
 </div>
 </div>
-<p>The resulting engineered features data frame has 2364 observations and 38115 variables. That is a lot of features! Given the the fact that for each writing sample, only a small subset of them will actually appear, most of our cells will be filled with zeros. This is what is known as a <strong>sparse matrix</strong>.</p>
+<p>The resulting engineered features data frame has 2,364 observations and 38,115 variables. That is a lot of features! Given the the fact that for each writing sample, only a small subset of them will actually appear, most of our cells will be filled with zeros. This is what is known as a <strong>sparse matrix</strong>.</p>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -797,7 +797,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
 <p>When applying tokenization and feature engineering steps to text data the result is often contained in a matrix object. Using {recipes} a data frame with a matrix-like structure is returned.</p>
-<p>Furthermore, the features are prefixed with the variable name and transformation step labels. In <a href="#exm-predict-class-recipe-prep" class="quarto-xref">Example&nbsp;<span>9.9</span></a> we applied term frequency - inverse document frequency to the <code>text</code> variable. Therefore the features are prefixed with <code>tfidf_text_</code>.</p>
+<p>Furthermore, the features are prefixed with the variable name and transformation step labels. In <a href="#exm-predict-class-recipe-prep" class="quarto-xref">Example&nbsp;<span>9.9</span></a> we applied <span class="math inline">\(tf\)</span>-<span class="math inline">\(idf\)</span> to the <code>text</code> variable. Therefore the features are prefixed with <code>tfidf_text_</code>.</p>
 </div>
 </div>
 </div>
@@ -1041,7 +1041,7 @@ Table&nbsp;9.3: Common classification algorithms
 </div>
 <p>The 10 values chosen to be in the grid range from nearly zero to 1, where 0 indicates no penalty and 1 indicates a strong penalty.</p>
 <p>Now to perform the tuning and arrive at an optimal value for <code>penalty</code> we need to create a tuning workflow. We do this by calling the <code>tune_grid()</code> function using our tuning model specification workflow, a resampling object, and our hyperparameter grid and returns a <code>tune_grid</code> object.</p>
-<p>Resampling is a strategy that allows us to generate multiple training and testing sets from a single data set –in this case the training data we split at the outset. Each generated training-testing pairs is called a fold. Which is why this type of resampling is called <span class="math inline">\(k\)</span>-fold cross-validation. The <code>vfold_cv()</code> function from {rsample} takes a data frame and a number of folds and returns a <code>vfold_cv</code> object. We will apply the <code>cls_wf</code> workflow to the 10 folds of the training set with <code>tune_grid()</code>. For each fold, each of the 10 values of the penalty hyperparameter will be tried and the model’s performance will be evaluated. The code is seen in <a href="#exm-predict-class-model-spec-tune-grid-cv" class="quarto-xref">Example&nbsp;<span>9.15</span></a>.</p>
+<p>Resampling is a strategy that allows us to generate multiple training and testing sets from a single data set –in this case the training data we split at the outset. Each generated training-testing pairs is called a fold. Which is why this type of resampling is called <strong><span class="math inline">\(k\)</span>-fold cross-validation</strong>. The <code>vfold_cv()</code> function from {rsample} takes a data frame and a number of folds and returns a <code>vfold_cv</code> object. We will apply the <code>cls_wf</code> workflow to the 10 folds of the training set with <code>tune_grid()</code>. For each fold, each of the 10 values of the penalty hyperparameter will be tried and the model’s performance will be evaluated. The code is seen in <a href="#exm-predict-class-model-spec-tune-grid-cv" class="quarto-xref">Example&nbsp;<span>9.15</span></a>.</p>
 <div id="exm-predict-class-model-spec-tune-grid-cv" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.15</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1104,7 +1104,7 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process
 </div>
 </div>
 </div>
-<p>The most common metrics for model performance in classification are accuracy and the area under the receiver operating characteristic curve (ROC-AUC). Accuracy is the proportion of correct predictions. The ROC-AUC is a measure of how well the model can distinguish between the two classes.</p>
+<p>The most common metrics for model performance in classification are accuracy and the area under the <strong>receiver operating characteristic curve</strong> (ROC-AUC). Accuracy is the proportion of correct predictions. The ROC-AUC is a measure of how well the model can distinguish between the two classes.</p>
 <p>In the plot of the metrics, we can see that the many of the penalty values performed similarly, with a drop off in performance at the higher values. Conveniently, the <code>show_best()</code> function from {tune} takes a <code>tune_grid</code> object and returns the best performing hyperparameter values. The code is seen in <a href="#exm-predict-class-model-spec-tune-grid-collect-best" class="quarto-xref">Example&nbsp;<span>9.17</span></a>.</p>
 <div id="exm-predict-class-model-spec-tune-grid-collect-best" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.17</strong></span> &nbsp;</p>
@@ -1215,11 +1215,11 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-regular fa-hand-point-up" aria-label="hand-point-up"></i> Tip</strong></p>
-<p>To provide context in terms of what is a good model performance, it is useful to compare the model’s performance to a null model. A null (or baseline) model is a simple model that is easy to implement and provides a benchmark for the model’s performance. For classification tasks, a common null model is to predict the most frequent class. In modeling, this is the minimal benchmark we want to beat, if we are doing better than this, we are doing better than chance.</p>
+<p>To provide context in terms of what is a good model performance, it is useful to compare the model’s performance to a null model. A <strong>null model </strong> (or baseline model) is a simple model that is easy to implement and provides a benchmark for the model’s performance. For classification tasks, a common null model is to predict the most frequent class. In modeling, this is the minimal benchmark we want to beat, if we are doing better than this, we are doing better than chance.</p>
 </div>
 </div>
 </div>
-<p>For classification tasks, a good place to start is to visualize a confusion matrix. A confusion matrix is a cross-tabulation of the predicted and actual outcomes. The <code>conf_mat_resampled()</code> function takes a <code>fit_resamples</code> object (with predictions saved) and returns a table (<code>tidy = FALSE</code>) with the confusion matrix for the aggregated folds. We can pass this to the <code>autoplot()</code> function to plot as in <a href="#exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="quarto-xref">Example&nbsp;<span>9.22</span></a>.</p>
+<p>For classification tasks, a good place to start is to visualize a confusion matrix. A <strong>confusion matrix</strong> is a cross-tabulation of the predicted and actual outcomes. The <code>conf_mat_resampled()</code> function takes a <code>fit_resamples</code> object (with predictions saved) and returns a table (<code>tidy = FALSE</code>) with the confusion matrix for the aggregated folds. We can pass this to the <code>autoplot()</code> function to plot as in <a href="#exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="quarto-xref">Example&nbsp;<span>9.22</span></a>.</p>
 <div id="exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.22</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1233,7 +1233,7 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process
 <img src="9_predict_files/figure-html/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis." width="576">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validation.
+Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validation
 </figcaption></figure>
 </div>
 </div>
@@ -1287,7 +1287,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <span>  <span class="fu">update_recipe</span><span class="op">(</span><span class="va">cls_rec</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>One thing to note is that we will want to consider what values of <code>max_tokens</code> we want to use to tune the hyperparameter. So instead of only specifying the levels in the <code>grid_regular()</code> function, we are best off to provide a range of values that we think are reasonable. Let’s add a range of values between our current value 100 and 2000 to start. And let’s tell the grid to select 5 values from this range.</p>
+<p>One thing to note is that we will want to consider what values of <code>max_tokens</code> we want to use to tune the hyperparameter. So instead of only specifying the levels in the <code>grid_regular()</code> function, we are best off to provide a range of values that we think are reasonable. Let’s add a range of values between our current value 100 and 2,000 to start. And let’s tell the grid to select five values from this range.</p>
 <p>The code is seen in <a href="#exm-predict-class-tune-hyperparameters-tokenfilter-grid" class="quarto-xref">Example&nbsp;<span>9.25</span></a>.</p>
 <div id="exm-predict-class-tune-hyperparameters-tokenfilter-grid" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.25</strong></span> &nbsp;</p>
@@ -1311,7 +1311,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 </div>
 </div>
 <p>From here, the process is the same as before. We will use the <code>tune_grid()</code> function to tune the <code>max_tokens</code> hyperparameter, select the best value, and finalize the workflow, as seen from <a href="#exm-predict-class-model-spec-tune-grid-cv" class="quarto-xref">Example&nbsp;<span>9.15</span></a> through <a href="#exm-predict-class-tune-hyperparameters-update-workflow" class="quarto-xref">Example&nbsp;<span>9.19</span></a>.</p>
-<p>After tuning the <code>max_tokens</code> hyperparameter, the best performing value is 1050. We now used the updated <code>cls_wf_lasso_tokens</code> workflow to cross-validate the model and collect the metrics. The code is seen in <a href="#exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect" class="quarto-xref">Example&nbsp;<span>9.26</span></a>.</p>
+<p>After tuning the <code>max_tokens</code> hyperparameter, the best performing value is 1,050. We now used the updated <code>cls_wf_lasso_tokens</code> workflow to cross-validate the model and collect the metrics. The code is seen in <a href="#exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect" class="quarto-xref">Example&nbsp;<span>9.26</span></a>.</p>
 <div id="exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.26</strong></span> &nbsp;</p>
 <div class="cell">
@@ -1350,7 +1350,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <img src="9_predict_files/figure-html/fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis." width="576">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validation.
+Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validation
 </figcaption></figure>
 </div>
 </div>
@@ -1399,7 +1399,7 @@ Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validati
 <img src="9_predict_files/figure-html/fig-predict-class-tune-hyperparameters-evaluate-test-confusion-1.png" class="img-fluid figure-img" alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis." width="576">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-predict-class-tune-hyperparameters-evaluate-test-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.4: Confusion matrix for the test set.
+Figure&nbsp;9.4: Confusion matrix for the test set
 </figcaption></figure>
 </div>
 </div>
@@ -1581,7 +1581,7 @@ $ text          &lt;chr&gt; "Sanaa Lathan es muy famosa persona. Ella es en de t
 <img src="9_predict_files/figure-html/fig-predict-class-tune-hyperparameters-evaluate-test-vip-plot-1.png" class="img-fluid figure-img" alt="Scatter plot of the most important features for predicting the outcome. The y-axis is the importance value and the x-axis is the feature. The features are faceted by the outcome." width="576">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-predict-class-tune-hyperparameters-evaluate-test-vip-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.5: Most important features for predicting the outcome.
+Figure&nbsp;9.5: Most important features for predicting the outcome
 </figcaption></figure>
 </div>
 </div>
@@ -1590,7 +1590,7 @@ Figure&nbsp;9.5: Most important features for predicting the outcome.
 <p>We can inspect <a href="#fig-predict-class-tune-hyperparameters-evaluate-test-vip-plot" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, and qualitatively assess what these features may be telling us about the differences between the learners and the natives.</p>
 <p>In this section, we’ve build a text classifier using a regularized logistic regression model. We’ve tuned the hyperparameters to arrive at a robust model that performs well on both the training and test sets. We’ve also evaluated the model errors and inspected the most important features for predicting the outcome.</p>
 </section><section id="sec-predict-text-regression" class="level3"><h3 class="anchored" data-anchor-id="sec-predict-text-regression">Text regression</h3>
-<p>We will now turn our attention to the second task in this section, text regression. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. I will make reference to but not repeat the steps we took in the classification task, as many of the steps are the same. This is one of the benefits of using tidymodels –the workflow is by-and-large the same for different tasks.</p>
+<p>We will now turn our attention to the second task in this section, text regression. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. I will make reference to but not repeat the steps we took in the classification task, as many of the steps are the same. This is one of the benefits of using tidymodels–the workflow is by-and-large the same for different tasks.</p>
 <p>Let’s start by extracting the observations (only learners) and the relevant variables from the original data set. The code is seen in <a href="#exm-predict-reg-data" class="quarto-xref">Example&nbsp;<span>9.36</span></a>.</p>
 <div id="exm-predict-reg-data" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.36</strong></span> &nbsp;</p>
@@ -1613,7 +1613,7 @@ $ text        &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande ciu
 </div>
 </div>
 <!-- Step 1: Identify variables -->
-<p>In this task, our outcome variable is numeric and our predictor variable <code>text</code> is the same as before. It might be useful to engineer the features differently, but we will start with the same feature engineering process as before, namely the term frequency - inverse document frequency method (<span class="math inline">\(tf\)</span>-<span class="math inline">\(idf\)</span>) for the top 1,050 words.</p>
+<p>In this task, our outcome variable is numeric and our predictor variable <code>text</code> is the same as before. It might be useful to engineer the features differently, but we will start with the same feature engineering process as before, namely the <span class="math inline">\(tf\)</span>-<span class="math inline">\(idf\)</span> method for the top 1,050 words.</p>
 <!-- Step 2: Initial split -->
 <!-- Step 3: Create recipe -->
 <!-- Step 4: Verify recipe -->
@@ -1683,7 +1683,7 @@ Table&nbsp;9.4: Steps to build and tune a model
 </div>
 </div>
 </div>
-<p>Now, the Root Mean Squared Error (RMSE) estimate is 14.1. RMSE is expressed in the same units as the outcome variable. In this case, the outcome variable is the placement test score percent. So the RMSE is 14.1 percentage points. The <span class="math inline">\(R^2\)</span> (rsq) is 0.621. This means that the model explains 62% of the variance in the outcome variable. Taken together, this isn’t the greatest model.</p>
+<p>Now, the <strong>Root Mean Squared Error</strong> (rmse) estimate is 14.1. RMSE is a measure of the difference between the predicted and the actual values expressed in the same units as the outcome variable. In this case, the outcome variable is the placement test score percent. So the RMSE is 14.1 percentage points. <strong>R-Squared</strong> <span class="math inline">\(R^2\)</span> (rsq) is a measure of the proportion of the variance in the outcome variable that is explained by the model. The <span class="math inline">\(R^2\)</span> estimate is 0.621. This means that the model explains 62% of the variance in the outcome variable. Taken together, this isn’t the greatest model.</p>
 <p>But how good or bad is it? This is where we can use the null model to compare the model to. The null model is a model that predicts the mean of the outcome variable for each of the outcomes. We can use the <code>null_model()</code> function to create a null model and submit it to cross-validation. The code is seen in <a href="#exm-predict-reg-model-spec-tune-fit-evaluate-null" class="quarto-xref">Example&nbsp;<span>9.38</span></a>.</p>
 <div id="exm-predict-reg-model-spec-tune-fit-evaluate-null" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.38</strong></span> &nbsp;</p>
@@ -1747,7 +1747,7 @@ Table&nbsp;9.4: Steps to build and tune a model
 <img src="9_predict_files/figure-html/fig-predict-reg-lr-eval-rmse-1.png" class="img-fluid figure-img" alt="Scatter plot of the true outcome against the predicted outcome for the cross-validated linear regression model. The x-axis is the true outcome and the y-axis is the predicted outcome. The shape of the points indicate the fold." width="576">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-predict-reg-lr-eval-rmse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.6: Distribution of the RMSE for the cross-validated linear regression model.
+Figure&nbsp;9.6: Distribution of the RMSE for the cross-validated linear regression model
 </figcaption></figure>
 </div>
 </div>

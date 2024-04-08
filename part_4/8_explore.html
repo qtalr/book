@@ -564,14 +564,14 @@ $ pos      &lt;chr&gt; "NNP", "CD", "PRP$", "NN", "TO", "NNP", "MD", "VB", "JJR"
 </div>
 </div>
 <p>From the output in <a href="#exm-explore-masc-read" class="quarto-xref">Example&nbsp;<span>8.1</span></a>, we get some sense of the structure of the dataset. However, we also need to perform diagnostic and descriptive procedures. This will include checking for missing data and anomalies and assessing central tendency, dispersion, and/ or distributions of the variables. This may include using {skimr}, {dplyr}, {stringr}, {ggplot2}, <em>etc.</em> to identify the most relevant variables for our task and to identify any potential issues with the dataset.</p>
-<p>After a descriptive and diagnostic assessment of the dataset, I identified and addressed missing data and anomalies (including many non-words). I also recoded the <code>doc_id</code> variable to a character variable. The dataset now has 486,368 observations, a reduction from the original 591,036 observations. There are 392 documents, 2 modalities, 18 genres, almost 38k unique terms (which are words), almost 26k lemmas (word base forms), and 34 distinct part of speech (POS) tags.</p>
+<p>After a descriptive and diagnostic assessment of the dataset, not included here, I identified and addressed missing data and anomalies (including many non-words). I also recoded the <code>doc_id</code> variable to a character variable. The dataset now has 486,368 observations, a reduction from the original 591,036 observations. There are 392 documents, 2 modalities, 18 genres, almost 38k unique terms (which are words), almost 26k lemmas (word base forms), and 34 distinct part of speech (POS) tags.</p>
 <section id="sec-explore-descriptive" class="level3"><h3 class="anchored" data-anchor-id="sec-explore-descriptive">Descriptive analysis</h3>
 <p>Descriptive analysis includes common techniques such as frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together.</p>
 <p>Using the MASC dataset, we will entertain questions such as:</p>
 <ul>
 <li>What are the most common terms a beginning ELL should learn?</li>
 <li>Are there term differences between spoken and written discourses that should be emphasized?</li>
-<li>What are the most common verb particle constructions?</li>
+<li>What are some of the most common verb particle constructions?</li>
 </ul>
 <p>Along the way, we will introduce touch on frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.</p>
 <section id="sec-explore-frequency" class="level4"><h4 class="anchored" data-anchor-id="sec-explore-frequency">Frequency analysis</h4>
@@ -607,7 +607,7 @@ $ pos      &lt;chr&gt; "NNP", "CD", "PRP$", "NN", "TO", "NNP", "MD", "VB", "JJR"
 </div>
 </div>
 <p>The output of this frequency tabulation in <a href="#exm-explore-masc-count" class="quarto-xref">Example&nbsp;<span>8.2</span></a> is a data frame with two columns: <code>lemma</code> and <code>n</code>.</p>
-<p>As we discussed in <a href="../part_2/3_analysis.html#sec-analysis-distributions" class="quarto-xref"><span>Section 3.1.3</span></a>, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution, approximating the Zipf distribution. If we calculate the cumulative frequency of the lemmas in the <code>masc_tbl</code> data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus –by 100 types that increases to near 50% and 1,000 around 75%, as seen in <a href="#exm-explore-masc-count-cumulative" class="quarto-xref">Example&nbsp;<span>8.3</span></a>.</p>
+<p>As we discussed in <a href="../part_2/3_analysis.html#sec-analysis-distributions" class="quarto-xref"><span>Section 3.1.3</span></a>, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution, approximating the Zipf distribution. If we calculate the <strong>cumulative frequency</strong>, a rolling sum of the frequency term by term, of the lemmas in the <code>masc_tbl</code> data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus –by 100 types that increases to near 50% and 1,000 around 75%, as seen in <a href="#exm-explore-masc-count-cumulative" class="quarto-xref">Example&nbsp;<span>8.3</span></a>.</p>
 <div id="exm-explore-masc-count-cumulative" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.3</strong></span> &nbsp;</p>
 <div class="cell">
@@ -865,7 +865,7 @@ Table&nbsp;8.4: Frequency of tokens in the MASC dataset after filtering out lemm
 <p>There are a variety of measures that can be used to estimate the distribution of types across a corpus. Let’s focus on three measures: document frequency (<span class="math inline">\(df\)</span>), inverse document frequency (<span class="math inline">\(idf\)</span>), and Gries’ Deviation of Proportions (<span class="math inline">\(dp\)</span>).</p>
 <p>The most basic measure is <strong>document frequency</strong> (<span class="math inline">\(df\)</span>). This is the number of documents in which a type appears at least once. For example, if a type appears in 10 documents, then the document frequency is 10. This is a very basic measure, but it is a good starting point.</p>
 <p>A nuanced version of document frequency is <strong>inverse document frequency</strong> (<span class="math inline">\(idf\)</span>). This measure takes the total number of documents and divides it by the document frequency. This results in a measure that is inversely proportional to the document frequency. That is, the higher the document frequency, the lower the inverse document frequency. This measure is often log-transformed to spread out the values.</p>
-<p>One thing to consider about <span class="math inline">\(df\)</span> and <span class="math inline">\(idf\)</span> is that niether takes into account the length of the documents in which the type appears nor the spread of the type within each document. To take these factors into account, we can use Gries’ Deviation of Proportions (<span class="math inline">\(dp\)</span>) measure <span class="citation" data-cites="Gries2023">(<a href="../references.html#ref-Gries2023" role="doc-biblioref">Gries, 2023, pp. 87–88</a>)</span>. The <span class="math inline">\(dp\)</span> measure considers the proportion of a type’s frequency in each document relative to its total frequency. This produces a measure that is more sensitive to the distribution of a type within and across documents in a corpus.</p>
+<p>One thing to consider about <span class="math inline">\(df\)</span> and <span class="math inline">\(idf\)</span> is that niether takes into account the length of the documents in which the type appears nor the spread of the type within each document. To take these factors into account, we can use Gries’ <strong>Deviation of Proportions</strong> (<span class="math inline">\(dp\)</span>) measure <span class="citation" data-cites="Gries2023">(<a href="../references.html#ref-Gries2023" role="doc-biblioref">Gries, 2023, pp. 87–88</a>)</span>. The <span class="math inline">\(dp\)</span> measure considers the proportion of a type’s frequency in each document relative to its total frequency. This produces a measure that is more sensitive to the distribution of a type within and across documents in a corpus.</p>
 <p>Let’s consider how these measures differ with three scenarios:</p>
 <p>Imagine a type with a token frequency of 100 appears in each of the 10 documents in a corpus.</p>
 <p>A. Each of the documents is 100 words long. The type appears 10 times in each document.<br>
@@ -956,36 +956,19 @@ Figure&nbsp;8.2: Density plot of Deviation of Proportions for lemmas in the MASC
 </div>
 </div>
 <p>Then in <a href="#tbl-explore-masc-dp-filter-preview" class="quarto-xref">Table&nbsp;<span>8.5</span></a>, I preview the top and bottom 50 lemmas in the dataset.</p>
+<div class="cell" data-layout-nrow="2" data-tbl-colwidths="[20,20,20,20,20]">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview top</span></span>
 <span><span class="va">masc_lemma_disp_thr</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span></span>
 <span><span class="co"># Preview bottom</span></span>
 <span><span class="va">masc_lemma_disp_thr</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_tail</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell" data-layout-nrow="2" data-tbl-colwidths="[20,20,20,20,20]">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview top</span></span>
-<span><span class="va">masc_lemma_disp_thr</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">slice_head</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">tt</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co"># Preview bottom</span></span>
-<span><span class="va">masc_lemma_disp_thr</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">slice_tail</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">kable</span><span class="op">(</span>col.names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">tt</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="tbl-explore-masc-dp-filter-preview" class="quarto-layout-panel anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-explore-masc-dp-filter-preview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion threshold
@@ -997,46 +980,83 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 (a) Top 50 lemmas
 </figcaption><div aria-describedby="tbl-explore-masc-dp-filter-preview-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="do-not-create-environment table table-sm table-striped small">
-<colgroup><col style="width: 20%"></colgroup>
-<thead><tr class="header">
-<th style="text-align: left;">x</th>
-</tr></thead>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><div class="line-block">&nbsp;&nbsp;&nbsp;&nbsp;| | | | |</div></td>
+<td style="text-align: left;">be</td>
+<td style="text-align: left;">think</td>
+<td style="text-align: left;">work</td>
+<td style="text-align: left;">also</td>
+<td style="text-align: left;">t</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|:—-|:——|:—–|:—–|:—–|</td>
+<td style="text-align: left;">have</td>
+<td style="text-align: left;">more</td>
+<td style="text-align: left;">year</td>
+<td style="text-align: left;">way</td>
+<td style="text-align: left;">first</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|be |think |work |also |t |</td>
+<td style="text-align: left;">do</td>
+<td style="text-align: left;">just</td>
+<td style="text-align: left;">come</td>
+<td style="text-align: left;">need</td>
+<td style="text-align: left;">help</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|have |more |year |way |first |</td>
+<td style="text-align: left;">not</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">use</td>
+<td style="text-align: left;">back</td>
+<td style="text-align: left;">day</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|do |just |come |need |help |</td>
+<td style="text-align: left;">n’t</td>
+<td style="text-align: left;">so</td>
+<td style="text-align: left;">well</td>
+<td style="text-align: left;">here</td>
+<td style="text-align: left;">many</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|not |time |use |back |day |</td>
+<td style="text-align: left;">say</td>
+<td style="text-align: left;">other</td>
+<td style="text-align: left;">look</td>
+<td style="text-align: left;">new</td>
+<td style="text-align: left;">man</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|n’t |so |well |here |many |</td>
+<td style="text-align: left;">go</td>
+<td style="text-align: left;">see</td>
+<td style="text-align: left;">then</td>
+<td style="text-align: left;">find</td>
+<td style="text-align: left;">ask</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|say |other |look |new |man |</td>
+<td style="text-align: left;">know</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">right</td>
+<td style="text-align: left;">give</td>
+<td style="text-align: left;">very</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|go |see |then |find |ask |</td>
+<td style="text-align: left;">get</td>
+<td style="text-align: left;">take</td>
+<td style="text-align: left;">only</td>
+<td style="text-align: left;">thing</td>
+<td style="text-align: left;">much</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|know |people |right |give |very |</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">|get |take |only |thing |much |</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">|make |now |want |tell |even |</td>
+<td style="text-align: left;">make</td>
+<td style="text-align: left;">now</td>
+<td style="text-align: left;">want</td>
+<td style="text-align: left;">tell</td>
+<td style="text-align: left;">even</td>
 </tr>
 </tbody>
 </table>
@@ -1052,46 +1072,83 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 (b) Bottom 50 lemmas
 </figcaption><div aria-describedby="tbl-explore-masc-dp-filter-preview-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="do-not-create-environment table table-sm table-striped small">
-<colgroup><col style="width: 20%"></colgroup>
-<thead><tr class="header">
-<th style="text-align: left;">x</th>
-</tr></thead>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><div class="line-block">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| | | | |</div></td>
+<td style="text-align: left;">dump</td>
+<td style="text-align: left;">tuition</td>
+<td style="text-align: left;">blur</td>
+<td style="text-align: left;">wound</td>
+<td style="text-align: left;">accidentally</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|:———-|:———-|:———-|:————|:————|</td>
+<td style="text-align: left;">instrument</td>
+<td style="text-align: left;">awaken</td>
+<td style="text-align: left;">litigation</td>
+<td style="text-align: left;">devote</td>
+<td style="text-align: left;">protective</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|dump |tuition |blur |wound |accidentally |</td>
+<td style="text-align: left;">triumph</td>
+<td style="text-align: left;">hook</td>
+<td style="text-align: left;">resistance</td>
+<td style="text-align: left;">alright</td>
+<td style="text-align: left;">preside</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|instrument |awaken |litigation |devote |protective |</td>
+<td style="text-align: left;">harsh</td>
+<td style="text-align: left;">fetch</td>
+<td style="text-align: left;">absurd</td>
+<td style="text-align: left;">evolutionary</td>
+<td style="text-align: left;">rethink</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|triumph |hook |resistance |alright |preside |</td>
+<td style="text-align: left;">ignorance</td>
+<td style="text-align: left;">brave</td>
+<td style="text-align: left;">qualify</td>
+<td style="text-align: left;">envy</td>
+<td style="text-align: left;">strictly</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|harsh |fetch |absurd |evolutionary |rethink |</td>
+<td style="text-align: left;">sting</td>
+<td style="text-align: left;">unleash</td>
+<td style="text-align: left;">liberty</td>
+<td style="text-align: left;">nostalgic</td>
+<td style="text-align: left;">wax</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|ignorance |brave |qualify |envy |strictly |</td>
+<td style="text-align: left;">mainstream</td>
+<td style="text-align: left;">prosperous</td>
+<td style="text-align: left;">going</td>
+<td style="text-align: left;">shy</td>
+<td style="text-align: left;">faith-based</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|sting |unleash |liberty |nostalgic |wax |</td>
+<td style="text-align: left;">wildly</td>
+<td style="text-align: left;">buzz</td>
+<td style="text-align: left;">awkward</td>
+<td style="text-align: left;">proximity</td>
+<td style="text-align: left;">decidedly</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">|mainstream |prosperous |going |shy |faith-based |</td>
+<td style="text-align: left;">dismiss</td>
+<td style="text-align: left;">presume</td>
+<td style="text-align: left;">afterwards</td>
+<td style="text-align: left;">sandy</td>
+<td style="text-align: left;">resolute</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">|wildly |buzz |awkward |proximity |decidedly |</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">|dismiss |presume |afterwards |sandy |resolute |</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">|liability |summarize |eve |interfere |evidently |</td>
+<td style="text-align: left;">liability</td>
+<td style="text-align: left;">summarize</td>
+<td style="text-align: left;">eve</td>
+<td style="text-align: left;">interfere</td>
+<td style="text-align: left;">evidently</td>
 </tr>
 </tbody>
 </table>
@@ -1120,14 +1177,14 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 </div>
 </div>
 </div>
-<p>To normalize the frequency of linguistic units across sub-corpora, we can use the <strong>relative frequency</strong> measure. This is the frequency of a linguistic unit divided by the total number of linguistic units in the sub-corpus. This bakes in the size of the sub-corpus into the measure. The notion of relative frequency is key to all research working with text, as it is the basis for the statistical approach to text analysis where comparisons are made.</p>
-<p>There are some field-specific terms that are used to refer to relative frequency measures. For example, in information retrieval and Natural Language Processing, the relative frequency measure is often referred to as the <strong>term frequency</strong>. In corpus linguistics, the relative frequency measure is often modified slightly to include a constant (<em>e.g.</em> <span class="math inline">\(rf * 100\)</span>) which is known as the <strong>observed relative frequency</strong>. Athough the observed relative frequency per number of tokens is not strictly necessary, it is often used to make the values more interpretable as we can now talk about an observed relative frequency of 1.5 as a linguistic unit that occurs 1.5 times per 100 linguistic units.</p>
+<p>To normalize the frequency of linguistic units across sub-corpora, we can use the <strong>relative frequency</strong> (<span class="math inline">\(rf\)</span>) measure. This is the frequency of a linguistic unit divided by the total number of linguistic units in the sub-corpus. This bakes in the size of the sub-corpus into the measure. The notion of relative frequency is key to all research working with text, as it is the basis for the statistical approach to text analysis where comparisons are made.</p>
+<p>There are some field-specific terms that are used to refer to relative frequency measures. For example, in information retrieval and Natural Language Processing, the relative frequency measure is often referred to as the <strong>term frequency</strong> (<span class="math inline">\(tf\)</span>). In corpus linguistics, the relative frequency measure is often modified slightly to include a constant (<em>e.g.</em> <span class="math inline">\(rf * 100\)</span>) which is known as the <strong>observed relative frequency</strong> (<span class="math inline">\(orf\)</span>). Athough the observed relative frequency per number of tokens is not strictly necessary, it is often used to make the values more interpretable as we can now talk about an observed relative frequency of 1.5 as a linguistic unit that occurs 1.5 times per 100 linguistic units.</p>
 <p>Let’s consider how we might compare the frequency and dispersion of lemmas across the two modalities in the MASC dataset, spoken and written. To make this a bit more interesting and more relevant, let’s add the <code>pos</code> variable to our analysis. The intent, then, will be to identify lemmas tagged with particular parts of speech that are particularly indicative of each of the modaliites.</p>
 <p>We can do this by collapsing the <code>lemma</code> and <code>pos</code> variables into a single variable, <code>lemma_pos</code>, with the <code>str_c()</code> function, as seen in <a href="#exm-explore-masc-type" class="quarto-xref">Example&nbsp;<span>8.9</span></a>.</p>
 <div id="exm-explore-masc-type" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.9</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collapse lemma and pos into type</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collapse lemma and pos into type</span></span>
 <span><span class="va">masc_content_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_content_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>lemma_pos <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="va">lemma</span>, <span class="va">pos</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span><span class="op">)</span></span>
@@ -1148,11 +1205,11 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 </div>
 </div>
 <p>Now this will increase the number of lemma types in the dataset as we are now considering lemmas where the same lemma form is tagged with different parts-of-speech.</p>
-<p>Getting back to calculating the frequency and dispersion of lemmas in each modality, we can use the <code>calc_type_metrics()</code> function with <code>lemma_pos</code> as our type argument. We will, however, need to apply this function to each sub-corpus independently and then concatenate the two data frames. This function returns a (raw) frequency measure by default, but we can specify the<code>frequency</code> argument to <code>rf</code> to calculate the relative frequency of the linguistic units as in <a href="#exm-explore-masc-metrics-modality" class="quarto-xref">Example&nbsp;<span>8.10</span></a>.</p>
+<p>Getting back to calculating the frequency and dispersion of lemmas in each modality, we can use the <code>calc_type_metrics()</code> function with <code>lemma_pos</code> as our type argument. We will, however, need to apply this function to each sub-corpus independently and then concatenate the two data frames. This function returns a (raw) frequency (<span class="math inline">\(n\)</span>) measure by default, but we can specify the<code>frequency</code> argument to <code>rf</code> to calculate the relative frequency of the linguistic units as in <a href="#exm-explore-masc-metrics-modality" class="quarto-xref">Example&nbsp;<span>8.10</span></a>.</p>
 <div id="exm-explore-masc-metrics-modality" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.10</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate relative frequency</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate relative frequency</span></span>
 <span><span class="co"># Spoken</span></span>
 <span><span class="va">masc_spoken_metrics</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_content_tbl</span> <span class="op">|&gt;</span></span>
@@ -1202,7 +1259,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <div id="exm-explore-masc-relative-frequency-top" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.11</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview top 10 lemmas in each modality</span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview top 10 lemmas in each modality</span></span>
 <span><span class="va">masc_metrics</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">modality</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_max</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, order_by <span class="op">=</span> <span class="va">rf</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1240,7 +1297,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <div id="exm-explore-masc-subcorpora-filtered" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.12</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for lemmas with</span></span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for lemmas with</span></span>
 <span><span class="co"># dp &lt;= 0.91 for written and</span></span>
 <span><span class="co"># dp &lt;= .79 for spoken</span></span>
 <span><span class="va">masc_metrics_thr</span> <span class="op">&lt;-</span></span>
@@ -1260,7 +1317,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <div id="exm-explore-masc-log-odds-weighted" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.13</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://juliasilge.github.io/tidylo/">tidylo</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Calculate log odds ratio</span></span>
@@ -1304,11 +1361,11 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 </div>
 </div>
 </div>
-<p>Let’s imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regular expression magic. Let’s use the <code>str_subset()</code> function to filter for lemmas that contain <code>_V</code> and then use <code>slice_max()</code> to extract the top 10 most indicative verb lemmas, as seen in <a href="#exm-explore-masc-log-odds-weighted-verbs" class="quarto-xref">Example&nbsp;<span>8.14</span></a>.</p>
+<p>Let’s imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regex magic. Let’s use the <code>str_subset()</code> function to filter for lemmas that contain <code>_V</code> and then use <code>slice_max()</code> to extract the top 10 most indicative verb lemmas, as seen in <a href="#exm-explore-masc-log-odds-weighted-verbs" class="quarto-xref">Example&nbsp;<span>8.14</span></a>.</p>
 <div id="exm-explore-masc-log-odds-weighted-verbs" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.14</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview (ordered by log_odds_weighted)</span></span>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview (ordered by log_odds_weighted)</span></span>
 <span><span class="va">masc_metrics_thr</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">modality</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">type</span>, <span class="st">"_V"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1347,7 +1404,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <p>Moving forward on our task, we have a good idea of the general vocabulary that we want to include in our ELL materials and can identify lemma types that are particularly indicative of each modality. Another useful approach to complement our analysis is to identify words that co-occur with our target lemmas (verbs). In English, it is common for verbs to appear with a preposition or adverb, such as ‘give up’, ‘look after’. These ‘phrasal verbs’ form a semantic unit that is distinct from the verb alone.</p>
 <p>In cases such as this, we are aiming to do a co-occurrence analysis. Co-occurrence analysis is a set of methods that are used to identify words that appear in close proximity to a target type.</p>
 <!-- Concordances -->
-<p>An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). This is a table that displays the target word in the center of the table and the words that appear before and after the target word within some defined window. This is a useful approach for spot identifying collocations of a target word or phrase, however it can be time-consuming to inspect and is not suitable for large datasets.</p>
+<p>An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). <strong>KWIC</strong> is a table that displays the target word in the center of the table and the words that appear before and after the target word within some defined window. This is a useful approach for spot identifying collocations of a target word or phrase, however it can be time-consuming to inspect and is not suitable for large datasets.</p>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1368,7 +1425,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <div id="exm-explore-masc-lemma-pos" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.15</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_tbl</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>pos <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
 <span>    <span class="fu">str_detect</span><span class="op">(</span><span class="va">pos</span>, <span class="st">"^V"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"V"</span>,</span>
@@ -1383,7 +1440,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <div id="exm-explore-masc-bigrams-pmi" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.16</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_assoc</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_lemma_pos_assoc</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_lemma_pos_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">calc_assoc_metrics</span><span class="op">(</span></span>
 <span>    doc_index <span class="op">=</span> <span class="va">doc_id</span>,</span>
@@ -1417,7 +1474,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <div id="exm-explore-masc-bigrams-pmi-filtered" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.17</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for target bigrams</span></span>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter for target bigrams</span></span>
 <span><span class="va">masc_verb_part_assoc</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_lemma_pos_assoc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1446,7 +1503,7 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 </div>
 </div>
 </div>
-<p>We have a working method for identify verb particle constructions. We can clean up the results a bit by removing the POS tags from the <code>x</code> and <code>y</code> variables, up our minimum PMI value, and create a network plot to visualize the results in <a href="#fig-explore-masc-verb-part-network" class="quarto-xref">Figure&nbsp;<span>8.3</span></a>.</p>
+<p>We have a working method for identify verb particle constructions. We can clean up the results a bit by removing the POS tags from the <code>x</code> and <code>y</code> variables, up our minimum PMI value, and create a network plot to visualize the results. A <strong>network plot</strong> is a type of graph that shows relationships between entities. In this case, the entities are verbs and particles, and the relationships are the PMI values between them. The connections between are represented by edges, and the thickness of the edges is proportional to the PMI value.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-explore-masc-verb-part-network" class="quarto-figure quarto-figure-center quarto-float anchored" alt="A network plot showing the association between verbs and prepositions in the MASC dataset. The plot shows a network of verbs and prepositions connected by edges with varying thicknesses.">
@@ -1456,6 +1513,17 @@ Table&nbsp;8.5: Frequency of tokens in the MASC dataset after our dispersion thr
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-explore-masc-verb-part-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;8.3: Network plot of verb particle constructions in the MASC dataset
 </figcaption></figure>
+</div>
+</div>
+</div>
+<div class="halfsize callout callout-style-simple callout-none no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
+<p>{ggplot2} cannot create network plots directly, so we use {ggraph} <span class="citation" data-cites="R-ggraph">(<a href="../references.html#ref-R-ggraph" role="doc-biblioref">Pedersen, 2024</a>)</span> and {igraph} <span class="citation" data-cites="R-igraph">(<a href="../references.html#ref-R-igraph" role="doc-biblioref">Csárdi et al., 2024</a>)</span> to create the network plot. For more information on creating network plots, see the {ggraph} documentation.</p>
 </div>
 </div>
 </div>
@@ -1481,7 +1549,7 @@ Figure&nbsp;8.3: Network plot of verb particle constructions in the MASC dataset
 <div id="exm-explore-masc-dtms" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.18</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/juliasilge/tidytext">tidytext</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create a document-term matrix of POS tags</span></span>
@@ -1496,7 +1564,7 @@ Figure&nbsp;8.3: Network plot of verb particle constructions in the MASC dataset
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 392  32</code></pre>
 </div>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
 <span><span class="va">masc_pos_dtm</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     Terms
@@ -1514,19 +1582,19 @@ Docs  CC DT EX IN JJ
 <div id="exm-explore-masc-dtms-normalized" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.19</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize pos matrix by documents</span></span>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize pos matrix by documents</span></span>
 <span><span class="va">masc_pos_dtm</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_pos_dtm</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">masc_pos_dtm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>There are two concerns to address before we can proceed with clustering. First, clustering algorithm performance tends to degrade with the number of features. Second, clustering algorithms perform better with more informative features. That is to say, features that are more distinct across the documents provide better information for deriving useful clusters.</p>
-<p>We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use <strong>dimensionality reduction</strong>. Dimensionality reduction is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is <strong>principle component analysis</strong> (PCA). PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principle components. The principle components are ordered by the amount of variance that they explain in the data. The first principle component explains the most variance, the second principle component explains the second most variance, and so on.</p>
+<p>We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use dimensionality reduction. <strong>Dimensionality reduction</strong> is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is <strong>principle component analysis</strong> (PCA). PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principle components. The principle components are ordered by the amount of variance that they explain in the data. The first principle component explains the most variance, the second principle component explains the second most variance, and so on.</p>
 <p>We can apply PCA to the matrix and assess how well it accounts for the variation in the data and how the variation is distributed across components. The <code><a href="https://rdrr.io/r/stats/prcomp.html">prcomp()</a></code> function from base R can be used to perform PCA.</p>
 <p>Let’s apply PCA to the matrix, as seen in <a href="#exm-explore-masc-dtms-pca" class="quarto-xref">Example&nbsp;<span>8.20</span></a>.</p>
 <div id="exm-explore-masc-dtms-pca" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.20</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed</span></span>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Apply PCA to matrix</span></span>
@@ -1535,11 +1603,10 @@ Docs  CC DT EX IN JJ
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>We can visualize the amount of variance explained by each principle component with a scree plot. The <code><a href="https://rdrr.io/pkg/factoextra/man/eigenvalue.html">fviz_eig()</a></code> function from {factoextra} implements a scree plot on a PCA object. We can set the number of number of components to visualize with <code>ncp =</code>.</p>
-<p>Let’s create a scree plot for the matrix, as seen in <a href="#exm-explore-masc-dtms-pca-scree" class="quarto-xref">Example&nbsp;<span>8.21</span></a>.</p>
+<p>We can visualize the amount of variance explained by each principle component with a scree plot. A <strong>scree plot</strong> is a bar plot ordered by the amount of variance explained by each principle component. The <code><a href="https://rdrr.io/pkg/factoextra/man/eigenvalue.html">fviz_eig()</a></code> function from {factoextra} implements a scree plot on a PCA object. We can set the number of number of components to visualize with <code>ncp =</code>.</p>
 <div id="exm-explore-masc-dtms-pca-scree" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.21</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.sthda.com/english/rpkgs/factoextra">factoextra</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Scree plot: POS relative frequency</span></span>
@@ -1568,12 +1635,12 @@ Figure&nbsp;8.4: Scree plot of the principle components of the POS relative freq
 </div>
 </div>
 </div>
-<p>From <a href="#fig-explore-masc-dtms-pca-scree" class="quarto-xref">Figure&nbsp;<span>8.4</span></a>, we can see that the first component shows the most variance explained, around 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears hhe variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.</p>
+<p>From the scree plot for the matrix in <a href="#fig-explore-masc-dtms-pca-scree" class="quarto-xref">Figure&nbsp;<span>8.4</span></a>, we can see that the first component shows the most variance explained, around 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears hhe variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.</p>
 <p>Let’s go ahead and create a matrix of the first four principle components for the POS data, as seen in <a href="#exm-explore-masc-pos-pca-pc" class="quarto-xref">Example&nbsp;<span>8.22</span></a>.</p>
 <div id="exm-explore-masc-pos-pca-pc" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.22</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a matrix of the first four principle components</span></span>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a matrix of the first four principle components</span></span>
 <span><span class="va">masc_pos_pca_pc</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_pos_pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1587,7 +1654,7 @@ Figure&nbsp;8.4: Scree plot of the principle components of the POS relative freq
 <p>One way to assess the fit of the clustering algorithm is to visualize the results, interpret, and adjust the number of clusters, if necessary, any number of times. Another, more efficient, approach is to algorithmically assess the variability of the clusters based on differing number of clusters and then select the number of clusters that best fits the data.</p>
 <p>We will take the later approach and plot the <strong>within-cluster sum of squares</strong> (WSS) for a range of values for <span class="math inline">\(k\)</span>. The WSS is the sum of the squared distance between each observation and its cluster center. With a plot of the WSS for a range of values for <span class="math inline">\(k\)</span>, we can identify the value for <span class="math inline">\(k\)</span> where the WSS begins to level off, using the elbow method. It is not always clear where the elbow is, yet it is a good starting point for identifying the optimal number of clusters.</p>
 <p>The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function can be used to plot the WSS for a range of values for <span class="math inline">\(k\)</span>. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function takes the <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> function as its first argument and the matrix of features as its second argument. The <code><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust()</a></code> function also takes arguments <code>method = "wss"</code> to specify the WSS method and <code>k.max = 20</code> to specify the maximum number of clusters to plot. Let’s plot the WSS for a range of values for <span class="math inline">\(k\)</span>, as seen in <a href="#fig-explore-masc-pos-kmeans-elbow" class="quarto-xref">Figure&nbsp;<span>8.5</span></a>.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_pos_pca_pc</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">masc_pos_pca_pc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/factoextra/man/fviz_nbclust.html">fviz_nbclust</a></span><span class="op">(</span></span>
 <span>    FUNcluster <span class="op">=</span> <span class="va">kmeans</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"wss"</span>, <span class="co"># method</span></span>
@@ -1612,7 +1679,7 @@ Figure&nbsp;8.5: Elbow method for <span class="math inline">\(k\)</span>-means c
 <div id="exm-explore-masc-pos-kmeans-fit" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.23</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed</span></span>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># K-means: for 4 clusters</span></span>
@@ -1638,7 +1705,7 @@ Figure&nbsp;8.5: Elbow method for <span class="math inline">\(k\)</span>-means c
 <div id="exm-explore-masc-pos-kmeans-join" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.24</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Organize $k$-means clusters into a tibble</span></span>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Organize $k$-means clusters into a tibble</span></span>
 <span><span class="va">masc_pos_cluster_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">tibble</span><span class="op">(</span></span>
 <span>    doc_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">masc_pos_kmeans_fit</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span>,</span>
@@ -1672,7 +1739,7 @@ Figure&nbsp;8.5: Elbow method for <span class="math inline">\(k\)</span>-means c
 <div id="exm-explore-masc-pos-kmeans-genre" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.25</strong></span> &nbsp;</p>
 <div class="cell" data-tbl-colwidths="[20,20,20,20,20]">
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Reduce to distinct combinations of genre and cluster</span></span>
@@ -1897,7 +1964,7 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <p>To implement the word2vec algorithm on our lemma + POS features, we will use the <code>word2vec</code> package. The <code>word2vec()</code> function takes a text file and uses it to train the vector representations. To prepare the MASC dataset for training, we will need to write the lemma + POS features to a text file as a single character string. We can do this by first collapsing the <code>lemma_pos</code> variable into a single string for the entire corpus using the <code>str_c()</code> function. Then we can use the <code>write_lines()</code> function to write the string to a text file, as in <a href="#exm-explore-masc-vsm-write-txt" class="quarto-xref">Example&nbsp;<span>8.26</span></a>.</p>
 <div id="exm-explore-masc-vsm-write-txt" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.26</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Write lemma + POS to text file</span></span>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Write lemma + POS to text file</span></span>
 <span><span class="va">masc_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">summarize</span><span class="op">(</span>text <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="va">lemma_pos</span>, collapse <span class="op">=</span> <span class="st">" "</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">pull</span><span class="op">(</span><span class="va">text</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1908,7 +1975,7 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <p>With the single line text file on disk, we will read it in, apply the word2vec algorithm using the <code>word2vec</code> package, and write the model to disk. By default, te <code>word2vec()</code> function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let’s apply the default algorithm to the text file spliting features by sentence punctuation, as seen in <a href="#exm-explore-masc-vsm-word2vec-train" class="quarto-xref">Example&nbsp;<span>8.27</span></a>.</p>
 <div id="exm-explore-masc-vsm-word2vec-train" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.27</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bnosac/word2vec">word2vec</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Traing word2vec model</span></span>
@@ -1931,7 +1998,7 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <p>Now that we have a trained model, we can read it in with the <code><a href="https://rdrr.io/pkg/wordVectors/man/read.vectors.html">read.vectors()</a></code> function from {wordVectors}.</p>
 <div id="exm-explore-masc-vsm-word2vec-read" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.28</strong></span> &nbsp;</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/bmschmidt/wordVectors">wordVectors</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Read word2vec model</span></span>
@@ -1944,12 +2011,12 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <div id="exm-explore-masc-vsm-word2vec-vector-object" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.29</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect</span></span>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Inspect</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">masc_model</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 5808  100</code></pre>
 </div>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
 <span><span class="va">masc_model</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>A VectorSpaceModel object of  5  words and  5  vectors
@@ -1960,16 +2027,16 @@ absorb_VERB      -1.772 -1.528 -0.0554  0.664 -1.2453
 accidentally_ADV -1.264 -0.742 -0.6870  0.613 -1.0750
 aesthetic_ADJ     0.567  0.524  1.0638 -0.332 -0.0424
 attr(,".cache")
-&lt;environment: 0x7faa5be4da88&gt;</code></pre>
+&lt;environment: 0x7f785984fdd0&gt;</code></pre>
 </div>
 </div>
 </div>
 <p>The row-wise vector in the model is the vector representation of each feature. The notion is that these values can now be compared with other features to explore distributional relatedness. We can extract specific features from the matrix using the <code>[]</code> operator.</p>
-<p>As an example, let’s compare the vectors for noun-verb pairs for the lemmas ‘run’ and ‘walk’. To do this we extract these features from the model. To appreciate the relatedness of these features it is best to visualize them. We can do this by first reducing the dimensionality of the vectors using principal components analysis (PCA). We can then plot the first two principle components, as seen in <a href="#fig-explore-masc-vsm-word2vec-similarity" class="quarto-xref">Figure&nbsp;<span>8.6</span></a>.</p>
+<p>As an example, let’s compare the vectors for noun-verb pairs for the lemmas ‘run’ and ‘walk’. To do this we extract these features from the model. To appreciate the relatedness of these features it is best to visualize them. We can do this by first reducing the dimensionality of the vectors using principal components analysis. We can then plot the first two principle components, as seen in <a href="#fig-explore-masc-vsm-word2vec-similarity" class="quarto-xref">Figure&nbsp;<span>8.6</span></a>.</p>
 <div id="exm-explore-masc-vsm-word2vec-similarity" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.30</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract vectors</span></span>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract vectors</span></span>
 <span><span class="va">word_vectors</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_model</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"run_VERB"</span>, <span class="st">"walk_VERB"</span>, <span class="st">"run_NOUN"</span>, <span class="st">"walk_NOUN"</span><span class="op">)</span>, <span class="op">]</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -2008,7 +2075,7 @@ Figure&nbsp;8.6: Similarity between ‘run’ and ‘walk’ in the MASC dataset
 <div id="exm-explore-masc-vsm-word2vec-verbs" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.31</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter to verbs</span></span>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Filter to verbs</span></span>
 <span><span class="va">verbs</span> <span class="op">&lt;-</span> <span class="fu">str_subset</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">masc_model</span><span class="op">)</span>, <span class="st">".*_VERB"</span><span class="op">)</span></span>
 <span><span class="va">verb_vectors</span> <span class="op">&lt;-</span> <span class="va">masc_model</span><span class="op">[</span><span class="va">verbs</span>, <span class="op">]</span></span>
 <span></span>
@@ -2023,7 +2090,7 @@ Figure&nbsp;8.6: Similarity between ‘run’ and ‘walk’ in the MASC dataset
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1115  100</code></pre>
 </div>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Preview</span></span>
 <span><span class="va">verb_vectors</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>A VectorSpaceModel object of  5  words and  5  vectors
@@ -2034,7 +2101,7 @@ bid      0.217 -0.490 -0.4588  0.1373  0.247
 brief    1.215 -0.674 -0.7121  0.5072 -0.445
 cap     -0.135  0.884  0.2278 -0.2563 -0.207
 attr(,".cache")
-&lt;environment: 0x7faa70f5c258&gt;</code></pre>
+&lt;environment: 0x7f78703d4730&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -2042,7 +2109,7 @@ attr(,".cache")
 <div id="exm-explore-masc-vsm-word2vec-manner-motion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.32</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add vectors for motion-similarity and manner-similarity</span></span>
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add vectors for motion-similarity and manner-similarity</span></span>
 <span><span class="va">motion</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"come"</span>, <span class="st">"leave"</span>, <span class="st">"arrive"</span>, <span class="st">"enter"</span>, <span class="st">"exit"</span>, <span class="st">"depart"</span>, <span class="st">"return"</span><span class="op">)</span></span>
 <span></span>
@@ -2057,7 +2124,7 @@ Columns: 2
 $ word                   &lt;chr&gt; "walk", "step", "return", "enter", "leave", "le…
 $ `similarity to motion` &lt;dbl&gt; 0.742, 0.741, 0.732, 0.727, 0.682, 0.669, 0.664…</code></pre>
 </div>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">manner</span> <span class="op">&lt;-</span></span>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">manner</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"run"</span>, <span class="st">"walk"</span>, <span class="st">"jump"</span>, <span class="st">"crawl"</span>, <span class="st">"swim"</span>, <span class="st">"fly"</span>, <span class="st">"drive"</span>, <span class="st">"ride"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">manner_similarity</span> <span class="op">&lt;-</span></span>
@@ -2077,7 +2144,7 @@ $ `similarity to manner` &lt;dbl&gt; 0.865, 0.841, 0.831, 0.826, 0.826, 0.824, 0
 <div id="exm-explore-masc-vsm-word2vec-manner-motion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.33</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join motion-similarity and manner-similarity</span></span>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Join motion-similarity and manner-similarity</span></span>
 <span><span class="va">manner_motion_similarity</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">manner_similarity</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">motion_similarity</span><span class="op">)</span></span>
@@ -2137,6 +2204,9 @@ Figure&nbsp;8.7: Motion-similarity and manner-similarity of verbs in the MASC da
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-R-igraph" class="csl-entry" role="listitem">
+Csárdi, G., Nepusz, T., Traag, V., Horvát, S., Zanini, F., Noom, D., &amp; Müller, K. (2024). <em>Igraph: Network analysis and visualization</em>. Retrieved from <a href="https://r.igraph.org/">https://r.igraph.org/</a>
+</div>
 <div id="ref-Firth1957" class="csl-entry" role="listitem">
 Firth, J. R. (1957). <em>Papers in linguistics</em>. Oxford University Press.
 </div>
@@ -2154,6 +2224,9 @@ Ide, N., Baker, C., Fellbaum, C., Fillmore, C., &amp; Passonneau, R. (2008). MAS
 </div>
 <div id="ref-Mikolov2013b" class="csl-entry" role="listitem">
 Mikolov, T., Sutskever, I., Chen, K., Corrado, G., &amp; Dean, J. (2013). Distributed representations of words and phrases and their compositionality. In <em>Advances in neural information processing systems</em> (pp. 3111–3119).
+</div>
+<div id="ref-R-ggraph" class="csl-entry" role="listitem">
+Pedersen, T. L. (2024). <em>Ggraph: An implementation of grammar of graphics for graphs and networks</em>. Retrieved from <a href="https://ggraph.data-imaginist.com">https://ggraph.data-imaginist.com</a>
 </div>
 <div id="ref-Petrenz2011" class="csl-entry" role="listitem">
 Petrenz, P., &amp; Webber, B. (2011). Stable classification of text genres. <em>Computational Linguistics</em>, <em>37</em>(2), 385–393. doi:<a href="https://doi.org/10.1162/COLI_a_00052">10.1162/COLI_a_00052</a>

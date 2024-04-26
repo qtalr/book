@@ -1751,21 +1751,18 @@ Figure&nbsp;9.6: Distribution of the RMSE for the cross-validated linear regress
 <span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>Computational engine: rpart</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>With the model and tuning specification in place, we can now continue through the steps outlined in <a href="#tbl-workflow" class="quarto-xref">Table&nbsp;<span>9.4</span></a> for this decision tree model. To create the grid of values for the tree depth hyperparameter, we will include the <code>grid_regular()</code> function with 10 levels, as seen in <a href="#lst-predict-reg-decision-tree-depth" class="quarto-xref">Snippet&nbsp;<span>9.1</span></a>.</p>
-<div id="lst-predict-reg-decision-tree-depth" class="listing quarto-float">
-<figure class="quarto-float quarto-float-lst figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-predict-reg-decision-tree-depth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Snippet&nbsp;9.1: Tuning values for the tree depth hyperparameter
-</figcaption><div aria-describedby="lst-predict-reg-decision-tree-depth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="sourceCode" id="lst-predict-reg-decision-tree-depth"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
+<p>With the model and tuning specification in place, we can now continue through the steps outlined in <a href="#tbl-workflow" class="quarto-xref">Table&nbsp;<span>9.4</span></a> for this decision tree model. To create the grid of values for the tree depth hyperparameter, we will include the <code>grid_regular()</code> function with 10 levels, as seen in <a href="#def-predict-reg-decision-tree-depth" class="quarto-xref">Snippet&nbsp;<span>9.1</span></a>.</p>
+<div id="def-predict-reg-decision-tree-depth" class="theorem definition">
+<p><span class="theorem-title"><strong>Snippet 9.1</strong></span> &nbsp;</p>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">tree_depth</span><span class="op">(</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</figure>
+<p>Tuning values for the tree depth hyperparameter</p>
 </div>
 <p>We can collect the metrics and inspect the RMSE and <span class="math inline">\(R^2\)</span> values. The code is seen in <a href="#exm-predict-reg-metrics-tree" class="quarto-xref">Example&nbsp;<span>9.41</span></a>.</p>
 <div id="exm-predict-reg-metrics-tree" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.41</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
 <span><span class="va">reg_tree_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 6
@@ -1783,7 +1780,7 @@ Snippet&nbsp;9.1: Tuning values for the tree depth hyperparameter
 <div id="exm-predict-reg-model-spec-random-forest" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.42</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
 <span><span class="va">reg_spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"ranger"</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1792,15 +1789,15 @@ Snippet&nbsp;9.1: Tuning values for the tree depth hyperparameter
 <span><span class="co"># Preview</span></span>
 <span><span class="va">reg_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="sourceCode" id="cb77"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>Random Forest Model Specification (regression)</span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
-<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  trees = tune()</span>
-<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>Engine-Specific Arguments:</span>
-<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>  importance = impurity</span>
-<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>Computational engine: ranger</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>Random Forest Model Specification (regression)</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  trees = tune()</span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>Engine-Specific Arguments:</span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>  importance = impurity</span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>Computational engine: ranger</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
@@ -1814,21 +1811,18 @@ Snippet&nbsp;9.1: Tuning values for the tree depth hyperparameter
 </div>
 </div>
 </div>
-<p>Again, we apply the steps in <a href="#tbl-workflow" class="quarto-xref">Table&nbsp;<span>9.4</span></a> to build and tune the random forest model. As part of this process, I will limit the range of the number of trees from 100 to 500 in five levels in the tuning grid, as seen in <a href="#lst-predict-reg-random-forest-trees" class="quarto-xref">Snippet&nbsp;<span>9.2</span></a>.</p>
-<div id="lst-predict-reg-random-forest-trees" class="listing quarto-float">
-<figure class="quarto-float quarto-float-lst figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-predict-reg-random-forest-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Snippet&nbsp;9.2: Tuning values for the number of trees hyperparameter
-</figcaption><div aria-describedby="lst-predict-reg-random-forest-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="sourceCode" id="lst-predict-reg-random-forest-trees"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
+<p>Again, we apply the steps in <a href="#tbl-workflow" class="quarto-xref">Table&nbsp;<span>9.4</span></a> to build and tune the random forest model. As part of this process, I will limit the range of the number of trees from 100 to 500 in five levels in the tuning grid, as seen in <a href="#def-predict-reg-random-forest-trees" class="quarto-xref">Snippet&nbsp;<span>9.2</span></a>.</p>
+<div id="def-predict-reg-random-forest-trees" class="theorem definition">
+<p><span class="theorem-title"><strong>Snippet 9.2</strong></span> &nbsp;</p>
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">trees</span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">500</span><span class="op">)</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</figure>
+<p>Tuning values for the number of trees hyperparameter</p>
 </div>
 <p>Let’s collect the metrics and inspect the RMSE and <span class="math inline">\(R^2\)</span> values. The code is seen in <a href="#exm-predict-reg-metrics-rf" class="quarto-xref">Example&nbsp;<span>9.43</span></a>.</p>
 <div id="exm-predict-reg-metrics-rf" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.43</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
 <span><span class="va">reg_rf_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 6
@@ -1845,7 +1839,7 @@ Snippet&nbsp;9.2: Tuning values for the number of trees hyperparameter
 <div id="exm-predict-reg-model-spec-mlp" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.44</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create model specification</span></span>
 <span><span class="va">reg_spec</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">mlp</span><span class="op">(</span>learn_rate <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"brulee"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1854,31 +1848,28 @@ Snippet&nbsp;9.2: Tuning values for the number of trees hyperparameter
 <span><span class="co"># Preview</span></span>
 <span><span class="va">reg_spec</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="sourceCode" id="cb81"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>Single Layer Neural Network Model Specification (regression)</span>
-<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
-<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>  learn_rate = tune()</span>
-<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a>Computational engine: brulee</span>
-<span id="cb81-7"><a href="#cb81-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb81-8"><a href="#cb81-8" aria-hidden="true" tabindex="-1"></a>Model fit template:</span>
-<span id="cb81-9"><a href="#cb81-9" aria-hidden="true" tabindex="-1"></a>brulee::brulee_mlp(x = missing_arg(), y = missing_arg(), learn_rate = tune())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb83"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>Single Layer Neural Network Model Specification (regression)</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>Main Arguments:</span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>  learn_rate = tune()</span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a>Computational engine: brulee</span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-8"><a href="#cb83-8" aria-hidden="true" tabindex="-1"></a>Model fit template:</span>
+<span id="cb83-9"><a href="#cb83-9" aria-hidden="true" tabindex="-1"></a>brulee::brulee_mlp(x = missing_arg(), y = missing_arg(), learn_rate = tune())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>And include the code in <a href="#lst-predict-reg-mlp-learning-rate" class="quarto-xref">Snippet&nbsp;<span>9.3</span></a> to create a grid of values for the learning rate hyperparameter, as part of the model building workflow.</p>
-<div id="lst-predict-reg-mlp-learning-rate" class="listing quarto-float">
-<figure class="quarto-float quarto-float-lst figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-predict-reg-mlp-learning-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Snippet&nbsp;9.3: Tuning values for the learning rate hyperparameter
-</figcaption><div aria-describedby="lst-predict-reg-mlp-learning-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="sourceCode" id="lst-predict-reg-mlp-learning-rate"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
+<p>And include the code in <a href="#def-predict-reg-mlp-learning-rate" class="quarto-xref">Snippet&nbsp;<span>9.3</span></a> to create a grid of values for the learning rate hyperparameter, as part of the model building workflow.</p>
+<div id="def-predict-reg-mlp-learning-rate" class="theorem definition">
+<p><span class="theorem-title"><strong>Snippet 9.3</strong></span> &nbsp;</p>
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reg_grid</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">grid_regular</span><span class="op">(</span><span class="fu">learn_rate</span><span class="op">(</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</figure>
+<p>Tuning values for the learning rate hyperparameter</p>
 </div>
 <p>Let’s collect the metrics and inspect the RMSE and <span class="math inline">\(R^2\)</span> values. The code is seen in <a href="#exm-predict-reg-metrics-mlp" class="quarto-xref">Example&nbsp;<span>9.45</span></a>.</p>
 <div id="exm-predict-reg-metrics-mlp" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.45</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Collect metrics</span></span>
 <span><span class="va">reg_mlp_cv</span> <span class="op">|&gt;</span> <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 6
@@ -1895,7 +1886,7 @@ Snippet&nbsp;9.3: Tuning values for the learning rate hyperparameter
 <div id="exm-predict-reg-model-spec-random-forest-workflow-tune-fit" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.46</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model to the training set and</span></span>
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model to the training set and</span></span>
 <span><span class="co"># evaluate on the test set</span></span>
 <span><span class="va">reg_final_fit</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">last_fit</span><span class="op">(</span></span>
@@ -1920,7 +1911,7 @@ Snippet&nbsp;9.3: Tuning values for the learning rate hyperparameter
 <div id="exm-predict-reg-final-fit-vip" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.47</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract feature importance</span></span>
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract feature importance</span></span>
 <span><span class="va">reg_vip</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">reg_final_fit</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">extract_fit_parsnip</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1950,7 +1941,7 @@ Snippet&nbsp;9.3: Tuning values for the learning rate hyperparameter
 <div id="exm-predict-reg-final-fit-vip-visualize" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.48</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract predictions</span></span>
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract predictions</span></span>
 <span><span class="va">reg_vip</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>Variable <span class="op">=</span> <span class="fu">str_replace</span><span class="op">(</span><span class="va">Variable</span>, <span class="st">"^tfidf_text_"</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">slice_max</span><span class="op">(</span><span class="va">Importance</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">|&gt;</span></span>

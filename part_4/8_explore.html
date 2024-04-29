@@ -1518,19 +1518,19 @@ Figure&nbsp;8.3: Network plot of verb particle constructions in the MASC dataset
 <p>Imagine that among the various features that we are interested in associating documents, we consider lemma use and POS use. However, we need to operationalize what we mean by ‘use’. In machine learning, this process is known as <strong>feature engineering</strong>. We likely want use some measure of frequency. Since we are comparing documents, a relative frequency measure will be most useful. Another consideration is what does it mean to use lemmas or POS tags as our features. Each represents a different linguistic of the documents. Lemmas represent the lexical diversity of the documents while POS tags approximate the grammatical diversity of the documents <span class="citation" data-cites="Petrenz2011">(<a href="../references.html#ref-Petrenz2011" role="doc-biblioref">Petrenz &amp; Webber, 2011</a>)</span>.</p>
 <p>Let’s assume that our interest is to gauge the grammatical diversity of the documents, so we will go with POS tags. With this approach, we aim to distinguish between documents in a way that may allow us to use consider whether genre-document categories are meaningful, along grammatical lines.</p>
 <p>The next question to address in any analysis is how to represent the features. In machine learning, the most common way to represent document- feature relationsips is in a matrix. In our case, we want to create a matrix with the documents in the rows and the features in the columns. The values in the matrix will be the operationalization of grammatical diversity in each document. This configuration is known as a <strong>document-term matrix</strong> (DTM).</p>
-<p>To recast a data frame into a DTM, we can use the <code><a href="https://rdrr.io/pkg/tidytext/man/document_term_casters.html">cast_dtm()</a></code> function from {tidytext}. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of POS tags into a matrix and then normalize the matrix by documents.</p>
+<p>To recast a data frame into a DTM, we can use the <code><a href="https://juliasilge.github.io/tidytext/reference/document_term_casters.html">cast_dtm()</a></code> function from {tidytext}. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of POS tags into a matrix and then normalize the matrix by documents.</p>
 <p>Let’s see how this works with the MASC dataset in <a href="#exm-explore-masc-dtms" class="quarto-xref">Example&nbsp;<span>8.18</span></a>.</p>
 <div id="exm-explore-masc-dtms" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.18</strong></span> &nbsp;</p>
 <div class="cell">
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/juliasilge/tidytext">tidytext</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://juliasilge.github.io/tidytext/">tidytext</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create a document-term matrix of POS tags</span></span>
 <span><span class="va">masc_pos_dtm</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">masc_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">count</span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">pos</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/tidytext/man/document_term_casters.html">cast_dtm</a></span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">pos</span>, <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://juliasilge.github.io/tidytext/reference/document_term_casters.html">cast_dtm</a></span><span class="op">(</span><span class="va">doc_id</span>, <span class="va">pos</span>, <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inpsect</span></span>
@@ -1935,7 +1935,7 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 </div>
 </div>
 <p>Another consideration to take into account is the size of the corpus used to train the model. VSM provide more reliable results when trained on larger corpora. The MASC dataset is relatively small. We’ve simplified our features in order to have a smaller vocabulary in hopes to offset this limitation to a degree. But the choice of either CBOW or Skip-gram can also help to offset this limitation. CBOW can be better for smaller corpora as it aggregates context infomation. Skip-gram can be better for larger corpora as it can capture more nuanced relationships between words.</p>
-<p>To implement the word2vec algorithm on our lemma + POS features, we will use the <code>word2vec</code> package. The <code>word2vec()</code> function takes a text file and uses it to train the vector representations. To prepare the MASC dataset for training, we will need to write the lemma + POS features to a text file as a single character string. We can do this by first collapsing the <code>lemma_pos</code> variable into a single string for the entire corpus using the <code>str_c()</code> function. Then we can use the <code>write_lines()</code> function to write the string to a text file, as in <a href="#exm-explore-masc-vsm-write-txt" class="quarto-xref">Example&nbsp;<span>8.26</span></a>.</p>
+<p>To implement the word2vec algorithm on our lemma + POS features, we will use the <code>word2vec</code> package. The <code><a href="https://rdrr.io/pkg/word2vec/man/word2vec.html">word2vec()</a></code> function takes a text file and uses it to train the vector representations. To prepare the MASC dataset for training, we will need to write the lemma + POS features to a text file as a single character string. We can do this by first collapsing the <code>lemma_pos</code> variable into a single string for the entire corpus using the <code>str_c()</code> function. Then we can use the <code>write_lines()</code> function to write the string to a text file, as in <a href="#exm-explore-masc-vsm-write-txt" class="quarto-xref">Example&nbsp;<span>8.26</span></a>.</p>
 <div id="exm-explore-masc-vsm-write-txt" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.26</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Write lemma + POS to text file</span></span>
@@ -1946,7 +1946,7 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <span>    file <span class="op">=</span> <span class="st">"../data/analysis/masc_lemma_pos.txt"</span></span>
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>With the single line text file on disk, we will read it in, apply the word2vec algorithm using the <code>word2vec</code> package, and write the model to disk. By default, te <code>word2vec()</code> function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let’s apply the default algorithm to the text file spliting features by sentence punctuation, as seen in <a href="#exm-explore-masc-vsm-word2vec-train" class="quarto-xref">Example&nbsp;<span>8.27</span></a>.</p>
+<p>With the single line text file on disk, we will read it in, apply the word2vec algorithm using the <code>word2vec</code> package, and write the model to disk. By default, te <code><a href="https://rdrr.io/pkg/word2vec/man/word2vec.html">word2vec()</a></code> function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let’s apply the default algorithm to the text file spliting features by sentence punctuation, as seen in <a href="#exm-explore-masc-vsm-word2vec-train" class="quarto-xref">Example&nbsp;<span>8.27</span></a>.</p>
 <div id="exm-explore-masc-vsm-word2vec-train" class="theorem example">
 <p><span class="theorem-title"><strong>Example 8.27</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package</span></span>
@@ -1954,7 +1954,7 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <span></span>
 <span><span class="co"># Traing word2vec model</span></span>
 <span><span class="va">masc_model</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">word2vec</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/word2vec/man/word2vec.html">word2vec</a></span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="st">"../data/analysis/masc_lemma_pos.txt"</span>,</span>
 <span>    type <span class="op">=</span> <span class="st">"cbow"</span>, <span class="co"># or "skip-gram"</span></span>
 <span>    dim <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -1963,7 +1963,7 @@ Table&nbsp;8.6: Distribution of clusters by genre in the MASC dataset
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Write model to disk</span></span>
-<span><span class="fu">write.word2vec</span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/word2vec/man/write.word2vec.html">write.word2vec</a></span><span class="op">(</span></span>
 <span>  <span class="va">masc_model</span>,</span>
 <span>  file <span class="op">=</span> <span class="st">"../data/analysis/masc_lemma_pos.bin"</span></span>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

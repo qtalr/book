@@ -445,14 +445,11 @@ masc_lemma_disp_thr <-
 ```
 :::
 
-Then in @tbl-explore-masc-dp-filter-preview, I preview the top and bottom 50 lemmas in the dataset.
+Then in @tbl-explore-masc-dp-filter-preview-top and @tbl-explore-masc-dp-filter-preview-bottom, I preview the top and bottom 50 lemmas in the dataset.
+
 ```{r}
-#| label: tbl-explore-masc-dp-filter-preview
-#| tbl-cap: "Frequency of tokens in the MASC dataset after our dispersion threshold"
-#| tbl-subcap:
-#| - "Top 50 lemmas"
-#| - "Bottom 50 lemmas"
-#| layout-nrow: 2
+#| label: tbl-explore-masc-dp-filter-preview-top
+#| tbl-cap: "Top 50 lemmas after our dispersion threshold"
 #| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Preview top
@@ -461,6 +458,13 @@ masc_lemma_disp_thr |>
   pull(type) |>
   matrix(ncol = 5) |>
   kable(col.names = NULL)
+```
+
+
+```{r}
+#| label: tbl-explore-masc-dp-filter-preview-bottom
+#| tbl-cap: "Bottom 50 lemmas after our dispersion threshold"
+#| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Preview bottom
 masc_lemma_disp_thr |>
@@ -1055,7 +1059,7 @@ masc_meta_tbl |>
 ```
 :::
 
-From @exm-explore-masc-pos-kmeans-genre, we can see that the clusters are not evenly distributed across the genres. In particular, cluster 2 tends to be more associated with 'blog', 'email', 'letters', 'twitter', and 'news'. Another interesting cluster is cluster 4, which is more associated with 'newspaper', 'non-fiction', and interestingly, 'email'. This suggest that the clusters are capturing some of the variation in the across the genres and potential within some of the genres.
+From @exm-explore-masc-pos-kmeans-genre, we can see that the clusters are not evenly distributed across the genres. In particular, cluster 2 tends to be more associated with 'blog', 'email', 'letters', 'twitter', and 'newspaper'. Another interesting cluster is cluster 4, which is more associated with 'non-fiction', and interestingly, 'email' and 'newspaper'. This suggest that the clusters are capturing some of the variation in the across the genres and potential within some of the genres.
 
 We could continue to explore genre, but we could also entertain the possibility that the clusters may capture differences between modality --even some interaction between modality and genre! This highlights how exploratory data analysis through clustering can be used to identify new questions and new variables of interest.
 
@@ -1139,7 +1143,7 @@ The number of dimensions is the number of features that the model will learn. Mo
 
 Another consideration to take into account is the size of the corpus used to train the model. VSM provide more reliable results when trained on larger corpora. The MASC dataset is relatively small. We've simplified our features in order to have a smaller vocabulary in hopes to offset this limitation to a degree. But the choice of either CBOW or Skip-gram can also help to offset this limitation. CBOW can be better for smaller corpora as it aggregates context infomation. Skip-gram can be better for larger corpora as it can capture more nuanced relationships between words.
 
-To implement the word2vec algorithm on our lemma + POS features, we will use the `word2vec` package. The `word2vec()` function takes a text file and uses it to train the vector representations. To prepare the MASC dataset for training, we will need to write the lemma + POS features to a text file as a single character string. We can do this by first collapsing the `lemma_pos` variable into a single string for the entire corpus using the `str_c()` function. Then we can use the `write_lines()` function to write the string to a text file, as in @exm-explore-masc-vsm-write-txt.
+To implement the word2vec algorithm on our lemma + POS features, we will use {word2vec}. The `word2vec()` function takes a text file and uses it to train the vector representations. To prepare the MASC dataset for training, we will need to write the lemma + POS features to a text file as a single character string. We can do this by first collapsing the `lemma_pos` variable into a single string for the entire corpus using the `str_c()` function. Then we can use the `write_lines()` function to write the string to a text file, as in @exm-explore-masc-vsm-write-txt.
 
 ::: {#exm-explore-masc-vsm-write-txt}
 ```r
@@ -1165,7 +1169,7 @@ masc_tbl |>
 ```
 :::
 
-With the single line text file on disk, we will read it in, apply the word2vec algorithm using the `word2vec` package, and write the model to disk. By default, te `word2vec()` function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let's apply the default algorithm to the text file spliting features by sentence punctuation, as seen in @exm-explore-masc-vsm-word2vec-train.
+With the single line text file on disk, we will read it in, apply the word2vec algorithm using {word2vec} [@R-word2vec], and write the model to disk. By default, te `word2vec()` function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let's apply the default algorithm to the text file spliting features by sentence punctuation, as seen in @exm-explore-masc-vsm-word2vec-train.
 
 ::: {#exm-explore-masc-vsm-word2vec-train}
 ```r

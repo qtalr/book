@@ -194,7 +194,7 @@ In @tbl-analysis-belc-dd we see the data dictionary for the BELC dataset which r
 ```{r}
 #| label: tbl-analysis-belc-dd
 #| tbl-cap: "Data dictionary for the BELC dataset"
-#| tbl-colwidths: [13, 17, 15, 55]
+#| tbl-colwidths: [13, 23, 12, 52]
 
 # Data dictionary ----
 belc_essay_dd |>
@@ -206,7 +206,7 @@ Now, let's take a look a the first few observations of the BELC dataset to get a
 ```{r}
 #| label: tbl-analysis-belc-overview
 #| tbl-cap: "First 5 observations of the BELC dataset"
-#| tbl-colwidths: [12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5]
+#| tbl-colwidths: [12, 12, 12, 12, 12, 12, 12, 12]
 
 # View data ----
 belc_essay_tbl |>
@@ -265,31 +265,28 @@ The central tendency is measure which aims to summarize the data points in a var
 
 The **mode** is the value that appears most frequently in a set of values. If there are multiple values with the highest frequency, then the variable is said to be multimodal. The most versatile of the central tendency measures as it can be applied to all levels of measurement, although the mode is not often used for numeric variables as it is not as informative as other measures.
 
-::: {.callout}
-**{{< fa lightbulb >}} Consider this**
+The more common measures for numeric variables are the mean and the median. The **mean** is a summary statistic calculated by summing all the values and dividing by the number of values. The **median** is calculated by sorting all the values in the variable and then selecting the middle value.
 
-::: {layout="[55, -3, 45]" layout-valign="top" layout-align="left"}
+:::: {.callout}
+**{{< fa regular lightbulb >}} Consider this**
 
-::: {#first}
-@Grieve2018 compiled a 8.9 billion-word corpus of geotagged posts from Twitter between 2013-2014 in the United States. The authors provide a [search interface](https://isogloss.shinyapps.io/isogloss/) to explore relationship between lexical usage and geographic location. Explore this corpus searching for terms related to slang ("hella", "wicked"), geographical ("mountain", "river"), meteorological ("snow", "rain"), and/ or any other term types. What types of patterns do you find? What are the benefits and/ or limitations of this type of data, data summarization, and/ or interface?
+::: {.content-visible when-format="html"}
+<img src="figures/data-word-mapper.png" width="35%" style="float: right;">
+
 :::
 
-::: {#second}
-```{r}
-#| label: fig-data-word-mapper
-#| fig-cap: 'Example distribution of the term "Yall" the Word Mapper Project'
-#| fig-alt: 'The southern region of the United States show a higher frequency of the term than north and northwest regions.'
-#| out-width: '100%'
-
-include_graphics("figures/data-word-mapper.png")
+::: {.content-visible when-format="latex"}
+```{=latex}
+\begin{wrapfigure}{r}{0.50\textwidth}
+  \centering
+  \includegraphics[width=0.45\textwidth]{part_2/figures/data-word-mapper.png}
+\end{wrapfigure}
 ```
 :::
 
-:::
+@Grieve2018 compiled a 8.9 billion-word corpus of geotagged posts from Twitter between 2013-2014 in the United States. The authors provide a [search interface](https://isogloss.shinyapps.io/isogloss/) to explore relationship between lexical usage and geographic location. Explore this corpus searching for terms related to slang ("hella", "wicked"), geographical ("mountain", "river"), meteorological ("snow", "rain"), and/ or any other terms. What types of patterns do you find? What are the benefits and/ or limitations of this type of data, data summarization, and/ or interface?
 
 :::
-
-The more common measures for numeric variables are the mean and the median. The **mean** is a summary statistic calculated by summing all the values and dividing by the number of values. The **median** is calculated by sorting all the values in the variable and then selecting the middle value.
 
 ```{r}
 #| label: tbl-analysis-belc-central-tendency
@@ -315,7 +312,7 @@ belc_essay_tbl |>
   select(-n_missing, -complete_rate) |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
-  tt(width = 1, digits = 2, theme = "striped")
+  tt(width = 1, digits = 2)
 
 
 belc_essay_tbl |>
@@ -325,7 +322,7 @@ belc_essay_tbl |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
   select(variable, mean, median) |>
-  tt(width = 1, digits = 2, theme = "striped")
+  tt(width = 1, digits = 2)
 ```
 
 As the mode is the most frequent value, the `top_counts` measure in @tbl-analysis-belc-central-tendency provides the most frequent value for the categorical variables. Mean and median appear but we notice that the mean and median are not the same for the numeric variables. Differences that appear between the mean and median will be of interest to us later in this chapter.
@@ -408,20 +405,21 @@ When assessing the distribution of categorical variables, we can use a frequency
 #|  - "Sex"
 #|  - "Time group"
 #| layout-ncol: 2
+#| fig-pos: H
 #| layout-valign: top
-#| tbl-colwidths: [33.3, 33.3, 33.3]
+#| tbl-colwidths: auto
 
 belc_essay_tbl |>
   tabyl(sex) |>
   tibble() |>
   select(sex, frequency = n, proportion = percent) |>
-  tt(width = 1, theme = "striped")
+  tt(width = 1)
 
 belc_essay_tbl |>
   tabyl(group) |>
   tibble() |>
   select(group, frequency = n, proportion = percent) |>
-  tt(width = 1, theme = "striped")
+  tt(width = 1)
 ```
 
 A **bar plot** is a type of plot where the x-axis is a categorical variable and the y-axis is the frequency of the values. The frequency is represented by the height of the bar. The variables can be ordered by frequency, alphabetically, or some other order. @fig-analysis-belc-barplots is a bar chart for the variables `sex` and `group` ordered alphabetically.
@@ -716,7 +714,7 @@ To assess association, the number and information types of the variables under c
 
 The directionality of a relationship will take the form of a tabular or graphic summary depending on the informational value of the variables involved. In @tbl-analysis-summary-types, we see the appropriate summary types for each of the six bivariate combinations.
 
-::: {#tbl-analysis-summary-types tbl-colwidths="[17, 27, 28, 28]" .striped}
+::: {#tbl-analysis-summary-types tbl-colwidths="[17, 27, 28, 28]"}
 
 |                 | Categorical       | Ordinal                     | Numeric              |
 |-----------------|-------------------|-----------------------------|----------------------|
@@ -865,7 +863,7 @@ The goal of analysis, generally, is to generate knowledge from information. The 
 
 In this section, I will elaborate briefly on the distinctions between analysis types seen in @tbl-analysis-analysis-types. I will structure the discussion moving from the least structured (inductive) to most structured (deductive) approach to deriving knowledge from information with the aim to provide enough information for you to identify these research approaches in the literature and to make appropriate decisions as to which approach your research should adopt.
 
-::: {#tbl-analysis-analysis-types tbl-colwidths="[15, 19, 22, 22, 22]" .striped}
+::: {#tbl-analysis-analysis-types tbl-colwidths="[15, 19, 22, 22, 22]"}
 
 | Type | Aims | Approach | Methods | Evaluation |
 |------|------|----------|---------|------------|
@@ -886,7 +884,7 @@ In line with the investigative nature of EDA, the identification of variables of
 
 ::: {#fig-eda-variables}
 
-[![](figures/analysis-eda-variables.drawio.png)]{fig-alt="A table which has columns labeled as 'feat_1', 'feat_2', on so on. Above, these columns are labeled as 'features'. This figure aims to show that no feature has a special status in exploratory data analysis."}
+[![](figures/analysis-eda-variables.drawio.png){width=85%}]{fig-alt="A table which has columns labeled as 'feat_1', 'feat_2', on so on. Above, these columns are labeled as 'features'. This figure aims to show that no feature has a special status in exploratory data analysis."}
 
 Roles of variables in exploratory data analysis
 :::
@@ -895,7 +893,7 @@ Any given dataset could serve as a starting point to explore many different type
 
 By the same token, approaches for interrogating the dataset can differ significantly, between research projects and within the same project, but for instructive purposes, let's draw a distinction between descriptive methods and unsupervised learning methods, as seen in @tbl-eda-methods.
 
-::: {#tbl-eda-methods tbl-colwidths="[50, 50]" .striped}
+::: {#tbl-eda-methods tbl-colwidths="[50, 50]"}
 
 | Descriptive methods | Unsupervised learning methods |
 |---------------------|-----------------------------|
@@ -921,7 +919,7 @@ There are two types of variables in PDA: the outcome variable and the predictor 
 
 ::: {#fig-pda-variables}
 
-[![](figures/analysis-pda-variables.drawio.png)]{fig-alt="A table which has one column labeled 'outcome' and the other columns labeled 'feat_1', 'feat_2', on so on. Above, these the columns there roles are labled as 'Outcome' and 'Features'. This figure aims to show that the outcome variable is fixed and the features are flexible in predictive data analysis."}
+[![](figures/analysis-pda-variables.drawio.png){width=85%}]{fig-alt="A table which has one column labeled 'outcome' and the other columns labeled 'feat_1', 'feat_2', on so on. Above, these the columns there roles are labled as 'Outcome' and 'Features'. This figure aims to show that the outcome variable is fixed and the features are flexible in predictive data analysis."}
 
 Roles of variables in predictive data analysis
 :::
@@ -934,7 +932,7 @@ The approach to interrogating the dataset includes three main steps: feature eng
 
 There are many different types of machine learning algorithms, each with their own strengths and weaknesses. The first rough cut is to decide what type of outcome variable we are predicting: categorical or numeric. If the outcome variable is categorical, we are performing a **classification** task, and if the outcome variable is numeric, we are performing a **regression** task. As we see in @tbl-pda-algorithms, there are various algorithms that can be used for each task.
 
-::: {#tbl-pda-algorithms tbl-colwidths="[50, 50]" .striped}
+::: {#tbl-pda-algorithms tbl-colwidths="[50, 50]"}
 
 | Classification         | Regression                |
 |:-----------------------|:--------------------------|
@@ -966,7 +964,7 @@ We can now see in @fig-analysis-ida-variables the variables roles assigned to va
 
 ::: {#fig-analysis-ida-variables}
 
-[![](figures/analysis-ida-variables.drawio.png)]{fig-alt="A table which has one column labeled 'response', two columns 'expl_1' and 'expl_2', and two more labeled 'cont_1' and 'cont_2'. Above, these the columns there roles are labled as 'Response', 'Explanatory', and 'Control'. This figure aims to show that the response variable and the explanatory variables are fixed and the control variables can be used in inferential data analysis."}
+[![](figures/analysis-ida-variables.drawio.png){width=85%}]{fig-alt="A table which has one column labeled 'response', two columns 'expl_1' and 'expl_2', and two more labeled 'cont_1' and 'cont_2'. Above, these the columns there roles are labled as 'Response', 'Explanatory', and 'Control'. This figure aims to show that the response variable and the explanatory variables are fixed and the control variables can be used in inferential data analysis."}
 
 Roles of variables in inferential data analysis
 :::
@@ -1001,7 +999,7 @@ Together, data, code, and documentation form a **research compendium**. As you c
 
 ## Activities {.unnumbered}
 
-In the following activies, we will build on our understanding of how to summarize data using statistics, tables, and plots. We will dive deeper into the use of {skimr} [@R-skimr] to summarize data and the `ggplot2` package [@R-ggplot2] to create plots. We also introduce producing Quarto tables and figures with appropriate code block options. We will reinforce our understanding of {readr} [@R-readr] to read in data and {dplyr} [@R-dplyr] to manipulate data.
+In the following activies, we will build on our understanding of how to summarize data using statistics, tables, and plots. We will dive deeper into the use of {skimr} [@R-skimr] to summarize data and the {ggplot2} [@R-ggplot2] to create plots. We also introduce producing Quarto tables and figures with appropriate code block options. We will reinforce our understanding of {readr} [@R-readr] to read in data and {dplyr} [@R-dplyr] to manipulate data.
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**

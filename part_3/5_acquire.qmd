@@ -102,11 +102,11 @@ There are many ways to create and edit CSV files. You can use a spreadsheet prog
 Using a spreadsheet program is the easiest method for editing tabular data. The key is to save the file as a CSV file, and not as an Excel file, to maintain our adherence to the principle of using open formats for reproducible research.
 :::
 
-As discussed in @sec-data-data-origin, all acquired data should be accompanied by a data origin file. The majority of this information can typically be identified on the resource's website and/ or the resource's documentation. In the case of the CEDEL2 corpus, the corpus homepage provides most of the information we need.
+As discussed in @sec-data-data-origin, all acquired data should be accompanied by a data origin file. The majority of this information can typically be identified on the resource's website and/ or the resource's documentation. In the case of the CEDEL2 corpus, the corpus homepage provides most of the information we need. The data origin file for the CEDEL2 corpus is seen in @tbl-acquire-cedel2-do.
 
 Structurally, data documentation files should be stored close to the data they describe. So for our data origin file this means adding it to the *data/original/* directory. Naming the file in a transparent way is also important. I've named the file *cedel2_do.csv* to reflect the name of the corpus, the meaning of the file as data origin with a suffixed *_do*, and the file extension *.csv* to reflect the file format. CSV files reflect tabular content. It is not required that data origin files are tabular, but it makes it easier to read and display them in literate programming documents.
 
-In @tbl-acquire-cedel2-do, I've created a data origin file for the CEDEL2 corpus.
+Given this is a manual download we also need to document the procedure used to retrieve the data in prose. The script in the *process/* directory that is typically used to acquire the data is not used to programmatically retrieve data in this case. However, to keep things predictable we will use this file to document the download procedure. I've created a Quarto file named *1_acquire_data.qmd* in the *process/* directory of my project. A glimpse at the directory structure of the project at this point is seen in @def-acquire-cedel2-structure.
 
 ```{r}
 #| label: tbl-acquire-cedel2-do
@@ -118,10 +118,6 @@ In @tbl-acquire-cedel2-do, I've created a data origin file for the CEDEL2 corpus
 read_csv("data/acquire-cedel2_do.csv") |>
   tt(width = 1)
 ```
-
-Given this is a manual download we also need to document the procedure used to retrieve the data in prose. The script in the *process/* directory that is typically used to acquire the data is not used to programmatically retrieve data in this case. However, to keep things predictable we will use this file to document the download procedure. I've created a Quarto file named *1_acquire_data.qmd* in the *process/* directory of my project.
-
-A glimpse at the directory structure of the project at this point is seen in @def-acquire-cedel2-structure.
 
 ::: {#def-acquire-cedel2-structure}
 Project structure for the CEDEL2 corpus data acquisition
@@ -173,7 +169,7 @@ The *.tar* file format is used archive files and folders, it does not perform co
 
 With this goal in mind, let's get started writing the code to download and organize the data in our project directory. First, we need to identify the URL (Uniform Resource Locator) for the data that we want to download. More often than not this file will be some type of archive file with an extension such as *.zip* (Zipped file), *.tar* (Tarball file), or *tar.gz* (Gzipped tarball file), which is the case for the SWDA corpus. Archive files make downloading multiple files easy by grouping files and directories into one file.
 
-In R, we can use the `download.file()` function from base R. The `download.file()` function minimally requires two arguments: `url` and `destfile`. These correspond to the file to download and the location where it is to be saved to disk. To break out the process a bit, I will assign the URL and destination file path to variables and then use the `download.file()` function to download the file.
+In R, we can use the `download.file()` function from base R, as seen in @exm-acquire-swda-download-file. The `download.file()` function minimally requires two arguments: `url` and `destfile`. These correspond to the file to download and the location where it is to be saved to disk. To break out the process a bit, I will assign the URL and destination file path to variables and then use the `download.file()` function to download the file.
 
 ::: {#exm-acquire-swda-download-file}
 
@@ -194,8 +190,6 @@ download.file(url = file_url, destfile = file_path)
 **{{< fa exclamation-triangle >}} Warning**
 
 Note that the `file_path` variable in @exm-acquire-swda-download-file is a relative path to the *data/original/* directory. This is because the *1_acquire_data.qmd* file that we are using for this code is located in the *process/* directory and the *data/* directory is a sibling directory to the *process/* directory.
-
-It is also possible to use an absolute path to the *data/original/* directory. I will have more to say about the advantages and disadvantages of relative and absolute paths in reproducible research in [@sec-contribute-chapter].
 :::
 
 As we can see looking at the directory structure, in @def-acquire-swda-download-location, the *swda.tar.zip* file has been added to the *data/original/* directory.

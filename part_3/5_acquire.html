@@ -404,9 +404,9 @@ Figure&nbsp;5.1: Search results for the CEDEL2 Corpus
 </div>
 </div>
 </div>
-<p>As discussed in <a href="../part_2/2_data.html#sec-data-data-origin" class="quarto-xref"><span>Section 2.3.1</span></a>, all acquired data should be accompanied by a data origin file. The majority of this information can typically be identified on the resource’s website and/ or the resource’s documentation. In the case of the CEDEL2 corpus, the corpus homepage provides most of the information we need.</p>
+<p>As discussed in <a href="../part_2/2_data.html#sec-data-data-origin" class="quarto-xref"><span>Section 2.3.1</span></a>, all acquired data should be accompanied by a data origin file. The majority of this information can typically be identified on the resource’s website and/ or the resource’s documentation. In the case of the CEDEL2 corpus, the corpus homepage provides most of the information we need. The data origin file for the CEDEL2 corpus is seen in <a href="#tbl-acquire-cedel2-do" class="quarto-xref">Table&nbsp;<span>5.1</span></a>.</p>
 <p>Structurally, data documentation files should be stored close to the data they describe. So for our data origin file this means adding it to the <em>data/original/</em> directory. Naming the file in a transparent way is also important. I’ve named the file <em>cedel2_do.csv</em> to reflect the name of the corpus, the meaning of the file as data origin with a suffixed *_do<em>, and the file extension </em>.csv* to reflect the file format. CSV files reflect tabular content. It is not required that data origin files are tabular, but it makes it easier to read and display them in literate programming documents.</p>
-<p>In <a href="#tbl-acquire-cedel2-do" class="quarto-xref">Table&nbsp;<span>5.1</span></a>, I’ve created a data origin file for the CEDEL2 corpus.</p>
+<p>Given this is a manual download we also need to document the procedure used to retrieve the data in prose. The script in the <em>process/</em> directory that is typically used to acquire the data is not used to programmatically retrieve data in this case. However, to keep things predictable we will use this file to document the download procedure. I’ve created a Quarto file named <em>1_acquire_data.qmd</em> in the <em>process/</em> directory of my project. A glimpse at the directory structure of the project at this point is seen in <a href="#def-acquire-cedel2-structure" class="quarto-xref">Snippet&nbsp;<span>5.2</span></a>.</p>
 <div class="cell" data-tbl-colwidths="[25,75]">
 <div id="tbl-acquire-cedel2-do" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-acquire-cedel2-do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -462,8 +462,6 @@ Table&nbsp;5.1: Data origin file for the CEDEL2 corpus
 </figure>
 </div>
 </div>
-<p>Given this is a manual download we also need to document the procedure used to retrieve the data in prose. The script in the <em>process/</em> directory that is typically used to acquire the data is not used to programmatically retrieve data in this case. However, to keep things predictable we will use this file to document the download procedure. I’ve created a Quarto file named <em>1_acquire_data.qmd</em> in the <em>process/</em> directory of my project.</p>
-<p>A glimpse at the directory structure of the project at this point is seen in <a href="#def-acquire-cedel2-structure" class="quarto-xref">Snippet&nbsp;<span>5.2</span></a>.</p>
 <div id="def-acquire-cedel2-structure" class="theorem definition">
 <p><span class="theorem-title"><strong>Snippet 5.2</strong></span> Project structure for the CEDEL2 corpus data acquisition</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">project/</span></span>
@@ -504,7 +502,7 @@ Table&nbsp;5.1: Data origin file for the CEDEL2 corpus
 </div>
 </div>
 <p>With this goal in mind, let’s get started writing the code to download and organize the data in our project directory. First, we need to identify the URL (Uniform Resource Locator) for the data that we want to download. More often than not this file will be some type of archive file with an extension such as <em>.zip</em> (Zipped file), <em>.tar</em> (Tarball file), or <em>tar.gz</em> (Gzipped tarball file), which is the case for the SWDA corpus. Archive files make downloading multiple files easy by grouping files and directories into one file.</p>
-<p>In R, we can use the <code><a href="https://rdrr.io/r/utils/download.file.html">download.file()</a></code> function from base R. The <code><a href="https://rdrr.io/r/utils/download.file.html">download.file()</a></code> function minimally requires two arguments: <code>url</code> and <code>destfile</code>. These correspond to the file to download and the location where it is to be saved to disk. To break out the process a bit, I will assign the URL and destination file path to variables and then use the <code><a href="https://rdrr.io/r/utils/download.file.html">download.file()</a></code> function to download the file.</p>
+<p>In R, we can use the <code><a href="https://rdrr.io/r/utils/download.file.html">download.file()</a></code> function from base R, as seen in <a href="#exm-acquire-swda-download-file" class="quarto-xref">Example&nbsp;<span>5.1</span></a>. The <code><a href="https://rdrr.io/r/utils/download.file.html">download.file()</a></code> function minimally requires two arguments: <code>url</code> and <code>destfile</code>. These correspond to the file to download and the location where it is to be saved to disk. To break out the process a bit, I will assign the URL and destination file path to variables and then use the <code><a href="https://rdrr.io/r/utils/download.file.html">download.file()</a></code> function to download the file.</p>
 <div id="exm-acquire-swda-download-file" class="theorem example">
 <p><span class="theorem-title"><strong>Example 5.1</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># URL to SWDA corpus archive file</span></span>
@@ -525,7 +523,6 @@ Table&nbsp;5.1: Data origin file for the CEDEL2 corpus
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-exclamation-triangle" aria-label="exclamation-triangle"></i> Warning</strong></p>
 <p>Note that the <code>file_path</code> variable in <a href="#exm-acquire-swda-download-file" class="quarto-xref">Example&nbsp;<span>5.1</span></a> is a relative path to the <em>data/original/</em> directory. This is because the <em>1_acquire_data.qmd</em> file that we are using for this code is located in the <em>process/</em> directory and the <em>data/</em> directory is a sibling directory to the <em>process/</em> directory.</p>
-<p>It is also possible to use an absolute path to the <em>data/original/</em> directory. I will have more to say about the advantages and disadvantages of relative and absolute paths in reproducible research in <a href="../part_5/11_contribute.html" class="quarto-xref"><span>Chapter 11</span></a>.</p>
 </div>
 </div>
 </div>

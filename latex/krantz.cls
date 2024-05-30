@@ -36,6 +36,9 @@
      {\setlength\@tempdima   {\paperheight}%
       \setlength\paperheight {\paperwidth}%
       \setlength\paperwidth  {\@tempdima}}
+  \DeclareOption{routledge}
+      {\setlength\paperheight {246mm}%
+       \setlength\paperwidth  {174mm}}
 \fi
 \if@compatibility
   \renewcommand\@ptsize{0}
@@ -113,10 +116,9 @@
 \newif\if@krantzb
 %%%%%%%%%%%%%%%%%%
 
-
-\ExecuteOptions{letterpaper,10pt,twoside,onecolumn,final,openright}
+% \ExecuteOptions{letterpaper,10pt,twoside,onecolumn,final,openright}
+\ExecuteOptions{routledge,10pt,twoside,onecolumn,final,openright}
 \ProcessOptions
-
 
 %%%%%%%%%%%%%%%%%%%
 

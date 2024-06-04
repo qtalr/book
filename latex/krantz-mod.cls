@@ -1,7 +1,7 @@
 %%
 %% This is file `Krantz.cls'
 %%% Created by Shashi Kumar / KGL [Jan 2023]
-
+%%% Modified by Jerid Francom [May 2024]
 
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{krantz}
@@ -480,7 +480,6 @@
 \def\@editor{}
 \def\@edition{}
 
-
 \if@titlepage
   \newcommand\maketitle{\begin{titlepage}%
   \let\footnotesize\small
@@ -812,6 +811,7 @@
     \vskip 19.3\p@}
     \def\theequation{\thechapter.\arabic{equation}}
     }
+
 \def\@schapter#1{\if@twocolumn
                    \@topnewpage[\@makeschapterhead{#1}]%
                  \else

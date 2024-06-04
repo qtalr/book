@@ -5,7 +5,7 @@
 %
 \documentclass[
   letterpaper,
-  krantz1]{latex/krantz}
+  krantz1]{latex/krantz-mod}
 
 \usepackage{amsmath,amssymb}
 \usepackage{iftex}
@@ -171,13 +171,23 @@
   breakanywhere
 }
 
+\usepackage{fancyhdr}
+\newcommand{\setDOI}[1]{\gdef\doi{#1}}
+\fancypagestyle{chapterfirstpage}{
+  \fancyhf{} % clear all header and footer fields
+  \fancyfoot[L]{\doi} % the DOI in the left of the footer
+  \fancyfoot[R]{\thepage} % the page number in the right of the footer
+  \renewcommand{\headrulewidth}{0pt} % remove the header rule
+}
+
 % https://github.com/hadley/r-pkgs/blob/main/latex/preamble.tex
 \widowpenalty=4000 % avoid leaving lines behind
 \clubpenalty=4000  % avoid creating orphans
 
 % create index
 \usepackage{imakeidx}[intoc,columns=2]
-\indexsetup{level=\section*,toclevel=section,noclearpage}
+\indexsetup{noclearpage}
+% \renewcommand{\indexname}{}
 \makeindex
 
 \frontmatter
@@ -258,9 +268,9 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
-\newtheorem{definition}{Snippet}[chapter]
-\theoremstyle{definition}
 \newtheorem{example}{Example}[chapter]
+\theoremstyle{definition}
+\newtheorem{definition}{Snippet}[chapter]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -284,7 +294,7 @@
 \@ifundefined{codebgcolor}{\definecolor{codebgcolor}{HTML}{f8f8f8}}{}
 \makeatother
 \makeatletter
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[colback={codebgcolor}, boxrule=0pt, enhanced, sharp corners, breakable, frame hidden]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[colback={codebgcolor}, frame hidden, sharp corners, enhanced, breakable, boxrule=0pt]}{\end{tcolorbox}}\fi
 \makeatother
 \makeatletter
 \@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
@@ -305,6 +315,7 @@
   pdfcreator={LaTeX via pandoc}}
 
 \title{An Introduction to Quantitative Text Analysis for Linguistics}
+
 \usepackage{etoolbox}
 \makeatletter
 \providecommand{\subtitle}[1]{% add subtitle to \maketitle
@@ -312,25 +323,33 @@
 }
 \makeatother
 \subtitle{Reproducible Research using R}
+
 \author{Jerid Francom 0000-0001-5972-6330}% hardcoded author ORCID
-\date{May 6, 2024}
+\date{June 3, 2024}
+
 
 \begin{document}
+\setcounter{page}{1} % Manually set the page number
 \halftitle{An Introduction to Quantitative Text Analysis for
 Linguistics}{}
 
-"An Introduction to Quantitative Text Analysis for Linguistics: Reproducible Research Using R" is a pragmatic textbook that equips students and researchers with the essential concepts and practical programming skills needed to conduct quantitative text analysis in a reproducible manner. Designed for undergraduate students and those new to the field, this book assumes no prior experience with statistics or programming, making it an accessible resource for anyone embarking on their journey into quantitative text analysis.
+\textit{An Introduction to Quantitative Text Analysis for Linguistics: Reproducible Research Using R} is a pragmatic textbook that equips students and researchers with the essential concepts and practical programming skills needed to conduct quantitative text analysis in a reproducible manner. Designed for undergraduate students and those new to the field, this book assumes no prior experience with statistics or programming, making it an accessible resource for anyone embarking on their journey into quantitative text analysis.
 
 
 Through a pedagogical approach which emphasizes intuitive understanding over technical details, readers will gain data literacy by learning to identify, interpret, and evaluate data analysis procedures and results. They will also develop research skills, enabling them to design, implement, and communicate quantitative text analysis projects effectively. The book places a strong emphasis on programming skills, guiding readers through interactive lessons, tutorials, and lab activities using the R programming language and real-world datasets.
 
 
-This practical text is enriched with features that facilitate learning, including thought and practical exercises, a companion website which includes programming demonstrations to develop and augment readers' recognition of how programming strategies are implemented, and a GitHub repository which contains both a set of interactive R programming lessons (Swirl) and lab exercises, which guide readers through practical hands-on programming applications. This text is an essential companion to any linguist looking to learn how to incorporate quantitative data analysis into their work.
+This practical textbook is enriched with features that facilitate learning, including thought and practical exercises, a companion website which includes programming demonstrations to develop and augment readers' recognition of how programming strategies are implemented, and a GitHub repository which contains both a set of interactive R programming lessons and lab exercises, which guide readers through practical hands-on programming applications. This textbook is an essential companion to any linguist looking to learn how to incorporate quantitative data analysis into their work.
 
 
 \textbf{Jerid Francom} is Associate Professor of Spanish and Linguistics at Wake Forest University. His research focuses on the use of language corpora from a variety of sources (news, social media, and other internet sources) to better understand the linguistic and cultural similarities and differences between language varieties for both scholarly and pedagogical projects. He has published on topics including the development, annotation, and evaluation of linguistic corpora and analyzed corpora through corpus, psycholinguistic, and computational methodologies. He also has experience working with and teaching statistical programming with R.
 
+
+
 \maketitle
+\setcounter{page}{4} % Manually set the page number (this will affect the subsequent pages)
+
+
 
 % BEFORE BODY
 
@@ -351,7 +370,9 @@ This practical text is enriched with features that facilitate learning, includin
 \AtBeginEnvironment{tabular}{\small\sffamily}
 
 \pagebreak
+
 % Publishing info
+\thispagestyle{empty}
 
 Designed cover image: Getty Images | Man As Thep
 
@@ -405,16 +426,35 @@ This book has been prepared from camera-ready copy provided by the author.
 
 \markboth{Acknowledgements}{Acknowledgements}
 
-\ldots{}
+The journey of creating this textbook has been both challenging and
+rewarding, and it would not have been possible without the inspiration,
+support, and invaluable feedback from many individuals. First and
+foremost, I extend my deepest gratitude to my students at Wake Forest
+University. Your enthusiasm and curiosity have been a constant source of
+inspiration, pushing me to address my blind spots and meet your needs
+more effectively.
 
-The development of this book has benefited from the generous feedback
-from the following people: Andrea Bowling, Caroline Brady, Declan
-Golsen, Asya Little, Claudia Valdez, Laura Aull, Jack Nelson, Logan
-Jacobs, Abby Komiske, Elain Lu, and Sicheng Wang.
+I am particularly grateful for the generous feedback from the following
+individuals, whose insights and suggestions have significantly shaped
+the development of this book: Andrea Bowling, Caroline Brady, Declan
+Golsen, Asya Little, Laura Aull, Jack Nelson, Logan Jacobs, Abby
+Komiske, Elain Lu, and Sicheng Wang. Your contributions have been
+instrumental in refining the content and making it more accessible and
+engaging for future readers.
 
-\ldots{}
+A special thanks to my colleague and spouse, Dr.~Claudia Valdez, for her
+unwavering support, encouragement, and patience throughout this project.
+Your feedback and guidance have been invaluable, and I am grateful for
+your willingness to engage in countless discussions about the content,
+structure, and pedagogical approach of this book. Most importantly,
+thank you for your love and understanding, which have sustained me
+through the ups and downs of this journey.
 
-As always, any errors or omissions are my own.
+Finally, I would like to express my appreciation to the R community,
+especially the developers and contributors of the \{tidyverse\} and
+\{tidmodels\} packages. Your dedication to creating user-friendly and
+powerful tools for data analysis has revolutionized the field of
+quantitative text analysis and made it accessible to a broader audience.
 
 \bookmarksetup{startatroot}
 
@@ -422,7 +462,10 @@ As always, any errors or omissions are my own.
 
 \markboth{Preface}{Preface}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\setDOI{10.4324/9781003393764.0}
+\thispagestyle{chapterfirstpage}
+
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -793,7 +836,7 @@ which is know as your \textbf{local environment}, is not the only option
 to work with R. Other options include working with R in a \textbf{remote
 environment} or a \textbf{virtual environment}.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Guides}
 
@@ -822,7 +865,7 @@ R-universe (\citeproc{ref-ROpenSci2024}{ROpenSci, 2024}), while other
 packages can be obtained from code-sharing platforms such as GitHub
 (\citeproc{ref-Github2024}{Github, 2024}).
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -843,7 +886,7 @@ textbook, but there is a set of packages that will be key to have from
 the get go. Once you have access to a working R/ RStudio environment,
 you can proceed to install the following packages.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Guides}
 
@@ -879,7 +922,7 @@ You can do this by running the following code in an R console:
 
 \subsection*{Git and GitHub}\label{sec-preface-git-github}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Guides}
 
@@ -958,7 +1001,7 @@ demonstrates your issue. This helps others understand and answer your
 question effectively. \\
 \end{longtable}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Guides}
 
@@ -1106,7 +1149,7 @@ textbook:
 
 \textbf{Content}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -1114,7 +1157,7 @@ Learning outcomes for the chapter.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1122,7 +1165,7 @@ Points to consider and questions to explore.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -1130,7 +1173,7 @@ Case studies which highlight conceptual knowledge and coding skills.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -1140,7 +1183,7 @@ Additional comments and resources for diving deeper into a topic.
 
 \textbf{Activities}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -1148,7 +1191,7 @@ Links to interactive lessons for practicing coding skills.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -1156,7 +1199,7 @@ Reading to examine programming concepts.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -1166,7 +1209,7 @@ Exercises for applying conceptual knowledge and coding skills.
 
 \textbf{Other}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -1174,7 +1217,7 @@ Tips for using R and related tools.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -1198,7 +1241,7 @@ the tools and resources that you will be using throughout this textbook.
 These and subsequent activities are designed to be completed in the
 order that they are presented in this textbook.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -1210,7 +1253,7 @@ completing swirl lessons for interactive R programming tutorials.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -1222,7 +1265,7 @@ to create literate documents using R and Quarto.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -1271,7 +1314,10 @@ analysis contributes to the field.
 
 \chapter{Text analysis}\label{sec-text-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\setDOI{10.4324/9781003393764.1}
+\thispagestyle{chapterfirstpage}
+
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -1296,7 +1342,7 @@ are discussed. I then introduce text analysis as a branch of data
 science and discuss its aims, approaches, implementation, and
 applications.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -1343,7 +1389,7 @@ the world is actually like can be two different things. This is
 problematic for making sense of the world in an objective way. This is
 where science comes in.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1401,8 +1447,8 @@ the world wide web, and wide adoption of mobile devices electronic
 communication skyrocketed around the globe. To put this in perspective,
 in 2019 it was estimated that every minute 511 thousand tweets were
 posted, 18.1 million text messages were sent, and 188 million emails
-were sent (\citeproc{ref-DataNeverSleeps08-2021}{{``Data never sleeps
-7.0 infographic,''} 2019}). The data flood has not been limited to
+were sent (\citeproc{ref-DataNeverSleeps08-2021}{{``Data {Never Sleeps}
+7.0 {Infographic},''} 2019}). The data flood has not been limited to
 language, there are more sensors and recording devices than ever before
 which capture evermore swaths of the world we live in
 (\citeproc{ref-Desjardins2019}{Desjardins, 2019}).
@@ -1507,7 +1553,7 @@ characteristics, or ``qualities'', that can be observed, but not
 measured (\emph{e.g.} introspective methods, ethnographic methods,
 \emph{etc.})
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -1709,7 +1755,7 @@ be using search engines, online translators, submitting your paper to
 plagiarism detection software, \emph{etc.} many of the text analysis
 methods we will cover are at play.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1815,7 +1861,7 @@ Language-related fields
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1857,7 +1903,7 @@ reproducible research documents. You will apply the capabilities of
 Quarto in a practical context conveying the objectives and key
 discoveries from a primary research article.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -1870,7 +1916,7 @@ references list, and cross-referenced tables and figures.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -1924,7 +1970,7 @@ to guide the implementation of a text analysis project.
 
 \chapter{Data}\label{sec-data-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -1953,7 +1999,7 @@ organization and transformation. Documentation in quantitative research
 is emphasized addressing the importance of data origin files and data
 dictionaries.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -2123,7 +2169,7 @@ targeted representation of specific language populations.
 specialized corpora which aim to model different languages or different
 language varieties for direct or indirect comparison, respectively.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -2227,7 +2273,7 @@ community, will make identifying language corpora faster than through a
 general web search. Furthermore, repositories often require certain
 standards for corpus format and documentation for publication.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -2255,7 +2301,7 @@ APIs are, as the title suggests, programming interfaces which allow
 access, under certain conditions, to information that a website or
 database accessible via the web contains.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -2286,7 +2332,7 @@ is crucial when working with corpus data. Violating these rights can
 lead to legal and ethical issues, including lawsuits, fines, and damage
 to one's professional reputation. To avoid these problems, researchers
 must ensure they have the necessary permissions to use copyrighted works
-in their research. Consult {``U.s. Copyright office''}
+in their research. Consult {``U.{S}. {Copyright Office}''}
 (\citeproc{ref-UScopyright2024}{n.d.}) or an academic librarian for
 guidance on copyright law and fair use.
 
@@ -2655,7 +2701,7 @@ other variables appear to describe that variable, then the most
 individualized variable is likely the unit of observation of the
 dataset, \emph{i.e.} the meaning of each observation.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -2873,7 +2919,7 @@ text\_id & sent\_id & bigram\\
 
 \end{table}%
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -2988,7 +3034,7 @@ each word in the sentence. The results of this process enables more
 direct access during analysis to features that were hidden or otherwise
 difficult to access.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -3076,7 +3122,7 @@ lemma
 
 \end{longtable}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -3286,7 +3332,7 @@ name and can include measurement units, allowed values, \emph{etc.} \\
 Organizing this information in a tabular format, such as a spreadsheet,
 can make it easy for others to read and understand your data dictionary.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -3330,7 +3376,7 @@ expand on the elements of code blocks in Quarto documents such as the
 \texttt{label}, \texttt{echo}, \texttt{message}, and \texttt{include}
 options.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -3342,7 +3388,7 @@ coding strategies for reading, inspecting, and writing datasets.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -3389,7 +3435,7 @@ ensure transparent and reproducible research.
 
 \chapter{Analysis}\label{sec-analysis-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -3418,7 +3464,7 @@ chapter, I will outline methods to and the importance of communicating
 the analysis results and procedure in a transparent and reproducible
 manner.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -3563,7 +3609,7 @@ E5 & L05 & female & T3 & 158 & 80 & 0.506 & 0.987 \\
 
 \end{longtable}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -3609,7 +3655,7 @@ all the values and dividing by the number of values. The \textbf{median}
 is calculated by sorting all the values in the variable and then
 selecting the middle value.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -3764,7 +3810,7 @@ prop\_l2 & 0.1 & 0.027\\
 
 \end{table}%
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -3915,7 +3961,7 @@ in first and third time groups. If we were to see any clearly loopsided
 categories, this would be a sign of imbalance in the data and we would
 need to consider how this might impact our analysis.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -4244,7 +4290,7 @@ distribution of units in a corpus is affected by various sampling
 factors, including the size of the corpus. The larger the corpus, the
 closer the distribution will be to the Zipf distribution.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -5024,7 +5070,7 @@ reinforce our understanding of \{readr\}
 data and \{dplyr\} (\citeproc{ref-R-dplyr}{Wickham, François, Henry,
 Müller, \& Vaughan, 2023}) to manipulate data.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -5037,7 +5083,7 @@ variable(s).
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -5078,7 +5124,7 @@ the analysis forms an integral part of creating reproducible research.
 
 \chapter{Research}\label{sec-research-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -5110,7 +5156,7 @@ conceptual and practical steps to implement the research effectively and
 in a way that supports communicating the research findings and the
 process by which the findings were obtained.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -5605,7 +5651,7 @@ most often are, sketch out contingency plans to address these
 shortcomings. This will help buttress your research and ensure that your
 time and effort is well-spent.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -5794,7 +5840,7 @@ such that you can begin to work on your own research projects and
 understand how to use the tools and resources available to you to manage
 your project.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -5806,7 +5852,7 @@ how to manage a reproducible research project structure.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -5867,7 +5913,7 @@ results and also forms the cornerstone of reproducible research.
 
 \chapter{Acquire}\label{sec-acquire-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -5900,7 +5946,7 @@ only be adept at acquiring data from diverse sources but also capable of
 documenting it comprehensively, enabling you to replicate the process in
 the future.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -6019,7 +6065,7 @@ origin of the data, and in the case of data acquired through manual
 downloads, we need to document the procedures we took to acquire the
 data to the best of our ability.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -6183,7 +6229,7 @@ pauses such as ``um'' and ``uh'' and traditional sociolinguistic
 variables such as sex, age, and education in spontaneous speech by
 American English speakers.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -6241,7 +6287,7 @@ the file.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -6382,7 +6428,7 @@ This object can now be used as the value of the argument
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -6578,7 +6624,7 @@ for data collection than others. Programmers (like you!) in the R
 community take up the task of wrapping calls to an API with R code to
 make accessing that data from R convenient, and of course reproducible.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -6647,7 +6693,7 @@ acquiring data from the TalkBank corpus resources. These include:
 \texttt{getTokens()}, \texttt{getTokenTypes()}, and
 \texttt{getUtterances()}.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip} List functions and arguments
 
@@ -7038,7 +7084,7 @@ may be helpful to perform other input checks, print messages,
 \emph{etc.} for functions that we plan to share with others. I will
 leave these enhancements as an exercise for the reader.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -7095,7 +7141,7 @@ Project structure with \emph{functions.R} file
 
 \end{definition}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -7174,7 +7220,7 @@ statements, and applying functions iteratively will be covered in
 addition to packages and functions which provide access to data from the
 web.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -7187,7 +7233,7 @@ service of programmatically acquiring and documenting data.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -7225,7 +7271,7 @@ into a tidy dataset.
 
 \chapter{Curate}\label{sec-curate-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -7258,7 +7304,7 @@ method that we will implement. Once the dataset is curated, we will
 create a data dictionary that describes the dataset and the variables
 that are included in the dataset for transparency and reproducibility.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -7713,7 +7759,7 @@ either the \texttt{data()} function, if the package is loaded, or the
 \texttt{::} operator, if the package is not loaded,
 \texttt{data(dative)} or \texttt{languageR::dative}, respectively.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -8742,7 +8788,7 @@ $ session_seq <chr> "2", "2", "2", "4", "4", "12", "12", "12", "12", "12", "12~
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -8794,7 +8840,7 @@ This is the data for the native speakers. We can now repeat this process
 for the non-native speakers, or we can create a function to do it for
 us.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -8841,7 +8887,7 @@ documentation is a data dictionary, as discussed in
 Section~\ref{sec-data-data-dictionaries}. As with data origin files, you
 can use spreadsheet software to create and edit the data dictionary.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -8912,7 +8958,7 @@ will have an opportunity to learn and apply your skills and knowledge to
 the task of curating datasets. This is a vital component of text
 analysis research that uses unstructured and semi-structured data.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -8928,7 +8974,7 @@ document datasets in a data dictionary.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -8964,7 +9010,7 @@ dataset.
 
 \chapter{Transform}\label{sec-transform-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -8992,7 +9038,7 @@ variables. These processes are not sequential but may occur in any order
 based on the researcher's evaluation of the dataset characteristics and
 the desired outcome.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -9372,7 +9418,7 @@ whitespace character. If we want to consider these contractions as
 separate words, then perhaps we need to entertain a different
 tokenization strategy.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -9402,7 +9448,7 @@ relevant for word tokenization in logographic writing systems, such as
 Chinese. The take home message is there is no one-size-fits-all
 tokenization strategy.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -9584,7 +9630,7 @@ Example~\ref{exm-transform-europarl-tokenization-bigrams-tidytext}.
 The two-word token sequences for lines appear as observations in the
 \texttt{europarl\_bigrams\_tbl} dataset.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -9863,7 +9909,7 @@ for the natives. Syntactic annotation is a computationally expensive
 operation and the natives and translations datasets contain 116,341 and
 738,597 observations, respectively.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -9982,7 +10028,7 @@ of the syntactic tree for a sentence in the ENNTT natives dataset}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -10324,7 +10370,7 @@ Example~\ref{exm-transform-merging-join-anti}.
 Of these join types, the left join and the anti join are some of the
 most common to encounter in research projects.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -10766,7 +10812,7 @@ with R. This includes preparation and enrichment of curated datasets
 using normalization, tokenization, recoding, generation, and/ or
 integration strategies.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -10780,7 +10826,7 @@ incorporate other datasets to augment or filter the dataset of interest.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -10836,7 +10882,7 @@ value of each of these approaches.
 
 \chapter{Explore}\label{sec-explore-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -10866,7 +10912,7 @@ quantitative methods to summarize, reduce, and sort complex datasets and
 statistically and visually interrogate a dataset in order to provide the
 researcher novel perspective to be qualitatively assessed.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -11237,7 +11283,7 @@ student', is the word `studious'. Yet, `studious' is not as frequent as
 \emph{etc}. In this way, `studious' is more semantically specific than
 `good'.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -11413,7 +11459,7 @@ scenario C is the least dispersed. Yet, the type's \(df\) and \(idf\)
 scores will be the same. But the \(dp\) score will reflect increasing
 concentration of the type's dispersion from A to B to C.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper} Dispersion measures
 
@@ -11645,7 +11691,7 @@ then, all else being equal, the frequency counts will be twice as large
 in the larger sub-corpus. This is why we use relative frequency
 measures, which are normalized by the size of the sub-corpus.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -12051,7 +12097,7 @@ window. This is a useful approach for spot identifying collocations of a
 target word or phrase, however it can be time-consuming to inspect and
 is not suitable for large datasets.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -12231,7 +12277,7 @@ particle constructions in the MASC dataset}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -12500,7 +12546,7 @@ principle components of the POS relative frequency}
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -12825,7 +12871,7 @@ possibility that the clusters may capture differences between modality
 exploratory data analysis through clustering can be used to identify new
 questions and new variables of interest.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -12859,7 +12905,7 @@ meanings (\citeproc{ref-Harris1954}{Harris, 1954}). As Firth
 (\citeproc{ref-Firth1957}{1957}) states, ``you shall know a word by the
 company it keeps''.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -12928,7 +12974,7 @@ on the target word. The CBOW model is faster to train and is better for
 frequent words. The Skip-gram model is slower to train and is better for
 infrequent words.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -13363,7 +13409,7 @@ embedding models. We will model how to explore iteratively using the
 output of one method to inform the next and ultimately to address a
 research question.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -13376,7 +13422,7 @@ exploratory data analysis.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -13414,7 +13460,7 @@ us a robust approach to exploring and generating research questions.
 
 \chapter{Predict}\label{sec-predict-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -13440,7 +13486,7 @@ variable based on the values of the feature variables. Throughout the
 chapter, we explore practical tasks and theoretical applications of
 statistical learning in text analysis.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -13539,7 +13585,7 @@ of the data for testing, we can evaluate the model's performance on data
 that it has not seen before and therefore get a more accurate estimate
 of the generalizable trends in the data.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -13967,7 +14013,7 @@ Example~\ref{exm-predict-class-recipe}.
 The recipe object at this moment contains just one instruction, what the
 variables are and what their relationship is.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14012,7 +14058,7 @@ feature frequencies and weights (\emph{e.g.} \texttt{step\_tf()},
 \texttt{step\_tfidf()}, \emph{etc.}) and token filtering (\emph{e.g.}
 \texttt{step\_tokenfilter()}).
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper} For other tokenization strategies
 and feature engineering methods, see \{textrecipes\} documentation
@@ -14110,7 +14156,7 @@ Example~\ref{exm-predict-class-recipe-tfidf}.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14170,7 +14216,7 @@ each writing sample, only a small subset of them will actually appear,
 most of our cells will be filled with zeros. This is what is known as a
 \textbf{sparse matrix}.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14256,7 +14302,7 @@ We now have a manageable set of features, and fewer of which will have a
 as many zeros. Only during the interrogation step will we know if they
 are useful.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14337,7 +14383,7 @@ computationally expensive, and uninterpretable models, all things being
 equal. Only if the performance of the simple model is not good enough
 should we move on to a more complex model.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14398,7 +14444,7 @@ training set with different hyperparameters and evaluating the model's
 performance to determine the best hyperparameter values to use for the
 model.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14872,7 +14918,7 @@ potential improvement. A good next step is to evaluate the model errors
 and see if there are any patterns that can be addressed before
 considering what approach to take to improve the model.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14941,7 +14987,7 @@ may be an interesting avenue for further exploration. Maybe these are
 learners that are more advanced or have a particular style of writing
 that is more similar to natives.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -15724,7 +15770,7 @@ Example~\ref{exm-predict-reg-model-spec-tune-fit-evaluate-null}.
 1 rmse    standard    22.6    10   0.203 Preprocessor1_Model1
 \end{verbatim}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -15963,7 +16009,7 @@ specification in Example~\ref{exm-predict-reg-model-spec-random-forest}.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -16270,7 +16316,7 @@ we have learned in this chapter. We will use the Tidymodels framework to
 build and evaluate supervised machine learning models for text
 classification and regression tasks.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -16282,7 +16328,7 @@ with the Tidymodels framework.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -16308,7 +16354,7 @@ techniques to extract feature importance.
 
 \chapter{Infer}\label{sec-infer-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -16334,7 +16380,7 @@ the analysis of corpus-based data. During our treatment of these
 contexts, we will establish a foundational understanding of statistical
 inference using a simulation-based approach.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -16434,7 +16480,7 @@ both response and explanatory variables, it is key to confirm that your
 operationalization of the variables is well-defined and that the data
 aligns.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -16536,7 +16582,7 @@ is very wide, we can be less confident that the results are reliable. If
 our confidence interval contains the null value, then even a significant
 \(p\)-value will require a more nuanced interpretation.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -17168,7 +17214,7 @@ the expected variation. This suggests that the observed statistic is not
 within the level of variation that we would expect if the null
 hypothesis were true.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -17860,7 +17906,7 @@ Example~\ref{exm-infer-cat-logistic-regression}.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -17984,7 +18030,7 @@ The confidence intervals for the main effects, \texttt{modality} and
 0, which provides evidence that each of the explanatory variables is
 related to the proportion of NP realizations of the recipient clause.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -18071,7 +18117,7 @@ see the terms for the logistic regression model with an interaction.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -18308,7 +18354,7 @@ Example~\ref{exm-infer-num-uni-null-mean} to specify the expected mean.
 The rest of the hypothesis testing workflow is the same as for the null
 distribution of proportions.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -18802,7 +18848,7 @@ observed difference between the means of the different levels of the
 \texttt{education} variable not significantly different from what we
 would expect by chance.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -19220,7 +19266,7 @@ chapter. You'll review working with key variables, examine data
 distributions, and employ simulation-based statistical methods using
 \{infer\} to test hypotheses about their relationships.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -19232,7 +19278,7 @@ simulation-based approach to statistical inference.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -19272,7 +19318,7 @@ research to build a more robust and verifiable research base.
 
 \chapter{Contribute}\label{sec-contribute-chapter}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -19299,7 +19345,7 @@ aspects of research communication, providing guidelines for effective
 research reporting and strategies to ensure the reproducibility of your
 research project.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -19540,7 +19586,7 @@ recreate the analysis steps from a dataset or manually copy and paste
 results from the console, which can be error-prone and is not
 reproducible.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -19995,7 +20041,7 @@ publishes a website. This can be useful for sharing the research project
 with others, as it provides a means to navigate the project in a
 web-based environment.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -20144,7 +20190,7 @@ The following activities are designed to dive deeper into the process of
 managing a research project and computing environment to ensure that
 your research project is reproducible.
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -20156,7 +20202,7 @@ computing environment for effective communication and reproducibility.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-color-frame, breakable, colback=white, opacityback=0, left=2mm, bottomrule=.15mm, leftrule=.75mm, arc=.35mm, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, bottomrule=.15mm, left=2mm, opacityback=0, leftrule=.75mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, breakable, colframe=quarto-callout-color-frame]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -20196,28 +20242,28 @@ Ackoff, R. L. (1989). From data to wisdom. \emph{Journal of Applied
 Systems Analysis}, \emph{16}(1), 3--9.
 
 \bibitem[\citeproctext]{ref-Adel2020}
-Ädel, A. (2020). Corpus compilation. In M. Paquot \& S. Th. Gries
-(Eds.), \emph{A practical handbook of corpus linguistics} (pp. 3--24).
-Switzerland: Springer.
+Ädel, A. (2020). Corpus {Compilation}. In M. Paquot \& S. Th. Gries
+(Eds.), \emph{A {Practical Handbook} of {Corpus Linguistics}} (pp.
+3--24). Switzerland: Springer.
 
 \bibitem[\citeproctext]{ref-Albert2015}
-Albert, S., de Ruiter, L. E., \& de Ruiter, J. P. (2015). CABNC: The
-jeffersonian transcription of the spoken british national corpus.
+Albert, S., de Ruiter, L. E., \& de Ruiter, J. P. (2015). {CABNC}: {The
+Jeffersonian} transcription of the spoken {British} national corpus.
 TalkBank.
 
 \bibitem[\citeproctext]{ref-Baayen2004}
-Baayen, R. Harald. (2004). Statistics in psycholinguistics: A critique
-of some current gold standards. \emph{Mental Lexicon Working Papers},
-\emph{1}(1), 1--47.
+Baayen, R. Harald. (2004). Statistics in {Psycholinguistics}: {A}
+critique of some current gold standards. \emph{Mental Lexicon Working
+Papers}, \emph{1}(1), 1--47.
 
 \bibitem[\citeproctext]{ref-Baayen2008a}
-Baayen, R. Harald. (2008). \emph{Analyzing linguistic data: A practical
-introduction to statistics using r}. Cambridge Univ Pr.
+Baayen, R. Harald. (2008). \emph{Analyzing linguistic data: {A}
+practical introduction to statistics using {R}}. Cambridge Univ Pr.
 
 \bibitem[\citeproctext]{ref-Baayen2010}
 Baayen, R. Harald. (2010). A real experiment is a factorial experiment?
 \emph{The Mental Lexicon}, \emph{5}(1), 149--157.
-doi:\href{https://doi.org/10.1075/ml.5.1.06baa}{10.1075/ml.5.1.06baa}
+doi:10.1075/ml.5.1.06baa
 
 \bibitem[\citeproctext]{ref-Baayen2011}
 Baayen, R. Harald. (2011). Corpus linguistics and naive discriminative
@@ -20229,55 +20275,52 @@ Lingu{\textbackslash{}}'{\textbackslash{}}istica Aplicada},
 Baayen, R. Harald, Feldman, L. B., \& Schreuder, R. (2006).
 Morphological influences on the recognition of monosyllabic
 monomorphemic words. \emph{Journal of Memory and Language}, \emph{55},
-290--313.
-doi:\href{https://doi.org/10.1016/j.jml.2006.03.008}{10.1016/j.jml.2006.03.008}
+290--313. doi:10.1016/j.jml.2006.03.008
 
 \bibitem[\citeproctext]{ref-R-languageR}
 Baayen, R. H., \& Shafaei-Bajestan, E. (2019). \emph{languageR:
 Analyzing linguistic data: A practical introduction to statistics}.
-Retrieved from \url{https://CRAN.R-project.org/package=languageR}
+Retrieved from https://CRAN.R-project.org/package=languageR
 
 \bibitem[\citeproctext]{ref-Baker2016}
 Baker, M. (2016). 1,500 scientists lift the lid on reproducibility.
-\emph{Nature}, \emph{533}(7604), 452--454.
-doi:\href{https://doi.org/10.1038/533452a}{10.1038/533452a}
+\emph{Nature}, \emph{533}(7604), 452--454. doi:10.1038/533452a
 
 \bibitem[\citeproctext]{ref-Bao2019}
 Bao, W., Lianju, N., \& Yue, K. (2019). Integration of unsupervised and
 supervised machine learning algorithms for credit risk assessment.
 \emph{Expert Systems with Applications}, \emph{128}, 301--315.
-doi:\href{https://doi.org/10.1016/j.eswa.2019.02.033}{10.1016/j.eswa.2019.02.033}
+doi:10.1016/j.eswa.2019.02.033
 
 \bibitem[\citeproctext]{ref-R-future}
 Bengtsson, H. (2024). \emph{Future: Unified parallel and distributed
 processing in r for everyone}. Retrieved from
-\url{https://future.futureverse.org}
+https://future.futureverse.org
 
 \bibitem[\citeproctext]{ref-R-readtext}
 Benoit, K., \& Obeng, A. (2024). \emph{Readtext: Import and handling for
 plain and formatted text files}. Retrieved from
-\url{https://CRAN.R-project.org/package=readtext}
+https://CRAN.R-project.org/package=readtext
 
 \bibitem[\citeproctext]{ref-R-effectsize}
 Ben-Shachar, M. S., Makowski, D., Lüdecke, D., Patil, I., Wiernik, B.
 M., Thériault, R., \& Waggoner, P. (2024). \emph{Effectsize: Indices of
-effect size}. Retrieved from
-\url{https://easystats.github.io/effectsize/}
+effect size}. Retrieved from https://easystats.github.io/effectsize/
 
 \bibitem[\citeproctext]{ref-R-workflowr}
 Blischak, J. D., Carbonetto, P., \& Stephens, M. (2019). Creating and
 sharing reproducible research code the workflowr way {[}version 1; peer
 review: 3 approved{]}. \emph{F1000Research}, \emph{8}(1749).
-doi:\href{https://doi.org/10.12688/f1000research.20843.1}{10.12688/f1000research.20843.1}
+doi:10.12688/f1000research.20843.1
 
 \bibitem[\citeproctext]{ref-R-wordbankr}
 Braginsky, M. (2024). \emph{Wordbankr: Accessing the wordbank database}.
-Retrieved from \url{https://CRAN.R-project.org/package=wordbankr}
+Retrieved from https://CRAN.R-project.org/package=wordbankr
 
 \bibitem[\citeproctext]{ref-R-infer}
 Bray, A., Ismay, C., Chasnovski, E., Couch, S., Baumer, B., \&
 Cetinkaya-Rundel, M. (2024). \emph{Infer: Tidy statistical inference}.
-Retrieved from \url{https://github.com/tidymodels/infer}
+Retrieved from https://github.com/tidymodels/infer
 
 \bibitem[\citeproctext]{ref-Bresnan2007a}
 Bresnan, J. (2007). A few lessons from typology. \emph{Linguistic
@@ -20285,8 +20328,8 @@ Typology}, \emph{11}(1), 297--306.
 
 \bibitem[\citeproctext]{ref-Bresnan2007}
 Bresnan, J., Cueni, A., Nikitina, T., \& Baayen, R. H. (2007).
-Predicting the dative alternation. In G. Bouma, I. Kraemer, \& J.-W. C.
-Zwart (Eds.), \emph{Cognitive foundations of interpretation} (pp.
+Predicting the {Dative Alternation}. In G. Bouma, I. Kraemer, \& J.-W.
+C. Zwart (Eds.), \emph{Cognitive {Foundations} of {Interpretation}} (pp.
 1--33). Amsterdam: KNAW.
 
 \bibitem[\citeproctext]{ref-Brown2005}
@@ -20296,22 +20339,22 @@ Brown, K. (2005). \emph{Encyclopedia of language and linguistics} (Vol.
 \bibitem[\citeproctext]{ref-R-reprex}
 Bryan, J., Hester, J., Robinson, D., Wickham, H., \& Dervieux, C.
 (2024). \emph{Reprex: Prepare reproducible example code via the
-clipboard}. Retrieved from \url{https://reprex.tidyverse.org}
+clipboard}. Retrieved from https://reprex.tidyverse.org
 
 \bibitem[\citeproctext]{ref-Buckheit1995}
 Buckheit, J. B., \& Donoho, D. L. (1995). Wavelab and reproducible
 research. In \emph{Wavelets and statistics} (pp. 55--81). Springer.
 
 \bibitem[\citeproctext]{ref-Bychkovska2017}
-Bychkovska, T., \& Lee, J. J. (2017). At the same time: Lexical bundles
-in L1 and L2 university student argumentative writing. \emph{Journal of
-English for Academic Purposes}, \emph{30}, 38--52.
-doi:\href{https://doi.org/10.1016/j.jeap.2017.10.008}{10.1016/j.jeap.2017.10.008}
+Bychkovska, T., \& Lee, J. J. (2017). At the same time: {Lexical}
+bundles in {L1} and {L2} university student argumentative writing.
+\emph{Journal of English for Academic Purposes}, \emph{30}, 38--52.
+doi:10.1016/j.jeap.2017.10.008
 
 \bibitem[\citeproctext]{ref-Campbell2001}
 Campbell, L. (2001). The history of linguistics. In M. Aronoff \& J.
-Rees-Miller (Eds.), \emph{The handbook of linguistics} (pp. 81--104).
-Blackwell Publishers.
+Rees-Miller (Eds.), \emph{The {Handbook} of {Linguistics}} (pp.
+81--104). Blackwell Publishers.
 
 \bibitem[\citeproctext]{ref-Carmi2020}
 Carmi, E., Yates, S. J., Lockley, E., \& Pawluczuk, A. (2020). Data
@@ -20320,26 +20363,24 @@ misinformation, and malinformation. \emph{Internet Policy Review},
 \emph{9}(2).
 
 \bibitem[\citeproctext]{ref-Chambers2020}
-Chambers, J. M. (2020). S, r, and data science. \emph{Proceedings of the
-ACM on Programming Languages}, \emph{4}(HOPL), 1--17.
-doi:\href{https://doi.org/10.1145/3386334}{10.1145/3386334}
+Chambers, J. M. (2020). S, {R}, and data science. \emph{Proc. ACM
+Program. Lang.}, \emph{4}(HOPL), 1--17. doi:10.1145/3386334
 
 \bibitem[\citeproctext]{ref-Chan2014}
 Chan, S. (2014). \emph{Routledge encyclopedia of translation
 technology}. Routledge.
 
 \bibitem[\citeproctext]{ref-Conway2010}
-Conway, D. (2010, September). The data science venn diagram. \emph{The
+Conway, D. (2010, September). The {Data Science Venn Diagram}. \emph{The
 Data Science Venn Diagram}.
 http://drewconway.com/zia/2013/3/26/the-data-science-venn-diagram.
 
 \bibitem[\citeproctext]{ref-Conway2012}
 Conway, L. G., Gornick, L. J., Burfeind, C., Mandella, P., Kuenzli, A.,
-Houck, S. C., \& Fullerton, D. T. (2012). Does complex or simple
-rhetoric win elections? An integrative complexity analysis of u.s.
-Presidential campaigns. \emph{Political Psychology}, \emph{33}(5),
-599--618.
-doi:\href{https://doi.org/10.1111/j.1467-9221.2012.00910.x}{10.1111/j.1467-9221.2012.00910.x}
+Houck, S. C., \& Fullerton, D. T. (2012). Does {Complex} or {Simple
+Rhetoric Win Elections}? {An Integrative Complexity Analysis} of
+{U}.{S}. {Presidential Campaigns}. \emph{Political Psychology},
+\emph{33}(5), 599--618. doi:10.1111/j.1467-9221.2012.00910.x
 
 \bibitem[\citeproctext]{ref-Cross2006}
 Cross, N. (2006). Design as a discipline. \emph{Designerly Ways of
@@ -20347,77 +20388,72 @@ Knowing}, 95--103.
 
 \bibitem[\citeproctext]{ref-R-pak}
 Csárdi, G., \& Hester, J. (2024). \emph{Pak: Another approach to package
-installation}. Retrieved from \url{https://pak.r-lib.org/}
+installation}. Retrieved from https://pak.r-lib.org/
 
 \bibitem[\citeproctext]{ref-R-igraph}
 Csárdi, G., Nepusz, T., Traag, V., Horvát, S., Zanini, F., Noom, D., \&
 Müller, K. (2024). \emph{Igraph: Network analysis and visualization}.
-Retrieved from \url{https://r.igraph.org/}
+Retrieved from https://r.igraph.org/
 
 \bibitem[\citeproctext]{ref-DataNeverSleeps08-2021}
-Data never sleeps 7.0 infographic. (2019).
+Data {Never Sleeps} 7.0 {Infographic}. (2019).
 https://www.domo.com/learn/infographic/data-never-sleeps-7.
 
 \bibitem[\citeproctext]{ref-DeMarneffe2021}
 de Marneffe, M.-C., Manning, C. D., Nivre, J., \& Zeman, D. (2021).
-Universal dependencies. \emph{Computational Linguistics}, \emph{47}(2),
-255--308.
-doi:\href{https://doi.org/10.1162/coli_a_00402}{10.1162/coli\_a\_00402}
+Universal {Dependencies}. \emph{Computational Linguistics},
+\emph{47}(2), 255--308. doi:10.1162/coli\_a\_00402
 
 \bibitem[\citeproctext]{ref-Deshors2016}
 Deshors, S. C., \& Gries, S. Th. (2016). Profiling verb complementation
-constructions across new englishes. \emph{International Journal of
+constructions across {New Englishes}. \emph{International Journal of
 Corpus Linguistics.}, \emph{21}(2), 192--218.
 
 \bibitem[\citeproctext]{ref-Desjardins2019}
-Desjardins, J. (2019, April). How much data is generated each day?
+Desjardins, J. (2019, April). How {Much Data} is {Generated Each Day}?
 \emph{Visual Capitalist}.
 
 \bibitem[\citeproctext]{ref-Donoho2017}
-Donoho, D. (2017). 50 years of data science. \emph{Journal of
+Donoho, D. (2017). 50 {Years} of {Data Science}. \emph{Journal of
 Computational and Graphical Statistics}, \emph{26}(4), 745--766.
-doi:\href{https://doi.org/10.1080/10618600.2017.1384734}{10.1080/10618600.2017.1384734}
+doi:10.1080/10618600.2017.1384734
 
 \bibitem[\citeproctext]{ref-DuBois2005}
 Du Bois, J. W., Chafe, W. L., Meyer, C., Thompson, S. A., Englebretson,
-R., \& Martey, N. (2005). Santa barbara corpus of spoken american
-english, parts 1-4. Philadelphia: Linguistic Data Consortium.
+R., \& Martey, N. (2005). Santa {Barbara Corpus} of {Spoken American
+English}, {Parts} 1-4. Philadelphia: Linguistic Data Consortium.
 
 \bibitem[\citeproctext]{ref-Dubnjakovic2010}
-Dubnjakovic, A., \& Tomlin, P. (2010). \emph{A practical guide to
-electronic resources in the humanities}. Elsevier.
+Dubnjakovic, A., \& Tomlin, P. (2010). \emph{A {Practical Guide} to
+{Electronic Resources} in the {Humanities}}. Elsevier.
 
 \bibitem[\citeproctext]{ref-Duran2004}
-Duran, P. (2004). Developmental trends in lexical diversity.
+Duran, P. (2004). Developmental {Trends} in {Lexical Diversity}.
 \emph{Applied Linguistics}, \emph{25}(2), 220--242.
-doi:\href{https://doi.org/10.1093/applin/25.2.220}{10.1093/applin/25.2.220}
+doi:10.1093/applin/25.2.220
 
 \bibitem[\citeproctext]{ref-Eisenstein2012}
 Eisenstein, J., O'Connor, B., Smith, N. A., \& Xing, E. P. (2012).
 Mapping the geographical diffusion of new words. \emph{Computation and
-Language}, 1--13.
-doi:\href{https://doi.org/10.1371/journal.pone.0113114}{10.1371/journal.pone.0113114}
+Language}, 1--13. doi:10.1371/journal.pone.0113114
 
 \bibitem[\citeproctext]{ref-Firth1957}
-Firth, J. R. (1957). \emph{Papers in linguistics}. Oxford University
+Firth, J. R. (1957). \emph{Papers in {Linguistics}}. Oxford University
 Press.
 
 \bibitem[\citeproctext]{ref-Francom2022}
-Francom, J. (2022). Corpus studies of syntax. In G. Goodall (Ed.),
-\emph{The cambridge handbook of experimental syntax} (pp. 687--713).
+Francom, J. (2022). Corpus {Studies} of {Syntax}. In G. Goodall (Ed.),
+\emph{The {Cambridge Handbook} of {Experimental Syntax}} (pp. 687--713).
 Cambridge University Press.
 
 \bibitem[\citeproctext]{ref-Gandrud2015}
-Gandrud, C. (2015).
-\emph{\href{https://www.ncbi.nlm.nih.gov/pubmed/17811671}{Reproducible
-research with r and r studio}} (Second edition.). CRC Press.
+Gandrud, C. (2015). \emph{Reproducible research with {R} and {R} studio}
+(Second edition.). CRC Press.
 
 \bibitem[\citeproctext]{ref-Garg2018}
 Garg, N., Schiebinger, L., Jurafsky, D., \& Zou, J. (2018). Word
 embeddings quantify 100 years of gender and ethnic stereotypes.
-\emph{Proceedings of the National Academy of Sciences}, \emph{115}(16),
-E3635--E3644.
-doi:\href{https://doi.org/10.1073/pnas.1720347115}{10.1073/pnas.1720347115}
+\emph{PNAS}, \emph{115}(16), E3635--E3644. doi:10.1073/pnas.1720347115
 
 \bibitem[\citeproctext]{ref-Gentleman2007}
 Gentleman, R., \& Temple Lang, D. (2007). Statistical analyses and
@@ -20425,106 +20461,101 @@ reproducible research. \emph{Journal of Computational and Graphical
 Statistics}, \emph{16}(1), 1--23.
 
 \bibitem[\citeproctext]{ref-Gilquin2009}
-Gilquin, G., \& Gries, S. T. (2009). Corpora and experimental methods: A
-state-of-the-art review. \emph{Corpus Linguistics and Linguistic
-Theory}, \emph{5}(1), 1--26.
-doi:\href{https://doi.org/10.1515/CLLT.2009.001}{10.1515/CLLT.2009.001}
+Gilquin, G., \& Gries, S. T. (2009). Corpora and experimental methods:
+{A} state-of-the-art review. \emph{Corpus Linguistics and Linguistic
+Theory}, \emph{5}(1), 1--26. doi:10.1515/CLLT.2009.001
 
 \bibitem[\citeproctext]{ref-Github2024}
-Github. (2024). GitHub. \emph{GitHub}. Repository, https://github.com.
+Github. (2024). {GitHub}. \emph{GitHub}. Repository, https://github.com.
 
 \bibitem[\citeproctext]{ref-Gomez-Uribe2015}
 Gomez-Uribe, C. A., \& Hunt, N. (2015). The netflix recommender system:
-Algorithms, business value, and innovation. \emph{ACM Transactions on
+{Algorithms}, business value, and innovation. \emph{ACM Transactions on
 Management Information Systems (TMIS)}, \emph{6}(4), 1--19.
 
 \bibitem[\citeproctext]{ref-Gries2016}
-Gries, S. T. (2016). \emph{Quantitative corpus linguistics with r: A
-practical introduction} (2nd ed.). New York: Routledge.
-doi:\href{https://doi.org/10.4324/9781315746210}{10.4324/9781315746210}
+Gries, S. T. (2016). \emph{Quantitative {Corpus Linguistics} with {R}:
+{A Practical Introduction}} (2nd ed.). New York: Routledge.
+doi:10.4324/9781315746210
 
 \bibitem[\citeproctext]{ref-Gries2021a}
-Gries, S. T. (2021). \emph{Statistics for linguistics with r}. De
+Gries, S. T. (2021). \emph{Statistics for {Linguistics} with {R}}. De
 Gruyter Mouton.
 
 \bibitem[\citeproctext]{ref-Gries2023}
 Gries, S. T. (2023). Statistical methods in corpus linguistics. In
-\emph{Readings in corpus linguistics: A teaching and research guide for
-scholars in nigeria and beyond,} (pp. 78--114).
+\emph{Readings in corpus linguistics: {A} teaching and research guide
+for scholars in {Nigeria} and beyond,} (pp. 78--114).
 
 \bibitem[\citeproctext]{ref-Gries2013a}
-Gries, S. Th. (2013). \emph{Statistics for linguistics with r. A
-practical introduction} (2nd revise.).
+Gries, S. Th. (2013). \emph{Statistics for {Linguistics} with {R}. {A
+Practical Introduction}} (2nd revise.).
 
 \bibitem[\citeproctext]{ref-Gries2014}
 Gries, S. Th., \& Deshors, S. C. (2014). Using regressions to explore
 deviations between corpus data and a standard/target: Two suggestions.
-\emph{Corpora}, \emph{9}(1), 109--136.
-doi:\href{https://doi.org/10.3366/cor.2014.0053}{10.3366/cor.2014.0053}
+\emph{Corpora}, \emph{9}(1), 109--136. doi:10.3366/cor.2014.0053
 
 \bibitem[\citeproctext]{ref-Gries2020}
-Gries, S. Th., \& Paquot, M. (2020). Writing up a corpus-linguistic
-paper. In M. Paquot \& S. Th. Gries (Eds.), \emph{A practical handbook
-of corpus linguistics} (pp. 647--659). Springer International
-Publishing.
-doi:\href{https://doi.org/10.1007/978-3-030-46216-1_26}{10.1007/978-3-030-46216-1\_26}
+Gries, S. Th., \& Paquot, M. (2020). Writing up a {Corpus-Linguistic
+Paper}. In M. Paquot \& S. Th. Gries (Eds.), \emph{A {Practical
+Handbook} of {Corpus Linguistics}} (pp. 647--659). Springer
+International Publishing. doi:10.1007/978-3-030-46216-1\_26
 
 \bibitem[\citeproctext]{ref-Grieve2018}
 Grieve, J., Nini, A., \& Guo, D. (2018). Mapping lexical innovation on
-american social media. \emph{Journal of English Linguistics},
+{American} social media. \emph{Journal of English Linguistics},
 \emph{46}(4), 293--319.
 
 \bibitem[\citeproctext]{ref-Harris1954}
-Harris, Z. S. (1954). Distributional structure. \emph{Word},
-\emph{10}(2-3), 146--162.
-doi:\href{https://doi.org/10.1080/00437956.1954.11659520}{10.1080/00437956.1954.11659520}
+Harris, Z. S. (1954). Distributional {Structure}. \emph{Word},
+\emph{10}(2-3), 146--162. doi:10.1080/00437956.1954.11659520
 
 \bibitem[\citeproctext]{ref-Hay2002}
-Hay, J. (2002). From speech perception to morphology: Affix ordering
-revisited. \emph{Language}, \emph{78}(3), 527--555.
+Hay, J. (2002). From {Speech Perception} to {Morphology}: {Affix
+Ordering Revisited}. \emph{Language}, \emph{78}(3), 527--555.
 
 \bibitem[\citeproctext]{ref-Head2015}
 Head, M. L., Holman, L., Lanfear, R., Kahn, A. T., \& Jennions, M. D.
-(2015). The extent and consequences of p-hacking in science. \emph{PLOS
-Biology}, \emph{13}(3), e1002106.
-doi:\href{https://doi.org/10.1371/journal.pbio.1002106}{10.1371/journal.pbio.1002106}
+(2015). The {Extent} and {Consequences} of {P-Hacking} in {Science}.
+\emph{PLOS Biology}, \emph{13}(3), e1002106.
+doi:10.1371/journal.pbio.1002106
 
 \bibitem[\citeproctext]{ref-R-fs}
 Hester, J., Wickham, H., \& Csárdi, G. (2024). \emph{Fs: Cross-platform
 file system operations based on libuv}. Retrieved from
-\url{https://fs.r-lib.org}
+https://fs.r-lib.org
 
 \bibitem[\citeproctext]{ref-Hicks2019}
-Hicks, S. C., \& Peng, R. D. (2019, July). Elements and principles for
-characterizing variation between data analyses. arXiv.
-doi:\href{https://doi.org/10.48550/arXiv.1903.07639}{10.48550/arXiv.1903.07639}
+Hicks, S. C., \& Peng, R. D. (2019, July). Elements and {Principles} for
+{Characterizing Variation} between {Data Analyses}. arXiv.
+doi:10.48550/arXiv.1903.07639
 
 \bibitem[\citeproctext]{ref-R-textrecipes}
 Hvitfeldt, E. (2023). \emph{Textrecipes: Extra recipes for text
-processing}. Retrieved from
-\url{https://github.com/tidymodels/textrecipes}
+processing}. Retrieved from https://github.com/tidymodels/textrecipes
 
 \bibitem[\citeproctext]{ref-Ide2008}
 Ide, N., Baker, C., Fellbaum, C., Fillmore, C., \& Passonneau, R.
-(2008). MASC: The manually annotated sub-corpus of american english. In
-\emph{6th international conference on language resources and evaluation,
-LREC 2008} (pp. 2455--2460). European Language Resources Association
-(ELRA).
+(2008). {MASC}: {The} manually annotated sub-corpus of {American
+English}. In \emph{6th {International Conference} on {Language
+Resources} and {Evaluation}, {LREC} 2008} (pp. 2455--2460). European
+Language Resources Association (ELRA).
 
 \bibitem[\citeproctext]{ref-Ide2001}
-Ide, N., \& Macleod, C. (2001). The american national corpus: A
-standardized resource for american english. In \emph{Proceedings of
-corpus linguistics}. Lancaster UK.
+Ide, N., \& Macleod, C. (2001). The {American National Corpus}: {A}
+standardized resource for {American English}. In \emph{Proceedings of
+{Corpus Linguistics}}. Lancaster UK.
 
 \bibitem[\citeproctext]{ref-Ignatow2017}
 Ignatow, G., \& Mihalcea, R. (2017). \emph{An introduction to text
-mining: Research design, data collection, and analysis}. Sage
+mining: {Research} design, data collection, and analysis}. Sage
 Publications.
 
 \bibitem[\citeproctext]{ref-Jaeger2007}
-Jaeger, T. F., \& Snider, N. (2007). Implicit learning and syntactic
-persistence: Surprisal and cumulativity. \emph{University of Rochester
-Working Papers in the Language Sciences}, \emph{3}(1).
+Jaeger, T. F., \& Snider, N. (2007). Implicit {Learning} and {Syntactic
+Persistence}: {Surprisal} and {Cumulativity}. \emph{University of
+Rochester Working Papers in the Language Sciences}, \emph{3}(1).
 
 \bibitem[\citeproctext]{ref-Johnson2008}
 Johnson, K. (2008). \emph{Quantitative methods in linguistics}.
@@ -20533,124 +20564,122 @@ Blackwell Pub.
 \bibitem[\citeproctext]{ref-R-gibasa}
 Kato, A., Ichinose, S., \& Kudo, T. (2024). \emph{Gibasa: An alternative
 'rcpp' wrapper of 'MeCab'}. Retrieved from
-\url{https://CRAN.R-project.org/package=gibasa}
+https://CRAN.R-project.org/package=gibasa
 
 \bibitem[\citeproctext]{ref-Kerr1998}
-Kerr, N. L. (1998). HARKing: Hypothesizing after the results are known.
-\emph{Personality and social psychology review}, \emph{2}(3), 196--217.
+Kerr, N. L. (1998). {HARKing}: {Hypothesizing} after the results are
+known. \emph{Personality and social psychology review}, \emph{2}(3),
+196--217.
 
 \bibitem[\citeproctext]{ref-Kloumann2012}
 Kloumann, I., Danforth, C., Harris, K., \& Bliss, C. (2012). Positivity
-of the english language. \emph{PloS one}.
+of the {English} language. \emph{PloS one}.
 
 \bibitem[\citeproctext]{ref-Koehn2005}
-Koehn, P. (2005). Europarl: A parallel corpus for statistical machine
+Koehn, P. (2005). Europarl: {A} parallel corpus for statistical machine
 translation. \emph{MT Summit X}, 12--16.
 
 \bibitem[\citeproctext]{ref-Kostic2003}
 Kostić, A., Marković, T., \& Baucal, A. (2003). Inflectional morphology
-and word meaning: Orthogonal or co-implicative cognitive domains? In R.
-Harald Baayen \& R. Schreuder (Eds.), \emph{Morphological structure in
-language processing} (pp. 1--44). De Gruyter Mouton.
-doi:\href{https://doi.org/10.1515/9783110910186.1}{10.1515/9783110910186.1}
+and word meaning: {Orthogonal} or co-implicative cognitive domains? In
+R. Harald Baayen \& R. Schreuder (Eds.), \emph{Morphological {Structure}
+in {Language Processing}} (pp. 1--44). De Gruyter Mouton.
+doi:10.1515/9783110910186.1
 
 \bibitem[\citeproctext]{ref-R-TBDBr}
 Kowalski, J., \& Cavanaugh, R. (2024). \emph{TBDBr: Easy access to
 TalkBankDB via r API}. Retrieved from
-\url{https://github.com/TalkBank/TalkBankDB-R}
+https://github.com/TalkBank/TalkBankDB-R
 
 \bibitem[\citeproctext]{ref-Krathwohl2002}
-Krathwohl, D. R. (2002). A revision of bloom's taxonomy: An overview.
-\emph{Theory into practice}, \emph{41}(4), 212--218.
+Krathwohl, D. R. (2002). A revision of {Bloom}'s taxonomy: {An}
+overview. \emph{Theory into practice}, \emph{41}(4), 212--218.
 
 \bibitem[\citeproctext]{ref-R-swirl}
 Kross, S., Carchedi, N., Bauer, B., \& Grdina, G. (2020). \emph{Swirl:
-Learn r, in r}. Retrieved from
-\url{https://CRAN.R-project.org/package=swirl}
+Learn r, in r}. Retrieved from https://CRAN.R-project.org/package=swirl
 
 \bibitem[\citeproctext]{ref-Kucera1967}
 Kucera, H., \& Francis, W. N. (1967). \emph{Computational analysis of
-present day american english}. Brown University Press Providence.
+present day {American English}}. Brown University Press Providence.
 
 \bibitem[\citeproctext]{ref-R-targets}
 Landau, W. M. (2021). The targets r package: A dynamic make-like
 function-oriented pipeline toolkit for reproducibility and
 high-performance computing. \emph{Journal of Open Source Software},
-\emph{6}(57), 2959. Retrieved from
-\url{https://doi.org/10.21105/joss.02959}
+\emph{6}(57), 2959. Retrieved from https://doi.org/10.21105/joss.02959
 
 \bibitem[\citeproctext]{ref-Larsson2024}
-Larsson, T., \& Biber, D. (2024). On the perils of linguistically opaque
-measures and methods: Toward increased transparency and linguistic
-interpretability. In P. Crosthwaite (Ed.), \emph{Corpora for language
-learning: Bridging the research-practice divide} (pp. 131--141). Taylor
-\& Francis.
+Larsson, T., \& Biber, D. (2024). On the {Perils} of {Linguistically
+Opaque Measures} and {Methods}: {Toward} increased transparency and
+linguistic interpretability. In P. Crosthwaite (Ed.), \emph{Corpora for
+language learning: {Bridging} the research-practice divide} (pp.
+131--141). Taylor \& Francis.
 
 \bibitem[\citeproctext]{ref-Leech1992}
-Leech, G. (1992). 100 million words of english: The british national
-corpus (BNC), (1991), 1--13.
+Leech, G. (1992). 100 {Million Words} of {English}: {The British
+National Corpus} ({BNC}), (1991), 1--13.
 
 \bibitem[\citeproctext]{ref-Lewis2004}
-Lewis, M. (2004). \emph{Moneyball: The art of winning an unfair game}.
-WW Norton \& Company.
+Lewis, M. (2004). \emph{Moneyball: {The Art} of {Winning} an {Unfair
+Game}}. WW Norton \& Company.
 
 \bibitem[\citeproctext]{ref-Liu2021}
 Liu, K., \& Afzaal, M. (2021). Syntactic complexity in translated and
-non-translated texts: A corpus-based study of simplification. \emph{PLOS
-ONE}, \emph{16}(6), e0253454.
-doi:\href{https://doi.org/10.1371/journal.pone.0253454}{10.1371/journal.pone.0253454}
+non-translated texts: {A} corpus-based study of simplification.
+\emph{PLoS ONE}, \emph{16}(6), e0253454.
+doi:10.1371/journal.pone.0253454
 
 \bibitem[\citeproctext]{ref-Lozano2009}
-Lozano, C. (2009). CEDEL2: Corpus escrito del espa{ñ}ol L2.
+Lozano, C. (2009). {CEDEL2}: {Corpus} escrito del espa{ñ}ol {L2}.
 \emph{Applied Linguistics Now: Understanding Language and Mind/La
 Ling{ü}{í}stica Aplicada Hoy: Comprendiendo el Lenguaje y la Mente.
 Almer{í}a: Universidad de Almer{í}a}, 197--212.
 
 \bibitem[\citeproctext]{ref-Macwhinney2024}
-Macwhinney, B. (2024). TalkBank. \emph{The TalkBank system}. Repository,
-https://talkbank.org/.
+Macwhinney, B. (2024). {TalkBank}. \emph{The TalkBank system}.
+Repository, https://talkbank.org/.
 
 \bibitem[\citeproctext]{ref-Manning2003}
 Manning, C. (2003). Probabilistic syntax. In Bod, J. Hay, \& Jannedy
-(Eds.), \emph{Probabilistic linguistics} (pp. 289--341). Cambridge, MA:
-MIT Press.
+(Eds.), \emph{Probabilistic {Linguistics}} (pp. 289--341). Cambridge,
+MA: MIT Press.
 
 \bibitem[\citeproctext]{ref-Marwick2018}
 Marwick, B., Boettiger, C., \& Mullen, L. (2018). Packaging data
-analytical work reproducibly using r (and friends). \emph{The American
+analytical work reproducibly using {R} (and friends). \emph{The American
 Statistician}, \emph{72}(1), 80--88.
 
 \bibitem[\citeproctext]{ref-Microsoft2024}
-Microsoft. (2024). Visual studio code. \emph{Visual Studio Code - Code
+Microsoft. (2024). Visual {Studio Code}. \emph{Visual Studio Code - Code
 Editing. Redefined.} Software, https://code.visualstudio.com/.
 
 \bibitem[\citeproctext]{ref-Mikolov2013b}
 Mikolov, T., Sutskever, I., Chen, K., Corrado, G., \& Dean, J. (2013).
-Distributed representations of words and phrases and their
-compositionality. In \emph{Advances in neural information processing
+Distributed {Representations} of {Words} and {Phrases} and their
+{Compositionality}. In \emph{Advances in neural information processing
 systems} (pp. 3111--3119).
 
 \bibitem[\citeproctext]{ref-R-lingtypology}
 Moroz, G. (2017). \emph{Lingtypology: Easy mapping for linguistic
 typology}. Retrieved from
-\url{https://CRAN.R-project.org/package=lingtypology}
+https://CRAN.R-project.org/package=lingtypology
 
 \bibitem[\citeproctext]{ref-Morris2019}
 Morris, T. P., White, I. R., \& Crowther, M. J. (2019). Using simulation
 studies to evaluate statistical methods. \emph{Statistics in Medicine},
-\emph{38}(11), 2074--2102.
-doi:\href{https://doi.org/10.1002/sim.8086}{10.1002/sim.8086}
+\emph{38}(11), 2074--2102. doi:10.1002/sim.8086
 
 \bibitem[\citeproctext]{ref-Mosteller1963}
-Mosteller, F., \& Wallace, D. L. (1963). Inference in an authorship
-problem. \emph{Journal of the American Statistical Association},
+Mosteller, F., \& Wallace, D. L. (1963). Inference in an {Authorship
+Problem}. \emph{Journal of the American Statistical Association},
 \emph{58}(302), 275--309. Retrieved from
-\url{https://www.jstor.org/stable/2283270}
+https://www.jstor.org/stable/2283270
 
 \bibitem[\citeproctext]{ref-R-tokenizers}
 Mullen, L. (2022). \emph{Tokenizers: Fast, consistent tokenization of
 natural language text}. Retrieved from
-\url{https://docs.ropensci.org/tokenizers/}
+https://docs.ropensci.org/tokenizers/
 
 \bibitem[\citeproctext]{ref-Munoz2006}
 Muñoz, C. (Ed.). (2006). \emph{Age and the rate of foreign language
@@ -20660,53 +20689,52 @@ learning} (1st ed., Vol. 19). Clevedon: Multilingual Matters.
 Nisioi, S., Rabinovich, E., Dinu, L. P., \& Wintner, S. (2016). A corpus
 of native, non-native and translated texts. In \emph{Proceedings of the
 tenth international conference on language resources and evaluation
-(LREC 2016)}. Portoro{z̆}, Slovenia: European Language Resources
+({LREC} 2016)}. Portoro{z̆}, Slovenia: European Language Resources
 Association (ELRA).
 
 \bibitem[\citeproctext]{ref-Nivre2020}
 Nivre, J., De Marneffe, M.-C., Ginter, F., Hajič, J., Manning, C. D.,
-Pyysalo, S., \ldots{} Zeman, D. (2020). Universal dependencies v2: An
-evergrowing multilingual treebank collection. \emph{arXiv preprint
-arXiv:2004.10643}. Retrieved from \url{https://arxiv.org/abs/2004.10643}
+Pyysalo, S., \ldots{} Zeman, D. (2020). Universal {Dependencies} v2:
+{An} evergrowing multilingual treebank collection. \emph{arXiv preprint
+arXiv:2004.10643}. Retrieved from https://arxiv.org/abs/2004.10643
 
 \bibitem[\citeproctext]{ref-Olohan2008}
-Olohan, M. (2008). Leave it out! Using a comparable corpus to
+Olohan, M. (2008). Leave it out! {Using} a comparable corpus to
 investigate aspects of explicitation in translation. \emph{Cadernos de
 Tradu{ç}{ã}o}, 153--169.
 
 \bibitem[\citeproctext]{ref-R-jsonlite}
 Ooms, J. (2023). \emph{Jsonlite: A simple and robust JSON parser and
-generator for r}. Retrieved from
-\href{https://jeroen.r-universe.dev/jsonlite\%0Ahttps://arxiv.org/abs/1403.2805}{https://jeroen.r-universe.dev/jsonlite
-https://arxiv.org/abs/1403.2805}
+generator for r}. Retrieved from https://jeroen.r-universe.dev/jsonlite
+https://arxiv.org/abs/1403.2805
 
 \bibitem[\citeproctext]{ref-Paquot2020a}
-Paquot, M., \& Gries, S. Th. (Eds.). (2020). \emph{A practical handbook
-of corpus linguistics}. Switzerland: Springer.
+Paquot, M., \& Gries, S. Th. (Eds.). (2020). \emph{A {Practical
+Handbook} of {Corpus Linguistics}}. Switzerland: Springer.
 
 \bibitem[\citeproctext]{ref-R-ggraph}
 Pedersen, T. L. (2024). \emph{Ggraph: An implementation of grammar of
 graphics for graphs and networks}. Retrieved from
-\url{https://ggraph.data-imaginist.com}
+https://ggraph.data-imaginist.com
 
 \bibitem[\citeproctext]{ref-Petrenz2011}
-Petrenz, P., \& Webber, B. (2011). Stable classification of text genres.
-\emph{Computational Linguistics}, \emph{37}(2), 385--393.
-doi:\href{https://doi.org/10.1162/COLI_a_00052}{10.1162/COLI\_a\_00052}
+Petrenz, P., \& Webber, B. (2011). Stable {Classification} of {Text
+Genres}. \emph{Computational Linguistics}, \emph{37}(2), 385--393.
+doi:10.1162/COLI\_a\_00052
 
 \bibitem[\citeproctext]{ref-Posit2024}
-Posit. (2024). RStudio. \emph{RStudio}. Software,
+Posit. (2024). {RStudio}. \emph{RStudio}. Software,
 https://posit.co/products/open-source/rstudio/.
 
 \bibitem[\citeproctext]{ref-RCommunity2024}
-R Community. (2024). The comprehensive r archive network. \emph{The
+R Community. (2024). The {Comprehensive R Archive Network}. \emph{The
 Comprehensive R Archive Network}. Repository,
 https://cran.r-project.org/.
 
 \bibitem[\citeproctext]{ref-R-DBI}
 R Special Interest Group on Databases (R-SIG-DB), Wickham, H., \&
 Müller, K. (2024). \emph{DBI: R database interface}. Retrieved from
-\url{https://dbi.r-dbi.org}
+https://dbi.r-dbi.org
 
 \bibitem[\citeproctext]{ref-Riehemann2001}
 Riehemann, S. Z. (2001). \emph{A constructional approach to idioms and
@@ -20714,28 +20742,26 @@ word formation} (PhD thesis). Stanford.
 
 \bibitem[\citeproctext]{ref-R-lexicon}
 Rinker, T. (2019). \emph{Lexicon: Lexicons for text analysis}. Retrieved
-from \url{https://github.com/trinker/lexicon}
+from https://github.com/trinker/lexicon
 
 \bibitem[\citeproctext]{ref-R-tidytext}
 Robinson, D., \& Silge, J. (2024). \emph{Tidytext: Text mining using
 dplyr, ggplot2, and other tidy tools}. Retrieved from
-\url{https://juliasilge.github.io/tidytext/}
+https://juliasilge.github.io/tidytext/
 
 \bibitem[\citeproctext]{ref-ROpenSci2024}
-ROpenSci. (2024). The r-universe system. \emph{The R-universe system}.
+ROpenSci. (2024). The {R-universe} system. \emph{The R-universe system}.
 Repository, https://ropensci.org/r-universe/.
 
 \bibitem[\citeproctext]{ref-Rossman2014a}
 Rossman, A. J., \& Chance, B. L. (2014). Using simulation-based
 inference for learning introductory statistics. \emph{WIREs
-Computational Statistics}, \emph{6}(4), 211--221.
-doi:\href{https://doi.org/10.1002/wics.1302}{10.1002/wics.1302}
+Computational Statistics}, \emph{6}(4), 211--221. doi:10.1002/wics.1302
 
 \bibitem[\citeproctext]{ref-Rowley2007}
-Rowley, J. (2007). The wisdom hierarchy: Representations of the DIKW
+Rowley, J. (2007). The wisdom hierarchy: {Representations} of the {DIKW}
 hierarchy. \emph{Journal of Information Science}, \emph{33}(2),
-163--180.
-doi:\href{https://doi.org/10.1177/0165551506070706}{10.1177/0165551506070706}
+163--180. doi:10.1177/0165551506070706
 
 \bibitem[\citeproctext]{ref-Saxena2020}
 Saxena, S., \& Gyanchandani, M. (2020). Machine learning methods for
@@ -20745,14 +20771,13 @@ review. \emph{Journal of medical imaging and radiation sciences},
 
 \bibitem[\citeproctext]{ref-Sedgwick2015}
 Sedgwick, P. (2015). Units of sampling, observation, and analysis.
-\emph{BMJ (online)}, \emph{351}, h5396.
-doi:\href{https://doi.org/10.1136/bmj.h5396}{10.1136/bmj.h5396}
+\emph{BMJ (online)}, \emph{351}, h5396. doi:10.1136/bmj.h5396
 
 \bibitem[\citeproctext]{ref-Serigos2020}
 Serigos, J. (2020). Using automated methods to explore the social
-stratification of anglicisms in spanish. \emph{Corpus Linguistics and
+stratification of anglicisms in {Spanish}. \emph{Corpus Linguistics and
 Linguistic Theory}, \emph{0}(0), 000010151520190052.
-doi:\href{https://doi.org/10.1515/cllt-2019-0052}{10.1515/cllt-2019-0052}
+doi:10.1515/cllt-2019-0052
 
 \bibitem[\citeproctext]{ref-Shriberg1994}
 Shriberg, E. E. (1994). \emph{Preliminaries to a theory of speech
@@ -20760,56 +20785,55 @@ disfluencies} (PhD thesis). Citeseer.
 
 \bibitem[\citeproctext]{ref-R-janeaustenr}
 Silge, J. (2022). \emph{Janeaustenr: Jane austen's complete novels}.
-Retrieved from \url{https://github.com/juliasilge/janeaustenr}
+Retrieved from https://github.com/juliasilge/janeaustenr
 
 \bibitem[\citeproctext]{ref-Silveira2014}
 Silveira, N., Dozat, T., de Marneffe, M.-C., Bowman, S., Connor, M.,
 Bauer, J., \& Manning, C. D. (2014). A gold standard dependency corpus
-for english. In \emph{Proceedings of the ninth international conference
-on language resources and evaluation (LREC-2014)}.
+for {English}. In \emph{Proceedings of the ninth international
+conference on language resources and evaluation ({LREC-2014})}.
 
 \bibitem[\citeproctext]{ref-Sternberg2010}
-Sternberg, R. J., \& Sternberg, K. (2010). \emph{The psychologist's
-companion: A guide to writing scientific papers for students and
-researchers} (5th ed.). Cambridge University Press.
-doi:\href{https://doi.org/10.1017/CBO9780511762024}{10.1017/CBO9780511762024}
+Sternberg, R. J., \& Sternberg, K. (2010). \emph{The {Psychologist}'s
+{Companion}: {A Guide} to {Writing Scientific Papers} for {Students} and
+{Researchers}} (5th ed.). Cambridge University Press.
+doi:10.1017/CBO9780511762024
 
 \bibitem[\citeproctext]{ref-Szmrecsanyi2004}
 Szmrecsanyi, B. (2004). On operationalizing syntactic complexity. In
-\emph{Le poids des mots. Proceedings of the 7th international conference
-on textual data statistical analysis. Louvain-la-neuve} (Vol. 2, pp.
-1032--1039).
+\emph{Le poids des mots. {Proceedings} of the 7th international
+conference on textual data statistical analysis. {Louvain-la-Neuve}}
+(Vol. 2, pp. 1032--1039).
 
 \bibitem[\citeproctext]{ref-TheRFoundation2024}
-The R Foundation. (2024). The r project for statistical computing.
+The R Foundation. (2024). The {R Project} for {Statistical Computing}.
 \emph{R: The R Project for Statistical Computing}. Software,
 https://www.r-project.org/.
 
 \bibitem[\citeproctext]{ref-Tottie2011}
-Tottie, G. (2011). Uh and um as sociolinguistic markers in british
-english. \emph{International Journal of Corpus Linguistics},
+Tottie, G. (2011). Uh and {Um} as sociolinguistic markers in {British
+English}. \emph{International Journal of Corpus Linguistics},
 \emph{16}(2), 173--197.
 
 \bibitem[\citeproctext]{ref-Tottie2014}
-Tottie, G. (2014). On the use of uh and um in american english.
-\emph{Functions of Language}, \emph{21}(1), 6--29.
-doi:\href{https://doi.org/10.1075/fol.21.1.02tot}{10.1075/fol.21.1.02tot}
+Tottie, G. (2014). On the use of uh and um in {American English}.
+\emph{FOL}, \emph{21}(1), 6--29. doi:10.1075/fol.21.1.02tot
 
 \bibitem[\citeproctext]{ref-SWDA2008}
-University of Colorado Boulder. (2008). Switchboard dialog act corpus.
-Web download. Linguistic Data Consortium.
+University of Colorado Boulder. (2008). Switchboard {Dialog Act Corpus}.
+{Web Download}. Linguistic Data Consortium.
 
 \bibitem[\citeproctext]{ref-R-washoku}
 Uryu, S. (2024). \emph{Washoku: Extra 'recipes' for japanese text, date
 and address processing}.
 
 \bibitem[\citeproctext]{ref-UScopyright2024}
-US copyright office. (n.d.). \emph{Copyright Law of the United States
+{US Copyright Office}. (n.d.). \emph{Copyright Law of the United States
 (Title 17)}. https://www.copyright.gov/title17/.
 
 \bibitem[\citeproctext]{ref-R-renv}
 Ushey, K., \& Wickham, H. (2024). \emph{Renv: Project environments}.
-Retrieved from \url{https://rstudio.github.io/renv/}
+Retrieved from https://rstudio.github.io/renv/
 
 \bibitem[\citeproctext]{ref-Voigt2017}
 Voigt, R., Camp, N. P., Prabhakaran, V., Hamilton, W. L., Hetey, R. C.,
@@ -20821,7 +20845,7 @@ body camera footage shows racial disparities in officer respect.
 \bibitem[\citeproctext]{ref-R-skimr}
 Waring, E., Quinn, M., McNamara, A., Arino de la Rubia, E., Zhu, H., \&
 Ellis, S. (2022). \emph{Skimr: Compact and flexible summaries of data}.
-Retrieved from \url{https://docs.ropensci.org/skimr/}
+Retrieved from https://docs.ropensci.org/skimr/
 
 \bibitem[\citeproctext]{ref-R-rsyntax}
 Welbers, K., \& van Atteveldt, W. (2022). \emph{Rsyntax: Extract
@@ -20829,36 +20853,32 @@ semantic relations from text by querying and reshaping syntax}.
 
 \bibitem[\citeproctext]{ref-R-jiebaR}
 Wenfeng, Q., \& Yanyi, W. (2019). \emph{jiebaR: Chinese text
-segmentation}. Retrieved from
-\url{https://CRAN.R-project.org/package=jiebaR}
+segmentation}. Retrieved from https://CRAN.R-project.org/package=jiebaR
 
 \bibitem[\citeproctext]{ref-R-ProjectTemplate}
 White, J. M. (2023). \emph{ProjectTemplate: Automates the creation of
 new statistical analysis projects}. Retrieved from
-\url{https://CRAN.R-project.org/package=ProjectTemplate}
+https://CRAN.R-project.org/package=ProjectTemplate
 
 \bibitem[\citeproctext]{ref-Wickham2014a}
-Wickham, H. (2014). Tidy data. \emph{Journal of Statistical Software},
-\emph{59}(10).
-doi:\href{https://doi.org/10.18637/jss.v059.i10}{10.18637/jss.v059.i10}
+Wickham, H. (2014). Tidy {Data}. \emph{Journal of Statistical Software},
+\emph{59}(10). doi:10.18637/jss.v059.i10
 
 \bibitem[\citeproctext]{ref-R-forcats}
 Wickham, H. (2023a). \emph{Forcats: Tools for working with categorical
-variables (factors)}. Retrieved from
-\url{https://forcats.tidyverse.org/}
+variables (factors)}. Retrieved from https://forcats.tidyverse.org/
 
 \bibitem[\citeproctext]{ref-R-stringr}
 Wickham, H. (2023b). \emph{Stringr: Simple, consistent wrappers for
-common string operations}. Retrieved from
-\url{https://stringr.tidyverse.org}
+common string operations}. Retrieved from https://stringr.tidyverse.org
 
 \bibitem[\citeproctext]{ref-R-tidyverse}
 Wickham, H. (2023c). \emph{Tidyverse: Easily install and load the
-tidyverse}. Retrieved from \url{https://tidyverse.tidyverse.org}
+tidyverse}. Retrieved from https://tidyverse.tidyverse.org
 
 \bibitem[\citeproctext]{ref-R-rvest}
 Wickham, H. (2024). \emph{Rvest: Easily harvest (scrape) web pages}.
-Retrieved from \url{https://rvest.tidyverse.org/}
+Retrieved from https://rvest.tidyverse.org/
 
 \bibitem[\citeproctext]{ref-Wickham2023}
 Wickham, H., \& Bryan, J. (2023). \emph{R packages: Organize, test,
@@ -20868,69 +20888,69 @@ document, and share your code} (Second edition.). Beijing: O'Reilly.
 Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K.,
 Wilke, C., \ldots{} van den Brand, T. (2024). \emph{ggplot2: Create
 elegant data visualisations using the grammar of graphics}. Retrieved
-from \url{https://ggplot2.tidyverse.org}
+from https://ggplot2.tidyverse.org
 
 \bibitem[\citeproctext]{ref-R-dplyr}
 Wickham, H., François, R., Henry, L., Müller, K., \& Vaughan, D. (2023).
 \emph{Dplyr: A grammar of data manipulation}. Retrieved from
-\url{https://dplyr.tidyverse.org}
+https://dplyr.tidyverse.org
 
 \bibitem[\citeproctext]{ref-R-dbplyr}
 Wickham, H., Girlich, M., \& Ruiz, E. (2024). \emph{Dbplyr: A dplyr back
-end for databases}. Retrieved from \url{https://dbplyr.tidyverse.org/}
+end for databases}. Retrieved from https://dbplyr.tidyverse.org/
 
 \bibitem[\citeproctext]{ref-R-purrr}
 Wickham, H., \& Henry, L. (2023). \emph{Purrr: Functional programming
-tools}. Retrieved from \url{https://purrr.tidyverse.org/}
+tools}. Retrieved from https://purrr.tidyverse.org/
 
 \bibitem[\citeproctext]{ref-R-readr}
 Wickham, H., Hester, J., \& Bryan, J. (2024). \emph{Readr: Read
-rectangular text data}. Retrieved from \url{https://readr.tidyverse.org}
+rectangular text data}. Retrieved from https://readr.tidyverse.org
 
 \bibitem[\citeproctext]{ref-R-haven}
 Wickham, H., Miller, E., \& Smith, D. (2023). \emph{Haven: Import and
 export SPSS, stata and SAS files}. Retrieved from
-\url{https://haven.tidyverse.org}
+https://haven.tidyverse.org
 
 \bibitem[\citeproctext]{ref-R-tidyr}
 Wickham, H., Vaughan, D., \& Girlich, M. (2024). \emph{Tidyr: Tidy messy
-data}. Retrieved from \url{https://tidyr.tidyverse.org}
+data}. Retrieved from https://tidyr.tidyverse.org
 
 \bibitem[\citeproctext]{ref-R-udpipe}
 Wijffels, J. (2023). \emph{Udpipe: Tokenization, parts of speech
 tagging, lemmatization and dependency parsing with the UDPipe 'NLP'
-toolkit}. Retrieved from
-\url{https://bnosac.github.io/udpipe/en/index.html}
+toolkit}. Retrieved from https://bnosac.github.io/udpipe/en/index.html
 
 \bibitem[\citeproctext]{ref-R-word2vec}
 Wijffels, J., \& Watanabe, K. (2023). \emph{word2vec: Distributed
 representations of words}. Retrieved from
-\url{https://github.com/bnosac/word2vec}
+https://github.com/bnosac/word2vec
 
 \bibitem[\citeproctext]{ref-Wilson2017}
 Wilson, G., Bryan, J., Cranston, K., Kitzes, J., Nederbragt, L., \&
 Teal, T. K. (2017). Good enough practices in scientific computing.
 \emph{PLoS Computational Biology}, \emph{13}(6), 1--20.
-doi:\href{https://doi.org/10.1371/journal.pcbi.1005510}{10.1371/journal.pcbi.1005510}
+doi:10.1371/journal.pcbi.1005510
 
 \bibitem[\citeproctext]{ref-Wulff2007}
-Wulff, S., Stefanowitsch, A., \& Gries, S. Th. (2007). Brutal brits and
-persuasive americans. \emph{Aspects of Meaning}.
+Wulff, S., Stefanowitsch, A., \& Gries, S. Th. (2007). Brutal {Brits}
+and persuasive {Americans}. \emph{Aspects of Meaning}.
 
 \bibitem[\citeproctext]{ref-R-tinytex}
 Xie, Y. (2024). \emph{Tinytex: Helper functions to install and maintain
 TeX live, and compile LaTeX documents}. Retrieved from
-\url{https://github.com/rstudio/tinytex}
+https://github.com/rstudio/tinytex
 
 \bibitem[\citeproctext]{ref-Zipf1949}
-Zipf, G. K. (1949). \emph{Human behavior and the principle of least
-effort}. Oxford, England: Addison-Wesley Press.
+Zipf, G. K. (1949). \emph{Human {Behavior} and the {Principle} of {Least
+Effort}}. Oxford, England: Addison-Wesley Press.
 
 \end{CSLReferences}
 
 
 
 % AFTER BODY
+% \backmatter
 \printindex
 
 \end{document}

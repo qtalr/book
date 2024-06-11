@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.553">
+<meta name="generator" content="quarto-1.4.555">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>An Introduction to Quantitative Text Analysis for Linguistics - 9&nbsp; Predict</title>
 <style>
@@ -329,7 +329,7 @@ window.Quarto = {
 </nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
    
   <ul>
 <li><a href="#sec-predict-orientation" id="toc-sec-predict-orientation" class="nav-link active" data-scroll-target="#sec-predict-orientation"><span class="header-section-number">9.1</span> Orientation</a></li>
@@ -396,7 +396,7 @@ window.Quarto = {
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-predict-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;9.1: Workflow for predictive data analysis
 </figcaption><div aria-describedby="tbl-predict-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
 <col style="width: 15%">
@@ -480,7 +480,7 @@ Table&nbsp;9.1: Workflow for predictive data analysis
 Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 </figcaption><div aria-describedby="tbl-predict-cedel2-data-dictionary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="cell table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 15%">
 <col style="width: 15%">
@@ -507,7 +507,7 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <td>The subcorpus to which the document belongs (‘Learner’ or ‘Native’)</td>
 </tr>
 <tr class="odd">
-<td>placement_score</td>
+<td>place_score</td>
 <td>Placement Score</td>
 <td>numeric</td>
 <td>The score obtained by the document author in a placement test. Null values indicate missing data (i.e.&nbsp;the document author did not take the placement test)</td>
@@ -544,19 +544,21 @@ Table&nbsp;9.2: Data dictionary for the CEDEL2 corpus
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 2,957
 Columns: 5
-$ doc_id          &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,…
-$ subcorpus       &lt;chr&gt; "Learner", "Learner", "Learner", "Learner", "Learner",…
-$ placement_score &lt;dbl&gt; 14.0, 16.3, 16.3, 18.6, 18.6, 18.6, 20.9, 20.9, 20.9, …
-$ proficiency     &lt;chr&gt; "Lower beginner", "Lower beginner", "Lower beginner", …
-$ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande ciu…</code></pre>
+$ doc_id      &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,…
+$ subcorpus   &lt;chr&gt; "Learner", "Learner", "Learner", "Learner", "Learner", "Le…
+$ place_score &lt;dbl&gt; 14.0, 16.3, 16.3, 18.6, 18.6, 18.6, 20.9, 20.9, 20.9, 20.9…
+$ proficiency &lt;chr&gt; "Lower beginner", "Lower beginner", "Lower beginner", "Low…
+$ text        &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande ciudad.…</code></pre>
 </div>
 </div>
 </div>
 <p>The output of <a href="#exm-predict-cedel-read" class="quarto-xref">Example&nbsp;<span>9.1</span></a> provides some structural information about the dataset, number of rows and columns as well as variable types.</p>
-<p>After I performed some diagnostics and made some adjustments, the dataset is in good order to proceed with the analysis. I updated the variables <code>subcorpus</code> and <code>proficiency</code> as factor variables and ordered them in a way that makes sense for the analysis. The <code>placement_score</code> variable is distributed well across the proficiency levels. The <code>subcorpus</code> variable is less balanced, with around 65% of the texts being from learners. This is not a problem, but it is something to keep in mind when building and interpreting the predictive models.</p>
+<p>After I performed some diagnostics and made some adjustments, the dataset is in good order to proceed with the analysis. I updated the variables <code>subcorpus</code> and <code>proficiency</code> as factor variables and ordered them in a way that makes sense for the analysis. The <code>place_score</code> variable is distributed well across the proficiency levels. The <code>subcorpus</code> variable is less balanced, with around 65% of the texts being from learners. This is not a problem, but it is something to keep in mind when building and interpreting the predictive models.</p>
 <p>We will be using the Tidymodels framework in R to perform these analyses. {tidymodels} is a metapackage, much like {tidyverse}, that provides a consistent interface for machine learning modeling. Some key packages unique to {tidymodels} are {recipes}, {parsnip}, {workflows}, and {tune}. {recipes} includes functions for preprocessing and engineering features. {parsnip} provides a consistent interface for specifying modeling algorithms. {worflows} allows us to combine recipes and models into a single pipeline. Finally, {tune} give us the ability to evaluate and tune hyperparameters of models.</p>
 <p>Since we are using text data, we will also be using {textrecipes} which makes various functions available for preprocessing text including extracting and engineering features.</p>
 <p>Let’s go ahead and do the setup, loading the necessary packages, seen in <a href="#exm-predict-packages-data" class="quarto-xref">Example&nbsp;<span>9.2</span></a>.</p>
+<!-- [ ] tmp fmt -->
+<div style="page-break-after: always;"></div>
 <div id="exm-predict-packages-data" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.2</strong></span> &nbsp;</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages</span></span>
@@ -733,6 +735,8 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>• Term frequency-inverse document frequency with: text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <!-- Step 4: Inspect:  -->
+<!-- [ ] tmp fmt -->
+<div style="page-break-after: always;"></div>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -832,7 +836,7 @@ $ text            &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-predict-class-algorithms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;9.3: Common classification algorithms
 </figcaption><div aria-describedby="tbl-predict-class-algorithms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 15%">
 <col style="width: 28%">
@@ -1197,22 +1201,18 @@ Figure&nbsp;9.1: Metrics for each fold of the tuning process
 <p>For classification tasks, a good place to start is to visualize a confusion matrix. A <strong>confusion matrix</strong> is a cross-tabulation of the predicted and actual outcomes. The <code>conf_mat_resampled()</code> function takes a <code>fit_resamples</code> object (with predictions saved) and returns a table (<code>tidy = FALSE</code>) with the confusion matrix for the aggregated folds. We can pass this to the <code>autoplot()</code> function to plot as in <a href="#exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="quarto-xref">Example&nbsp;<span>9.22</span></a>.</p>
 <div id="exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.22</strong></span> &nbsp;</p>
-<div class="cell">
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
 <span><span class="va">cls_lasso_cv</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">conf_mat_resampled</span><span class="op">(</span>tidy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">autoplot</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
+</div>
 <div id="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis." width="576">
+<img src="figures/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion.png" class="img-fluid figure-img" style="width:75.0%" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis.">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validation
 </figcaption></figure>
-</div>
-</div>
-</div>
 </div>
 <p>The top left to bottom right diagonal contains the true positives and true negatives, these are the correct predictions. The top right to bottom left diagonal contains the false positives and false negatives –our errors. The convention is speak of one class being the positive class and the other class being the negative class. In our case, we will consider the positive class to be the ‘learner’ class and the negative class to be the ‘natives’ class.</p>
 <p>We can see that there are more learners falsely predicted to be natives than the other way around. This may be due to the fact that there are simply more learners than natives in the data set or this could signal that there are some learners that are more similar to natives than other learners. Clearly this can’t be the entire explanation as the model is not perfect, even some natives are classified falsely as learners! But may be an interesting avenue for further exploration. Maybe these are learners that are more advanced or have a particular style of writing that is more similar to natives.</p>
@@ -1223,7 +1223,7 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 </div>
 <div class="callout-body-container">
 <p><strong><i class="fa-solid fa-medal" aria-label="medal"></i> Dive deeper</strong></p>
-<p>Another perspective often applied to evaluate a model is the Reciever Operating Characteristic (ROC) curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. This metric, and visualization, can be useful to gauge the model’s ability to distinguish between the two classes. {yardstick} provides the <code>roc_curve()</code> function to calculate the ROC curve on a <code>fit_resamples</code> object.</p>
+<p>Another perspective often applied to evaluate a model is the Reciever Operating Characteristic (ROC) curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. This metric, and visualization, can be useful to gauge the model’s ability to distinguish between the two classes. {yardstick} provides the <code>roc_curve()</code> function to calculate the ROC curve on an <code>fit_resamples</code> object.</p>
 </div>
 </div>
 </div>
@@ -1315,33 +1315,30 @@ Figure&nbsp;9.2: Confusion matrix for the aggregated folds of the cross-validati
 <p>The metrics from <a href="#exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect" class="quarto-xref">Example&nbsp;<span>9.26</span></a> show that the model’s performance has improved for both the accuracy and the ROC-AUC. The confusion matrix from <a href="#exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion" class="quarto-xref">Example&nbsp;<span>9.27</span></a> shows that the number of false positives and false negatives has decreased. This is a good sign that the model is more robust.</p>
 <div id="exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.27</strong></span> &nbsp;</p>
-<div class="cell">
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
 <span><span class="va">cls_lasso_tokens_cv</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">conf_mat_resampled</span><span class="op">(</span>tidy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">autoplot</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
+</div>
 <div id="fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis.">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-1.png" class="img-fluid figure-img" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis." width="576">
+<img src="figures/fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion.png" class="img-fluid figure-img" style="width:75.0%" alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis.">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validation
 </figcaption></figure>
-</div>
-</div>
-</div>
 </div>
 <p>It appears that the model is more robust with the updated <code>max_tokens</code> hyperparameter. We could continue to explore other model improvement strategies, but for now we will move on to the next step in our workflow.</p>
 <!-- Step 6: Evaluate -->
 <p>We are now ready to move on to step 7, evaluating the model on the test set. To do this we need to fit the tuned workflow to the training set, which is the actual training phase. We will use the <code>last_fit()</code> function from {workflows} to fit the workflow to the training set.</p>
 <p>The <code>last_fit()</code> function takes a workflow and a split object and returns a <code>last_fit</code> object. The <code>last_fit</code> object contains the results of the model fit on the training set and the results of the model evaluation on the test set. The code is seen in <a href="#exm-predict-class-tune-hyperparameters-evaluate-test" class="quarto-xref">Example&nbsp;<span>9.28</span></a>.</p>
 <p>We will use the <code>last_fit()</code> function to train the final model and predict the outcome on the test set. The <code>collect_metrics()</code> function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in <a href="#exm-predict-class-tune-hyperparameters-evaluate-test" class="quarto-xref">Example&nbsp;<span>9.28</span></a>.</p>
+<!-- [ ] tmp fmt -->
+<div style="page-break-after: always;"></div>
 <div id="exm-predict-class-tune-hyperparameters-evaluate-test" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.28</strong></span> &nbsp;</p>
 <div class="cell">
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model to the training set and</span></span>
-<span><span class="co"># evaluate on the test set</span></span>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the model to the training set and evaluate on the test set</span></span>
 <span><span class="va">cls_final_fit</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">last_fit</span><span class="op">(</span></span>
 <span>    <span class="va">cls_wf_lasso_tokens</span>,</span>
@@ -1364,23 +1361,19 @@ Figure&nbsp;9.3: Confusion matrix for the aggregated folds of the cross-validati
 <p>The performance metrics are very close to those we achieved on the training set in <a href="#exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect" class="quarto-xref">Example&nbsp;<span>9.26</span></a>. This is a good sign that the model is robust as it performs well on both training and test sets. We can evaluate the confusion matrix on the test set as well. The code is seen in <a href="#exm-predict-class-tune-hyperparameters-evaluate-test-confusion" class="quarto-xref">Example&nbsp;<span>9.29</span></a>.</p>
 <div id="exm-predict-class-tune-hyperparameters-evaluate-test-confusion" class="theorem example">
 <p><span class="theorem-title"><strong>Example 9.29</strong></span> &nbsp;</p>
-<div class="cell">
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot confusion matrix</span></span>
 <span><span class="va">cls_final_fit</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">collect_predictions</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">conf_mat</span><span class="op">(</span>truth <span class="op">=</span> <span class="va">outcome</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">autoplot</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="fig-predict-class-tune-hyperparameters-evaluate-test-confusion" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis.">
-<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-predict-class-tune-hyperparameters-evaluate-test-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="9_predict_files/figure-html/fig-predict-class-tune-hyperparameters-evaluate-test-confusion-1.png" class="img-fluid figure-img" alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis." width="576">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-predict-class-tune-hyperparameters-evaluate-test-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-predict-class-tune-hyperparameters-evaluate-test-confusion.png" class="img-fluid figure-img" style="width:75.0%" alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.4: Confusion matrix for the test set
 </figcaption></figure>
-</div>
-</div>
-</div>
 </div>
 <p>On the test set the false instances are balanced, which is a good sign that the model is robust. Ideally, there would be no errors, but this is not realistic. The model is not perfect, but it is useful.</p>
 <p>Now a model that can predict the nativeness of a writer based on their writing sample is a useful tool in itself. You could imagine that this could be a preprocessing step for a language learning application, for example. But for a study that is more interested in learning about what features are most important for predicting the native versus non-native features of a writer, we still have some work to do. We can inspect the errors on the test set to gain some insight into what writing samples, and which proficiency levels of the writers, are most difficult to predict. We can also inspect the estimates for the features in the model to gain some insight into what features are most important for predicting the outcomes.</p>
@@ -1576,7 +1569,7 @@ Figure&nbsp;9.5: Most important features for predicting the outcome
 <span><span class="va">reg_tbl</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">cedel_tbl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">subcorpus</span> <span class="op">==</span> <span class="st">"Learner"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span>outcome <span class="op">=</span> <span class="va">placement_score</span>, <span class="va">proficiency</span>, <span class="va">text</span><span class="op">)</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span>outcome <span class="op">=</span> <span class="va">place_score</span>, <span class="va">proficiency</span>, <span class="va">text</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Preview</span></span>
 <span><span class="va">reg_tbl</span> <span class="op">|&gt;</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1602,7 +1595,7 @@ $ text        &lt;chr&gt; "Yo vivo es Alanta, Georgia. Atlanta es muy grande ciu
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;9.4: Steps to build and tune a model
 </figcaption><div aria-describedby="tbl-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
 <col style="width: 95%">
@@ -1690,6 +1683,8 @@ Table&nbsp;9.4: Steps to build and tune a model
 1 rmse    standard    22.6    10   0.203 Preprocessor1_Model1</code></pre>
 </div>
 </div>
+<!-- [ ] tmp fmt -->
+<div style="page-break-after: always;"></div>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1801,6 +1796,8 @@ Figure&nbsp;9.6: Distribution of the RMSE for the cross-validated linear regress
 <span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>Computational engine: ranger</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<!-- [ ] tmp fmt -->
+<div style="page-break-after: always;"></div>
 <div class="halfsize callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1968,6 +1965,8 @@ Figure&nbsp;9.7: Feature importance of the random forest model
 <p>In this section, we’ve built text regression models focusing on the ability to change algorithms and hyperparameters. We also seen some of the differences between evaluating model performance between classification and regression tasks. There are many more combinations of model specifications and feature selection and engineering that can be applied. In your research, you will find yourself using these tools to explore the best model for your data.</p>
 </section></section><section id="activities" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="activities">Activities</h2>
 <p>In the following activities, we will apply the concepts and techniques we have learned in this chapter. We will use the Tidymodels framework to build and evaluate supervised machine learning models for text classification and regression tasks.</p>
+<!-- [ ] tmp fmt -->
+<div style="page-break-after: always;"></div>
 <div class="callout callout-style-simple callout-none no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -1995,11 +1994,14 @@ Figure&nbsp;9.7: Feature importance of the random forest model
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Ackoff1989" class="csl-entry" role="listitem">
+Ackoff, R. L. (1989). From data to wisdom. <em>Journal of Applied Systems Analysis</em>, <em>16</em>(1), 3–9.
+</div>
 <div id="ref-Baayen2011" class="csl-entry" role="listitem">
 Baayen, R. H. (2011). Corpus linguistics and naive discriminative learning. <em>Revista Brasileira de Lingu<span>\</span>’<span>\</span>istica Aplicada</em>, <em>11</em>(2), 295–328.
 </div>
 <div id="ref-Deshors2016" class="csl-entry" role="listitem">
-Deshors, S. C., &amp; Gries, S. Th. (2016). Profiling verb complementation constructions across new englishes. <em>International Journal of Corpus Linguistics.</em>, <em>21</em>(2), 192–218.
+Deshors, S. C., &amp; Gries, S. Th. (2016). Profiling verb complementation constructions across <span>New Englishes</span>. <em>International Journal of Corpus Linguistics.</em>, <em>21</em>(2), 192–218.
 </div>
 <div id="ref-Gries2014" class="csl-entry" role="listitem">
 Gries, S. Th., &amp; Deshors, S. C. (2014). Using regressions to explore deviations between corpus data and a standard/target: Two suggestions. <em>Corpora</em>, <em>9</em>(1), 109–136. doi:<a href="https://doi.org/10.3366/cor.2014.0053">10.3366/cor.2014.0053</a>
@@ -2008,7 +2010,10 @@ Gries, S. Th., &amp; Deshors, S. C. (2014). Using regressions to explore deviati
 Hvitfeldt, E. (2023). <em>Textrecipes: Extra recipes for text processing</em>. Retrieved from <a href="https://github.com/tidymodels/textrecipes">https://github.com/tidymodels/textrecipes</a>
 </div>
 <div id="ref-Lozano2009" class="csl-entry" role="listitem">
-Lozano, C. (2009). CEDEL2: Corpus escrito del espa<span>ñ</span>ol L2. <em>Applied Linguistics Now: Understanding Language and Mind/La Ling<span>ü</span><span>í</span>stica Aplicada Hoy: Comprendiendo el Lenguaje y la Mente. Almer<span>í</span>a: Universidad de Almer<span>í</span>a</em>, 197–212.
+Lozano, C. (2009). <span>CEDEL2</span>: <span>Corpus</span> escrito del espa<span>ñ</span>ol <span>L2</span>. <em>Applied Linguistics Now: Understanding Language and Mind/La Ling<span>ü</span><span>í</span>stica Aplicada Hoy: Comprendiendo el Lenguaje y la Mente. Almer<span>í</span>a: Universidad de Almer<span>í</span>a</em>, 197–212.
+</div>
+<div id="ref-Rowley2007" class="csl-entry" role="listitem">
+Rowley, J. (2007). The wisdom hierarchy: <span>Representations</span> of the <span>DIKW</span> hierarchy. <em>Journal of Information Science</em>, <em>33</em>(2), 163–180. doi:<a href="https://doi.org/10.1177/0165551506070706">10.1177/0165551506070706</a>
 </div>
 <div id="ref-R-washoku" class="csl-entry" role="listitem">
 Uryu, S. (2024). <em>Washoku: Extra ’recipes’ for japanese text, date and address processing</em>.

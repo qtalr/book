@@ -3,6 +3,13 @@ execute:
   echo: false
 ---
 
+::: {.content-visible when-format="pdf"}
+```{=latex}
+\setDOI{10.4324/9781003393764.3}
+\thispagestyle{chapterfirstpage}
+```
+:::
+
 # Analysis {#sec-analysis-chapter}
 
 <!-- Deriving Knowledge from Data: A Guide to Descriptive and Analytical Methods in Text Analysis -->
@@ -400,12 +407,11 @@ When assessing the distribution of categorical variables, we can use a frequency
 
 ```{r}
 #| label: tbl-analysis-belc-frequency-table
-#| tbl-cap: "Frequency table for variables in the BELC dataset"
+#| tbl-cap: "Frequency table for variables `sex` and `group`."
 #| tbl-subcap:
 #|  - "Sex"
 #|  - "Time group"
 #| layout-ncol: 2
-#| fig-pos: H
 #| layout-valign: top
 #| tbl-colwidths: auto
 
@@ -452,11 +458,11 @@ create_barplot <- function(data, variable, x_lab = NULL, y_lab = NULL) {
 
 # Bar plot `sex` ----
 belc_essay_tbl |>
-  create_barplot(sex, "Sex", "Frequency")
+  create_barplot(sex, "Sex", "Frequency") + theme_qtalr(font_size = 12)
 
 # Bar plot `group` ----
 belc_essay_tbl |>
-  create_barplot(group, "Time group", "Frequency")
+  create_barplot(group, "Time group", "Frequency") + theme_qtalr(font_size = 12)
 ```
 
 So for a frequency table or barplot, we can see the frequency of each level of a categorical variable. This gives us some knowledge about the BELC dataset: there are more girls in the dataset and more essays appear in first and third time groups. If we were to see any clearly loopsided categories, this would be a sign of imbalance in the data and we would need to consider how this might impact our analysis.
@@ -490,14 +496,14 @@ belc_essay_tbl |>
   ggplot(aes(x = tokens)) +
   geom_histogram(bins = 30, color = "black", fill = "white") +
   labs(x = "Number of tokens", y = "Frequency") +
-  scale_x_continuous(limits = x_range)
+  scale_x_continuous(limits = x_range) + theme_qtalr(font_size = 12)
 
 # Density plot ----
 belc_essay_tbl |>
   ggplot(aes(x = tokens)) +
   geom_density() +
   labs(x = "Number of tokens", y = "Probability") +
-  scale_x_continuous(limits = x_range)
+  scale_x_continuous(limits = x_range) + theme_qtalr(font_size = 12)
 ```
 
 Both the histogram in @fig-analysis-belc-histogram-density-tokens-1 and the density plot in @fig-analysis-belc-histogram-density-tokens-2 show the distribution of the variable `tokens` in slightly different ways which translate into trade-offs in terms of interpretability.
@@ -633,7 +639,7 @@ ggplot(left_skew_data, aes(x = value)) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed") +
   geom_vline(aes(xintercept = median(value)), linetype = "solid") +
   labs(x = "Values", y = "Density") +
-  theme(axis.text = element_blank())
+  theme(axis.text = element_blank()) + theme_qtalr(font_size = 12)
 
 # Normal distribution ----
 set.seed(123)
@@ -644,7 +650,7 @@ ggplot(norm_data, aes(x = value)) +
   geom_vline(aes(xintercept = median(value)), linetype = "solid") +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed") +
   labs(x = "Values", y = "Density") +
-  theme(axis.text = element_blank())
+  theme(axis.text = element_blank()) + theme_qtalr(font_size = 12)
 
 # Right skewed distribution ----
 set.seed(123)
@@ -655,7 +661,7 @@ ggplot(right_skew_data, aes(x = value)) +
   geom_vline(aes(xintercept = mean(value)), linetype = "dashed") +
   geom_vline(aes(xintercept = median(value)), linetype = "solid") +
   labs(x = "Values", y = "Density") +
-  theme(axis.text = element_blank())
+  theme(axis.text = element_blank()) + theme_qtalr(font_size = 12)
 
 ```
 
@@ -683,13 +689,13 @@ zipf_data <- tibble(rank = 1:100, frequency = 100 / (1:100))
 zipf_data |>
   ggplot(aes(x = rank, y = frequency)) +
   geom_line() +
-  labs(x = "Rank", y = "Frequency")
+  labs(x = "Rank", y = "Frequency") + theme_qtalr(font_size = 12)
 
 # Log-transformed Zipfian distribution
 zipf_data |>
   ggplot(aes(x = rank, y = log(frequency))) +
   geom_line() +
-  labs(x = "Rank", y = "Frequency (log)")
+  labs(x = "Rank", y = "Frequency (log)") + theme_qtalr(font_size = 12)
 ```
 
 Zipf's law describes a theoretical distribution, and the actual distribution of units in a corpus is affected by various sampling factors, including the size of the corpus. The larger the corpus, the closer the distribution will be to the Zipf distribution.
@@ -722,7 +728,7 @@ The directionality of a relationship will take the form of a tabular or graphic 
 | **Ordinal**     | -                 | Contingency table/ Bar plot | Pivot table/ Boxplot |
 | **Numeric**     | -                 | -                           | Scatterplot          |
 
-Appropriate summary types for different combinations of variable types
+Summaries for different combinations of variable types
 :::
 
 <!-- Nominal + ? -->
@@ -735,7 +741,7 @@ In @tbl-analysis-belc-contingency-tables we see contingency tables for the categ
 
 ```{r}
 #| label: tbl-analysis-belc-contingency-tables
-#| tbl-cap: "Contingency tables for categorical variable `sex` and ordinal variable `group` in the BELC dataset"
+#| tbl-cap: "Contingency tables for categorical variable `sex` and ordinal variable `group`"
 #| tbl-subcap:
 #|  - "Counts"
 #|  - "Percentages"
@@ -764,7 +770,7 @@ It is sometimes helpful to visualize a contingency table as a bar plot when ther
 
 ```{r}
 #| label: fig-analysis-belc-bar-plots
-#| fig-cap: "Bar plots for the relationship between `sex` and `group` in the BELC dataset"
+#| fig-cap: "Bar plots for the relationship between `sex` and `group`"
 #| fig-alt: "Two bar plots. On the left, a bar plot for the relationship between `sex` and `group` as counts on the y-axis. On the right, a bar plot for the relationship between `sex` and `group` as proportions on the y-axis."
 #| fig-subcap:
 #| - "Counts"
@@ -776,13 +782,15 @@ belc_essay_tbl |>
   geom_bar(position = "stack", color = "black") +
   scale_fill_brewer(palette = "Greys") +
   labs(x = "Sex", y = "Frequency", fill = "Group") +
-  ylim(0, 80)
+  ylim(0, 80) +
+  theme_qtalr(font_size = 12)
 
 belc_essay_tbl |>
   ggplot(aes(x = sex, fill = group)) +
   geom_bar(position = "fill", color = "black") +
   scale_fill_brewer(palette = "Greys") +
-  labs(x = "Sex", y = "Proportion", fill = "Group")
+  labs(x = "Sex", y = "Proportion", fill = "Group") +
+  theme_qtalr(font_size = 12)
 ```
 
 To summarize and assess the relationship between a categorical or an ordinal variable and a numeric variable, we cannot use a contingency table. Instead, this type of relationship is best summarized in a table using a summary statistic in a **pivot table**. A pivot table is a table in which a class-type variable is used to group a numeric variable by some summary statistic appropriate for numeric variables, *e.g.* mean, median, standard deviation, *etc.*
@@ -793,7 +801,7 @@ In @tbl-analysis-belc-pivot-table, we see a pivot table for the relationship bet
 
 ```{r}
 #| label: tbl-analysis-belc-pivot-table
-#| tbl-cap: "Pivot table for the mean `tokens` by `group` in the BELC dataset"
+#| tbl-cap: "Pivot table for the mean `tokens` by `group`"
 #| tbl-colwidths: [50, 50]
 
 belc_essay_tbl |>
@@ -810,7 +818,7 @@ In @fig-analysis-belc-boxplot-violin-plot, we see both a boxplot and a violin pl
 
 ```{r}
 #| label: fig-analysis-belc-boxplot-violin-plot
-#| fig-cap: "Boxplot and violin plot for the relationship between `group` and `tokens` in the BELC dataset"
+#| fig-cap: "Boxplot and violin plot for the relationship between `group` and `tokens`"
 #| fig-alt: "Two plots that `group` on the x-axis and `tokens` on the y-axis. The left plot is a boxplot and the right plot is a violin plot. The boxplot shows the median, first and third quartiles, and the whiskers. The violin plot shows the distribution of the data by the width of the plot at the points where the data is most dense."
 #| fig-subcap:
 #| - "Boxplot"
@@ -820,12 +828,14 @@ In @fig-analysis-belc-boxplot-violin-plot, we see both a boxplot and a violin pl
 belc_essay_tbl |>
   ggplot(aes(x = group, y = tokens)) +
   geom_boxplot(color = "black") +
-  labs(x = "Group", y = "Tokens")
+  labs(x = "Group", y = "Tokens") +
+  theme_qtalr(font_size = 12)
 
 belc_essay_tbl |>
   ggplot(aes(x = group, y = tokens)) +
   geom_violin(color = "black") +
-  labs(x = "Group", y = "Tokens")
+  labs(x = "Group", y = "Tokens") +
+  theme_qtalr(font_size = 12)
 ```
 
 <!-- Numeric + Numeric -->
@@ -838,23 +848,26 @@ In @fig-analysis-belc-scatter-plot, we see a scatterplot and a scatterplot with 
 
 ```{r}
 #| label: fig-analysis-belc-scatter-plot
-#| fig-cap: "Scatter plot for the relationship between `ttr` and `types` in the BELC dataset"
+#| fig-cap: "Scatter plot for the relationship between `ttr` and `types`"
 #| fig-alt: "Two scatterplots in which the y-axis is `ttr` and the x-axis is `types`. The first scatterplot shows the points only. The second scatterplot shows the points with a linear trend line which minimizes the distance between the line and the points. In this case, that line slopes from the top left to the bottom right."
 #| fig-subcap:
 #| - "Points"
 #| - "Points with a linear trend line"
 #| layout-ncol: 2
+#| fig-pos: H
 
 belc_essay_tbl |>
   ggplot(aes(x = types, y = ttr)) +
   geom_point(color = "black", alpha = 0.5) +
-  labs(x = "Number of types", y = "Type-Token Ratio score")
+  labs(x = "Number of types", y = "Type-Token Ratio score") +
+  theme_qtalr(font_size = 12)
 
 belc_essay_tbl |>
   ggplot(aes(x = types, y = ttr)) +
   geom_point(color = "black", alpha = 0.5) +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(x = "Number of types", y = "Type-Token Ratio score")
+  labs(x = "Number of types", y = "Type-Token Ratio score") +
+  theme_qtalr(font_size = 12)
 ```
 
 ## Analyze {#sec-analysis-analyze}

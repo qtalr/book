@@ -3,6 +3,13 @@ execute:
   echo: false
 ---
 
+::: {.content-visible when-format="pdf"}
+```{=latex}
+\setDOI{10.4324/9781003393764.2}
+\thispagestyle{chapterfirstpage}
+```
+:::
+
 # Data {#sec-data-chapter}
 
 <!-- From Data to Information: Curating and Transforming Datasets for Text Analysis -->
@@ -79,19 +86,58 @@ Types of corpora
 
 Of the corpus types, \index{corpora!reference}**reference corpora** are the least common and most ambitious. These resources aim to model the characteristics of a language population. \index{corpora!specialized}**Specialized corpora** aim to represent more specific populations. What specialized corpora lack in breadth of coverage, they make up for in depth of coverage by providing a more targeted representation of specific language populations. \index{corpora!parallel}**Parallel** and \index{corpora!comparable}**comparable corpora** are both types of specialized corpora which aim to model different languages or different language varieties for direct or indirect comparison, respectively.
 
-:::: {.callout}
+```{r}
+#| include: false
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+
+brown <- readr::read_csv("data/data-brown.csv")
+
+brown_categories_docs <-
+  brown |>
+  distinct(category, category_description, document_id) |>
+  separate(category_description,
+    into = c("main_category", "sub_category"),
+    sep = ": ",
+    fill = "right"
+  ) |>
+  mutate(main_category = str_to_title(main_category))
+
+brown_categories_docs |>
+  count(main_category) |>
+  ggplot(aes(y = reorder(main_category, desc(n)), x = n / sum(n))) +
+  geom_col() +
+  scale_x_continuous(labels = scales::percent) +
+  labs(
+    x = "Balance",
+    y = "Strata",
+    title = ""
+  ) +
+  coord_flip() +
+  theme_qtalr(font_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 11))
+
+ggsave("figures/fig-brown-corpus.png", width = 3, height = 4)
+```
+
+::: {.callout}
 **{{< fa regular lightbulb >}} Consider this**
 
+<!-- [ ] add alt description -->
 ::: {.content-visible when-format="html"}
-<img src="figures/brown-corpus.png" width="35%" style="float: right;">
-
+<img src="figures/fig-brown-corpus.png" width="40%" style="float: right;">
 :::
 
-::: {.content-visible when-format="latex"}
+::: {.content-visible when-format="pdf"}
 ```{=latex}
 \begin{wrapfigure}{r}{0.45\textwidth}
+  \vspace{-20pt}% adjust to fit better
   \centering
-  \includegraphics[width=0.40\textwidth]{part_2/figures/brown-corpus.png}
+  \includegraphics[width=0.42\textwidth]{part_2/figures/fig-brown-corpus.png}
 \end{wrapfigure}
 ```
 :::
@@ -527,9 +573,9 @@ As we have seen in this chapter, acquiring corpus data and converting that data 
 
 ### Data origin {#sec-data-data-origin}
 
-Data acquired from corpus resources should be accompanied by information about the **data origin**. @tbl-data-data-origin provides a list of the types of information that should be included in the data origin information.
+Data acquired from corpus resources should be accompanied by information about the **data origin**. @tbl-data-data-origin provides the types of information that should be included in the data origin file.
 
-::: {#tbl-data-data-origin tbl-colwidths="[25, 75]"}
+::: {#tbl-data-data-origin tbl-colwidths="[30, 70]"}
 
 | Information | Description |
 |-------------|-------------|
@@ -553,7 +599,7 @@ The process of organizing the data into a dataset, curation, and modifications t
 
 On the one hand, each dataset that is created should have a **data dictionary** file. A data dictionary is a document, usually in a spreadsheet format, that describes the variables in a dataset. The key  information that should be included in a data dictionary is provided in @tbl-data-data-dictionary.
 
-::: {#tbl-data-data-dictionary tbl-colwidths="[25, 75]"}
+::: {#tbl-data-data-dictionary tbl-colwidths="[30, 70]"}
 
 | Information | Description |
 |-------------|-------------|

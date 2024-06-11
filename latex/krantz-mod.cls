@@ -247,13 +247,14 @@
 \newdimen\vtrimtop
 \newdimen\vtrimbot
 
+% Original Krantz trim
 % \setlength\trimheight{9.21in}
 % \setlength\trimwidth{6.14in}
 
-% Adjust for Routledge trim
-\setlength\trimheight{246mm}
-\setlength\trimwidth{174mm}
-%
+% Adjust for Routledge trim %%
+\setlength\trimheight{246mm} %
+\setlength\trimwidth{174mm}  %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %
 \if@krantza
@@ -267,8 +268,10 @@
   \evensidemargin1.1875in
   % \htrim.7365in
   \htrim1in
-  \vtrimtop1.068in
-  \vtrimbot1.068in
+  % \vtrimtop1.068in
+  % \vtrimbot1.068in
+  \vtrimtop1in
+  \vtrimbot1in
   \hoffset-15pt
   \voffset39pt
 \let\normaltextheight\textheight

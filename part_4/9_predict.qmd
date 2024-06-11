@@ -3,6 +3,13 @@ execute:
   echo: true
 ---
 
+::: {.content-visible when-format="pdf"}
+```{=latex}
+\setDOI{10.4324/9781003393764.9}
+\thispagestyle{chapterfirstpage}
+```
+:::
+
 # Predict {#sec-predict-chapter}
 
 ```{r}
@@ -10,7 +17,6 @@ execute:
 #| child: "../_common.qmd"
 #| cache: false
 ```
-
 
 ::: {.callout}
 **{{< fa regular list-alt >}} Outcomes**
@@ -100,27 +106,27 @@ We will use data from the CEDEL2 corpus [@Lozano2009]. We will include a subset 
 
 # Read in the datasets
 learners_tbl <-
-  read_csv("data/cedel2_learners.csv") |>   # read in the learners dataset outcome variable |>
+  read_csv("data/cedel2_learners.csv") |> # read in the learners dataset outcome variable |>
   mutate(subcorpus = "Learner") |>
-  select(subcorpus, placement_score = placement_test_score_percent, proficiency, text)                  # select variables
+  select(subcorpus, place_score = placement_test_score_percent, proficiency, text) # select variables
 
 natives_tbl <-
-  read_csv("data/cedel2_natives.csv") |>    # read in the natives dataset
-  mutate(placement_score = NA) |>                       # create an outcome variable
-  mutate(proficiency = "Native") |>                   # create a proficiency variable
-  select(subcorpus, placement_score, proficiency, text)                  # select the text column
+  read_csv("data/cedel2_natives.csv") |> # read in the natives dataset
+  mutate(place_score = NA) |> # create an outcome variable
+  mutate(proficiency = "Native") |> # create a proficiency variable
+  select(subcorpus, place_score, proficiency, text) # select the text column
 
 # Combine the datasets by row
-cedel_tbl<-
-  bind_rows(                                          # combine the datasets by row
+cedel_tbl <-
+  bind_rows( # combine the datasets by row
     learners_df,
     natives_df
   ) |>
-  mutate(doc_id = row_number()) |>                    # create a document id
-  select(doc_id, subcorpus, placement_score, proficiency, text)          # select variables
+  mutate(doc_id = row_number()) |> # create a document id
+  select(doc_id, subcorpus, place_score, proficiency, text) # select variables
 
 # Write to disk
-cedel_tbl|>
+cedel_tbl |>
   write_csv("data/cedel2_transformed.csv")
 
 # Create data dictionary
@@ -182,11 +188,11 @@ library(janitor)
 cedel_tbl |>
   skim()
 
-# There appear to be 1051 NA values for placement_score. This is likely due to the fact that the natives dataset does not have a placement_score variable, let's take a look.
+# There appear to be 1051 NA values for place_score. This is likely due to the fact that the natives dataset does not have a place_score variable, let's take a look.
 
 cedel_tbl |>
-  filter(is.na(placement_score)) |>
-  select(subcorpus, placement_score, proficiency) |>
+  filter(is.na(place_score)) |>
+  select(subcorpus, place_score, proficiency) |>
   head()
 
 # Yes, placement score is NA for the natives dataset.
@@ -199,10 +205,10 @@ cedel_tbl |>
 
 # Lower beginner and upper advanced have very few observations. But since this will not be a class, we can proceed with the analysis.
 
-# Next, let's look at the distribution of the placement_score variable.
+# Next, let's look at the distribution of the place_score variable.
 
 cedel_tbl |>
-  ggplot(aes(x = placement_score)) +
+  ggplot(aes(x = place_score)) +
   geom_histogram(aes(y = after_stat(density))) +
   geom_density(alpha = 0.5) +
   labs(title = "Distribution of placement scores",
@@ -212,7 +218,7 @@ cedel_tbl |>
 # Some left skew, with an apparent bimodal distribution. Since this is only a learner dataset, we can assume that the bimodal distribution is due to the fact that the learners are at different levels of proficiency. Let's explore this further.
 
 cedel_tbl |>
-  ggplot(aes(x = placement_score, fill = proficiency)) +
+  ggplot(aes(x = place_score, fill = proficiency)) +
   # geom_histogram(aes(y = after_stat(density)), position = "identity", alpha = 0.5, binwidth = 2) +
   geom_density(alpha = 0.5) +
   labs(title = "Distribution of placement scores by proficiency",
@@ -221,7 +227,7 @@ cedel_tbl |>
 
 # Looks like our two peaks are due to the lower and upper proficiency levels. This is good to know and will be useful for our analysis.
 
-# Let's gauge the variablity of the placement_score variable by proficiency. A boxplot will be useful for this.
+# Let's gauge the variablity of the place_score variable by proficiency. A boxplot will be useful for this.
 
 # Before we do that, let's make proficiency and subscorpus a factor variable in the order we want.
 
@@ -243,7 +249,7 @@ cedel_tbl <-
         )
 
 cedel_tbl |>
-  ggplot(aes(x = proficiency, y = placement_score, fill = proficiency)) +
+  ggplot(aes(x = proficiency, y = place_score, fill = proficiency)) +
   geom_boxplot() +
   labs(title = "Variability of placement scores by proficiency",
        x = "Proficiency",
@@ -257,13 +263,16 @@ cedel_tbl |>
 
 ```
 
-After I performed some diagnostics and made some adjustments, the dataset is in good order to proceed with the analysis. I updated the variables `subcorpus` and `proficiency` as factor variables and ordered them in a way that makes sense for the analysis. The `placement_score` variable is distributed well across the proficiency levels. The `subcorpus` variable is less balanced, with around 65% of the texts being from learners. This is not a problem, but it is something to keep in mind when building and interpreting the predictive models.
+After I performed some diagnostics and made some adjustments, the dataset is in good order to proceed with the analysis. I updated the variables `subcorpus` and `proficiency` as factor variables and ordered them in a way that makes sense for the analysis. The `place_score` variable is distributed well across the proficiency levels. The `subcorpus` variable is less balanced, with around 65% of the texts being from learners. This is not a problem, but it is something to keep in mind when building and interpreting the predictive models.
 
 We will be using the Tidymodels framework in R to perform these analyses. {tidymodels} is a metapackage, much like {tidyverse}, that provides a consistent interface for machine learning modeling. Some key packages unique to {tidymodels} are {recipes}, {parsnip}, {workflows}, and {tune}. {recipes} includes functions for preprocessing and engineering features. {parsnip} provides a consistent interface for specifying modeling algorithms. {worflows} allows us to combine recipes and models into a single pipeline. Finally, {tune} give us the ability to evaluate and tune hyperparameters of models.
 
 Since we are using text data, we will also be using {textrecipes} which makes various functions available for preprocessing text including extracting and engineering features.
 
 Let's go ahead and do the setup, loading the necessary packages, seen in @exm-predict-packages-data.
+
+<!-- [ ] tmp fmt -->
+\pagebreak
 
 ::: {#exm-predict-packages-data}
 ```r
@@ -481,6 +490,9 @@ predictor: 1
 :::
 
 <!-- Step 4: Inspect:  -->
+
+<!-- [ ] tmp fmt -->
+\pagebreak
 
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
@@ -873,19 +885,34 @@ To provide context in terms of what is a good model performance, it is useful to
 
 For classification tasks, a good place to start is to visualize a confusion matrix. A **confusion matrix** is a cross-tabulation of the predicted and actual outcomes. The `conf_mat_resampled()` function takes a `fit_resamples` object (with predictions saved) and returns a table (`tidy = FALSE`) with the confusion matrix for the aggregated folds. We can pass this to the `autoplot()` function to plot as in @exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion.
 
-::: {#exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion}
 ```{r}
-#| label: fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion
-#| fig-cap: "Confusion matrix for the aggregated folds of the cross-validation"
-#| fig-alt: "Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."
-#| fig-width: 6
-#| fig-asp: 0.5
+#| include: false
 
+# Plot confusion matrix
+cls_lasso_cv |>
+  conf_mat_resampled(tidy = FALSE) |>
+  autoplot(type = "heatmap") +
+  theme_qtalr(font_size = 12) +
+  theme(legend.position = "none")
+
+ggsave("figures/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion.png", width = 4.5, height = 4, dpi = 300)
+```
+
+::: {#exm-predict-class-tune-hyperparameters-evaluate-workflow-cv-confusion}
+
+```r
 # Plot confusion matrix
 cls_lasso_cv |>
   conf_mat_resampled(tidy = FALSE) |>
   autoplot(type = "heatmap")
 ```
+:::
+
+::: {#fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion}
+
+![](figures/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion.png){width="75%" fig-alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."}
+
+Confusion matrix for the aggregated folds of the cross-validation
 :::
 
 The top left to bottom right diagonal contains the true positives and true negatives, these are the correct predictions. The top right to bottom left diagonal contains the false positives and false negatives --our errors. The convention is speak of one class being the positive class and the other class being the negative class. In our case, we will consider the positive class to be the 'learner' class and the negative class to be the 'natives' class.
@@ -895,7 +922,7 @@ We can see that there are more learners falsely predicted to be natives than the
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
-Another perspective often applied to evaluate a model is the Reciever Operating Characteristic (ROC) curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. This metric, and visualization, can be useful to gauge the model's ability to distinguish between the two classes. {yardstick} provides the `roc_curve()` function to calculate the ROC curve on a `fit_resamples` object.
+Another perspective often applied to evaluate a model is the Reciever Operating Characteristic (ROC) curve. The ROC curve is a plot of the true positive rate (TPR) against the false positive rate (FPR) for different classification thresholds. This metric, and visualization, can be useful to gauge the model's ability to distinguish between the two classes. {yardstick} provides the `roc_curve()` function to calculate the ROC curve on an `fit_resamples` object.
 :::
 
 <!-- Model improvement: tune max tokens -->
@@ -1010,19 +1037,34 @@ cls_lasso_tokens_cv |>
 
 The metrics from @exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect show that the model's performance has improved for both the accuracy and the ROC-AUC. The confusion matrix from @exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion shows that the number of false positives and false negatives has decreased. This is a good sign that the model is more robust.
 
-::: {#exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion}
 ```{r}
-#| label: fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion
-#| fig-cap: "Confusion matrix for the aggregated folds of the cross-validation"
-#| fig-alt: "Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."
-#| fig-width: 6
-#| fig-asp: 0.5
+#| include: false
 
+# Plot confusion matrix
+cls_lasso_tokens_cv |>
+  conf_mat_resampled(tidy = FALSE) |>
+  autoplot(type = "heatmap") +
+  theme_qtalr(font_size = 12) +
+  theme(legend.position = "none")
+
+ggsave("figures/fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion.png", width = 4.5, height = 4, dpi = 300)
+```
+
+::: {#exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion}
+
+```r
 # Plot confusion matrix
 cls_lasso_tokens_cv |>
   conf_mat_resampled(tidy = FALSE) |>
   autoplot(type = "heatmap")
 ```
+:::
+
+::: {#fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion}
+
+![](figures/fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion.png){width="75%" fig-alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."}
+
+Confusion matrix for the aggregated folds of the cross-validation
 :::
 
 It appears that the model is more robust with the updated `max_tokens` hyperparameter. We could continue to explore other model improvement strategies, but for now we will move on to the next step in our workflow.
@@ -1035,12 +1077,14 @@ The `last_fit()` function takes a workflow and a split object and returns a `las
 
 We will use the `last_fit()` function to train the final model and predict the outcome on the test set. The `collect_metrics()` function takes a data frame with the actual and predicted outcomes and returns a data frame with the metrics for the model. The code is seen in @exm-predict-class-tune-hyperparameters-evaluate-test.
 
+<!-- [ ] tmp fmt -->
+\pagebreak
+
 ::: {#exm-predict-class-tune-hyperparameters-evaluate-test}
 ```{r}
 #| label: predict-class-tune-hyperparameters-evaluate-test
 
-# Fit the model to the training set and
-# evaluate on the test set
+# Fit the model to the training set and evaluate on the test set
 cls_final_fit <-
   last_fit(
     cls_wf_lasso_tokens,
@@ -1055,20 +1099,36 @@ cls_final_fit |>
 
 The performance metrics are very close to those we achieved on the training set in @exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-collect. This is a good sign that the model is robust as it performs well on both training and test sets. We can evaluate the confusion matrix on the test set as well. The code is seen in @exm-predict-class-tune-hyperparameters-evaluate-test-confusion.
 
-::: {#exm-predict-class-tune-hyperparameters-evaluate-test-confusion}
 ```{r}
-#| label: fig-predict-class-tune-hyperparameters-evaluate-test-confusion
-#| fig-cap: "Confusion matrix for the test set"
-#| fig-alt: "Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis."
-#| fig-width: 6
-#| fig-asp: 0.5
+#| include: false
 
 # Plot confusion matrix
 cls_final_fit |>
   collect_predictions() |>
   conf_mat(truth = outcome, estimate = .pred_class) |>
   autoplot(type = "heatmap")
+  theme_qtalr(font_size = 12) +
+  theme(legend.position = "none")
+
+ggsave("figures/fig-predict-class-tune-hyperparameters-evaluate-test-confusion.png", width = 4.5, height = 4, dpi = 300)
 ```
+
+::: {#exm-predict-class-tune-hyperparameters-evaluate-test-confusion}
+
+```r
+# Plot confusion matrix
+cls_final_fit |>
+  collect_predictions() |>
+  conf_mat(truth = outcome, estimate = .pred_class) |>
+  autoplot(type = "heatmap")
+```
+:::
+
+::: {#fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion}
+
+![](figures/fig-predict-class-tune-hyperparameters-evaluate-test-confusion.png){width="75%" fig-alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis."}
+
+Confusion matrix for the test set
 :::
 
 On the test set the false instances are balanced, which is a good sign that the model is robust. Ideally, there would be no errors, but this is not realistic. The model is not perfect, but it is useful.
@@ -1217,7 +1277,7 @@ Let's start by extracting the observations (only learners) and the relevant vari
 reg_tbl <-
   cedel_tbl |>
   filter(subcorpus == "Learner") |>
-  select(outcome = placement_score, proficiency, text)
+  select(outcome = place_score, proficiency, text)
 
 # Preview
 reg_tbl |> glimpse()
@@ -1381,6 +1441,9 @@ null_cv <-
 # Collect metrics
 null_cv |> collect_metrics()
 ```
+
+<!-- [ ] tmp fmt -->
+\pagebreak
 
 ::: {.callout .halfsize}
 **{{< fa exclamation-triangle >}} Warning**
@@ -1571,6 +1634,9 @@ Engine-Specific Arguments:
 Computational engine: ranger
 ```
 :::
+
+<!-- [ ] tmp fmt -->
+\pagebreak
 
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
@@ -1837,6 +1903,9 @@ In this section, we've built text regression models focusing on the ability to c
 ## Activities {.unnumbered}
 
 In the following activities, we will apply the concepts and techniques we have learned in this chapter. We will use the Tidymodels framework to build and evaluate supervised machine learning models for text classification and regression tasks.
+
+<!-- [ ] tmp fmt -->
+\pagebreak
 
 ::: {.callout}
 **{{< fa regular file-code >}} Recipe**

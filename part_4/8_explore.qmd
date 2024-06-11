@@ -3,9 +3,14 @@ execute:
   echo: true
 ---
 
-# Explore {#sec-explore-chapter}
+::: {.content-visible when-format="pdf"}
+```{=latex}
+\setDOI{10.4324/9781003393764.8}
+\thispagestyle{chapterfirstpage}
+```
+:::
 
-<!-- Exploring Insights from Data: A Survey of Descriptive and Unsupervised Learning Methods -->
+# Explore {#sec-explore-chapter}
 
 ```{r}
 #| label: setup-options
@@ -71,7 +76,7 @@ The data dictionary for the dataset we will use as our point of departure is sho
 
 ```{r}
 #| label: tbl-explore-masc-dd-show
-#| tbl-cap: "Data dictionary for the MASC dataset."
+#| tbl-cap: "Data dictionary for the MASC dataset"
 #| tbl-colwidths: [15, 15, 15, 55]
 #| echo: false
 
@@ -218,7 +223,12 @@ At its core, frequency analysis is a descriptive method that counts the number o
 
 <!--- Raw frequency (counting) --->
 
+<!-- [ ] tmp fmt -->
+\pagebreak
+
 ##### Raw frequency {#sec-explore-frequency-raw}
+
+\vspace{-1em}
 
 Let's consider what the most common words in the MASC dataset are as a starting point to making inroads on our task by identifying relevant vocabulary for an ELL textbook.
 
@@ -243,10 +253,10 @@ As we discussed in @sec-analysis-distributions, the frequency of linguistic unit
 ::: {#exm-explore-masc-count-cumulative}
 ```{r}
 #| label: fig-explore-masc-count-cumulative
-#| fig-cap: "Cumulative frequency of lemmas in the MASC dataset"
+#| fig-cap: "Cumulative frequency of lemmas"
 #| fig-alt: "A line plot showing the cumulative frequency of lemmas in the MASC dataset. Vertical lines at 10, 100, and 1000 types show that the top 10 lemmas account for 25% of the corpus, 100 lemmas account for 50% of the corpus, and 1000 lemmas account for 75% of the corpus."
 #| fig-width: 6
-#| fig-asp: 0.35
+#| fig-asp: 0.30
 #| echo: false
 
 # Calculate cumulative frequency
@@ -266,15 +276,16 @@ p <-
   scale_x_discrete(breaks = seq(0, 1000, 100), labels = seq(0, 1000, 100), expand = c(0, 0)) +
   labs(x = "Types", y = "Cumulative frequency (%)") +
   theme(axis.text = element_text(size = 10),
-        panel.grid.major = element_line(color = "#cccccc"))
+        panel.grid.major = element_line(color = "#cccccc")) +
+  theme_qtalr(font_size = 10)
 
 p +
-  geom_vline(xintercept = 10, linetype = "dashed") +
-  annotate("text", x = 10+75, y = 0.33, label = "10 lemmas", size = 4, angle = 35) +
-  geom_vline(xintercept = 100, linetype = "dashed") +
-  annotate("text", x = 100+76, y = 0.63, label = "100 lemmas", size = 4, angle = 35) +
-  geom_vline(xintercept = 1000, linetype = "dashed") +
-  annotate("text", x = 1000+82, y = 0.87, label = "1000 lemmas", size = 4, angle = 35)
+  geom_vline(xintercept = 10, linetype = "dashed", color = "grey40") +
+  annotate("text", x = 105, y = 0.20, label = "10 lemmas", size = 3, angle = 0) +
+  geom_vline(xintercept = 100, linetype = "dashed", color = "grey40") +
+  annotate("text", x = 210, y = 0.45, label = "100 lemmas", size = 3, angle = 0) +
+  geom_vline(xintercept = 1000, linetype = "dashed", color = "grey40") +
+  annotate("text", x = 1120, y = 0.65, label = "1000 lemmas", size = 3, angle = 0)
 ```
 :::
 
@@ -283,7 +294,7 @@ If we look at the types that appear within the first 50 most frequent, you can l
 ::: {#exm-explore-masc-count-top-50}
 ```{r}
 #| label: tbl-explore-masc-count-top-50
-#| tbl-cap: "Top 50 lemma types in the MASC dataset."
+#| tbl-cap: "Top 50 lemma types"
 #| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Top 50 types
@@ -321,7 +332,7 @@ We need to consult the Penn Tagset again, to ensure we are selecting the correct
 ::: {#exm-explore-masc-filter-pos}
 ```{r}
 #| label: tbl-explore-masc-filter-pos
-#| tbl-cap: "Frequency of tokens in the MASC dataset after filtering out lemmas with POS tags that are not content words"
+#| tbl-cap: "Frequency of tokensafter filtering out lemmas with POS tags that are not content words"
 #| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Penn Tagset for content words
@@ -350,6 +361,8 @@ masc_content_tbl |>
 The resulting list in @tbl-explore-masc-filter-pos paints a different picture of the most frequent words in the dataset. The most frequent words are now content words, and included in most frequent words are more semantically specific words. We now have reduced the number of observations by `r label_percent()(1-nrow(masc_content_tbl) / nrow(masc_tbl))` focusing on the content words. We are getting closer to identifying the vocabulary that we want to include in our ELL materials, but we will need some more tools to help us identify the most relevant vocabulary.
 
 ##### Dispersion {#sec-explore-frequency-dispersion}
+
+\vspace{-1em}
 
 **Dispersion** is a measure of how evenly distributed a linguistic unit is across a dataset. This is a key concept in text analysis, as important as frequency. It is important to recognize that frequency and dispersion are measures of different characteristics. We can have two words that occur with the same frequency, but one word may be more evenly distributed across a dataset than the other. Depending on the researcher's aims, this may be an important distinction to make. For our task, it is likely the case that we want to capture words that are well-dispersed across the dataset as words that have a high frequency and a low dispersion tend to be connected to a particular context, whether that be a particular genre, a particular speaker, a particular topic, *etc*. In other research, aim may be the reverse; to identify words that are highly frequent and highly concentrated in a particular context to identify words that are distinctive to that context.
 
@@ -417,21 +430,23 @@ There are statistical approaches to identifying natural breakpoints, including c
 ::: {#exm-explore-masc-dp-density}
 ```{r}
 #| label: fig-explore-masc-dp-density
-#| fig-cap: "Density plot of Deviation of Proportions for lemmas in the MASC dataset"
+#| fig-cap: "Density plot of Deviation of Proportions for lemmas"
 #| fig-alt: "A density plot showing the distribution of Deviation of Proportions for lemmas in the MASC dataset. The plot shows a bend in the distribution between 0.85 and 0.97."
+#| fig-width: 6
+#| fig-asp: 0.30
 
 # Density plot of dp
 masc_lemma_disp |>
   ggplot(aes(x = dp)) +
   geom_density() +
   scale_x_continuous(breaks = seq(0, 1, .1)) +
-  labs(x = "Deviation of Proportions")
+  labs(x = "Deviation of Proportions", y = "Density")
 ```
 :::
 
-What we are looking for is a distinctive bend in the distribution of dispersion measures. In @fig-explore-masc-dp-density, we can see one between 0.85 and 0.97. This bend is called an elbow, and using this approach to make informed decisions about thresholds is called the **elbow method**. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed.
+What we are looking for is a distinctive bend in the distribution of dispersion measures. In @fig-explore-masc-dp-density, we can see one between $0.85$ and $0.97$. This bend is called an elbow, and using this approach to make informed decisions about thresholds is called the **elbow method**. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed.
 
-In @exm-explore-masc-dp-filter, I filter out lemmas that have a dispersion measure less than 0.91.
+In @exm-explore-masc-dp-filter, I filter out lemmas that have a dispersion measure less than $0.91$.
 
 ::: {#exm-explore-masc-dp-filter}
 ```{r}
@@ -477,6 +492,8 @@ masc_lemma_disp_thr |>
 We now have a good candidate list of common vocabulary that is spread well across the corpus.
 
 ##### Relative frequency {#sec-explore-frequency-relative}
+
+\vspace{-1em}
 
 Gauging frequency and dispersion across the entire corpus is a good starting point for any frequency analysis, but it is often the case that we want to compare the frequency and dispersion of linguistic units across corpora or sub-corpora.
 
@@ -576,7 +593,7 @@ We can appreciate, now, that there are similarities and a few differences betwee
 
 We can further cull our results by filtering out lemmas that are not well-dispersed across the sub-corpora. Although it may be tempting to use the threshold we used earlier, we should consider that the size of the sub-corpora are different and the distribution of the dispersion measure may be different. With this in mind, we need to visualize the distribution of the dispersion measure for each modality and apply the elbow method to identify a threshold for each modality.
 
-After assessing the density plots for the dispersion of each modality via the elbow method, we update our thresholds. We maintain the 0.91 threshold for the written subcorpus and use a 0.79 threshold for the spoken subcorpus. I apply these filters as seen in @exm-explore-masc-subcorpora-filtered.
+After assessing the density plots for the dispersion of each modality via the elbow method, we update our thresholds. We maintain the $0.91$ threshold for the written subcorpus and use a $0.79$ threshold for the spoken subcorpus. I apply these filters as seen in @exm-explore-masc-subcorpora-filtered.
 
 ::: {#exm-explore-masc-subcorpora-filtered}
 ```{r}
@@ -735,7 +752,7 @@ We have a working method for identify verb particle constructions. We can clean 
 
 ```{r}
 #| label: fig-explore-masc-verb-part-network
-#| fig-cap: "Network plot of verb particle constructions in the MASC dataset"
+#| fig-cap: "Network plot of verb particle constructions"
 #| fig-alt: "A network plot showing the association between verbs and prepositions in the MASC dataset. The plot shows a network of verbs and prepositions connected by edges with varying thicknesses."
 #| fig-width: 8
 #| fig-asp: 0.75
@@ -892,7 +909,7 @@ fviz_eig(masc_pos_pca, ncp = 10)
 #| label: fig-explore-masc-dtms-pca-scree
 #| fig-cap: "Scree plot of the principle components of the POS relative frequency"
 #| fig-alt: "A scree plot which is a bar plot ordered by the amount of variance explained by each principle component. The plot shows the first 10 principle components and the amount of variance explained by each component. The first two components explain almost 50% of the variance."
-#| fig-width: 8
+#| fig-width: 6
 #| fig-asp: 0.5
 #| echo: false
 
@@ -901,10 +918,12 @@ library(factoextra)
 
 # Scree plot: POS relative frequency
 fviz_eig(masc_pos_pca, ncp = 10, barfill = "grey50", barcolor = "grey50") +
-labs(title = "")
+labs(title = "", y = "Variance explained (%)") + theme_qtalr(font_size = 10) + scale_y_continuous(labels = scales::label_percent(scale = 1))
 ```
 :::
 
+<!-- [ ] tmp fmt -->
+\pagebreak
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
@@ -912,7 +931,7 @@ labs(title = "")
 As with many modeling techniques we will encounter, it is possible to extract the importance of features that contribute to the model. In the case of PCA, we can extract the feature values from the principle components using the `get_pca_var()` function from {factoextra}. Feature importance provides more detailed insight into the inner workings of the algorithms we employ in our research and therefore can serve to inform our interpretation of the results.
 :::
 
-From the scree plot for the matrix, in @fig-explore-masc-dtms-pca-scree, we can see that the first component shows the most variance explained, around 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears hhe variance explained decreases between 4 and 5 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
+From the scree plot for the matrix, in @fig-explore-masc-dtms-pca-scree, we can see that the first component shows the most variance explained, around just over 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears the variance explained decreases after 4 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
 
 Let's go ahead and create a matrix of the first four principle components for the POS data, as seen in @exm-explore-masc-pos-pca-pc.
 
@@ -957,9 +976,9 @@ masc_pos_pca_pc |>
 
 ```{r}
 #| label: fig-explore-masc-pos-kmeans-elbow
-#| fig-cap: "Elbow method for $k$-means clustering of the MASC dataset"
+#| fig-cap: "Elbow method for $k$-means clustering"
 #| fig-alt: "A line plot showing the within-cluster sum of squares for a range of values for $k$ in the MASC dataset. The plot shows the WSS for $k$ ranging from 1 to 20. The plot shows that the WSS decreases rapidly from 1 to 4 clusters and then levels off after 5-7 clusters."
-#| fig-width: 8
+#| fig-width: 6
 #| fig-asp: 0.5
 #| echo: false
 
@@ -973,12 +992,16 @@ masc_pos_pca_pc |>
     iter.max = 20,
     linecolor = "black"
   ) +
-  labs(title = "")
+  labs(title = "") +
+  theme_qtalr(font_size = 11)
 ```
 
-It is clear that there is significant gains in cluster fit from 1 to 4 clusters, but the gains begin to level off after 5-7 clusters.
+It is clear that there is significant gains in cluster fit from 1 to 4 clusters, but the gains begin to level off after 5 clusters.
 
 Now we have an informed selection for $k$. Let's use 4 clusters in the `kmeans()` function and collect the results, as seen in @exm-explore-masc-pos-kmeans-fit.
+
+<!-- [ ] tmp fmt -->
+\pagebreak
 
 ::: {#exm-explore-masc-pos-kmeans-fit}
 ```{r}
@@ -1037,7 +1060,7 @@ We now see that the cluster assignments from the $k$-means algorithm have been j
 ::: {#exm-explore-masc-pos-kmeans-genre}
 ```{r}
 #| label: tbl-explore-masc-pos-kmeans-genre
-#| tbl-cap: "Distribution of clusters by genre in the MASC dataset"
+#| tbl-cap: "Distribution of clusters by genre"
 #| tbl-colwidths: [20, 20, 20, 20, 20]
 
 # Load package
@@ -1294,10 +1317,10 @@ As an example, let's compare the vectors for noun-verb pairs for the lemmas 'run
 ::: {#exm-explore-masc-vsm-word2vec-similarity}
 ```{r}
 #| label: fig-explore-masc-vsm-word2vec-similarity
-#| fig-cap: "Similarity between 'run' and 'walk' in the MASC dataset"
+#| fig-cap: "Similarity between 'run' and 'walk'"
 #| fig-alt: "A scatter plot showing the similarity between 'run' and 'walk' in the MASC dataset. The plot shows the first two principle components of the vectors for 'run' and 'walk', as nouns and as verbs."
-#| fig-width: 6
-#| fig-asp: 0.5
+#| fig-width: 2.75
+#| fig-asp: 1
 
 # Extract vectors
 word_vectors <-
@@ -1319,7 +1342,8 @@ pca_tbl <-
 pca_tbl |>
   ggplot(aes(x = PC1, y = PC2, label = word)) +
   geom_point() +
-  ggrepel::geom_text_repel()
+  ggrepel::geom_text_repel(size = 2) +
+  theme_qtalr(font_size = 8)
 ```
 :::
 
@@ -1399,7 +1423,7 @@ The result of @exm-explore-masc-vsm-word2vec-manner-motion is a data frame with 
 
 ```{r}
 #| label: fig-explore-masc-vsm-word2vec-manner-motion-compare
-#| fig-cap: "Motion-similarity and manner-similarity of verbs in the MASC dataset"
+#| fig-cap: "Motion-similarity and manner-similarity of verbs"
 #| fig-alt: "A scatter plot showing the motion-similarity and manner-similarity of verbs in the MASC dataset. The plot shows the similarity to motion on the x-axis and the similarity to manner on the y-axis. The plot shows the motion-similarity and manner-similarity of 50 randomly sampled verbs from the dataset, as well as the motion and manner seed vectors."
 #| fig-width: 6
 #| fig-asp: 1

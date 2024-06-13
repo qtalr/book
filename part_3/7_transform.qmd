@@ -97,14 +97,14 @@ Simply looking at the first 10 lines of the dataset from @exm-transform-europarl
 
 After exploring variations in the `lines` variable, I identified a number of artifacts in this dataset that we will want to consider addressing. These are included in @tbl-transform-europarl-normalization.
 
-::: {#tbl-transform-europarl-normalization tbl-colwidths="[30, 70]"}
+::: {#tbl-transform-europarl-normalization tbl-colwidths="[40, 60]"}
 
 | Description | Examples |
 |:---|:---|
 | Non-speech annotations | `(Abucheos)`, `(A4-0247/98)`, `(The sitting was opened at 09:00)` |
-| Inconsistent whitespace | `5 % ,`, <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>, `Palacio' s` |
-| Non-sentence punctuation | ` - `, `:`, `...`, `;` |
-| Abbreviations | `Mr.`, `Sr.`, `Mme.`, `Mr`, `Sr`, `Mme`, `Mister`, `Señor`, `Madam` |
+| Inconsistent whitespace (<code>␣</code>) | `5`<code>␣</code>`%`<code>␣</code>, <code>␣</code>, `Palacio'`<code>␣</code>`s` |
+| Non-sentence punctuation | `-`, `:`, `...`, `;` |
+| (Non-)Abbreviations | `Mr.`, `Sr.`, `Mme.`, `Mr`, `Sr`, `Mme`, `Mister`, `Señor`, `Madam` |
 | Text case | `The`, `the`, `White`, `white` |
 
 Characteristics of the Europarl Corpus dataset that may require normalization
@@ -197,7 +197,7 @@ Normalization goals will vary from dataset to dataset but the procedures often f
 
 ### Tokenization {#sec-transform-tokenization}
 
-Tokenization is the process of segmenting units of language into components relevant for the research question. This includes breaking text in curated datasets into smaller units, such as words, $n$-grams, sentences, *etc.* or combining smaller units into larger units.
+Tokenization is the process of segmenting units of language into components relevant for the research question. This includes breaking text in curated datasets into smaller units, such as words, ngrams, sentences, *etc.* or combining smaller units into larger units.
 
 The process of tokenization is fundamentally row-wise. Changing the unit of observation changes the number of rows. It is important both for the research and the text processing to operationalize our language units beforhand. For example, while it may appear obvious to you what 'word' or 'sentence' means, a computer, and your reproducible research, needs a working definition. This can prove tricker than it seems. For example, in English, we can segment text into words by splitting on whitespace. This works fairly well but there are some cases where this is not ideal. For example, in the case of contractions, such as `don't`, `won't`, `can't`, *etc.* the apostrophe is not a whitespace character. If we want to consider these contractions as separate words, then perhaps we need to entertain a different tokenization strategy.
 
@@ -270,6 +270,7 @@ europarl_unigrams_tbl <-
 
 Let's preview the very same lines we modeled in @tbl-transform-europarl-tokenization-words-example to see the results of our tokenization.
 
+::: {#exm-transform-europarl-tokenization-words-preview}
 ```{r}
 #| label: transform-europarl-tokenization-words-preview
 
@@ -278,8 +279,9 @@ europarl_unigrams_tbl |>
   filter(type == "Target", line_id == 2) |>
   slice_head(n = 10)
 ```
+:::
 
-The `token` column now contains our word tokens. One thing to note, however, is that text is lowercased and punctuation is stripped by default. If we want to retain the original case or punctuation, keep the original variable, or change the tokenization strategy, we can update the `to_lower`, `strip_punct`, `drop`, or `token` parameters, respectively.
+In @exm-transform-europarl-tokenization-words-preview, the `token` column now contains our word tokens. One thing to note, however, is that text is lowercased and punctuation is stripped by default. If we want to retain the original case or punctuation, keep the original variable, or change the tokenization strategy, we can update the `to_lower`, `strip_punct`, `drop`, or `token` parameters, respectively.
 
 As we derive datasets to explore, let's also create bigram tokens. We can do this by changing the `token` parameter to `"ngrams"` and specifying the value for $n$ with the `n` parameter. I will assign the result to `europarl_bigrams_tbl` as we will have two-word tokens, as seen in @exm-transform-europarl-tokenization-bigrams-tidytext.
 

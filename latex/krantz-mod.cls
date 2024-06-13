@@ -1,7 +1,8 @@
 %%
 %% This is file `Krantz.cls'
 %%% Created by Shashi Kumar / KGL [Jan 2023]
-%%% Modified by Jerid Francom [May 2024]
+%%% Modified by Jerid Francom [May/June 2024]
+%%% for Routledge Press publication
 
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{krantz}
@@ -266,12 +267,14 @@
   \topmargin0in
   \oddsidemargin1.1875in
   \evensidemargin1.1875in
+  % Original Krantz trim
   % \htrim.7365in
-  \htrim1in
   % \vtrimtop1.068in
   % \vtrimbot1.068in
-  \vtrimtop1in
-  \vtrimbot1in
+  % Ajusments for Routledge trim
+  \htrim0.98in
+  \vtrimtop1.152in
+  \vtrimbot1.152in
   \hoffset-15pt
   \voffset39pt
 \let\normaltextheight\textheight
@@ -1295,8 +1298,6 @@
 %%    }
 %%    \if@restonecol\twocolumn\fi
 %%    }
-
-
 
 \newcommand*\l@part[2]{%
   \ifnum \c@tocdepth >-2\relax

@@ -271,10 +271,11 @@
   % \htrim.7365in
   % \vtrimtop1.068in
   % \vtrimbot1.068in
-  % Ajusments for Routledge trim
-  \htrim0.98in
-  \vtrimtop1.152in
-  \vtrimbot1.152in
+  % Adjustments for Routledge trim %
+  \htrim1.0953in                   %
+  \vtrimtop1.264in                 %
+  \vtrimbot1.264in                 %
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \hoffset-15pt
   \voffset39pt
 \let\normaltextheight\textheight
@@ -488,6 +489,9 @@
 
 \if@titlepage
   \newcommand\maketitle{\begin{titlepage}%
+    % Adjustment for Routledge Press title page %
+    \setcounter{page}{3}                        %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \let\footnotesize\small
   \let\footnoterule\relax
   \let \footnote \thanks

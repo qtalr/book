@@ -21,8 +21,8 @@
 \usepackage{lmodern}
 \ifPDFTeX\else  
     % xetex/luatex font selection
-  \setmainfont[]{Palatino}
-  \setmonofont[Scale=0.75]{Hack Nerd Font Mono}
+    \setmainfont[]{Palatino}
+    \setmonofont[Scale=0.75]{Hack Nerd Font Mono}
   \ifXeTeX
     \usepackage{xeCJK}
     \setCJKmainfont[]{Arial Unicode MS}
@@ -52,14 +52,28 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \setcounter{secnumdepth}{2}
 % Make \paragraph and \subparagraph free-standing
+\makeatletter
 \ifx\paragraph\undefined\else
   \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
 \fi
 \ifx\subparagraph\undefined\else
   \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
+\makeatother
 
 \usepackage{color}
 \usepackage{fancyvrb}
@@ -198,6 +212,14 @@
 \indexsetup{noclearpage}
 \makeindex[options=-s header.ist]
 
+% command to index code
+
+\usepackage{xstring}
+\newcommand{\cindex}[1]{%
+  \StrSubstitute{#1}{_}{\_}[\temp]%
+  \index{\temp}%
+}
+
 \frontmatter
 \usepackage{booktabs}
 \usepackage{longtable}
@@ -302,11 +324,12 @@
 \@ifundefined{codebgcolor}{\definecolor{codebgcolor}{HTML}{f8f8f8}}{}
 \makeatother
 \makeatletter
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, frame hidden, boxrule=0pt, colback={codebgcolor}, enhanced, breakable]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, colback={codebgcolor}, boxrule=0pt, frame hidden, breakable, sharp corners]}{\end{tcolorbox}}\fi
 \makeatother
 \makeatletter
 \@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
 \makeatother
+
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -321,6 +344,7 @@
   pdfauthor={Jerid Francom},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
+
 
 \title{An Introduction to Quantitative Text Analysis for Linguistics}
 
@@ -428,6 +452,7 @@ This book has been prepared from camera-ready copy provided by the author.
 \setcounter{tocdepth}{2}
 \tableofcontents
 }
+
 \bookmarksetup{startatroot}
 
 \chapter*{Acknowledgments}\label{sec-acknowledgments-pdf}
@@ -473,7 +498,7 @@ quantitative text analysis and made it accessible to a broader audience.
 \setDOI{10.4324/9781003393764.0}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -848,7 +873,7 @@ include working with R in a \index{remote environment}\textbf{remote
 environment} or a \index{virtual environment}\textbf{virtual
 environment}.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Guides} For more information and instructions
 on setting up an R environment for using this book, consult the
@@ -876,7 +901,7 @@ Official R packages can be found in repositories like
 2024}), while other packages can be obtained from code-sharing platforms
 such as \index{GitHub}GitHub (\citeproc{ref-Github2024}{GitHub, 2024}).
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -898,7 +923,7 @@ textbook, but there is a set of packages that will be key to have from
 the get go. Once you have access to a working \index{R}R environment,
 you can proceed to install the following packages.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Guides}
 
@@ -957,7 +982,7 @@ version control software \index{Git}Git on your computing environment.
 
 \pagebreak
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Guides}
 
@@ -1030,7 +1055,7 @@ understand and answer your question effectively. \\
 
 \index{RStudio}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Guides}
 
@@ -1184,7 +1209,7 @@ textbook:
 
 \textbf{Content}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -1192,7 +1217,7 @@ Learning outcomes for the chapter.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1200,7 +1225,7 @@ Points to consider and questions to explore.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -1208,7 +1233,7 @@ Case studies which highlight conceptual knowledge and coding skills.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -1218,7 +1243,7 @@ Additional comments and resources for diving deeper into a topic.
 
 \textbf{Activities}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -1226,7 +1251,7 @@ Links to interactive lessons for practicing coding skills.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -1234,7 +1259,7 @@ Reading to examine programming concepts.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -1244,7 +1269,7 @@ Exercises for applying conceptual knowledge and coding skills.
 
 \textbf{Other}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -1252,7 +1277,7 @@ Tips for using R and related tools.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -1276,7 +1301,7 @@ the tools and resources that you will be using throughout this textbook.
 These and subsequent activities are designed to be completed in the
 order that they are presented in this textbook.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -1288,7 +1313,7 @@ completing swirl lessons for interactive R programming tutorials.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -1300,7 +1325,7 @@ to create literate documents using R and Quarto.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -1352,7 +1377,7 @@ analysis contributes to the field.
 \setDOI{10.4324/9781003393764.1}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -1377,7 +1402,7 @@ including methodological approaches and the nature of data, are
 discussed. I then introduce text analysis as a branch of data science
 and discuss its aims, approaches, implementation, and applications.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -1424,7 +1449,7 @@ the world is actually like can be two different things. This is
 problematic for making sense of the world in an objective way. This is
 where science comes in.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1598,7 +1623,7 @@ methods, \index{ethnographic methods}ethnographic methods, \emph{etc.})
 
 \pagebreak
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -1817,7 +1842,7 @@ applications stem from Computational Linguistic research, often known as
 translators, submitting your paper to plagiarism detection software,
 \emph{etc.} many of the text analysis methods we will cover are at play.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1925,7 +1950,7 @@ Language-related fields
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -1967,7 +1992,7 @@ reproducible research documents. You will apply the capabilities of
 Quarto in a practical context conveying the objectives and key
 discoveries from a primary research article.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -1980,7 +2005,7 @@ references list, and cross-referenced tables and figures.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -2030,7 +2055,7 @@ to guide the implementation of a text analysis project.
 \setDOI{10.4324/9781003393764.2}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -2059,7 +2084,7 @@ organization and transformation. Documentation in quantitative research
 is emphasized addressing the importance of data origin files and data
 dictionaries.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -2233,7 +2258,7 @@ corpora}\index{corpus!comparable} are both types of specialized corpora
 which aim to model different languages or different language varieties
 for direct or indirect comparison, respectively.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -2349,7 +2374,7 @@ general web search\index{search engine}. Furthermore, repositories often
 require certain standards for corpus format and
 documentation\index{data documentation} for publication.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -2381,7 +2406,7 @@ suggests, programming interfaces which allow access, under certain
 conditions, to information that a website or database accessible via the
 web contains.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -2407,7 +2432,7 @@ Beyond physical access to the data, legal access is also a
 consideration. Just because data is available on the web does not mean
 it is free to use. Repositories, APIs, and individual data resources
 often have \textbf{licensing agreements} and \textbf{terms of use},
-ranging from public domain to proprietary licenses\index{copyright}.
+ranging from public domain to proprietary licenses\index{terms of use}.
 Respecting intellectual property rights is crucial when working with
 corpus data. Violating these rights can lead to legal and ethical
 issues, including lawsuits, fines, and damage to one's professional
@@ -2802,7 +2827,7 @@ other variables appear to describe that variable, then the most
 individualized variable is likely the unit of observation of the
 dataset, \emph{i.e.} the meaning of each observation.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -3025,7 +3050,7 @@ text\_id & sent\_id & bigram\\
 
 \end{table}%
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -3148,7 +3173,7 @@ syntactic structure of each word in the sentence. The results of this
 process enables more direct access during analysis to features that were
 hidden or otherwise difficult to access.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -3241,7 +3266,7 @@ lemma
 
 \end{longtable}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -3464,7 +3489,7 @@ file\index{comma-separated values file} or
 spreadsheet\index{spreadsheet file}, can make it easy for others to read
 and understand your data dictionary.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -3510,7 +3535,7 @@ expand on the elements of code blocks in Quarto documents such as the
 \texttt{label}, \texttt{echo}, \texttt{message}, and \texttt{include}
 options.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -3522,7 +3547,7 @@ coding strategies for reading, inspecting, and writing datasets.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -3572,7 +3597,7 @@ ensure transparent and reproducible research.
 \setDOI{10.4324/9781003393764.3}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -3601,7 +3626,7 @@ chapter, I will outline methods to and the importance of communicating
 the analysis results and procedure in a transparent and reproducible
 manner.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -3658,7 +3683,8 @@ of age).
 In Table~\ref{tbl-analysis-belc-dd} we see the data
 dictionary\index{data dictionary} for the BELC dataset which reflects
 structural and transformational steps I've done so we start with a tidy
-dataset with \texttt{essay\_id} as the unit of observation.
+dataset\index{tidy data} with \texttt{essay\_id} as the unit of
+observation.\index{unit of observation}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1300}}
@@ -3748,11 +3774,11 @@ E5 & L05 & female & T3 & 158 & 80 & 0.506 & 0.987 \\
 
 \end{longtable}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-alt} Case study}
 
-Type-token ratio (TTR)\index{Type-token ratio (TTR)} is a standard
+Type-token ratio (TTR)\index{type-token ratio (TTR)} is a standard
 metric for measuring lexical diversity, but it is not without its flaws.
 Most importantly, TTR is highly sensitive to the word length of the
 text. Duran (\citeproc{ref-Duran2004}{2004}) discuss this limitation,
@@ -3796,7 +3822,7 @@ by summing all the values and dividing by the number of values. The
 \textbf{median}\index{median} is calculated by sorting all the values in
 the variable and then selecting the middle value.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -3954,7 +3980,7 @@ prop\_l2 & 0.1 & 0.027\\
 
 \end{table}%
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -4110,7 +4136,7 @@ in first and third time groups. If we were to see any clearly lopsided
 categories, this would be a sign of imbalance in the data and we would
 need to consider how this might impact our analysis.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -4451,7 +4477,7 @@ distribution of units in a corpus is affected by various sampling
 factors, including the size of the corpus. The larger the corpus, the
 closer the distribution will be to the Zipf distribution.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -5261,7 +5287,7 @@ appropriate code block options. We will reinforce our understanding of
 read in data and \{dplyr\} (\citeproc{ref-R-dplyr}{Wickham, François,
 Henry, Müller, \& Vaughan, 2023}) to manipulate data.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -5274,7 +5300,7 @@ variable(s).
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -5318,7 +5344,7 @@ the analysis forms an integral part of creating reproducible research.
 \setDOI{10.4324/9781003393764.4}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -5350,7 +5376,7 @@ conceptual and practical steps to implement the research effectively and
 in a way that supports communicating the research findings and the
 process by which the findings were obtained.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -5606,7 +5632,7 @@ hypothesis.\index{hypothesis}
 
 For illustration, let's posit a hypothesis
 (\(H_1\))\index{alternative hypothesis}, leaving aside the implicit null
-hypothesis (\(H_0\))\index(null hypothesis), seen in
+hypothesis (\(H_0\))\index{null hypothesis}, seen in
 Example~\ref{exm-research-form-infer}.
 
 \begin{example}[]\protect\hypertarget{exm-research-form-infer}{}\label{exm-research-form-infer}
@@ -5853,7 +5879,7 @@ most often are, sketch out contingency plans to address these
 shortcomings. This will help buttress your research and ensure that your
 time and effort is well-spent.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -6044,7 +6070,7 @@ such that you can begin to work on your own research projects and
 understand how to use the tools and resources available to you to manage
 your project.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -6056,7 +6082,7 @@ how to manage a reproducible research project structure.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -6120,7 +6146,7 @@ results and also forms the cornerstone of reproducible research.
 \setDOI{10.4324/9781003393764.5}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -6153,7 +6179,7 @@ only be adept at acquiring data from diverse sources but also capable of
 documenting it comprehensively, enabling you to replicate the process in
 the future.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -6177,39 +6203,43 @@ programmatically. The data may be contained in a single file or multiple
 files. The files may be archived or unarchived. The data may be
 hierarchically organized or not. Each resource will have its own unique
 characteristics that will influence the process of acquiring the data.
-In this section we will work through a few examples to demonstrate the
+In this section, we will work through examples to demonstrate the
 general process of acquiring data through downloads.
 
 \subsection{Manual}\label{manual}
 
 In contrast to the other data acquisition methods we will cover in this
-chapter, \textbf{manual downloads} require human intervention. This
-means that manual downloads are non-reproducible in a strict sense and
-require that we keep track of and document our procedure. It is a very
-common for research projects to acquire data through manual downloads as
-many data resources require some legwork before they are accessible for
-downloading. These can be resources that require institutional or
-private licensing and fees, require authorization/ registration, and/ or
-are only accessible via resource search interfaces.
+chapter, \textbf{manual downloads}\index{manual downloads} require human
+intervention. This means that manual downloads are non-reproducible in a
+strict sense and require that we keep track of and document our
+procedure. It is a very common for research projects to acquire data
+through manual downloads as many data resources require some legwork
+before they are accessible for downloading. These can be resources that
+require institutional or private licensing and fees, require
+authorization/ registration, and/ or are only accessible via resource
+search interfaces.\index{terms of use}
 
 The resource we will use for this demonstration is the
 \href{http://cedel2.learnercorpora.com/}{Corpus Escrito del Español como
-L2 (CEDEL2)} (\citeproc{ref-Lozano2009}{Lozano, 2009}), a corpus of
+L2 (CEDEL2)} (\citeproc{ref-Lozano2009}{Lozano,
+2009})\index{Corpus Escrito del Español como L2 (CEDEL2)}, a corpus of
 Spanish learner writing. It includes L2 writing from students with a
-variety of L1 backgrounds. For comparative puposes it also includes
-native writing for Spanish, English, and several other languages.
+variety of L1 backgrounds. For comparative purposes it also includes
+native writing for Spanish, English, and several other
+languages.\index{second language writing} \index{specialized corpus}
 
 The CEDEL2 corpus is a freely available resource, but to access the data
 you must first use a search interface to select the relevant
 characteristics of the data of interest. Following the search/ download
 link you can find a search interface that allows the user to select the
-subcorpus and filter the results by a set of attributes.
+sub-corpus and filter the results by a set of
+attributes.\index{acquire data}
 
 For this example let's assume that we want to acquire data to use in a
-study comparing the use of the Spanish preterite and imperfect past
-tense aspect in written texts by English L1 learners of Spanish to
-native Spanish speakers. To acquire data for such a project, we will
-first select the subcorpus ``Learners of L2 Spanish''. We will set the
+study comparing the use of the Spanish preterit and imperfect past tense
+aspect in written texts by English L1 learners of Spanish to native
+Spanish speakers. To acquire data for such a project, we will first
+select the sub-corpus ``Learners of L2 Spanish''. We will set the
 results to provide full texts and filter the results to ``L1 English -
 L2 Spanish''. Additionally, we will set the medium to ``Written''. This
 will provide us with a set of texts for the L2 learners that we can use
@@ -6232,11 +6262,12 @@ Corpus}
 The `Download' link now appears for this search criteria. Following this
 link will provide the user a form to fill out. This particular resource
 allows for access to different formats to download (Texts only, Texts
-with metadata, CSV (Excel), CSV (Others)). I will select the `CSV
-(Others)' option so that the data is structured for easier processing
-downstream in subsequent processing steps. Then I save the CSV in the
-\emph{data/original/} directory of my project and create a sub-directory
-named \emph{cedel2/}, as seen in
+with metadata, CSV (Excel), CSV
+(Others)).\index{comma-separated values file (CSV)} I will select the
+`CSV (Others)' option so that the data is structured for easier
+processing downstream in subsequent processing steps. Then I save the
+CSV in the \emph{data/original/} directory of my project and create a
+sub-directory named \emph{cedel2/}, as seen in
 Snippet~\ref{def-acquire-cedel2-learners-download}.
 
 \pagebreak
@@ -6268,23 +6299,25 @@ the appropriate directory, we move on to the next processing step,
 right? Not so fast! Imagine we are working on a project with a
 collaborator. How will they know where the data came from? What if we
 need to come back to this data in the future? How will we know what
-characteristics we used to filter the data? The directory and filenames
+characteristics we used to filter the data? The directory and file names
 may not be enough. To address these questions we need to document the
-origin of the data, and in the case of data acquired through manual
-downloads, we need to document the procedures we took to acquire the
-data to the best of our ability.
+origin of the data,\index{data origin file} and in the case of data
+acquired through manual downloads, we need to document the procedures we
+took to acquire the data to the best of our ability.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
 There are many ways to create and edit CSV files. You can use a
 spreadsheet program like MS Excel or Google Sheets, a text editor like
-Notepad or TextEdit, or a code editor like RStudio or VS Code. The
-\{qtkit\} package provides a convenient function,
-\texttt{create\_data\_origin()} to create a CSV file with the data
-origin boilerplate structure. This CSV file then can be edited to add
-the relevant information in any of the above mentioned programs.
+Notepad or TextEdit\index{text editor}, or an IDE like
+RStudio\index{integrated development environment (IDE)}.
+\{qtkit\}\index{R packages!qtkit} provides a convenient function,
+\texttt{create\_data\_origin()}\cindex{create_data_origin()} to create a
+CSV file with the data origin boilerplate structure. This CSV file then
+can be edited to add the relevant information in any of the above
+mentioned programs.
 
 Using a spreadsheet program is the easiest method for editing tabular
 data. The key is to save the file as a CSV file, and not as an Excel
@@ -6294,22 +6327,23 @@ for reproducible research.
 \end{tcolorbox}
 
 As discussed in Section~\ref{sec-data-data-origin}, all acquired data
-should be accompanied by a data origin file. The majority of this
-information can typically be identified on the resource's website and/
-or the resource's documentation. In the case of the CEDEL2 corpus, the
-corpus homepage provides most of the information we need. The data
-origin file for the CEDEL2 corpus is seen in
+should be accompanied by a data origin file.\index{data origin file} The
+majority of this information can typically be identified on the
+resource's website and/ or the resource's documentation. In the case of
+the CEDEL2 corpus, the corpus homepage provides most of the information
+we need. The data origin file for the CEDEL2 corpus is seen in
 Table~\ref{tbl-acquire-cedel2-do}.
 
 Structurally, data documentation files should be stored close to the
-data they describe. So for our data origin file this means adding it to
-the \emph{data/original/} directory. Naming the file in a transparent
-way is also important. I've named the file \emph{cedel2\_do.csv} to
-reflect the name of the corpus, the meaning of the file as data origin
-with a suffixed *\_do\emph{, and the file extension }.csv* to reflect
-the file format. CSV files reflect tabular content. It is not required
-that data origin files are tabular, but it makes it easier to read and
-display them in literate programming documents.
+data they describe.\index{data documentation} So for our data origin
+file this means adding it to the \emph{data/original/} directory. Naming
+the file in a transparent way is also important. I've named the file
+\emph{cedel2\_do.csv} to reflect the name of the corpus, the meaning of
+the file as data origin with a suffixed *\_do\emph{, and the file
+extension }.csv* to reflect the file format. CSV files reflect tabular
+content. It is not required that data origin files are tabular, but it
+makes it easier to read and display them in literate programming
+documents.\index{literate programming}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
@@ -6355,19 +6389,20 @@ https://doi.org/10.1177/02676583211050522. \\
 Given this is a manual download we also need to document the procedure
 used to retrieve the data in prose. The script in the \emph{process/}
 directory that is typically used to acquire the data is not used to
-programmatically retrieve data in this case. However, to keep things
-predictable we will use this file to document the download procedure.
-I've created a Quarto file named \emph{1\_acquire\_data.qmd} in the
-\emph{process/} directory of my project. A glimpse at the directory
-structure of the project at this point is seen in
-Snippet~\ref{def-acquire-cedel2-structure}.
+programmatically retrieve data in this case.\index{research scaffold}
+However, to keep things predictable we will use this file to document
+the download procedure. I've created a Quarto file named
+\emph{1\_acquire\_data.qmd} in the \emph{process/} directory of my
+project. A glimpse at the directory structure of the project at this
+point is seen in Snippet~\ref{def-acquire-cedel2-structure}.
 
 Even though the \emph{1\_acquire\_data.qmd} file is not used to
 programmatically retrieve the data, it is still a useful place to
-document the download procedure. This includes the URL of the resource,
-the search criteria used to filter the data, and the file format and
-location of the data. It is also good to include and display your data
-origin file in this file as a formatted table.
+document the download procedure. This includes the \textbf{uniform
+resource locator} (URL)\index{uniform resource locator (URL)} of the
+resource, the search criteria used to filter the data, and the file
+format and location of the data. It is also good to include and display
+your data origin file in this file as a formatted table.
 
 \pagebreak
 
@@ -6414,44 +6449,47 @@ accessible for which programmatic downloads can be applied. A
 automated through code. Thus, this is a reproducible process. The data
 can be acquired by anyone with access to the necessary code.
 
-In this case, and subsquent data acquisition procedures in this chapter,
-we use the \emph{1\_acquire\_data.qmd} Quarto file to its full potential
-intermingling prose, code, and code comments to execute and document the
-download procedure.
+In this case, and subsequent data acquisition procedures in this
+chapter, we use the \emph{1\_acquire\_data.qmd} Quarto file to its full
+potential intermingling prose, code, and code comments to execute and
+document the download procedure.
 
 To illustrate how this works to conduct a programmatic download, we will
 work with the Switchboard Dialog Act Corpus (SWDA)
-(\citeproc{ref-SWDA2008}{University of Colorado Boulder, 2008}). The
-version that we will use is found on the Linguistic Data Consortium
-under the \href{https://catalog.ldc.upenn.edu/LDC97S62}{Switchboard-1
-Release 2 Corpus}. The corpus and related documentation are linked on
-the catalog page \url{https://catalog.ldc.upenn.edu/docs/LDC97S62/}.
+(\citeproc{ref-SWDA2008}{University of Colorado Boulder,
+2008}).\index{Switchboard Dialog Act Corpus (SWDA)} The version that we
+will use is found on the Linguistic Data Consortium under the
+\href{https://catalog.ldc.upenn.edu/LDC97S62}{Switchboard-1 Release 2
+Corpus}. The corpus and related documentation are linked on the catalog
+page
+\url{https://catalog.ldc.upenn.edu/docs/LDC97S62/}.\index{Linguistic Data Consortium (LDC)}\index{speech corpus}\index{specialized corpus}
 
 From the documentation we learn that the corpus contains transcripts for
 1155 5-minute two-way telephone conversations among English speakers for
 all areas of the United States. The speakers were given a topic to
 discuss and the conversations were recorded. The corpus metadata and
-annotations for sociolinguistic and discourse features.
+annotations for sociolinguistic and discourse
+features.\index{sociolinguistics}
 
 This corpus, as you can image, could support a wide range of interesting
-reseach questions. Let's assume we are following research conducted by
+research questions. Let's assume we are following research conducted by
 Tottie (\citeproc{ref-Tottie2011}{2011}) to explore the use of filled
 pauses such as ``um'' and ``uh'' and traditional sociolinguistic
 variables such as sex, age, and education in spontaneous speech by
 American English speakers.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
-You may be wondering what the difference betwen \emph{.zip},
+You may be wondering what the difference between \emph{.zip},
 \emph{.tar}, and \emph{.tar.gz} files are. The \emph{.zip} file format
 is the most common. It groups file and directories into one file (an
 archive) and compresses it to reduce the size of the file in one step
-when the file is created.
+when the file is created.\index{archive files}
 
 The \emph{.tar} file format is used archive files and folders, it does
-not perform compression. Gzipping peforms the compression to the
+not perform compression. Gzipping performs the compression to the
 \emph{.tar} file resulting in a file with the \emph{.tar.gz} extension.
 Notably the \emph{.gz} compression is highly efficient for large files.
 Take the \emph{swda.tar.gz} file for example. It has a compressed file
@@ -6462,15 +6500,17 @@ reduction in file size.
 
 With this goal in mind, let's get started writing the code to download
 and organize the data in our project directory. First, we need to
-identify the URL (Uniform Resource Locator) for the data that we want to
-download. More often than not this file will be some type of archive
-file with an extension such as \emph{.zip} (Zipped file), \emph{.tar}
-(Tarball file), or \emph{tar.gz} (Gzipped tarball file), which is the
-case for the SWDA corpus. Archive files make downloading multiple files
-easy by grouping files and directories into one file.
+identify the URL\index{uniform resource locator (URL)} for the data that
+we want to download. More often than not this file will be some type of
+\textbf{archive file}\index{archive file} with an extension such as
+\emph{.zip} (Zipped file), \emph{.tar} (Tarball file), or \emph{tar.gz}
+(Gzipped tarball file), which is the case for the SWDA corpus. Archive
+files make downloading multiple files easy by grouping files and
+directories into one file.
 
-In R, we can use the \texttt{download.file()} function from base R, as
-seen in Example~\ref{exm-acquire-swda-download-file}. The
+In R, we can use the \texttt{download.file()}
+function\cindex{download.file()} from base R, as seen in
+Example~\ref{exm-acquire-swda-download-file}. The
 \texttt{download.file()} function minimally requires two arguments:
 \texttt{url} and \texttt{destfile}. These correspond to the file to
 download and the location where it is to be saved to disk. To break out
@@ -6498,16 +6538,27 @@ the file.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
 Note that the \texttt{file\_path} variable in
-Example~\ref{exm-acquire-swda-download-file} is a relative path to the
-\emph{data/original/} directory. This is because the
-\emph{1\_acquire\_data.qmd} file that we are using for this code is
-located in the \emph{process/} directory and the \emph{data/} directory
-is a sibling directory to the \emph{process/} directory.
+Example~\ref{exm-acquire-swda-download-file} is a \textbf{relative
+path}\index{relative path} to the \emph{data/original/} directory. A
+relative path specifies the location of a file or directory relative to
+the current working directory. The \texttt{../} at the beginning of the
+path indicates that the file is located in the parent directory of the
+current working directory. It is also possible to use a full or
+\textbf{absolute path}\index{absolute path} to specify the location of a
+file or directory. An absolute path specifies the location of a file or
+directory from the root directory of the file system. For example, on a
+Unix-like system (\emph{e.g.} Linux, macOS, \emph{etc.}) the root
+directory is \texttt{/} and on a Windows system it is
+\texttt{C:\textbackslash{}}. An absolute path also includes the
+intermediate directories between the root directory and the file or
+directory. As an absolute path reflects both operating system and unique
+file system structure not related to the project, it is not recommended
+for use in a reproducible research project.
 
 \end{tcolorbox}
 
@@ -6538,7 +6589,8 @@ this \emph{.tar.gz} file we use the \texttt{untar()} function with the
 arguments \texttt{tarfile} pointing to the \emph{.tar.gz} file and
 \texttt{exdir} specifying the directory where we want the files to be
 extracted to. Again, I will assign the arguments to variables. Then we
-can unarchive the file using the \texttt{untar()} function.
+can unarchive the file using the \texttt{untar()}
+function.\cindex{untar()}
 
 \begin{example}[]\protect\hypertarget{exm-acquire-swda-archive-file}{}\label{exm-acquire-swda-archive-file}
 
@@ -6619,7 +6671,8 @@ to store the file, unarchive it, and then the temporary file will
 automatically be deleted. We assign the temporary space to an R object
 we will name \texttt{temp\_file} with the \texttt{tempfile()} function.
 This object can now be used as the value of the argument
-\texttt{destfile} in the \texttt{download.file()} function.
+\texttt{destfile} in the \texttt{download.file()}
+function.\cindex{tempfile()}
 
 \pagebreak
 
@@ -6643,7 +6696,7 @@ This object can now be used as the value of the argument
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -6696,10 +6749,10 @@ disk and if it exists, then skip the download, if not then download it.
 
 The desired functionality we've described can be implemented using the
 \texttt{if()} function. The \texttt{if()} function is one of a class of
-functions known as control statements. \textbf{Control statments} allow
-us to control the flow of our code by evaluating logical statements and
-processing subsequent code based on the logical value it is passed as an
-argument.
+functions known as control statements. \textbf{Control
+statements}\index{control statements} allow us to control the flow of
+our code by evaluating logical statements and processing subsequent code
+based on the logical value it is passed as an argument.\cindex{if()}
 
 So in this case we want to evaluate whether the data directory exists on
 disk. If it does then skip the download, if not, proceed with the
@@ -6723,12 +6776,12 @@ Example~\ref{exm-acquire-if-dir-exists}.
 
 \end{example}
 
-We can simplify this statement by using the \texttt{!} operator which
-negates the logical value of the statement it precedes. So if the
-directory exists, \texttt{!DIRECTORY\_EXISTS} will return \texttt{FALSE}
-and if the directory does not exist, \texttt{!DIRECTORY\_EXISTS} will
-return \texttt{TRUE}. In other words, if the directory does not exist,
-download the data. This is shown in
+We can simplify this statement by using the \texttt{!}\cindex{"!}
+operator which negates the logical value of the statement it precedes.
+So if the directory exists, \texttt{!DIRECTORY\_EXISTS} will return
+\texttt{FALSE} and if the directory does not exist,
+\texttt{!DIRECTORY\_EXISTS} will return \texttt{TRUE}. In other words,
+if the directory does not exist, download the data. This is shown in
 Example~\ref{exm-acquire-if-dir-exists-simplified}.
 
 \begin{example}[]\protect\hypertarget{exm-acquire-if-dir-exists-simplified}{}\label{exm-acquire-if-dir-exists-simplified}
@@ -6746,18 +6799,19 @@ Example~\ref{exm-acquire-if-dir-exists-simplified}.
 \end{example}
 
 Now, to determine if a directory exists in our project directory we will
-turn to \{fs\} (\citeproc{ref-R-fs}{Hester, Wickham, \& Csárdi, 2024}).
-\{fs\} provides a set of functions for interacting with the file system,
-including \texttt{dir\_exists()}. \texttt{dir\_exists()} takes a path to
-a directory as an argument and returns the logical value, \texttt{TRUE},
-if that directory exists, and \texttt{FALSE} if it does not.
+turn to \{fs\} (\citeproc{ref-R-fs}{Hester, Wickham, \& Csárdi,
+2024})\index{R packages!fs}. \{fs\} provides a set of functions for
+interacting with the file system, including \texttt{dir\_exists()}.
+\texttt{dir\_exists()} takes a path to a directory as an argument and
+returns the logical value, \texttt{TRUE}, if that directory exists, and
+\texttt{FALSE} if it does not.\cindex{dir_exists()}
 
 We can use this function to evaluate whether the directory exists and
 then use the \texttt{if()} function to process the subsequent code based
 on the logical flow we set out in
 Example~\ref{exm-acquire-if-dir-exists-simplified}. Applied to our
 project, the code will look like
-Example~\ref{exm-acquire-swda-if-dir-exists}.
+Example~\ref{exm-acquire-swda-if-dir-exists}.\cindex{if()}
 
 \begin{example}[]\protect\hypertarget{exm-acquire-swda-if-dir-exists}{}\label{exm-acquire-swda-if-dir-exists}
 
@@ -6790,6 +6844,11 @@ Example~\ref{exm-acquire-swda-if-dir-exists}.
 \end{Highlighting}
 \end{Shaded}
 
+\cindex{download.file()}
+\cindex{untar()}
+\cindex{dir_exists()}
+\cindex{tempfile()}
+
 \end{example}
 
 The code in Example~\ref{exm-acquire-swda-if-dir-exists} is added to the
@@ -6797,12 +6856,13 @@ The code in Example~\ref{exm-acquire-swda-if-dir-exists} is added to the
 data will be downloaded and extracted to our project directory. If the
 data already exists, the download will be skipped, just as we wanted.
 
-Now, before we move on, we need to make sure to document the process.
-Now that our Quarto document includes code we can review, explain, and
-comment this process. And, as always, create a data origin file as with
-the relevant information. The data origin file will be stored in the
-\emph{data/original/} directory and the Quarto file will be stored in
-the \emph{process/} directory.
+Now, before we move on, we need to make sure to document the
+process.\index{data documentation} Now that our Quarto document includes
+code we can review, explain, and comment this process. And, as always,
+create a data origin file as with the relevant
+information.\index{data origin file} The data origin file will be stored
+in the \emph{data/original/} directory and the Quarto file will be
+stored in the \emph{process/} directory.\index{research scaffold}
 
 We've leveraged R to automate the download and extraction of the data,
 depending on the existence of the data in our project directory. But you
@@ -6819,27 +6879,30 @@ Now, if you are collaborating with others, you will want to share this
 data with them. It is very common to find data that has limited
 restrictions for use in academic projects, but the most common
 limitation is redistribution. This means that you can use the data for
-your own research, but you cannot share it with others. If you plan on
-publishing your project to a code repository to share the data as part
-of your reproducible project, you would be violating the terms of use
-for the data. By including the programmatic download in your project,
-you can ensure that your collaborators can easily and effectively
-acquire the data themselves and that you are not violating the terms of
-use.
+your own research, but you cannot share it with
+others.\index{terms of use} If you plan on publishing your project to a
+code repository to share the data as part of your reproducible project,
+you would be violating the terms of use for the
+data.\index{data sharing} By including the programmatic download in your
+project, you can ensure that your collaborators can easily and
+effectively acquire the data themselves and that you are not violating
+the terms of use.
 
 \section{APIs}\label{sec-apis}
 
-A convenient alternative method for acquiring data in R is through
-package interfaces to web services. These interfaces are built using R
-code to make connections with resources on the web through
-\textbf{Application Programming Interfaces} (APIs). Websites such as
+A convenient alternative method for acquiring data in R\index{R} is
+through package interfaces to web services. These interfaces are built
+using R code to make connections with resources on the web through
+\textbf{application programming interfaces}
+(APIs).\index{application programming interface (API)} Websites such as
 Project Gutenberg, Twitter, Reddit, and many others provide APIs to
 allow access to their data under certain conditions, some more limiting
 for data collection than others. Programmers (like you!) in the R
-community take up the task of wrapping calls to an API with R code to
-make accessing that data from R convenient, and of course reproducible.
+community\index{R community} take up the task of wrapping calls to an
+API with R code to make accessing that data from R convenient, and of
+course reproducible.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -6848,8 +6911,8 @@ data, from text to images to video to audio. Visit the
 \href{https://publicapis.io/}{Public APIs website} to explore the
 diversity of APIs available.
 
-ROpenSci maintains a curated list of R packages that provide access to
-data from web services. Visit the
+ROpenSci\index{ROpenSci} maintains a curated list of R packages that
+provide access to data from web services. Visit the
 \href{https://ropensci.org/packages/data-access/}{ROpenSci website} to
 explore the packages available.
 
@@ -6859,32 +6922,36 @@ In addition to popular public APIs, there are also APIs that provide
 access to repositories and databases which are of particular interest to
 linguists. For example, \href{http://wordbank.stanford.edu/}{Wordbank}
 provides access to a large collection of child language corpora through
-\{wordbankr\} (\citeproc{ref-R-wordbankr}{Braginsky, 2024}), and
+\{wordbankr\} (\citeproc{ref-R-wordbankr}{Braginsky,
+2024})\index{R packages!wordbankr}, and
 \href{https://glottolog.org/}{Glottolog},
 \href{https://wals.info/}{World Atlas of Language Structures} (WALS),
 and \href{https://phoible.org/}{PHOIBLE} provide access to large
 collections of language metadata that can be accessed through
-\{lingtypology\} (\citeproc{ref-R-lingtypology}{Moroz, 2017}).
+\{lingtypology\} (\citeproc{ref-R-lingtypology}{Moroz,
+2017}).\index{R packages!lingtypology}
 
 Let's work with an R package that provides access to the
-\href{https://talkbank.org/}{TalkBank} database. The TalkBank project
-(\citeproc{ref-Macwhinney2024}{Macwhinney, 2024}) contains a large
-collection of spoken language corpora from various contexts:
-conversation, child language, multilinguals, \emph{etc}. Resource
-information, web interfaces, and links to download data in various
-formats can be found by perusing individual resources linked from the
-main page. However, \{TBDBr\} (\citeproc{ref-R-TBDBr}{Kowalski \&
-Cavanaugh, 2024}) provides convenient access to corpora using R once a
-corpus resource is identified.
+\href{https://talkbank.org/}{TalkBank} database\index{TalkBank}. The
+TalkBank project (\citeproc{ref-Macwhinney2024}{Macwhinney, 2024})
+contains a large collection of spoken language corpora from various
+contexts: conversation, child language, multilinguals, \emph{etc}.
+Resource information, web interfaces, and links to download data in
+various formats can be found by perusing individual resources linked
+from the main page. However, \{TBDBr\} (\citeproc{ref-R-TBDBr}{Kowalski
+\& Cavanaugh, 2024}) provides convenient access to corpora using R once
+a corpus resource is identified.\index{R packages!TBDBr}
 
 The CABNC (\citeproc{ref-Albert2015}{Albert, de Ruiter, \& de Ruiter,
 2015}) contains the
 \href{http://www.natcorp.ox.ac.uk/docs/URG/BNCdes.html\#body.1_div.1_div.5_div.1}{demographically
 sampled portion} of the spoken portion of the British National Corpus
-(BNC) (\citeproc{ref-Leech1992}{Leech, 1992}).
+(BNC) (\citeproc{ref-Leech1992}{Leech,
+1992})\index{British National Corpus (BNC)}.
 
 Useful for a study aiming to research spoken British English, either in
-isoloation or in comparison to American English (SWDA).
+isolation or in comparison to American English
+(SWDA).\index{Switchboard Dialog Act Corpus (SWDA)}.
 
 First, we need to install and load \{TBDBr\}, as in
 Example~\ref{exm-acquire-load-pacman}.
@@ -6900,6 +6967,8 @@ Example~\ref{exm-acquire-load-pacman}.
 \end{Highlighting}
 \end{Shaded}
 
+\cindex{library()}
+
 \end{example}
 
 \{TBDBr\} provides a set of common \texttt{get*()} functions for
@@ -6908,18 +6977,18 @@ acquiring data from the TalkBank corpus resources. These include:
 \texttt{getTokens()}, \texttt{getTokenTypes()}, and
 \texttt{getUtterances()}.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip} List functions and arguments
 
 For any package loaded in your R session, you can list all of its
 functions and datasets using the \texttt{ls()} function. For example,
 \texttt{ls("package:TBDBr")} will list all of the functions and datasets
-in \{TBDBr\}.
+in \{TBDBr\}.\cindex{ls()}
 
 To view all of the arguments for a function, use the \texttt{args()}
 function. For example, \texttt{args(getUtterances)} will list all of the
-arguments for the \texttt{getUtterances()} function.
+arguments for the \texttt{getUtterances()} function.\cindex{args()}
 
 \end{tcolorbox}
 
@@ -6963,6 +7032,9 @@ the data frame it returns using \texttt{glimpse()}.
 \end{Highlighting}
 \end{Shaded}
 
+\cindex{getUtterances()}
+\cindex{glimpse()}
+
 \begin{verbatim}
 Rows: 235,901
 Columns: 10
@@ -6988,10 +7060,10 @@ information. First, we see the data type of each variable.
 Interestingly, the data type for each variable in the data frame is a
 list object. Being that a list is two-dimensional data type, like a data
 frame, we have two-dimensional data inside two-dimensional data. This is
-known as a \textbf{nested structure}. We will work with nested
-structures in more depth later, but for now it will suffice to say that
-we would like to `unnest' these lists and reveal the list-contained
-vector types at the data frame level.
+known as a \textbf{nested structure}\index{nested structure}. We will
+work with nested structures in more depth later, but for now it will
+suffice to say that we would like to `unnest' these lists and reveal the
+list-contained vector types at the data frame level.
 
 To do this we will pass the \texttt{utterances} data frame to the,
 appropriately named, \texttt{unnest()} function from \{tidyr\}
@@ -7001,6 +7073,7 @@ unnest, \texttt{cols\ =\ c()}. To unnest all variables, we will use the
 \texttt{everything()} function from \{dplyr\} to select all variables at
 once. We will use the result to overwrite the \texttt{utterances} object
 with the unnested data frame.
+\index{R packages!tidyr}\index{R packages!dplyr}
 
 \begin{example}[]\protect\hypertarget{exm-acquire-unnest}{}\label{exm-acquire-unnest}
 
@@ -7033,6 +7106,8 @@ $ startTime <chr> "0.208", "2.656", "2.896", "3.328", "5.088", "6.208", "8.32"~
 $ endTime   <chr> "2.672", "2.896", "3.328", "5.264", "6.016", "8.496", "9.312~
 \end{verbatim}
 
+\cindex{unnest()}
+
 \end{example}
 
 The output from Example~\ref{exm-acquire-unnest} shows that the
@@ -7040,7 +7115,7 @@ variables are now one-dimensional vector types.
 
 Returning to the information about our data frame from
 \texttt{glimpse()}, the second thing to notice is we get a short preview
-of the values for each variable. There are a couple things we can gleen
+of the values for each variable. There are a couple things we can glean
 from this. One is that we can confirm or clarify the meaning of the
 variable names by looking at the values. The other thing to consider is
 whether the values show any patterns that may be worthy of more
@@ -7053,22 +7128,28 @@ useful information and we may want to remove them later.
 
 For now, however, we want to acquire and store the data in its original
 form (or as closely as possible). So now, we have acquired the
-utterances data and have it in our R session as a data frame. To store
-this data in a file, we will first need to consider the file format.
-Data frames are tabular, so that gives us a few options.
+utterances data and have it in our R session as a data
+frame.\index{data frame} To store this data in a file, we will first
+need to consider the file format. Data frames are tabular, so that gives
+us a few options.
 
 Since we are working in R, we could store this data as an R object, in
-the form of an RDS file. An RDS file is a binary file that can be read
-back into R as an R object. This is a good option if we want to store
-the data for use in R, but not if we want to share the data with others
-or use it in other software. Another option is to store the data as a
-spreadsheet file, such as XSLX (MS Excel). This may make viewing and
-editing the contents more convenient, but it depends on the software
-available to you and others. A third, more viable option, is to store
-the data as a CSV file. CSV files are plain text files that can be read
-and written by most software. This makes CSV files one of the most
-popular for sharing tablular data. For this reason, we will store the
-data as a CSV file.
+the form of an R data serialization (RDS)
+file\index{R data serialization (RDS) file}. An RDS file is a binary
+file. Binary files cannot be viewed in plain text format. However, these
+files can be read back into R as an R object exactly as there were
+(including factors, sorting, \emph{etc.}). This is a good option if we
+want to store the data for use in R, but not if we want to share the
+data with others or use it in other software.
+
+Another option is to store the data as a spreadsheet file, such as XSLX
+(MS Excel)\index{spreadsheet file}. This may make viewing and editing
+the contents more convenient, but it depends on the software available
+to you and others. A third, more viable option, is to store the data as
+a CSV file\index{comma-separated values file (CSV)}. CSV files are plain
+text files that can be read and written by most software. This makes CSV
+files one of the most popular for sharing tabular data. For this reason,
+we will store the data as a CSV file.
 
 \{readr\} provides the \texttt{write\_csv()} function for writing data
 frames to CSV files. The first argument is the data frame to write, and
@@ -7079,7 +7160,8 @@ not, we will get an error.
 In this case, I would like to write the file \emph{utterances.csv} to
 the \emph{../data/original/cabnc/} directory. The original project
 structure does not contain a \emph{cabnc/} directory, so I need to
-create one. To do this, I will use \texttt{dir\_create()} from \{fs\}.
+create one. To do this, I will use \texttt{dir\_create()} from
+\{fs\}.\index{research scaffold}
 
 \begin{example}[]\protect\hypertarget{exm-acquire-write-csv}{}\label{exm-acquire-write-csv}
 
@@ -7094,6 +7176,9 @@ create one. To do this, I will use \texttt{dir\_create()} from \{fs\}.
 \FunctionTok{write\_csv}\NormalTok{(utterances, }\StringTok{"../data/original/cabnc/utterances.csv"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+\cindex{dir_create()}
+\cindex{write_csv()}
 
 \end{example}
 
@@ -7132,7 +7217,7 @@ data and we move on to the next step. However, if we want to acquire
 other datasets from the CABNC, say participants, tokens, \emph{etc.},
 then we can either repeat the steps in
 Example~\ref{exm-acquire-get-unnest-write-csv} for each data type, or we
-can write a function to do this for us!
+can write a function to do this for us!\index{custom functions}
 
 A function serves us to make our code more legible and reusable for the
 CABNC, and since the TalkBank data is structured similarly across
@@ -7159,7 +7244,7 @@ To write a function, we need to consider the following:
 Taking each in turn, the name of the function should be descriptive of
 what the function does. In this case, we are acquiring and writing data
 from Talkbank corpora. A possible name is
-\texttt{get\_talkbank\_data()}. The required arguments of the the
+\texttt{get\_talkbank\_data()}. The required arguments of the
 \texttt{get*()} functions will definitely figure in our function. In
 addition, we will need to specify the path to the directory to write the
 data. With these considerations, we can write the function signature in
@@ -7176,6 +7261,9 @@ Example~\ref{exm-acquire-get-talkbank-data-1}.
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
+
+\cindex{function()}
+\cindex{get_talkbank_data()}
 
 \end{example}
 
@@ -7226,7 +7314,8 @@ files.
 
 To achieve this functionality we will use an \texttt{if()} statement to
 check if the file exists. If it does, then we will skip the process. If
-it does not, then we will acquire and write the data.
+it does not, then we will acquire and write the
+data.\index{control statements}\cindex{if()}
 
 \begin{example}[]\protect\hypertarget{exm-acquire-get-talkbank-data-3}{}\label{exm-acquire-get-talkbank-data-3}
 
@@ -7252,6 +7341,14 @@ it does not, then we will acquire and write the data.
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
+
+\cindex{file_exists()}
+\cindex{if()}
+\cindex{write_csv()}
+\cindex{unnest()}
+\cindex{getUtterances()}
+\cindex{dir_create()}
+\cindex{path()}
 
 \end{example}
 
@@ -7301,7 +7398,7 @@ may be helpful to perform other input checks, print messages,
 \emph{etc.} for functions that we plan to share with others. I will
 leave these enhancements as an exercise for the reader.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -7314,7 +7411,7 @@ projects, you may want to consider creating an R package. R packages are
 a great way to share your code with others. If you are interested in
 learning more about creating R packages, check out the
 \href{https://r-pkgs.org/}{R Packages book} by Wickham \& Bryan
-(\citeproc{ref-Wickham2023}{2023}).
+(\citeproc{ref-Wickham2023}{2023}).\index{Wickham}
 
 \end{tcolorbox}
 
@@ -7341,7 +7438,7 @@ projects, then put it in an R package.
 
 In this case, we will put the function in a separate file,
 \emph{functions.R}, in the same directory as the other process files as
-in Snippet~\ref{def-acquire-functions-r}.
+in Snippet~\ref{def-acquire-functions-r}.\index{research scaffold}
 
 \begin{definition}[]\protect\hypertarget{def-acquire-functions-r}{}\label{def-acquire-functions-r}
 
@@ -7358,7 +7455,7 @@ Project structure with \emph{functions.R} file
 
 \end{definition}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -7371,7 +7468,7 @@ not used, only the R code and code comments.
 To include this, or other functions in in the R session of the process
 file that uses them, use the \texttt{source()} function, with the
 correct relative path to the file, as seen in
-Example~\ref{exm-acquire-source-functions}.
+Example~\ref{exm-acquire-source-functions}. \cindex{source()}
 
 \begin{example}[]\protect\hypertarget{exm-acquire-source-functions}{}\label{exm-acquire-source-functions}
 
@@ -7391,9 +7488,9 @@ of the package setup.
 
 Given the utility of this function to my projects and potentially
 others', I've included the \texttt{get\_talkbank\_data()} function in
-the \{qtkit\} package. You can view the source code by calling the
-function without parentheses \texttt{()}, or on the \{qtkit\} GitHub
-repository.
+\{qtkit\}. You can view the source code by calling the function without
+parentheses \texttt{()}, or on the \{qtkit\} GitHub
+repository.\index{R packages!qtkit}\index{GitHub}
 
 After running the \texttt{get\_talkbank\_data()} function, we can see
 that the data has been acquired and written to the
@@ -7437,7 +7534,7 @@ statements, and applying functions iteratively will be covered in
 addition to packages and functions which provide access to data from the
 web.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -7450,7 +7547,7 @@ service of programmatically acquiring and documenting data.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -7491,7 +7588,7 @@ into a tidy dataset.
 \setDOI{10.4324/9781003393764.6}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -7524,7 +7621,7 @@ method that we will implement. Once the dataset is curated, we will
 create a data dictionary that describes the dataset and the variables
 that are included in the dataset for transparency and reproducibility.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -7539,28 +7636,30 @@ manipulate data into Tidy datasets.
 
 \section{Unstructured}\label{sec-unstructured}
 
-The bulk of text ever created is of the unstructured variety.
-Unstructured data is data that has not been organized to make the
-information contained within machine-readable. Remember that text in
-itself is not information. Only when given explicit context does text
-become informative. The explicit contextual information that is included
-with data is called metadata. Metadata can be linguistic or
-non-linguistic in nature. So for unstructured data there is little to no
+The bulk of textual data is of the unstructured variety. Unstructured
+data is data that has not been organized to make the information
+contained within machine-readable.\index{unstructured data} Remember
+that text in itself is not information.\index{information} Only when
+given explicit context in the form of metadata does text become
+informative. Metadata can be linguistic or non-linguistic in
+nature.\index{metadata} So for unstructured data there is little to no
 metadata directly associated with the data.
 
 \subsection{Reading data}\label{reading-data}
 
 Some of the common file formats which contain unstructured data include
-TXT, PDF, and DOCX. Although these formats are unstructured, they are
-not the same. Reading these files into R requires different techniques
-and tools.
+TXT\index{plain text file},
+PDF\index{portable document format file (PDF)}, and
+DOCX\index{Word document file (DOCX)}. Although these formats are
+unstructured, they are not the same. Reading these files into R requires
+different techniques and tools.
 
 There are many ways to read TXT files into R and many packages that can
-be used to do so. For example, using \{readr\}, we can choose to read
-the entire file into a single vector of character strings with
-\texttt{read\_file()} or read the file by lines with
+be used to do so. For example, using \{readr\}\index{R packages!readr},
+we can choose to read the entire file into a single vector of character
+strings with \texttt{read\_file()} or read the file by lines with
 \texttt{read\_lines()} in which each line is a character string in a
-vector.
+vector.\cindex{read_file()}\cindex{read_lines()}
 
 Less commonly used in prepared data resources, PDF and DOCX files are
 more complex than TXT files as they contain formatting and embedded
@@ -7568,9 +7667,10 @@ document metadata. However, these attributes are primarily for visual
 presentation and not for machine-readability. Needless to say, we need
 an alternate strategy to extract the text content from these files and
 potentially some of the metadata. For example, using \{readtext\}
-(\citeproc{ref-R-readtext}{Benoit \& Obeng, 2024}), we can read the text
-content from PDF and DOCX files into a single vector of character
-strings with \texttt{readtext()}.
+(\citeproc{ref-R-readtext}{Benoit \& Obeng,
+2024})\index{R packages!readtext}, we can read the text content from PDF
+and DOCX files into a single vector of character strings with
+\texttt{readtext()}.\cindex{readtext()}
 
 Whether in TXT, PDF, or DOCX format, the resulting data structure will
 require further processing to convert the data into a tidy dataset.
@@ -7579,16 +7679,17 @@ require further processing to convert the data into a tidy dataset.
 
 As an example of curating an unstructured source of corpus data, let's
 take a look at the \href{https://www.statmt.org/europarl/}{Europarl
-Parallel Corpus} (\citeproc{ref-Koehn2005}{Koehn, 2005}). This corpus
-contains parallel texts (source and translated documents) from the
-European Parliamentary proceedings between 1996-2011 for some 21
-European languages.
+Parallel Corpus} (\citeproc{ref-Koehn2005}{Koehn,
+2005}).\index{Europarl Parallel Corpus} This corpus contains parallel
+texts (source and translated documents) from the European Parliamentary
+proceedings between 1996-2011 for some 21 European
+languages.\index{parallel corpus}
 
 Let's assume we selected this corpus because we are interested in
 researching Spanish to English translations. After consulting the corpus
 website, downloading the archive file, and inspecting the unarchived
-structure, we have the the file structure seen in
-Snippet~\ref{def-curate-europarl-file-structure}.
+structure, we have the file structure seen in
+Snippet~\ref{def-curate-europarl-file-structure}.\index{translation studies}
 
 \begin{definition}[]\protect\hypertarget{def-curate-europarl-file-structure}{}\label{def-curate-europarl-file-structure}
 
@@ -7616,11 +7717,13 @@ Project directory structure for the Europarl Parallel Corpus
 \end{Highlighting}
 \end{Shaded}
 
+\index{research scaffold}
+
 \end{definition}
 
 The \emph{europarl\_do.csv} file contains the data origin information
-documented as part of the acquisition process. The contents are seen in
-Table~\ref{tbl-curate-europarl-data-origin}.
+documented as part of the acquisition process.\index{data origin file}
+The contents are seen in Table~\ref{tbl-curate-europarl-data-origin}.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
@@ -7708,11 +7811,12 @@ target languages.
 
 \end{definition}
 
-Now, before embarking on a data curation process, it is recommendable to
-define the structure of the data that we want to create. I call this the
-``\textbf{idealized structure}'' of the data. For a curated dataset, we
-want to reflect the contents of the original data, yet in a tidy format,
-to maintain the integrity of and connection with the data.
+Now, before embarking on a data curation process\index{curate data}, it
+is recommendable to define the structure of the data that we want to
+create. I call this the ``\textbf{idealized structure}'' of the data.
+For a curated dataset, we want to reflect the contents of the original
+data, yet in a tidy format, to maintain the integrity of and connection
+with the data.
 
 Given what we know about the data, we can define the idealized structure
 of the data as seen in
@@ -7767,7 +7871,7 @@ documented with a data dictionary file.
 \subsection{Tidy the data}\label{tidy-the-data}
 
 To create the idealized dataset structure in
-Table~\ref{tbl-curate-europarl-structure-example}, lets's start by
+Table~\ref{tbl-curate-europarl-structure-example}, let's start by
 reading the files by lines into R. As the files are aligned by lines, we
 will use the \texttt{read\_lines()} function to read the files into
 character vectors.
@@ -7789,6 +7893,8 @@ character vectors.
   \FunctionTok{read\_lines}\NormalTok{(}\StringTok{"../data/original/europarl{-}v7.es{-}en.en"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+\cindex{library()}\cindex{read_lines()}
 
 \end{example}
 
@@ -7861,6 +7967,8 @@ file.
 [5] "In the meantime, I should like to observe a minute' s silence, as a number of Members have requested, on behalf of all the victims concerned, particularly those of the terrible storms, in the various countries of the European Union."
 \end{verbatim}
 
+\cindex{length()}\cindex{head()}
+
 \end{example}
 
 The output of Example~\ref{exm-curate-europarl-inspect-chr} shows that
@@ -7897,6 +8005,8 @@ respectively, as seen in Example~\ref{exm-curate-europarl-df}.
 \NormalTok{  )}
 \end{Highlighting}
 \end{Shaded}
+
+\index{R packages!tibble}\cindex{tibble()}
 
 \end{example}
 
@@ -7935,6 +8045,8 @@ Columns: 2
 $ type  <chr> "Target", "Target", "Target", "Target", "Target", "Target", "Tar~
 $ lines <chr> "Resumption of the session", "I declare resumed the session of t~
 \end{verbatim}
+
+\cindex{glimpse()}
 
 \end{example}
 
@@ -7979,7 +8091,7 @@ either the \texttt{data()} function, if the package is loaded, or the
 \texttt{::} operator, if the package is not loaded,
 \texttt{data(dative)} or \texttt{languageR::dative}, respectively.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -8992,7 +9104,7 @@ $ session_seq <chr> "2", "2", "2", "4", "4", "12", "12", "12", "12", "12", "12~
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -9044,7 +9156,7 @@ This is the data for the native speakers. We can now repeat this process
 for the non-native speakers, or we can create a function to do it for
 us.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -9091,7 +9203,7 @@ documentation is a data dictionary, as discussed in
 Section~\ref{sec-data-data-dictionaries}. As with data origin files, you
 can use spreadsheet software to create and edit the data dictionary.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -9162,7 +9274,7 @@ will have an opportunity to learn and apply your skills and knowledge to
 the task of curating datasets. This is a vital component of text
 analysis research that uses unstructured and semi-structured data.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -9178,7 +9290,7 @@ document datasets in a data dictionary.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -9217,7 +9329,7 @@ dataset.
 \setDOI{10.4324/9781003393764.7}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -9245,7 +9357,7 @@ variables. These processes are not sequential but may occur in any order
 based on the researcher's evaluation of the dataset characteristics and
 the desired outcome.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -9625,7 +9737,7 @@ whitespace character. If we want to consider these contractions as
 separate words, then perhaps we need to entertain a different
 tokenization strategy.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -9655,7 +9767,7 @@ relevant for word tokenization in logographic writing systems, such as
 Chinese. The take home message is there is no one-size-fits-all
 tokenization strategy.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -9844,7 +9956,7 @@ Example~\ref{exm-transform-europarl-tokenization-bigrams-tidytext}.
 The two-word token sequences for lines appear as observations in the
 \texttt{europarl\_bigrams\_tbl} dataset.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -10123,7 +10235,7 @@ for the natives. Syntactic annotation is a computationally expensive
 operation and the natives and translations datasets contain 116,341 and
 738,597 observations, respectively.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -10240,7 +10352,7 @@ of the syntactic tree for a sentence in the ENNTT natives dataset}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -10582,7 +10694,7 @@ Example~\ref{exm-transform-merging-join-anti}.
 Of these join types, the left join and the anti join are some of the
 most common to encounter in research projects.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -11024,7 +11136,7 @@ with R. This includes preparation and enrichment of curated datasets
 using normalization, tokenization, recoding, generation, and/ or
 integration strategies.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -11040,7 +11152,7 @@ incorporate other datasets to augment or filter the dataset of interest.
 
 \pagebreak
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -11099,7 +11211,7 @@ approaches.
 \setDOI{10.4324/9781003393764.8}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -11129,7 +11241,7 @@ quantitative methods to summarize, reduce, and sort complex datasets and
 statistically and visually interrogate a dataset in order to provide the
 researcher novel perspective to be qualitatively assessed.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -11503,7 +11615,7 @@ student', is the word `studious'. Yet, `studious' is not as frequent as
 \emph{etc}. In this way, `studious' is more semantically specific than
 `good'.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -11680,7 +11792,7 @@ scenario C is the least dispersed. Yet, the type's \(df\) and \(idf\)
 scores will be the same. But the \(dp\) score will reflect increasing
 concentration of the type's dispersion from A to B to C.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper} Dispersion measures
 
@@ -11914,7 +12026,7 @@ then, all else being equal, the frequency counts will be twice as large
 in the larger sub-corpus. This is why we use relative frequency
 measures, which are normalized by the size of the sub-corpus.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -12320,7 +12432,7 @@ window. This is a useful approach for spot identifying collocations of a
 target word or phrase, however it can be time-consuming to inspect and
 is not suitable for large datasets.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -12500,7 +12612,7 @@ particle constructions}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -12771,7 +12883,7 @@ principle components of the POS relative frequency}
 
 \pagebreak
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -13098,7 +13210,7 @@ possibility that the clusters may capture differences between modality
 exploratory data analysis through clustering can be used to identify new
 questions and new variables of interest.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -13132,7 +13244,7 @@ meanings (\citeproc{ref-Harris1954}{Harris, 1954}). As Firth
 (\citeproc{ref-Firth1957}{1957}) states, ``you shall know a word by the
 company it keeps''.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-alt} Case study}
 
@@ -13201,7 +13313,7 @@ on the target word. The CBOW model is faster to train and is better for
 frequent words. The Skip-gram model is slower to train and is better for
 infrequent words.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -13637,7 +13749,7 @@ embedding models. We will model how to explore iteratively using the
 output of one method to inform the next and ultimately to address a
 research question.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -13650,7 +13762,7 @@ exploratory data analysis.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -13691,7 +13803,7 @@ us a robust approach to exploring and generating research questions.
 \setDOI{10.4324/9781003393764.9}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -13717,7 +13829,7 @@ variable based on the values of the feature variables. Throughout the
 chapter, we explore practical tasks and theoretical applications of
 statistical learning in text analysis.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -13816,7 +13928,7 @@ of the data for testing, we can evaluate the model's performance on data
 that it has not seen before and therefore get a more accurate estimate
 of the generalizable trends in the data.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -14244,7 +14356,7 @@ predictor: 1
 The recipe object at this moment contains just one instruction, what the
 variables are and what their relationship is.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14289,7 +14401,7 @@ feature frequencies and weights (\emph{e.g.} \texttt{step\_tf()},
 \texttt{step\_tfidf()}, \emph{etc.}) and token filtering (\emph{e.g.}
 \texttt{step\_tokenfilter()}).
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper} For other tokenization strategies
 and feature engineering methods, see \{textrecipes\} documentation
@@ -14387,7 +14499,7 @@ predictor: 1
 
 \pagebreak
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14447,7 +14559,7 @@ each writing sample, only a small subset of them will actually appear,
 most of our cells will be filled with zeros. This is what is known as a
 \textbf{sparse matrix}.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14533,7 +14645,7 @@ We now have a manageable set of features, and fewer of which will have a
 as many zeros. Only during the interrogation step will we know if they
 are useful.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14614,7 +14726,7 @@ computationally expensive, and uninterpretable models, all things being
 equal. Only if the performance of the simple model is not good enough
 should we move on to a more complex model.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -14675,7 +14787,7 @@ model.
 
 \pagebreak
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -15143,7 +15255,7 @@ potential improvement. A good next step is to evaluate the model errors
 and see if there are any patterns that can be addressed before
 considering what approach to take to improve the model.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -15212,7 +15324,7 @@ may be an interesting avenue for further exploration. Maybe these are
 learners that are more advanced or have a particular style of writing
 that is more similar to natives.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -15998,7 +16110,7 @@ Example~\ref{exm-predict-reg-model-spec-tune-fit-evaluate-null}.
 
 \pagebreak
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -16233,7 +16345,7 @@ Computational engine: ranger
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -16538,7 +16650,7 @@ we have learned in this chapter. We will use the Tidymodels framework to
 build and evaluate supervised machine learning models for text
 classification and regression tasks.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -16550,7 +16662,7 @@ with the Tidymodels framework.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -16579,7 +16691,7 @@ techniques to extract feature importance.
 \setDOI{10.4324/9781003393764.10}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -16605,7 +16717,7 @@ the analysis of corpus-based data. During our treatment of these
 contexts, we will establish a foundational understanding of statistical
 inference using a simulation-based approach.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -16705,7 +16817,7 @@ both response and explanatory variables, it is key to confirm that your
 operationalization of the variables is well-defined and that the data
 aligns.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -16807,7 +16919,7 @@ is very wide, we can be less confident that the results are reliable. If
 our confidence interval contains the null value, then even a significant
 \(p\)-value will require a more nuanced interpretation.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -17441,7 +17553,7 @@ the expected variation. This suggests that the observed statistic is not
 within the level of variation that we would expect if the null
 hypothesis were true.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -18133,7 +18245,7 @@ Example~\ref{exm-infer-cat-logistic-regression}.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -18259,7 +18371,7 @@ The confidence intervals for the main effects, \texttt{modality} and
 0, which provides evidence that each of the explanatory variables is
 related to the proportion of NP realizations of the recipient clause.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -18346,7 +18458,7 @@ see the terms for the logistic regression model with an interaction.
 
 \end{example}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{lightbulb} Consider this}
 
@@ -18585,7 +18697,7 @@ Example~\ref{exm-infer-num-uni-null-mean} to specify the expected mean.
 The rest of the hypothesis testing workflow is the same as for the null
 distribution of proportions.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -19085,7 +19197,7 @@ observed difference between the means of the different levels of the
 \texttt{education} variable not significantly different from what we
 would expect by chance.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{exclamation-triangle} Warning}
 
@@ -19503,7 +19615,7 @@ chapter. You'll review working with key variables, examine data
 distributions, and employ simulation-based statistical methods using
 \{infer\} to test hypotheses about their relationships.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -19515,7 +19627,7 @@ simulation-based approach to statistical inference.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -19558,7 +19670,7 @@ robust and verifiable research base.
 \setDOI{10.4324/9781003393764.11}
 \thispagestyle{chapterfirstpage}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{list-alt} Outcomes}
 
@@ -19585,7 +19697,7 @@ aspects of research communication, providing guidelines for effective
 research reporting and strategies to ensure the reproducibility of your
 research project.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{terminal} Lessons}
 
@@ -19825,7 +19937,7 @@ recreate the analysis steps from a dataset or manually copy and paste
 results from the console, which can be error-prone and is not
 reproducible.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{hand-point-up} Tip}
 
@@ -20281,7 +20393,7 @@ publishes a website. This can be useful for sharing the research project
 with others, as it provides a means to navigate the project in a
 web-based environment.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{medal} Dive deeper}
 
@@ -20427,7 +20539,7 @@ The following activities are designed to dive deeper into the process of
 managing a research project and computing environment to ensure that
 your research project is reproducible.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{file-code} Recipe}
 
@@ -20439,7 +20551,7 @@ computing environment for effective communication and reproducibility.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, left=2mm, breakable, rightrule=.15mm, bottomrule=.15mm, arc=.35mm, toprule=.15mm, colback=white, colframe=quarto-callout-color-frame, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-color-frame, opacityback=0, breakable, bottomrule=.15mm, leftrule=.75mm, colback=white, arc=.35mm, left=2mm, toprule=.15mm]
 
 \textbf{\faIcon{flask} Lab}
 
@@ -21198,5 +21310,6 @@ effort}. Oxford, England: Addison-Wesley Press.
 % AFTER BODY
 % \backmatter
 \printindex
+
 
 \end{document}

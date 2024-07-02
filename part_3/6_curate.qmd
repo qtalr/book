@@ -2,12 +2,13 @@
 execute:
   echo: true
 ---
-
 ::: {.content-visible when-format="pdf"}
+
 ```{=latex}
 \setDOI{10.4324/9781003393764.6}
 \thispagestyle{chapterfirstpage}
 ```
+
 :::
 
 # Curate {#sec-curate-chapter}
@@ -20,7 +21,6 @@ execute:
 #| cache: false
 ```
 
-
 ::: {.callout}
 **{{< fa regular list-alt >}} Outcomes**
 
@@ -32,7 +32,6 @@ execute:
 ```{r}
 #| label: curate-data-packages
 #| echo: false
-
 ```
 
 In this chapter, we will now look at the next step in a text analysis project: data curation. That is, the process of converting the original data we acquire to a tidy dataset. Acquired data can come in a wide variety of formats. These formats tend to signal the richness of the metadata that is included in the file content. We will consider three general types of content formats: (1) unstructured data, (2) structured data, and (3) semi-structured data. Regardless of the file type and the structure of the data, it will be necessary to consider how to curate a dataset that such that the structure reflects the basic the unit of analysis that we wish to investigate. The resulting dataset will form the base from which we will work to further transform the dataset such that it aligns with the unit(s) of observation required for the analysis method that we will implement. Once the dataset is curated, we will create a data dictionary that describes the dataset and the variables that are included in the dataset for transparency and reproducibility.
@@ -47,23 +46,23 @@ In this chapter, we will now look at the next step in a text analysis project: d
 
 ## Unstructured {#sec-unstructured}
 
-The bulk of text ever created is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable. Remember that text in itself is not information. Only when given explicit context does text become informative. The explicit contextual information that is included with data is called metadata. Metadata can be linguistic or non-linguistic in nature. So for unstructured data there is little to no metadata directly associated with the data.
+The bulk of textual data is of the unstructured variety. Unstructured data is data that has not been organized to make the information contained within machine-readable.\index{unstructured data} Remember that text in itself is not information.\index{information} Only when given explicit context in the form of metadata does text become informative. Metadata can be linguistic or non-linguistic in nature.\index{metadata} So for unstructured data there is little to no metadata directly associated with the data.
 
 ### Reading data
 
-Some of the common file formats which contain unstructured data include TXT, PDF, and DOCX. Although these formats are unstructured, they are not the same. Reading these files into R requires different techniques and tools.
+Some of the common file formats which contain unstructured data include TXT\index{plain text file}, PDF\index{portable document format file (PDF)}, and DOCX\index{Word document file (DOCX)}. Although these formats are unstructured, they are not the same. Reading these files into R requires different techniques and tools.
 
-There are many ways to read TXT files into R and many packages that can be used to do so. For example, using {readr}, we can choose to read the entire file into a single vector of character strings with `read_file()` or read the file by lines with `read_lines()` in which each line is a character string in a vector.
+There are many ways to read TXT files into R and many packages that can be used to do so. For example, using {readr}\index{R packages!readr}, we can choose to read the entire file into a single vector of character strings with `read_file()` or read the file by lines with `read_lines()` in which each line is a character string in a vector.\cindex{read_file()}\cindex{read_lines()}
 
-Less commonly used in prepared data resources, PDF and DOCX files are more complex than TXT files as they contain formatting and embedded document metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Needless to say, we need an alternate strategy to extract the text content from these files and potentially some of the metadata. For example, using {readtext} [@R-readtext], we can read the text content from PDF and DOCX files into a single vector of character strings with `readtext()`.
+Less commonly used in prepared data resources, PDF and DOCX files are more complex than TXT files as they contain formatting and embedded document metadata. However, these attributes are primarily for visual presentation and not for machine-readability. Needless to say, we need an alternate strategy to extract the text content from these files and potentially some of the metadata. For example, using {readtext} [@R-readtext]\index{R packages!readtext}, we can read the text content from PDF and DOCX files into a single vector of character strings with `readtext()`.\cindex{readtext()}
 
 Whether in TXT, PDF, or DOCX format, the resulting data structure will require further processing to convert the data into a tidy dataset.
 
 ### Orientation
 
-As an example of curating an unstructured source of corpus data, let's take a look at the [Europarl Parallel Corpus](https://www.statmt.org/europarl/) [@Koehn2005]. This corpus contains parallel texts (source and translated documents) from the European Parliamentary proceedings between 1996-2011 for some 21 European languages.
+As an example of curating an unstructured source of corpus data, let's take a look at the [Europarl Parallel Corpus](https://www.statmt.org/europarl/) [@Koehn2005].\index{Europarl Parallel Corpus} This corpus contains parallel texts (source and translated documents) from the European Parliamentary proceedings between 1996-2011 for some 21 European languages.\index{parallel corpus}
 
-Let's assume we selected this corpus because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the archive file, and inspecting the unarchived structure, we have the the file structure seen in @def-curate-europarl-file-structure.
+Let's assume we selected this corpus because we are interested in researching Spanish to English translations. After consulting the corpus website, downloading the archive file, and inspecting the unarchived structure, we have the file structure seen in @def-curate-europarl-file-structure.\index{translation studies}
 
 ::: {#def-curate-europarl-file-structure}
 Project directory structure for the Europarl Parallel Corpus
@@ -88,9 +87,10 @@ project/
 └── README
 ```
 
+\index{research scaffold}
 :::
 
-The *europarl_do.csv* file contains the data origin information documented as part of the acquisition process. The contents are seen in @tbl-curate-europarl-data-origin.
+The *europarl_do.csv* file contains the data origin information documented as part of the acquisition process.\index{data origin file} The contents are seen in @tbl-curate-europarl-data-origin.
 
 ```{r}
 #| label: tbl-curate-europarl-data-origin
@@ -147,7 +147,7 @@ In the meantime, I should like to observe a minute' s silence, as a number of Me
 
 :::
 
-Now, before embarking on a data curation process, it is recommendable to define the structure of the data that we want to create. I call this the "**idealized structure**" of the data. For a curated dataset, we want to reflect the contents of the original data, yet in a tidy format, to maintain the integrity of and connection with the data.
+Now, before embarking on a data curation process\index{curate data}, it is recommendable to define the structure of the data that we want to create. I call this the "**idealized structure**" of the data. For a curated dataset, we want to reflect the contents of the original data, yet in a tidy format, to maintain the integrity of and connection with the data.
 
 Given what we know about the data, we can define the idealized structure of the data as seen in @tbl-curate-europarl-structure-example.
 
@@ -165,9 +165,10 @@ Our task now is to develop code that will read the original data and render the 
 
 ### Tidy the data
 
-To create the idealized dataset structure in @tbl-curate-europarl-structure-example, lets's start by reading the files by lines into R. As the files are aligned by lines, we will use the `read_lines()` function to read the files into character vectors.
+To create the idealized dataset structure in @tbl-curate-europarl-structure-example, let's start by reading the files by lines into R. As the files are aligned by lines, we will use the `read_lines()` function to read the files into character vectors.
 
 ::: {#exm-curate-europarl-readr}
+
 ```r
 # Load package
 library(readr)
@@ -179,7 +180,7 @@ europarl_es_chr <-
 europarl_en_chr <-
   read_lines("../data/original/europarl-v7.es-en.en")
 ```
-
+\cindex{library()}\cindex{read_lines()}
 ```{r}
 #| label: curate-europarl-readr
 #| echo: false
@@ -201,6 +202,7 @@ Using the `read_lines()` function, we read each line of the files into a charact
 Let's inspect our character vectors to ensure that they are of the length and appear to be structured as we expect. We can use the `length()` function to get the number of lines in each file and the `head()` function to preview the first few lines of each file.
 
 ::: {#exm-curate-europarl-inspect-chr}
+
 ```{r}
 #| label: curate-europarl-inspect-chr
 
@@ -212,6 +214,7 @@ head(europarl_es_chr, 5)
 length(europarl_en_chr)
 head(europarl_en_chr, 5)
 ```
+\cindex{length()}\cindex{head()}
 :::
 
 The output of @exm-curate-europarl-inspect-chr shows that the number of lines in each file is the same. This is good. If the number of lines in each file was different, we would need to figure out why and fix it. We also see that the content of the files is aligned as expected.
@@ -219,6 +222,7 @@ The output of @exm-curate-europarl-inspect-chr shows that the number of lines in
 Let's now create a dataset for each of the character vectors. We will use the `tibble()` function from {tibble} to create a data frame object with the character vectors as the `line` column and add a `type` column with the value 'Source' for the Spanish file and 'Target' for the English file. We will assign the output two new objects `europarl_source_df` and `europarl_target_df`, respectively, as seen in @exm-curate-europarl-df.
 
 ::: {#exm-curate-europarl-df}
+
 ```{r}
 #| label: curate-europarl-df
 
@@ -235,11 +239,13 @@ europarl_target_df <-
     lines = europarl_en_chr
   )
 ```
+\index{R packages!tibble}\cindex{tibble()}
 :::
 
 Inspecting these data frames with `glimpse()` in @exm-curate-europarl-glimpse, we can see if the data frames have the structure we expect.
 
 ::: {#exm-curate-europarl-glimpse}
+
 ```{r}
 #| label: curate-europarl-glimpse
 
@@ -249,6 +255,7 @@ glimpse(europarl_source_df)
 # Preview target
 glimpse(europarl_target_df)
 ```
+\cindex{glimpse()}
 :::
 
 We now have our `type` and `lines` columns and the associated observations for our idealized dataset, in @tbl-curate-europarl-structure-example. We can now write these datasets to the *data/derived/* directory using `write_csv()` and create corresponding data dictionary files.
@@ -276,11 +283,13 @@ R provides a suite of tools for importing data from non-native structured source
 Software agnostic file formats include delimited files, such as CSV, TSV, *etc.*. These file formats lack the robust structural attributes of the other formats, but balance this shortcoming by storing structured data in more accessible, human-readable format. Delimited files are plain text files which use a delimiter, such as a comma (`,`), tab (`\t`), or pipe (`|`), to separate the columns and rows. For example, a CSV file is a delimited file where the columns and rows are separated by commas, as seen in @exm-curate-csv-example.
 
 ::: {#exm-curate-csv-example}
+
 ```{.xml}
 column_1,column_2,column_3
 row 1 value 1,row 1 value 2,row 1 value 3
 row 2 value 1,row 2 value 2,row 2 value 3
 ```
+
 :::
 
 Given the accessibility of delimited files, they are a common format for sharing structured data in reproducible research. It is not surprising, then, that this is the format which we have chosen for the derived datasets in this book.
@@ -329,6 +338,7 @@ Now, let's envision a scenario in which we are preparing our data for a study th
 With these goals in mind, let's start the process of curation by reading the relevant datasets into an R session. Since we are working with CSV files will will use the `read_csv()` function, as seen in @exm-curate-cabnc-read.
 
 ::: {#exm-curate-cabnc-read}
+
 ```{r}
 #| label: curate-cabnc-read
 
@@ -338,11 +348,13 @@ cabnc_utterances <-
 cabnc_participants <-
   read_csv("data/cabnc/original/participants.csv")
 ```
+
 :::
 
 The next step is to inspect the structure of the datasets. We can use the `glimpse()` function for this task.
 
 ::: {#exm-curate-cabnc-glimpse}
+
 ```{r}
 #| label: curate-cabnc-glimpse
 #| results: hold
@@ -351,6 +363,7 @@ The next step is to inspect the structure of the datasets. We can use the `glimp
 glimpse(cabnc_utterances)
 glimpse(cabnc_participants)
 ```
+
 :::
 
 From visual inspection of the output of @exm-curate-cabnc-glimpse we can see that there are common variables in both datasets. In particular, we see the `filename` and `who` variables mentioned in the data origin file *cabnc_do.csv*.
@@ -360,6 +373,7 @@ The next step is to consider the variables that will be useful for future analys
 As an example case, let's look at the `cabnc_participants` data frame. We can use the `skim()` function from {skimr} to get a summary of the variables in the dataset. We can add the `yank()` function to look at variable types one at a time. We will start with the character variables, as seen in @exm-curate-cabnc-skim-character.
 
 ::: {#exm-curate-cabnc-skim-character}
+
 ```r
 # Load package
 library(skimr)
@@ -382,8 +396,8 @@ cabnc_participants |>
   capture.output() |>
   cat(sep = "\n")
 ```
-:::
 
+:::
 
 We see from the output in @exm-curate-cabnc-skim-character, that the variables `role` and `language` have a single unique value. This means that these variables do not show any variation across observations. We will remove these variables from the dataset.
 
@@ -394,6 +408,7 @@ Another potentially redundant set of variables are `who` and `name` --both of wh
 Another way to explore this is to look at the number of unique values in the `who` variable for each unique value in the `name` variable. We can do this using the `group_by()` and `summarize()` functions from {dplyr}. For each value of `name`, we will count the number of unique values in `who` with `n_distinct()` and then sort the results in descending order.
 
 ::: {#exm-curate-cabnc-who-name}
+
 ```{r}
 #| label: curate-cabnc-who-name
 
@@ -402,6 +417,7 @@ cabnc_participants |>
   summarize(n = n_distinct(who)) |>
   arrange(desc(n))
 ```
+
 :::
 
 It is good that we performed the check in @exm-curate-cabnc-who-name beforehand. In addition to speakers with the same name, such as 'Chris' and 'David', we also have multiple speakers with generic codes, such as 'None' and 'Unknown_speaker'. It is clear that `name` is redundant and we can safely remove it from the dataset.
@@ -409,6 +425,7 @@ It is good that we performed the check in @exm-curate-cabnc-who-name beforehand.
 With this in mind, we can then safely remove the following variables from the dataset: `role`, `language`, `name`, and `path`. To drop variables from a data frame we can use the `select()` function in combination with the `-` operator. The `-` operator tells the `select()` function to drop the variables that follow it.
 
 ::: {#exm-curate-cabnc-drop-vars}
+
 ```{r}
 #| label: curate-cabnc-drop-vars
 
@@ -420,14 +437,15 @@ cabnc_participants <-
 # Preview the dataset
 glimpse(cabnc_participants)
 ```
-:::
 
+:::
 
 Now we have a frame with 9 more informative variables which describe the participants. We would then repeat this process for the `cabnc_utterances` dataset to remove redundant and uninformative variables.
 
 Another, optional step, is to rename and/ or organize the order the variables to make the dataset more understandable. Let's organize the columns to read left to right from most general to most specific. Again, we turn to the `select()` function, this time including the variables in the order we want them to appear in the dataset. We will take this opportunity to rename some of the variable names so that they are more informative.
 
 ::: {#exm-curate-cabnc-rename-vars}
+
 ```{r}
 #| label: curate-cabnc-rename-vars
 
@@ -448,6 +466,7 @@ cabnc_participants <-
 # Preview the dataset
 glimpse(cabnc_participants)
 ```
+
 :::
 
 The variable order is organized after running @exm-curate-cabnc-rename-vars. Now let's sort the rows by `doc_id` and `part_id` so that the dataset is sensibly organized. The `arrange()` function takes a data frame and a list of variables to sort by, in the order they are listed.
@@ -456,6 +475,7 @@ The variable order is organized after running @exm-curate-cabnc-rename-vars. Now
 \pagebreak
 
 ::: {#exm-curate-cabnc-sort-rows}
+
 ```{r}
 #| label: curate-cabnc-sort-rows
 
@@ -468,6 +488,7 @@ cabnc_participants <-
 cabnc_participants |>
   slice_head(n = 10)
 ```
+
 :::
 
 Applying the sorting in @exm-curate-cabnc-sort-rows, we can see that the utterances are now our desired order, a dataset that reads left to right from document to participant-oriented attributes and top to bottom by document and participant.
@@ -529,6 +550,7 @@ Example *.dat* file for the non-native speakers
 <LINE STATE="Poland" MEPID="96779" LANGUAGE="EN" NAME="Danuta Hübner," SEQ_SPEAKER_ID="184" SESSION_ID="ep-05-11-17"/>
 <LINE STATE="Poland" MEPID="96779" LANGUAGE="EN" NAME="Danuta Hübner," SEQ_SPEAKER_ID="184" SESSION_ID="ep-05-11-17"/>
 ```
+
 :::
 
 We see that the *.dat* file contains annotations for various session and speaker attributes. The format of the annotations is XML-like. XML is a form of markup language, such as YAML, JSON, *etc.* **Markup languages** are used to annotate text with additional information about the structure, meaning, and/ or presentation of text. In XML, structure is built up by nesting of nodes. The nodes are named with tags, which are enclosed in angle brackets, `<` and `>`. Nodes are opened with `<TAG>` and closed with `</TAG>`. In @def-curate-xml we see an example of a simple XML file structure.
@@ -595,6 +617,7 @@ The general approach we will take is, for native and then non-natives, to read i
 Starting with the natives, we use {rvest} to read in the *.dat* file as an XML file with the `read_html()` function and then extract the line nodes with the `html_elements()` function as in @exm-curate-enntt-read-xml.
 
 ::: {#exm-curate-enntt-read-xml}
+
 ```r
 # Load packages
 library(rvest)
@@ -628,11 +651,13 @@ class(ns_dat_lines)
 typeof(ns_dat_lines)
 length(ns_dat_lines)
 ```
+
 :::
 
 When can see that the `ns_dat_lines` object is a special type of list, `xml_nodeset` which contains `r format(length(ns_dat_lines), big.mark = ",")` line nodes. Let's now jump out of sequence and read in the *.tok* file as a text file, in @exm-curate-enntt-read-lines, again by lines using `read_lines()`, and compare the two to make sure that our approach will work.
 
 ::: {#exm-curate-enntt-read-lines}
+
 ```r
 # Read in *.tok* file by lines
 ns_tok_lines <-
@@ -658,6 +683,7 @@ class(ns_tok_lines)
 typeof(ns_tok_lines)
 length(ns_tok_lines)
 ```
+
 :::
 
 We do, in fact, have the same number of lines in the *.dat* and *.tok* files. So we can proceed with extracting the attributes from the line nodes and combining them with the text from the *.tok* file.
@@ -665,6 +691,7 @@ We do, in fact, have the same number of lines in the *.dat* and *.tok* files. So
 Let's start by listing the attributes of the first line node in the `ns_dat_lines` object. To do this we will draw on the `pluck()` function from {purrr} [@R-purrr] to extract the first line node. Then, we use the `html_attrs()` function to get the attribute names and the values, as in @exm-curate-enntt-list-attributes.
 
 ::: {#exm-curate-enntt-list-attributes}
+
 ```{r}
 #| label: curate-enntt-list-attributes
 
@@ -676,6 +703,7 @@ ns_dat_lines |>
   pluck(1) |>
   html_attrs()
 ```
+
 :::
 
 No surprise here, these are the same attributes we saw in the *.dat* file preview in @def-curate-enntt-nonnatives-dat. At this point, it's good to make a plan on how to associate the attribute names with the column names in our curated dataset.
@@ -691,6 +719,7 @@ No surprise here, these are the same attributes we saw in the *.dat* file previe
 We can do this one attribute at a time using the `html_attr()` function and then combine them into a data frame with the `tibble()` function as in @exm-curate-enntt-extract-attributes.
 
 ::: {#exm-curate-enntt-extract-attributes}
+
 ```{r}
 #| label: curate-enntt-extract-attributes
 
@@ -703,11 +732,13 @@ session_seq <- ns_dat_lines |> pluck(1) |> html_attr("seq_speaker_id")
 # Combine into data frame
 tibble(session_id, speaker_id, state, session_seq)
 ```
+
 :::
 
 The results from @exm-curate-enntt-extract-attributes show that the attributes have been extracted and mapped to our idealized column names, but this would be tedious to do for each line node. A function to extract attributes and values from a line and add them to a data frame would help simplify this process. The function in @exm-curate-enntt-extract-attributes-function does just that.
 
 ::: {#exm-curate-enntt-extract-attributes-function}
+
 ```{r}
 #| label: curate-enntt-extract-attributes-function
 
@@ -721,6 +752,7 @@ extract_dat_attrs <- function(line_node) {
   tibble(session_id, speaker_id, state, session_seq)
 }
 ```
+
 :::
 
 It's a good idea to test out the function to verify that it works as expected. We can do this by passing the various indices to the `ns_dat_lines` object to the function as in @exm-curate-enntt-test-extract-attributes-function.
@@ -729,6 +761,7 @@ It's a good idea to test out the function to verify that it works as expected. W
 \pagebreak
 
 ::: {#exm-curate-enntt-test-extract-attributes-function}
+
 ```{r}
 #| label: curate-enntt-test-extract-attributes-function
 #| results: hold
@@ -738,11 +771,13 @@ ns_dat_lines |> pluck(1) |> extract_dat_attrs()
 ns_dat_lines |> pluck(20) |> extract_dat_attrs()
 ns_dat_lines |> pluck(100) |> extract_dat_attrs()
 ```
+
 :::
 
 Looks like the `extract_dat_attrs()` function is ready for prime-time. Let's now apply it to all of the line nodes in the `ns_dat_lines` object using the `map_dfr()` function from {purrr} as in @exm-curate-enntt-extract-attributes-all.
 
 ::: {#exm-curate-enntt-extract-attributes-all}
+
 ```{r}
 #| label: curate-enntt-extract-attributes-all
 #| cache: true
@@ -756,6 +791,7 @@ ns_dat_attrs <-
 glimpse(ns_dat_attrs)
 
 ```
+
 :::
 
 ::: {.callout}
@@ -767,6 +803,7 @@ The `map*()` functions from {purrr} are a family of functions that apply a funct
 We can see that the `ns_dat_attrs` object is a data frame with `r format(nrow(ns_dat_attrs), big.mark = ",")` rows and `r ncol(ns_dat_attrs)` columns, just has we expected. We can now combine the `ns_dat_attrs` data frame with the `ns_tok_lines` vector to create a single data frame with the attributes and the text. This is done with the `mutate()` function assigning the `ns_tok_lines` vector to a new column named `text` as in @exm-curate-enntt-combine-attributes-text.
 
 ::: {#exm-curate-enntt-combine-attributes-text}
+
 ```{r}
 #| label: curate-enntt-combine-attributes-text
 
@@ -778,6 +815,7 @@ ns_dat <-
 # Inspect
 glimpse(ns_dat)
 ```
+
 :::
 
 This is the data for the native speakers. We can now repeat this process for the non-native speakers, or we can create a function to do it for us.
@@ -843,3 +881,4 @@ The following activities build on your skills and knowledge to use R to read, in
 ## Summary {.unnumbered}
 
 In this chapter we looked at the process of structuring data into a dataset. This included a discussion on three main types of data --unstructured, structured, and semi-structured. The level of structure of the original data(set) will vary from resource to resource and by the same token so will the file format used to support the level of metadata included. The results from data curation results in a dataset that is saved separate from the original data to maintain modularity between what the data(set) looked like before we intervene and afterwards. Since there can be multiple analysis approaches applied the original data in a research project, this curated dataset serves as the point of departure for each of the subsequent datasets derived from the transformational steps. In addition to the code we use to derive the curated dataset's structure, we also include a data dictionary which documents the curated dataset.
+

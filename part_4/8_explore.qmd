@@ -98,7 +98,7 @@ masc_tbl <-
   read_csv("../data/masc/masc_transformed.csv")
 
 # Preview the MASC dataset
-masc_tbl |> glimpse()
+glimpse(masc_tbl)
 ```
 
 \index{R packages!readr}\index{R packages!dplyr}
@@ -114,7 +114,7 @@ masc_tbl <-
   select(-description, -domain)
 
 # Preview the MASC dataset
-masc_tbl |> glimpse()
+glimpse(masc_tbl)
 ```
 
 :::
@@ -256,7 +256,7 @@ masc_tbl |>
 
 The output of this raw frequency\index{raw frequency} tabulation in @exm-explore-masc-count is a data frame with two columns: `lemma` and `n`.
 
-As we discussed in @sec-analysis-distributions, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution\index{skewed distribution}, approximating the Zipf distribution.\index{Zipf distribution} If we calculate the **cumulative frequency**\index{cumulative frequency}, a rolling sum of the frequency term by term, of the lemmas in the `masc_tbl` data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus --by 100 types that increases to near 50% and 1,000 around 75%, as seen in @exm-explore-masc-count-cumulative.
+As we discussed in @sec-analysis-distributions, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution\index{skewed distribution}, approximating the Zipf distribution.\index{Zipf distribution} If we calculate the **cumulative frequency**\index{cumulative frequency}, a rolling sum of the frequency term by term, of the lemmas in the `masc_tbl` data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus ---by 100 types that increases to near 50% and 1,000 around 75%, as seen in @exm-explore-masc-count-cumulative.
 
 ::: {#exm-explore-masc-count-cumulative}
 
@@ -331,7 +331,7 @@ Based on what you now know about the expected distribution of words in a corpus,
 
 So common across corpus samples, in some analyses these function words (and sometimes generic content words) are considered irrelevant and are filtered out. In our ELL materials task, however, we might exclude them for the simple fact that it will be a given that we will teach these words given their overall frequency. Let's aim to focus solely on the content words in the dataset.
 
-One approach to filtering out these words is to use a pre-determined list of words to exclude, known as a **stopwords**\index{stopwords} lexicon. {tidytext} includes a data frame `stop_words` which includes stopword lexicons for English. We can select a lexicon from `stop_words` and use `anti_join()` to filter out the words that appear in the `word` variable from the `lemma` variable in the `masc_tbl` data frame.\index{R packages!tidytext}
+One approach to filtering out these words is to use a pre-determined list of words to exclude, known as a **stopwords**\index{stopwords} lexicon. {tidytext} includes a data frame `stop_words` which includes stopword lexicons for English. We can select a lexicon from `stop_words` and use `anti_join()` to filter out the words that appear in the `word` variable from the `lemma` variable in the `masc_tbl` data frame.\index{R packages!tidytext}\index{joining datasets!anti join}
 
 Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using frequency and/ or dispersion measures.
 
@@ -1145,6 +1145,7 @@ masc_cluster_tbl |>
 ```
 \index{R packages!dplyr}
 \cindex{tibble()}\cindex{left_join()}\cindex{slice_head()}
+\index{joining datasets!left join}
 :::
 
 We now see that the cluster assignments from the k-means algorithm have been joined to the original dataset. We can now explore the clusters in terms of the original features. For example, let's look at the distribution\index{distribution} of the clusters across genre, as seen in @exm-explore-masc-pos-kmeans-genre. To do this, we first need to reduce our dataset to the distinct combinations of genre and cluster. Then, we can use {janitor}'s `tabyl()` function to provided formatted percentages.
@@ -1179,7 +1180,7 @@ masc_meta_tbl |>
 
 From @exm-explore-masc-pos-kmeans-genre, we can see that the clusters are not evenly distributed across the genres. In particular, cluster 2 tends to be more associated with 'blog', 'email', 'letters', 'twitter', and 'newspaper'. Another interesting cluster is cluster 4, which is more associated with 'non-fiction', and interestingly, 'email' and 'newspaper'. This suggest that the clusters are capturing some of the variation in the across the genres and potential within some of the genres.
 
-We could continue to explore genre, but we could also entertain the possibility that the clusters may capture differences between modality --even some interaction between modality and genre! This highlights how exploratory data analysis through clustering can be used to identify new questions and new variables of interest.
+We could continue to explore genre, but we could also entertain the possibility that the clusters may capture differences between modality ---even some interaction between modality and genre! This highlights how exploratory data analysis through clustering can be used to identify new questions and new variables of interest.
 
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
@@ -1191,7 +1192,7 @@ Given the cluster assignments derived using the distribution of POS tags, what o
 
 In our discussion of clustering, we targeted associations between documents based on the distribution of linguistic features. We now turn to targeting associations between linguistic features based on their distribution across documents. The technique we will introduce is known as **vector space modeling**\index{vector space model (VSM)}. Vector space modeling aims to represent linguistic features as numerical vectors which reflect the various linguistic contexts in which the features appear. Together these vectors form a feature-context space in which features with similar contextual distributions are closer together.
 
-An interesting property of vector space models is that are able to capture semantic and/ or syntactic relationships between features based on their distribution. In this way, vector space modeling can be seen as an implementation of the **distributional hypothesis**\index{distributional hypothesis} --that is, terms that appear in similar linguistic contexts tend to have similar meanings [@Harris1954]. As @Firth1957 states, "you shall know a word by the company it keeps".
+An interesting property of vector space models is that are able to capture semantic and/ or syntactic relationships between features based on their distribution. In this way, vector space modeling can be seen as an implementation of the **distributional hypothesis**\index{distributional hypothesis} ---that is, terms that appear in similar linguistic contexts tend to have similar meanings [@Harris1954]. As @Firth1957 states, "you shall know a word by the company it keeps".
 
 ::: {.callout .halfsize}
 **{{< fa regular file-alt >}} Case study**
@@ -1256,7 +1257,7 @@ After simplifying the features, we can then apply the vector space model (VSM)\i
 
 Choosing window size and dimensions for word2vec\index{word2vec} models is another important consideration. The window size is the number of words that the model will consider as context for the target word. Smaller window sizes tend to capture more syntactic information, while larger window sizes tend to capture more semantic information.
 
-The number of dimensions is the number of features that the model will learn. More dimensions can capture more information, but can also lead to **overfitting**\index{overfitting} --picking up on nuances that are particular to the dataset and that do not generalize well. Fewer dimensions can capture less information, but can also lead to **underfitting**\index{underfitting} --not picking up on nuances that are particular to the dataset and that do generalize well. The number of dimensions is a hyperparameter that can be tuned to optimize the model for the task at hand.
+The number of dimensions is the number of features that the model will learn. More dimensions can capture more information, but can also lead to **overfitting**\index{overfitting} ---picking up on nuances that are particular to the dataset and that do not generalize well. Fewer dimensions can capture less information, but can also lead to **underfitting**\index{underfitting} ---not picking up on nuances that are particular to the dataset and that do generalize well. The number of dimensions is a hyperparameter that can be tuned to optimize the model for the task at hand.
 :::
 
 Another consideration to take into account is the size of the corpus used to train the model. VSM provide more reliable results when trained on larger corpora. The MASC dataset is relatively small. We've simplified our features in order to have a smaller vocabulary in hopes to offset this limitation to a degree. But the choice of either CBOW or Skip-gram can also help to offset this limitation. CBOW can be better for smaller corpora as it aggregates context information. Skip-gram can be better for larger corpora as it can capture more nuanced relationships between words.
@@ -1426,7 +1427,7 @@ As an example, let's compare the vectors for noun-verb pairs for the lemmas\inde
 ```{r}
 #| label: fig-explore-masc-vsm-word2vec-similarity
 #| fig-cap: "Similarity between 'run' and 'walk'"
-#| fig-alt: "A scatter plot showing the similarity between 'run' and 'walk' in the MASC dataset. The plot shows the first two principle components of the vectors for 'run' and 'walk', as nouns and as verbs."
+#| fig-alt: "A scatterplot showing the similarity between 'run' and 'walk' in the MASC dataset. The plot shows the first two principle components of the vectors for 'run' and 'walk', as nouns and as verbs."
 #| fig-width: 2.75
 #| fig-asp: 1
 
@@ -1503,7 +1504,7 @@ motion_similarity <-
   verb_vectors |> closest_to(motion, n = Inf)
 
 # Preview
-motion_similarity |> glimpse()
+glimpse(motion_similarity)
 
 manner <-
   c("run", "walk", "jump", "crawl", "swim", "fly", "drive", "ride")
@@ -1512,7 +1513,7 @@ manner_similarity <-
   verb_vectors |> closest_to(manner, n = Inf)
 
 # Preview
-manner_similarity |> glimpse()
+glimpse(manner_similarity)
 ```
 \index{R packages!wordVectors}
 \cindex{closest_to()}\cindex{glimpse()}
@@ -1531,10 +1532,11 @@ manner_motion_similarity <-
   inner_join(motion_similarity)
 
 # Preview
-manner_motion_similarity |> glimpse()
+glimpse(manner_motion_similarity)
 ```
 \index{R packages!dplyr}
 \cindex{inner_join()}\cindex{glimpse()}
+\index{joining datasets!inner join}
 :::
 
 The result of @exm-explore-masc-vsm-word2vec-manner-motion is a data frame with the motion-similarity and manner-similarity measures for all verbs in the MASC dataset. We can now visualize the distribution of motion-similarity and manner-similarity measures, as seen in @fig-explore-masc-vsm-word2vec-manner-motion-compare.
@@ -1542,7 +1544,7 @@ The result of @exm-explore-masc-vsm-word2vec-manner-motion is a data frame with 
 ```{r}
 #| label: fig-explore-masc-vsm-word2vec-manner-motion-compare
 #| fig-cap: "Motion-similarity and manner-similarity of verbs"
-#| fig-alt: "A scatter plot showing the motion-similarity and manner-similarity of verbs in the MASC dataset. The plot shows the similarity to motion on the x-axis and the similarity to manner on the y-axis. The plot shows the motion-similarity and manner-similarity of 50 randomly sampled verbs from the dataset, as well as the motion and manner seed vectors."
+#| fig-alt: "A scatterplot showing the motion-similarity and manner-similarity of verbs in the MASC dataset. The plot shows the similarity to motion on the x-axis and the similarity to manner on the y-axis. The plot shows the motion-similarity and manner-similarity of 50 randomly sampled verbs from the dataset, as well as the motion and manner seed vectors."
 #| fig-width: 6
 #| fig-asp: 1
 #| echo: false
@@ -1619,7 +1621,7 @@ manner_motion_similarity |>
   coord_fixed(xlim = c(-0.3, 1), ylim = c(-0.3, 1))
 ```
 
-From @fig-explore-masc-vsm-word2vec-manner-motion-compare, we can see that the manner-similarity is plotted on the x-axis and the motion-similarity on the y-axis. I've added horizontal and vertical lines to break the scatter plot into quadrants --the top-right corresponding to high manner- and motion-similarity and the bottom-left corresponding to low manner- and motion-similarity. This captures the majority of the verbs in the dataset. The verbs in the top-left quadrant have high motion-similarity but lower manner similarity, and verbs in the bottom-right quadrant have high manner-similarity but lower motion-similarity.
+From @fig-explore-masc-vsm-word2vec-manner-motion-compare, we can see that the manner-similarity is plotted on the x-axis and the motion-similarity on the y-axis. I've added horizontal and vertical lines to break the scatterplot into quadrants ---the top-right corresponding to high manner- and motion-similarity and the bottom-left corresponding to low manner- and motion-similarity. This captures the majority of the verbs in the dataset. The verbs in the top-left quadrant have high motion-similarity but lower manner similarity, and verbs in the bottom-right quadrant have high manner-similarity but lower motion-similarity.
 
 I've randomly sampled 50 verbs from the dataset and plotted them as text labels. I've also plotted the motion and manner seed vectors as triangle and box points, respectively. We can see that motion- and manner-similarity seed verbs are found in the top-right quadrant together, showing that they are semantically related. Verbs in the other quadrants are either lower in motion- or manner-similarity, or both. From a qualitative point of view, it appears that many of the verbs align with intuition. Some, however, less so. This is to be expected to some degree as the model is trained on a relatively small corpus\index{sampling frame}. All in all, this serves as an example of how vector space modeling can be used to explore semantic relationships between linguistic features.
 

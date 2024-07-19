@@ -327,7 +327,7 @@ Let's begin the workflow from @tbl-predict-workflow by identifying the features 
 
 If as part of our research question\index{research question} the types of features is included, then we should proceed toward deriving those features. If not, a simple approach is to use words as the predictor features\index{predictor features}. This will serve as a baseline for more complex models, if necessary.
 
-This provides us the linguistic unit we will use but we still need to decide how to operationalize what we mean by 'use' in our research statement. Do we use raw token counts? Do we use normalized frequencies? Do we use some type of weighting scheme? These are questions that we need to consider as we embark on this analysis. Since we are exploring, we can use trial-and-error or consider the implications of each approach and choose the one that best fits our research question --or both.
+This provides us the linguistic unit we will use but we still need to decide how to operationalize what we mean by 'use' in our research statement. Do we use raw token counts? Do we use normalized frequencies? Do we use some type of weighting scheme? These are questions that we need to consider as we embark on this analysis. Since we are exploring, we can use trial-and-error or consider the implications of each approach and choose the one that best fits our research question ---or both.
 
 Let's approach this with a bit more nuance as we already have some domain knowledge about word use. First, we know that in the frequency distribution of words is highly skewed\index{skewed distribution}, meaning that a few words occur very frequently and most words occur very infrequently. Second, we know that the most frequent words in a language are often function words\index{function words} (*e.g.* 'the', 'and', 'of', *etc.*) and that these words are tend not very informative for distinguishing between classes of texts. Third, we know that comparing raw counts across texts conflates the influence text class lengths.
 
@@ -535,7 +535,7 @@ cls_bake <-
   bake(new_data = NULL) # apply to training set
 
 # Preview
-cls_bake |> dim()
+dim(cls_bake)
 ```
 \index{R packages!recipes}
 \cindex{prep()}\cindex{bake()}\cindex{dim()}
@@ -576,7 +576,7 @@ cls_bake <-
   bake(new_data = NULL)
 
 # Preview
-cls_bake |> dim()
+dim(cls_bake)
 
 cls_bake[1:5, 1:5]
 ```
@@ -765,7 +765,7 @@ The 10 values chosen to be in the grid range from nearly zero to 1, where 0 indi
 
 Now to perform the tuning and arrive at an optimal value for `penalty` we need to create a tuning workflow. We do this by calling the `tune_grid()` function using our tuning model specification workflow, a resampling object, and our hyperparameter grid and returns a `tune_grid` object.
 
-Resampling\index{resampling} is a strategy that allows us to generate multiple training and testing sets from a single data set --in this case the training data we split at the outset. Each generated training-testing pair is called a fold. Which is why this type of resampling is called **$k$-fold cross-validation**\index{k-fold cross-validation}. The `vfold_cv()` function from {rsample} takes a data frame and a number of folds and returns a `vfold_cv` object. We will apply the `cls_wf` workflow to the 10 folds of the training set with `tune_grid()`. For each fold, each of the 10 values of the penalty hyperparameter will be tried and the model's performance will be evaluated. The code is seen in @exm-predict-class-model-spec-tune-grid-cv.
+Resampling\index{resampling} is a strategy that allows us to generate multiple training and testing sets from a single data set ---in this case the training data we split at the outset. Each generated training-testing pair is called a fold. Which is why this type of resampling is called **$k$-fold cross-validation**\index{k-fold cross-validation}. The `vfold_cv()` function from {rsample} takes a data frame and a number of folds and returns a `vfold_cv` object. We will apply the `cls_wf` workflow to the 10 folds of the training set with `tune_grid()`. For each fold, each of the 10 values of the penalty hyperparameter will be tried and the model's performance will be evaluated. The code is seen in @exm-predict-class-model-spec-tune-grid-cv.
 
 ::: {#exm-predict-class-model-spec-tune-grid-cv}
 ```{r}
@@ -808,7 +808,7 @@ cls_tune_metrics <-
   collect_metrics(cls_tune)
 
 # Visualize metrics
-cls_tune |> autoplot()
+autoplot(cls_tune)
 ```
 \index{R packages!tune}\index{R packages!ggplot2}
 \cindex{collect_metrics()}\cindex{autoplot()}
@@ -895,7 +895,7 @@ As a reminder we are still working in step 5 of our workflow, interrogating the 
 
 The next step is to assess the performance of the model on the training set given the features we have engineered, the algorithm we have selected, and the hyperparameters we have tuned. Instead of evaluating the model on the training set directly, we will use cross-validation\index{k-fold cross-validation} on the training set to gauge the variability of the model.
 
-The reason for this is that the model's performance on the entire training set at once is not a reliable indicator of the model's performance on new data --just imagine if you were to take the same test over and over again, you would get better and better at the test, but that doesn't mean you've learned the material any better. Cross-validation is a technique that allows us to estimate the model's performance on new data by simulating the process of training and testing the model on different subsets of the training data.
+The reason for this is that the model's performance on the entire training set at once is not a reliable indicator of the model's performance on new data ---just imagine if you were to take the same test over and over again, you would get better and better at the test, but that doesn't mean you've learned the material any better. Cross-validation is a technique that allows us to estimate the model's performance on new data by simulating the process of training and testing the model on different subsets of the training data.
 
 Similar to what we did to tune the hyperparameters, we can use cross-validation to gauge the variability of the model. The `fit_resamples()` function takes a workflow and a resampling object and returns metrics for each fold. The code is seen in @exm-predict-class-tune-hyperparameters-evaluate-workflow-cv.
 
@@ -923,7 +923,7 @@ We want to aggregate the metrics across the folds to get a sense of the variabil
 #| label: predict-class-tune-hyperparameters-evaluate-workflow-cv-collect
 
 # Collect metrics
-cls_lasso_cv |> collect_metrics()
+collect_metrics(cls_lasso_cv)
 ```
 \cindex{collect_metrics()}
 :::
@@ -970,7 +970,7 @@ cls_lasso_cv |>
 Confusion matrix for the aggregated folds of the cross-validation
 :::
 
-The top left to bottom right diagonal contains the true positives and true negatives, these are the correct predictions. The top right to bottom left diagonal contains the false positives and false negatives --our errors. The convention is speak of one class being the positive class and the other class being the negative class. In our case, we will consider the positive class to be the 'learner' class and the negative class to be the 'natives' class.
+The top left to bottom right diagonal contains the true positives and true negatives, these are the correct predictions. The top right to bottom left diagonal contains the false positives and false negatives ---our errors. The convention is speak of one class being the positive class and the other class being the negative class. In our case, we will consider the positive class to be the 'learner' class and the negative class to be the 'natives' class.
 
 We can see that there are more learners falsely predicted to be natives than the other way around. This may be due to the fact that there are simply more learners than natives in the data set or this could signal that there are some learners that are more similar to natives than other learners. Clearly this can't be the entire explanation as the model is not perfect, even some natives are classified falsely as learners! But may be an interesting avenue for further exploration. Maybe these are learners that are more advanced or have a particular style of writing that is more similar to natives.
 
@@ -1091,8 +1091,7 @@ cls_lasso_tokens_cv <-
   )
 
 # Collect metrics
-cls_lasso_tokens_cv |>
-  collect_metrics()
+collect_metrics(cls_lasso_tokens_cv)
 ```
 \index{R packages!tune}
 \cindex{fit_resamples()}\cindex{collect_metrics()}
@@ -1157,8 +1156,7 @@ cls_final_fit <-
   )
 
 # Evaluate model on testing set
-cls_final_fit |>
-  collect_metrics()
+collect_metrics(cls_final_fit)
 ```
 \index{R packages!workflows}\index{R packages!tune}
 \cindex{last_fit()}\cindex{collect_metrics()}
@@ -1311,7 +1309,7 @@ The `Variable` column contains each feature (with the feature type and correspon
 ```{r}
 #| label: fig-predict-class-tune-hyperparameters-evaluate-test-vip-plot
 #| fig-cap: "Most important features for predicting the outcome"
-#| fig-alt: "Scatter plot of the most important features for predicting the outcome. The y-axis is the importance value and the x-axis is the feature. The features are faceted by the outcome."
+#| fig-alt: "scatterplot of the most important features for predicting the outcome. The y-axis is the importance value and the x-axis is the feature. The features are faceted by the outcome."
 #| fig-width: 6
 #| fig-asp: 0.65
 
@@ -1346,7 +1344,7 @@ In this section, we've build a text classifier using a regularized logistic regr
 
 ### Text regression {#sec-predict-text-regression}
 
-We will now turn our attention to the second task in this section, text regression\index{text regression}. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. I will make reference to but not repeat the steps we took in the classification task, as many of the steps are the same. This is one of the benefits of using Tidymodels\index{tidymodels}--the workflow is by-and-large the same for different tasks.
+We will now turn our attention to the second task in this section, text regression\index{text regression}. In this task, we will use the same original dataset as in the classification task, but we will predict the placement score based on the learner writing samples. I will make reference to but not repeat the steps we took in the classification task, as many of the steps are the same. This is one of the benefits of using Tidymodels\index{Tidymodels}--the workflow is by-and-large the same for different tasks.
 
 Let's start by extracting the observations (only learners) and the relevant variables from the original data set. The code is seen in @exm-predict-reg-data.
 
@@ -1361,7 +1359,7 @@ reg_tbl <-
   select(outcome = place_score, proficiency, text)
 
 # Preview
-reg_tbl |> glimpse()
+glimpse(reg_tbl)
 ```
 \index{R packages!dplyr}
 \cindex{filter()}\cindex{select()}\cindex{glimpse()}
@@ -1482,7 +1480,7 @@ Applying the steps 1-7 we have cross-validated\index{k-fold cross-validation} re
 #| label: predict-reg-metrics-lasso
 
 # Collect metrics
-reg_lasso_cv |> collect_metrics()
+collect_metrics(reg_lasso_cv)
 ```
 \index{R packages!tune}
 \cindex{collect_metrics()}
@@ -1524,7 +1522,7 @@ null_cv <-
   )
 
 # Collect metrics
-null_cv |> collect_metrics()
+collect_metrics(null_cv)
 ```
 \index{R packages!parsnip}\index{R packages!workflows}\index{R packages!tune}
 \cindex{null_model()}\cindex{set_engine()}\cindex{set_mode()}\cindex{fit_resamples()}\cindex{collect_metrics()}
@@ -1555,7 +1553,7 @@ Let's visualize the distribution of the predictions and the errors from our mode
 ```{r}
 #| label: fig-predict-reg-lr-eval-rmse
 #| fig-cap: "Distribution of the RMSE for the cross-validated linear regression model"
-#| fig-alt: "Scatter plot of the true outcome against the predicted outcome for the cross-validated linear regression model. The x-axis is the true outcome and the y-axis is the predicted outcome. The shape of the points indicate the fold."
+#| fig-alt: "scatterplot of the true outcome against the predicted outcome for the cross-validated linear regression model. The x-axis is the true outcome and the y-axis is the predicted outcome. The shape of the points indicate the fold."
 #| fig-width: 6
 #| fig-asp: 0.5
 
@@ -1575,7 +1573,7 @@ reg_lasso_cv |>
 \cindex{collect_predictions()}\cindex{geom_point()}\cindex{geom_smooth()}\cindex{labs()}\cindex{position_jitter()}\cindex{ggplot()}\cindex{aes()}
 :::
 
-From @fig-predict-reg-lr-eval-rmse, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting\index{overfitting} the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, *i.e.* outliers, in particular for test scores in the lower ranges\index{scatter plot}.
+From @fig-predict-reg-lr-eval-rmse, we see data points for each predicted and truth value pair for each of the ten folds. There is a trend line for each fold which shows the linear relationship between the predicted and truth values for each fold. The trend lines are more similar than different, which is a good sign that the model is not wildly overfitting\index{overfitting} the training data. Looking closer, however, we can see the errors. Some are noticeably distant from the linear trend lines, *i.e.* outliers, in particular for test scores in the lower ranges\index{scatterplot}.
 
 If the $R^2$\index{R-squared} value is in the ballpark, this means that somewhere around 40% of the variation is not explained by the frequency of the top 1,050 words. This is not surprising, as there are many other factors that contribute to the proficiency level of a text.
 
@@ -1677,7 +1675,7 @@ We can collect the metrics and inspect the RMSE\index{root mean squared error (R
 #| label: predict-reg-metrics-tree
 
 # Collect metrics
-reg_tree_cv |> collect_metrics()
+collect_metrics(reg_tree_cv)
 ```
 \index{R packages!tune}
 :::
@@ -1803,7 +1801,7 @@ Let's collect the metrics and inspect the RMSE and $R^2$ values. The code is see
 #| label: predict-reg-metrics-rf
 
 # Collect metrics
-reg_rf_cv |> collect_metrics()
+collect_metrics(reg_rf_cv)
 ```
 \index{R packages!tune}
 \cindex{collect_metrics()}
@@ -1928,7 +1926,7 @@ Let's collect the metrics and inspect the RMSE and $R^2$ values. The code is see
 #| label: predict-reg-metrics-mlp
 
 # Collect metrics
-reg_mlp_cv |> collect_metrics()
+collect_metrics(reg_mlp_cv)
 ```
 :::
 
@@ -1951,13 +1949,13 @@ reg_final_fit <-
   )
 
 # Evaluate model on testing set
-reg_final_fit |> collect_metrics()
+collect_metrics(reg_final_fit)
 ```
 \index{R packages!tune}
 \cindex{last_fit()}\cindex{collect_metrics()}
 :::
 
-OK. The difference between the cross-validated metrics and the metrics for the test set differ --but only slightly. This suggests that the model is robust and that we have not overfit the data from the training set.
+OK. The difference between the cross-validated metrics and the metrics for the test set differ ---but only slightly. This suggests that the model is robust and that we have not overfit the data from the training set.
 
 <!-- Step 7: Interpret -->
 

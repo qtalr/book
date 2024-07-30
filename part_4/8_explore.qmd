@@ -2,12 +2,13 @@
 execute:
   echo: true
 ---
-
 ::: {.content-visible when-format="pdf"}
+
 ```{=latex}
 \setDOI{10.4324/9781003393764.8}
 \thispagestyle{chapterfirstpage}
 ```
+
 :::
 
 # Explore {#sec-explore-chapter}
@@ -18,8 +19,7 @@ execute:
 #| cache: false
 ```
 
-
-::: {.callout}
+:::{.callout}
 **{{< fa regular list-alt >}} Outcomes**
 
 - Determine the suitability of exploratory data analysis for a research project.
@@ -27,13 +27,7 @@ execute:
 - Interpret insights from data summarization and pattern recognition, considering their potential to guide further research.
 :::
 
-```{r}
-#| label: exploration-data-packages
-#| echo: false
-
-```
-
-In this chapter, we examine a wide range of strategies for exploratory data analysis. The chapter outlines two main branches of exploratory data analysis: descriptive analysis which statistically and/ or visually summarizes a dataset and unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either through descriptive or unsupervised learning methods, exploratory data analysis employs quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset in order to provide the researcher novel perspective to be qualitatively assessed.
+In this chapter, we examine a wide range of strategies for exploratory data analysis. The chapter outlines two main branches of exploratory data analysis: descriptive analysis which statistically and/or visually summarizes a dataset and unsupervised learning which is a machine learning approach that does not assume any particular relationship between variables in a dataset. Either through descriptive or unsupervised learning methods, exploratory data analysis employs quantitative methods to summarize, reduce, and sort complex datasets and statistically and visually interrogate a dataset in order to provide the researcher novel perspective to be qualitatively assessed.
 
 ::: {.callout}
 **{{< fa terminal >}} Lessons**
@@ -45,9 +39,9 @@ In this chapter, we examine a wide range of strategies for exploratory data anal
 
 ## Orientation {#sec-explore-orientation}
 
-The goal of exploratory data analysis is to discover, describe, and posit new hypotheses. This analysis approach is best-suited for research questions where the literature scarce, where the gap in knowledge is wide, or where new territories are being explored. The researcher may not know what to expect, but they are willing to let the data speak for itself. The researcher is open to new insights and new questions that may emerge from the analysis process.
+The goal of exploratory data analysis is to discover, describe, and posit new hypotheses.\index{exploratory data analysis (EDA)} This analysis approach is best-suited for research questions where the literature is scarce, where the gap in knowledge is wide, or where new territories are being explored. The researcher may not know what to expect, but they are willing to let the data speak for itself. The researcher is open to new insights and new questions that may emerge from the analysis process.
 
-While exploratory data analysis allows flexibility, it is essential to have a guiding research question that provides a focus for the analysis. This question will help to determine the variables of interest and the methods to be used. The research question will also help to determine the relevance of the results and the potential for the results to be used in further research.
+While exploratory data analysis allows flexibility, it is essential to have a guiding research question\index{research question} that provides a focus for the analysis. This question will help to determine the variables of interest and the methods to be used. The research question will also help to determine the relevance of the results and the potential for the results to be used in further research.
 
 The general workflow for exploratory data analysis is shown in @tbl-explore-workflow.
 
@@ -66,9 +60,9 @@ Workflow for exploratory data analysis
 
 ## Analysis {#sec-explore-analysis}
 
-To frame our demonstration and discussion of exploratory data analysis, let's tackle a task. The task will be to identify relevant materials for an English Language Learner (ELL) textbook. This will involve multiple research questions and allow us to illustrate some very fundamental concepts that emerge across text analysis research in both descriptive and unsupervised learning approaches.
+To frame our demonstration and discussion of exploratory data analysis, let's tackle a task. The task will be to identify relevant materials for an English- language learner (ELL) textbook.\index{English as a second language (ESL)} This will involve multiple research questions and allow us to illustrate some very fundamental concepts that emerge across text analysis research in both descriptive and unsupervised learning approaches.
 
-Since our task is geared towards English language use, we will want a representative data sample. For this, we will use the Manually Annotated Sub-Corpus (MASC) of the American National Corpus [@Ide2008].
+Since our task is geared towards English language use, we will want a representative data sample. For this, we will use the Manually Annotated Sub-Corpus of American English (MASC)\index{Manually Annotated Sub-Corpus of American English (MASC)} of the American National Corpus [@Ide2008]\index{American National Corpus (ANC)}.
 
 The data dictionary for the dataset we will use as our point of departure is shown in @tbl-explore-masc-dd-show.
 
@@ -98,11 +92,21 @@ masc_tbl <-
   read_csv("../data/masc/masc_transformed.csv")
 
 # Preview the MASC dataset
-masc_tbl |> glimpse()
+glimpse(masc_tbl)
+
 ```
+:::
+
+\index{R packages!readr}\index{R packages!dplyr}
+\cindex{read_csv()}\cindex{glimpse()}
+
+<!--Add space to push output to next page-->
+::: {.content-visible when-format="pdf"}
+\vspace{1em}
+:::
 
 ```{r}
-#| label: explore--masc-read
+#| label: explore-masc-read
 #| echo: false
 
 # Read and subset the MASC dataset
@@ -111,11 +115,10 @@ masc_tbl <-
   select(-description, -domain)
 
 # Preview the MASC dataset
-masc_tbl |> glimpse()
+glimpse(masc_tbl)
 ```
-:::
 
-From the output in @exm-explore-masc-read, we get some sense of the structure of the dataset. However, we also need to perform diagnostic and descriptive procedures. This will include checking for missing data and anomalies and assessing central tendency, dispersion, and/ or distributions of the variables. This may include using {skimr}, {dplyr}, {stringr}, {ggplot2}, *etc.* to identify the most relevant variables for our task and to identify any potential issues with the dataset.
+From the output in @exm-explore-masc-read, we get some sense of the structure of the dataset. However, we also need to perform diagnostic and descriptive procedures.\index{descriptive statistics} This will include checking for missing data and anomalies and assessing central tendency, dispersion, and/or distributions of the variables. This may include using {skimr}, {dplyr}, {stringr}, {ggplot2}, *etc.* to identify the most relevant variables for our task and to identify any potential issues with the dataset.
 
 ```{r}
 #| label: exm-explore-masc-doc-id
@@ -201,11 +204,11 @@ doc_id <- filter(masc_skm_obj, skim_variable == "doc_id")
 
 ```
 
-After a descriptive and diagnostic assessment of the dataset, not included here, I identified and addressed missing data and anomalies (including many non-words). I also recoded the `doc_id` variable to a character variable. The dataset now has `r format(masc_new_obs, big.mark = ",")` observations, a reduction from the original `r format(masc_org_obs, big.mark = ",")` observations. There are 392 documents, 2 modalities, 18 genres, almost 38k unique terms (which are words), almost 26k lemmas (word base forms), and 34 distinct part of speech (POS) tags.
+After a descriptive and diagnostic assessment of the dataset\index{descriptive assessment}, not included here, I identified and addressed missing data\index{missing data} and anomalies (including many non-words).\index{text normalization} I also recoded the `doc_id` variable to a character variable.\index{variable recoding} The dataset now has `r format(masc_new_obs, big.mark = ",")` observations, a reduction from the original `r format(masc_org_obs, big.mark = ",")` observations. There are 392 documents, 2 modalities, 18 genres, almost 38k unique terms\index{terms} (which are words), almost 26k lemmas\index{lemmas}, and 34 distinct POS tags.
 
 ### Descriptive analysis {#sec-explore-descriptive}
 
-Descriptive analysis includes common techniques such as frequency analysis to determine the most frequent words or phrases, dispersion analysis to see how terms are distributed throughout a document or corpus, keyword analysis to identify distinctive terms, and/ or co-occurrence analysis to see what terms tend to appear together.
+Descriptive analysis\index{descriptive methods} includes common techniques such as frequency analysis\index{frequency analysis} to determine the most frequent words or phrases, dispersion analysis\index{dispersion analysis} to see how terms are distributed throughout a document or corpus, keyword analysis\index{keyword analysis} to identify distinctive terms, and/or co-occurrence analysis\index{co-occurrence analysis} to see what terms tend to appear together.
 
 Using the MASC dataset, we will entertain questions such as:
 
@@ -213,18 +216,15 @@ Using the MASC dataset, we will entertain questions such as:
 - Are there term differences between spoken and written discourses that should be emphasized?
 - What are some of the most common verb particle constructions?
 
-Along the way, we will introduce touch on frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.
+Along the way, we will discuss frequency, dispersion, and co-occurrence measures. In addition, we will apply various descriptive analysis techniques and visualizations to explore the dataset and identify new questions and new variables of interest.
 
 #### Frequency analysis {#sec-explore-frequency}
 
 <!-- 4 I's: identify, inspect, interrogate, interpret -->
 
-At its core, frequency analysis is a descriptive method that counts the number of times a linguistic unit occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify terms that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset.
+At its core, frequency analysis\index{frequency analysis} is a descriptive method that counts the number of times a linguistic unit\index{terms} occurs in a dataset. The results of frequency analysis can be used to describe the dataset and to identify terms that are linguistically distinctive or distinctive to a particular group or sub-group in the dataset.
 
 <!--- Raw frequency (counting) --->
-
-<!-- [ ] tmp fmt -->
-\pagebreak
 
 ##### Raw frequency {#sec-explore-frequency-raw}
 
@@ -232,25 +232,28 @@ At its core, frequency analysis is a descriptive method that counts the number o
 
 Let's consider what the most common words in the MASC dataset are as a starting point to making inroads on our task by identifying relevant vocabulary for an ELL textbook.
 
-In the `masc_tbl` data frame we have the linguistic unit `term` which corresponds to the word-level annotation of the MASC. The `lemma` corresponds to the base form of each term, for words with inflectional morphology, the lemma is the word sans the inflection (*e.g.* is - be, are - be). For other words, the `term` and the `lemma` will be the same (*e.g.* the - the, in - in). These two variables pose a choice point for us: do we consider words to be the actual forms or the base forms? There is an argument to be made for both. In this case, I will operationalize our linguistic unit as the `lemma` variable, as this will allow us to group words with distinct inflectional morphology together.
+In the `masc_tbl` data frame we have the linguistic unit `term`\index{terms} which corresponds to the word-level annotation of the MASC. The `lemma` corresponds to the base form of each term, for words with inflectional morphology\index{morphological features}, the lemma is the word sans the inflection (*e.g.* is/be, are/be). For other words, the `term` and the `lemma` will be the same (*e.g.* the/the, in/in). These two variables pose a choice point for us: do we consider words to be the actual forms or the base forms? There is an argument to be made for both. In this case, I will operationalize\index{operationalize} our linguistic unit as the `lemma` variable, as this will allow us to group words with distinct inflectional morphology together.
 
 To perform a basic word frequency analysis, we can apply `summarize()` in combination with `n()` or the convenient `count()` function from {dplyr}. Our sorted lemma counts appear in @exm-explore-masc-count.
 
 ::: {#exm-explore-masc-count}
+
 ```{r}
-#| label: explore--masc-count
+#| label: explore-masc-count
 
 # Lemma count, sorted in descending order
 masc_tbl |>
   count(lemma, sort = TRUE)
 ```
+
+\index{R packages!dplyr}
+\cindex{count()}
 :::
 
-The output of this frequency tabulation in @exm-explore-masc-count is a data frame with two columns: `lemma` and `n`.
+The output of this raw frequency\index{raw frequency} tabulation in @exm-explore-masc-count is a data frame with two columns: `lemma` and `n`.
 
-As we discussed in @sec-analysis-distributions, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution, approximating the Zipf distribution. If we calculate the **cumulative frequency**, a rolling sum of the frequency term by term, of the lemmas in the `masc_tbl` data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus --by 100 types that increases to near 50% and 1,000 around 75%, as seen in @exm-explore-masc-count-cumulative.
+As we discussed in @sec-analysis-distributions, the frequency of linguistic units in a corpus tends to be highly right-skewed distribution\index{skewed distribution}, approximating the Zipf distribution.\index{Zipf distribution} If we calculate the **cumulative frequency**\index{cumulative frequency}, a rolling sum of the frequency term by term, of the lemmas in the `masc_tbl` data frame, we can see that the top 10 types account for around 25% of the lemmas used in the entire corpus ---by 100 types that increases to near 50% and 1,000 around 75%, as seen in @fig-explore-masc-count-cumulative.
 
-::: {#exm-explore-masc-count-cumulative}
 ```{r}
 #| label: fig-explore-masc-count-cumulative
 #| fig-cap: "Cumulative frequency of lemmas"
@@ -287,15 +290,14 @@ p +
   geom_vline(xintercept = 1000, linetype = "dashed", color = "grey40") +
   annotate("text", x = 1120, y = 0.65, label = "1000 lemmas", size = 3, angle = 0)
 ```
-:::
 
-If we look at the types that appear within the first 50 most frequent, you can likely also appreciate another thing about language use. Let's list the top 50 types in @exm-explore-masc-count-top-50.
+If we look at the types that appear within the first 50 most frequent, you can likely also appreciate another thing about language use. Let's list the top 50 types in @tbl-explore-masc-count-top-50.
 
-::: {#exm-explore-masc-count-top-50}
 ```{r}
 #| label: tbl-explore-masc-count-top-50
 #| tbl-cap: "Top 50 lemma types"
 #| tbl-colwidths: [20, 20, 20, 20, 20]
+#| echo: false
 
 # Top 50 types
 lemma_cumul_freq |>
@@ -304,36 +306,29 @@ lemma_cumul_freq |>
   matrix(ncol = 5) |>
   kable(col.names = NULL)
 ```
-:::
 
+For the most part, the most frequent words are function words. **Function words**\index{function words} are a closed class of relatively few words that are used to express grammatical relationships between content words (*e.g.* determiners, prepositions, pronouns, and auxiliary verbs). Given the importance of these words, it then is no surprise that they comprise many of the most frequent words in a corpus.
 
-For the most part, the most frequent words are not content words, but rather function words (*e.g.* determiners, prepositions, pronouns, auxiliary verbs). Function words include a closed class of relatively few words that are used to express grammatical relationships between content words. It then is no surprise that they are the comprise many of the most frequent words in a corpus.
-
-Another key observation is that among the most frequency content words (*e.g.* nouns, verbs, adjectives, adverbs) are words that are quite semantically generic --that is, they are words that are used in a wide range of contexts and take a wide range of meanings.
-
-Take for example the adjective 'good'. It can be used to describe a wide range of nouns, such as 'good food', 'good people', 'good times', *etc*. A sometimes near-synonym of 'good', for example 'good student', is the word 'studious'. Yet, 'studious' is not as frequent as 'good' as it is used to describe a narrower range of nouns, such as 'studious student', 'studious scholar', 'studious researcher', *etc*. In this way, 'studious' is more semantically specific than 'good'.
+Another key observation is that for those the content words\index{content words} (*e.g.* nouns, verbs, adjectives, adverbs) that do figure in the most frequent words, we find that they are quite generic semantically speaking. That is, they are words that are used in a wide range of contexts and take a wide range of meanings. Take for example the adjective 'good'. It can be used to describe a wide range of nouns, such as 'good food', 'good people', 'good times', *etc*. A sometimes near-synonym of 'good', for example 'good student', is the word 'studious'. Yet, 'studious' is not as frequent as 'good' as it is used to describe a narrower range of nouns, such as 'studious student', 'studious scholar', 'studious researcher', *etc*. In this way, 'studious' is more semantically specific than 'good'.
 
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
 
-Based on what you now know about the expected distribution of words in a corpus, what if your were asked to predict what the most frequency English word used is in each U.S. State? What would you predict? How confident would you be in your prediction? What if you were asked to predict what the most frequency word used is in the language of a given country? What would you want to know before making your prediction?
+Based on what you now know about the expected distribution of words in a corpus, what if your were asked to predict what the most frequent English word used is in each U.S. State? What would you predict? How confident would you be in your prediction? What if you were asked to predict what the most frequent word used is in the language of a given country? What would you want to know before making your prediction?
 :::
 
-So common across corpus samples, in some analyses these usual suspects of the most common words are considered irrelvant and are filtered out. In our ELL materials task, however, we might exclude them for this simple fact that it will be a given that we will teach these words given their grammatical importance. If we want to focus on the most common content words, we can filter out the function words.
+So common across corpus samples, in some analyses these function words (and sometimes generic content words) are considered irrelevant and are filtered out. In our ELL materials task, however, we might exclude them for the simple fact that it will be a given that we will teach these words given their overall frequency. Let's aim to focus solely on the content words in the dataset.
 
-One approach to filtering out these words is to use a pre-determined list of **stopwords**. {tidytext} includes a data frame `stop_words` of stopword lexicons for English. We can select a lexicon from `stop_words` and use `anti_join()` to filter out the words that appear in the `word` variable from the `lemma` variable in the `masc_tbl` data frame.
+One approach to filtering out these words is to use a list of words to exclude, known as a **stopwords**\index{stopwords} lexicon. {tidytext} includes a data frame `stop_words` which includes stopword lexicons for English. We can select a lexicon from `stop_words` and use `anti_join()` to filter out the words that appear in the `word` variable from the `lemma` variable in the `masc_tbl` data frame.\index{R packages!tidytext}\index{joining datasets!anti join}
 
-Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using frequency and/ or dispersion measures.
+Eliminating words in this fashion, however, may not always be the best approach. Available lists of stopwords vary in their contents and are determined by other researchers for other potential uses. We may instead opt to create our own stopword list that is tailored to the task, or we may opt to use a statistical approach based on their distribution in the dataset using frequency and/or dispersion measures.
 
-For our case, however, we have another available strategy. Since our task is to identify relevant vocabulary, beyond the fundamental function words in English, we can use the POS tags to reduce our dataset to just the content words, that is nouns, verbs, adjectives, and adverbs.
-
-We need to consult the Penn Tagset again, to ensure we are selecting the correct tags. I will assign this data frame to `masc_content_tbl` to keep it separate from our main data frame `masc_tbl`, seen in @exm-explore-masc-filter-pos.
+For our case, however, we have another available strategy. Since our task is to identify relevant vocabulary, beyond the fundamental function words in English, we can use the POS tags to reduce our dataset to just the content words, that is nouns, verbs, adjectives, and adverbs.\index{part-of-speech tagging} Using the Penn tagset as reference, we can create a vector with the POS tags we want to retain and then use the `filter()` function on the datasets. I will assign this new data frame to `masc_content_tbl` to keep it separate from our main data frame `masc_tbl`, seen in @exm-explore-masc-filter-pos.
 
 ::: {#exm-explore-masc-filter-pos}
+
 ```{r}
-#| label: tbl-explore-masc-filter-pos
-#| tbl-cap: "Frequency of tokensafter filtering out lemmas with POS tags that are not content words"
-#| tbl-colwidths: [20, 20, 20, 20, 20]
+#| label: explore--masc-filter-pos
 
 # Penn Tagset for content words
 # Nouns: NN, NNS,
@@ -347,6 +342,20 @@ content_pos <- c("NN", "NNS", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "JJ", "JJ
 masc_content_tbl <-
   masc_tbl |>
   filter(pos %in% content_pos)
+```
+
+\index{R packages!dplyr}
+\cindex{filter()}
+:::
+
+Let's now preview the top 50 lemmas in the `masc_content_tbl` data frame to see how the most
+frequent words have changed in @tbl-explore-masc-filter-pos.
+
+```{r}
+#| label: tbl-explore-masc-filter-pos
+#| tbl-cap: "Frequency of tokens after filtering out lemmas with POS tags that are not content words"
+#| tbl-colwidths: [20, 20, 20, 20, 20]
+#| echo: false
 
 # Preview top 50
 masc_content_tbl |>
@@ -356,42 +365,42 @@ masc_content_tbl |>
   matrix(ncol = 5) |>
   kable(col.names = NULL)
 ```
-:::
 
 The resulting list in @tbl-explore-masc-filter-pos paints a different picture of the most frequent words in the dataset. The most frequent words are now content words, and included in most frequent words are more semantically specific words. We now have reduced the number of observations by `r label_percent()(1-nrow(masc_content_tbl) / nrow(masc_tbl))` focusing on the content words. We are getting closer to identifying the vocabulary that we want to include in our ELL materials, but we will need some more tools to help us identify the most relevant vocabulary.
+
+\pagebreak
 
 ##### Dispersion {#sec-explore-frequency-dispersion}
 
 \vspace{-1em}
 
-**Dispersion** is a measure of how evenly distributed a linguistic unit is across a dataset. This is a key concept in text analysis, as important as frequency. It is important to recognize that frequency and dispersion are measures of different characteristics. We can have two words that occur with the same frequency, but one word may be more evenly distributed across a dataset than the other. Depending on the researcher's aims, this may be an important distinction to make. For our task, it is likely the case that we want to capture words that are well-dispersed across the dataset as words that have a high frequency and a low dispersion tend to be connected to a particular context, whether that be a particular genre, a particular speaker, a particular topic, *etc*. In other research, aim may be the reverse; to identify words that are highly frequent and highly concentrated in a particular context to identify words that are distinctive to that context.
+**Dispersion** is a measure of how evenly distributed a linguistic unit is across a dataset.\index{dispersion} This is a key concept in text analysis, as important as frequency. It is important to recognize that frequency and dispersion are measures of different characteristics. We can have two words that occur with the same frequency, but one word may be more evenly distributed across a dataset than the other. Depending on the researcher's aims, this may be an important distinction to make. For our task, it is likely the case that we want to capture words that are well-dispersed across the dataset, as words that have a high frequency and a low dispersion tend to be connected to a particular context, whether that be a particular genre, a particular speaker, a particular topic, *etc*. In other research, the aim may be the reverse; to identify words that are highly frequent and highly concentrated in a particular context to identify words that are distinctive to that context.
 
 There are a variety of measures that can be used to estimate the distribution of types across a corpus. Let's focus on three measures: document frequency ($df$), inverse document frequency ($idf$), and Gries' Deviation of Proportions ($dp$).
 
-The most basic measure is **document frequency** ($df$). This is the number of documents in which a type appears at least once. For example, if a type appears in 10 documents, then the document frequency is 10. This is a very basic measure, but it is a good starting point.
+The most basic measure is **document frequency** ($df$).\index{document frequency} This is the number of documents in which a type appears at least once. For example, if a type appears in 10 documents, then the document frequency is 10. This is a very basic measure, but it is a decent starting point.
 
-A nuanced version of document frequency is **inverse document frequency** ($idf$). This measure takes the total number of documents and divides it by the document frequency. This results in a measure that is inversely proportional to the document frequency. That is, the higher the document frequency, the lower the inverse document frequency. This measure is often log-transformed to spread out the values.
+A nuanced version of document frequency is **inverse document frequency** ($idf$).\index{inverse document frequency} This measure takes the total number of documents and divides it by the document frequency. This results in a measure that is inversely proportional to the document frequency. That is, the higher the document frequency, the lower the inverse document frequency. This measure is often log-transformed\index{log transformation} to spread out the values.
 
-One thing to consider about $df$ and $idf$ is that niether takes into account the length of the documents in which the type appears nor the spread of the type within each document. To take these factors into account, we can use Gries' **Deviation of Proportions** ($dp$) measure [@Gries2023, pp. 87-88]. The $dp$ measure considers the proportion of a type's frequency in each document relative to its total frequency. This produces a measure that is more sensitive to the distribution of a type within and across documents in a corpus.
+One thing to consider about $df$ and $idf$ is that neither takes into account the length of the documents in which the type appears nor the spread of each type within each document. To take these factors into account, we can use Gries' **deviation of proportions** ($dp$) measure [@Gries2023, pp. 87-88].\index{Gries' deviation of proportions} The $dp$ measure considers the proportion of a type's frequency in each document relative to its total frequency. This produces a measure that is more sensitive to the distribution of types within and across documents in a corpus.
+
+\pagebreak
 
 Let's consider how these measures differ with three scenarios:
 
-Imagine a type with a token frequency of 100 appears in each of the 10 documents in a corpus.
+1. Scenario A: A type with a token frequency of 100 appears in each of the 10 documents in a corpus. Each document is 100 words long, and the type appears 10 times in each document.
+2. Scenario B: The same type with a token frequency of 100 appears in each of the 10 documents, each 100 words long. However, in this scenario, the type appears once in 9 documents and 91 times in 1 document.
+3. Scenario C: Nine of the documents constitute 99% of the corpus. The type appears once in each of these 9 documents and 91 times in the 10th document.
 
-A. Each of the documents is 100 words long. The type appears 10 times in each document.\
-B. Each of the documents is 100 words long. But now the type appears once in 9 documents and 91 times in 1 document.\
-C. Nine of the documents constitute 99% of the corpus. The type appears once in each of the 9 documents and 91 times in the 10th document.
-
-Scenario A is the most dispersed, scenario B is less dispersed, and scenario C is the least dispersed. Yet, the type's $df$ and $idf$ scores will be the same. But the $dp$ score will reflect increasing concentration of the type's dispersion from A to B to C.
+In these scenarios, Scenario A is the most dispersed, Scenario B is less dispersed, and Scenario C is the least dispersed. Despite these differences, the type's document frequency ($df$) and inverse document frequency ($idf$) scores remain the same across all three scenarios. However, the dispersion ($dp$) score will accurately reflect the increasing concentration of the type's dispersion from Scenario A to Scenario B to Scenario C.
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
-Dispersion measures
 
-You may wonder why we would want to use $df$ or $idf$ at all. The answer is some combination of the fact that they are computationally less expensive to calculate, they are widely used (especially $idf$), and/ or in many practical situations they often highly correlated with $dp$.
+You may wonder why we would want to use $df$ or $idf$ at all. The answer is some combination of the fact that they are computationally less expensive to calculate, they are widely used (especially $idf$), and/or in many practical situations they often highly correlated with $dp$.
 :::
 
-So for our task we will use $dp$ as our measure of dispersion. {qtkit} includes the `calc_type_metrics()` function which calculates, among other metrics, the dispersion metrics $df$, $idf$, and/ or $dp$. Let's select `dp` and assign the result to `masc_lemma_disp`, as seen in @exm-explore-masc-dp.
+So for our task we will use $dp$ as our measure of dispersion.\index{dispersion} {qtkit} includes the `calc_type_metrics()` function which calculates, among other metrics, the dispersion metrics $df$, $idf$, and/or $dp$. Let's select `dp` and assign the result to `masc_lemma_disp`, as seen in @exm-explore-masc-dp.
 
 ::: {#exm-explore-masc-dp}
 
@@ -399,10 +408,11 @@ So for our task we will use $dp$ as our measure of dispersion. {qtkit} includes 
 #| label: qtalrkit-remove-later
 #| include: false
 
-library(qtalrkit) # [ ] remove
+library(qtalrkit) # TODO: replace with `qtkit` when available
 ```
+
 ```{r}
-#| label: explore--masc-dp
+#| label: explore-masc-dp
 
 # Load package
 library(qtkit)
@@ -421,20 +431,17 @@ masc_lemma_disp <-
 masc_lemma_disp |>
   slice_head(n = 10)
 ```
+
+\index{R packages!qtkit}\index{R packages!dplyr}
+\cindex{calc_type_metrics()}\cindex{arrange()}\cindex{slice_head()}
 :::
 
 We would like to identify lemmas that are frequent and well-dispersed. But an important question arises, what is the threshold for frequency and dispersion that we should use to identify the lemmas that we want to include in our ELL materials?
 
-There are statistical approaches to identifying natural breakpoints, including clustering, but a visual inspection is often good enough for practical purposes. Let's create a density plot to see if there is a natural break in the distribution of our dispersion measure, as seen in @fig-explore-masc-dp-density.
+There are statistical approaches to identifying natural breakpoints but a visual inspection is often good enough for practical purposes. Let's create a density plot to see if there is a natural break in the distribution of our dispersion measure, as seen in @fig-explore-masc-dp-density.
 
 ::: {#exm-explore-masc-dp-density}
-```{r}
-#| label: fig-explore-masc-dp-density
-#| fig-cap: "Density plot of Deviation of Proportions for lemmas"
-#| fig-alt: "A density plot showing the distribution of Deviation of Proportions for lemmas in the MASC dataset. The plot shows a bend in the distribution between 0.85 and 0.97."
-#| fig-width: 6
-#| fig-asp: 0.30
-
+```r
 # Density plot of dp
 masc_lemma_disp |>
   ggplot(aes(x = dp)) +
@@ -444,80 +451,110 @@ masc_lemma_disp |>
 ```
 :::
 
-What we are looking for is a distinctive bend in the distribution of dispersion measures. In @fig-explore-masc-dp-density, we can see one between $0.85$ and $0.97$. This bend is called an elbow, and using this approach to make informed decisions about thresholds is called the **elbow method**. We can split the difference and use this as a threshold to filter out lemmas that are less dispersed.
+```{r}
+#| label: fig-explore-masc-dp-density
+#| fig-cap: "Density plot of lemma dispersion"
+#| fig-alt: "The plot shows a bend in the distribution between 0.85 and 0.97."
+#| fig-width: 6
+#| fig-asp: 0.30
+#| echo: false
 
-In @exm-explore-masc-dp-filter, I filter out lemmas that have a dispersion measure less than $0.91$.
+# Density plot of dp
+masc_lemma_disp |>
+  ggplot(aes(x = dp)) +
+  geom_density() +
+  scale_x_continuous(breaks = seq(0, 1, .1)) +
+  labs(x = "Deviation of Proportions", y = "Density") +
+  theme_qtalr(font_size = 10)
+```
+\index{R packages!ggplot2}
+\cindex{ggplot()}\cindex{geom_density()}\cindex{scale_x_continuous()}\cindex{labs()}\cindex{aes()}\cindex{seq()}
+
+What we are looking for is a distinctive bend in the distribution of dispersion measures. In @fig-explore-masc-dp-density, we can see one roughly between $0.87$ and $0.97$. The inflection point appears to be near $0.95$. This bend is called an elbow, and using this bend to make informed decisions about thresholds is called the **elbow method**\index{elbow method}.
+
+In @exm-explore-masc-dp-filter, I filter out lemmas that have a dispersion measure less than $0.95$.
+
+\pagebreak
 
 ::: {#exm-explore-masc-dp-filter}
+
 ```{r}
 #| label: explore--masc-dp-filter
 
-# Filter for lemmas with dp <= 0.91
+# Filter for lemmas with dp <= 0.95
 masc_lemma_disp_thr <-
   masc_lemma_disp |>
-  filter(dp <= 0.91) |>
+  filter(dp <= 0.95) |>
   arrange(desc(n))
 ```
+
+\index{R packages!dplyr}
+\cindex{filter()}\cindex{arrange()}
 :::
 
-Then in @tbl-explore-masc-dp-filter-preview-top and @tbl-explore-masc-dp-filter-preview-bottom, I preview the top and bottom 50 lemmas in the dataset.
+Then in [Tables @tbl-explore-masc-dp-filter-preview-top] and [-@tbl-explore-masc-dp-filter-preview-bottom], I preview the top and bottom 25 lemmas in the dataset.
 
 ```{r}
 #| label: tbl-explore-masc-dp-filter-preview-top
-#| tbl-cap: "Top 50 lemmas after our dispersion threshold"
+#| tbl-cap: "Top 25 lemmas after our dispersion threshold"
 #| tbl-colwidths: [20, 20, 20, 20, 20]
+#| echo: false
 
 # Preview top
 masc_lemma_disp_thr |>
-  slice_head(n = 50) |>
+  slice_head(n = 25) |>
   pull(type) |>
   matrix(ncol = 5) |>
   kable(col.names = NULL)
 ```
-
 
 ```{r}
 #| label: tbl-explore-masc-dp-filter-preview-bottom
-#| tbl-cap: "Bottom 50 lemmas after our dispersion threshold"
+#| tbl-cap: "Bottom 25 lemmas after our dispersion threshold"
 #| tbl-colwidths: [20, 20, 20, 20, 20]
+#| echo: false
 
 # Preview bottom
 masc_lemma_disp_thr |>
-  slice_tail(n = 50) |>
+  filter(type != "fu") |> # Remove 'fu' lemma
+  slice_tail(n = 25) |>
   pull(type) |>
   matrix(ncol = 5) |>
   kable(col.names = NULL)
 ```
 
-We now have a good candidate list of common vocabulary that is spread well across the corpus.
+We now have a solid candidate list of common vocabulary that is spread well across the corpus.
+
+\pagebreak
 
 ##### Relative frequency {#sec-explore-frequency-relative}
 
 \vspace{-1em}
 
-Gauging frequency and dispersion across the entire corpus is a good starting point for any frequency analysis, but it is often the case that we want to compare the frequency and dispersion of linguistic units across corpora or sub-corpora.
+Gauging frequency and dispersion across the entire corpus sets the foundation for any frequency analysis, but it is often the case that we want to compare the frequency and/or dispersion of linguistic units across corpora or sub-corpora.\index{relative frequency}
 
-In the case of the MASC dataset, for example, we may want to compare metrics across the two modalities or the various genres. Simply comparing frequency counts across these sub-corpora is not a good approach, and can be misleading, as the sub-corpora may vary in size. For example, if one sub-corpus is twice as large as another sub-corpus, then, all else being equal, the frequency counts will be twice as large in the larger sub-corpus. This is why we use relative frequency measures, which are normalized by the size of the sub-corpus.
+In the case of the MASC dataset, for example, we may want to compare metrics across the two modalities or the various genres. Simply comparing raw frequency\index{raw frequency} counts across these sub-corpora is not a good approach, and can be misleading, as the sub-corpora will likely vary in size. For example, if one sub-corpus is twice as large as another sub-corpus, then, all else being equal, the frequency counts will be twice as large in the larger sub-corpus. This is why we use relative frequency measures, which are normalized by the size of the sub-corpus.
 
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
 
-A variable in the MASC dataset that has yet to be used is the `pos` POS variable. How could we use this variable to refine our frequency and dispersion analysis of lemma types?
+A variable in the MASC dataset that has yet to be used is the `pos` variable. How could we use this POS variable to refine our frequency and dispersion analysis of lemma types?
 
-Hint: consider lemma forms that may be tagged with different parts-of-speech.
+Hint: consider lemma forms that may be tagged with different parts of speech.
 :::
 
-To normalize the frequency of linguistic units across sub-corpora, we can use the **relative frequency** ($rf$) measure. This is the frequency of a linguistic unit divided by the total number of linguistic units in the sub-corpus. This bakes in the size of the sub-corpus into the measure. The notion of relative frequency is key to all research working with text, as it is the basis for the statistical approach to text analysis where comparisons are made.
+To normalize the frequency of linguistic units across sub-corpora, we can use the **relative frequency**\index{relative frequency} ($rf$) measure. This is the frequency of a linguistic unit divided by the total number of linguistic units in the sub-corpus. This bakes in the size of the sub-corpus into the measure. The notion of relative frequency is key to all research working with text, as it is the basis for the statistical approach to text analysis where comparisons are made.
 
-There are some field-specific terms that are used to refer to relative frequency measures. For example, in information retrieval and Natural Language Processing, the relative frequency measure is often referred to as the **term frequency** ($tf$). In corpus linguistics, the relative frequency measure is often modified slightly to include a constant (*e.g.* $rf * 100$) which is known as the **observed relative frequency** ($orf$). Athough the observed relative frequency per number of tokens is not strictly necessary, it is often used to make the values more interpretable as we can now talk about an observed relative frequency of 1.5 as a linguistic unit that occurs 1.5 times per 100 linguistic units.
+There are some field-specific terms that are used to refer to relative frequency measures. For example, in NLP\index{Natural Language Processing (NLP)} literature, the relative frequency measure is often referred to as the **term frequency**\index{term frequency} ($tf$). In corpus linguistics, the relative frequency measure is often modified slightly to include a constant (*e.g.* $rf * 100$) which is known as the **observed relative frequency**\index{observed relative frequency} ($orf$). Although the observed relative frequency per number of tokens is not strictly necessary, it is often used to make the values more interpretable as we can now talk about an observed relative frequency of 1.5 as a linguistic unit that occurs 1.5 times per 100 linguistic units.
 
-Let's consider how we might compare the frequency and dispersion of lemmas across the two modalities in the MASC dataset, spoken and written. To make this a bit more interesting and more relevant, let's add the `pos` variable to our analysis. The intent, then, will be to identify lemmas tagged with particular parts of speech that are particularly indicative of each of the modaliites.
+Let's consider how we might compare the frequency\index{frequency analysis} and dispersion\index{dispersion analysis} of lemmas\index{lemmas} across the two modalities in the MASC dataset, spoken and written. To make this a bit more interesting and more relevant, let's add the `pos` variable to our analysis. The intent, then, will be to identify lemmas tagged with particular parts of speech that are particularly indicative of each modality.
 
 We can do this by collapsing the `lemma` and `pos` variables into a single variable, `lemma_pos`, with the `str_c()` function, as seen in @exm-explore-masc-type.
 
 ::: {#exm-explore-masc-type}
+
 ```{r}
-#| label: explore--masc-type
+#| label: explore-masc-type
 
 # Collapse lemma and pos into type
 masc_content_tbl <-
@@ -528,13 +565,17 @@ masc_content_tbl <-
 masc_content_tbl |>
   slice_head(n = 5)
 ```
+
+\index{R packages!stringr}\index{R packages!dplyr}
+\cindex{mutate()}\cindex{str_c()}\cindex{slice_head()}
 :::
 
-Now this will increase the number of lemma types in the dataset as we are now considering lemmas where the same lemma form is tagged with different parts-of-speech.
+Now this will increase the number of lemma types in the dataset as we are now considering lemmas where the same lemma form is tagged with different parts of speech.
 
-Getting back to calculating the frequency and dispersion of lemmas in each modality, we can use the `calc_type_metrics()` function with `lemma_pos` as our type argument. We will, however, need to apply this function to each sub-corpus independently and then concatenate the two data frames. This function returns a (raw) frequency ($n$) measure by default, but we can specify the`frequency` argument to `rf` to calculate the relative frequency of the linguistic units as in @exm-explore-masc-metrics-modality.
+Getting back to calculating the frequency and dispersion of lemmas in each modality, we can use the `calc_type_metrics()` function with `lemma_pos` as our type argument. We will, however, need to apply this function to each sub-corpus independently and then concatenate the two data frames\index{concatenating datasets}. This function returns a (raw) frequency ($n$) measure by default, but we can specify the `frequency` argument to `rf` to calculate the relative frequency of the linguistic units as in @exm-explore-masc-metrics-modality.
 
 ::: {#exm-explore-masc-metrics-modality}
+
 ```{r}
 #| label: explore--masc-metrics-modality
 
@@ -553,7 +594,7 @@ masc_spoken_metrics <-
   arrange(desc(n))
 
 # Written
-masc_written_metrics <-
+masc_written_metrics <- 
   masc_content_tbl |>
   filter(modality == "Written") |>
   calc_type_metrics(
@@ -565,7 +606,7 @@ masc_written_metrics <-
   mutate(modality = "Written") |>
   arrange(desc(n))
 
-# Concatenate spoken and written metrics
+# Concatenate metrics
 masc_metrics <-
   bind_rows(masc_spoken_metrics, masc_written_metrics)
 
@@ -573,56 +614,82 @@ masc_metrics <-
 masc_metrics |>
   slice_head(n = 5)
 ```
+
+\index{R packages!dplyr}\index{R packages!qtkit}
+\cindex{calc_type_metrics()}\cindex{mutate()}\cindex{arrange()}\cindex{slice_head()}\cindex{bind_rows()}
 :::
 
 With the `rf` measure, we are now in a position to compare 'apples to apples', as you might say. We can now compare the relative frequency of lemmas across the two modalities. Let's preview the top 5 lemmas in each modality, as seen in @exm-explore-masc-relative-frequency-top.
 
 ::: {#exm-explore-masc-relative-frequency-top}
+```r
+# Preview top 10 lemmas in each modality
+masc_metrics |>
+  group_by(modality) |>
+  slice_max(n = 10, order_by = rf)
+```
+
+::: {.content-visible when-format="pdf"}
+\vspace{5em}
+:::
+
 ```{r}
 #| label: explore--masc-relative-frequency-top
+#| echo: false
 
 # Preview top 10 lemmas in each modality
 masc_metrics |>
   group_by(modality) |>
-  slice_max(n = 10, order_by = rf) |>
-  ungroup()
+  slice_max(n = 10, order_by = rf)
 ```
+
+\index{R packages!dplyr}
+\cindex{group_by()}\cindex{slice_max()}
 :::
 
 We can appreciate, now, that there are similarities and a few differences between the most frequent lemmas for each modality. First, there are similar lemmas in written and spoken modalities, such as 'be', 'have', and 'not'. Second, the top 10 include verbs and adverbs. Now we are looking at the most frequent types, so it is not surprising that we see more in common than not. However, looking close we can see that contracted forms are more frequent in the spoken modality, such as 'isn't', 'don't', and 'can't' and that ordering of the verb tenses differs to some degree. Whether these are important distinctions for our task is something we will need to consider.
 
-We can further cull our results by filtering out lemmas that are not well-dispersed across the sub-corpora. Although it may be tempting to use the threshold we used earlier, we should consider that the size of the sub-corpora are different and the distribution of the dispersion measure may be different. With this in mind, we need to visualize the distribution of the dispersion measure for each modality and apply the elbow method to identify a threshold for each modality.
+We can further cull our results by filtering out lemmas that are not well-dispersed across the sub-corpora. Although it may be tempting to use the threshold we used earlier, we should consider that the sizes of the sub-corpora are different and the distribution of the dispersion measure may be different. With this in mind, we need to visualize the distribution of the dispersion measure for each modality and apply the elbow method\index{elbow method} to identify a threshold for each modality.
 
-After assessing the density plots for the dispersion of each modality via the elbow method, we update our thresholds. We maintain the $0.91$ threshold for the written subcorpus and use a $0.79$ threshold for the spoken subcorpus. I apply these filters as seen in @exm-explore-masc-subcorpora-filtered.
+After assessing the density plots for the dispersion of each modality via the elbow method, we update our thresholds. We maintain the $0.95$ threshold for the written sub-corpus and use a $0.79$ threshold for the spoken sub-corpus. I apply these filters as seen in @exm-explore-masc-subcorpora-filtered.
+
+\pagebreak
 
 ::: {#exm-explore-masc-subcorpora-filtered}
+
 ```{r}
 #| label: explore--masc-subcorpora-filtered
 
 # Filter for lemmas with
-# dp <= 0.91 for written and
+# dp <= 0.95 for written and
 # dp <= .79 for spoken
 masc_metrics_thr <-
   masc_metrics |>
   filter(
-    (modality == "Written" & dp <= 0.91) |
+    (modality == "Written" & dp <= 0.95) |
     (modality == "Spoken" & dp <= .79)
   ) |>
   arrange(desc(rf))
 ```
+
+\index{R packages!dplyr}
+\cindex{filter()}\cindex{arrange()}
 :::
 
 Filtering the less-dispersed types reduces the dataset from `r format(nrow(masc_metrics), big.mark = ",")` to `r format(nrow(masc_metrics_thr), big.mark = ",")` observations. This will provide us with a more succinct list of common and well-dispersed lemmas that are used in each modality.
 
-As much as the frequency and dispersion measures can provide us with a good starting point, it does not provide an understanding of what types are more indicative of a particular sub-corpus, modality subcorpora in our case. We can do this by calculating the log odds ratio of each lemma in each modality.
+As much as the frequency and dispersion measures can provide us with a starting point, it does not provide an understanding of what types are more indicative of a particular sub-corpus, modality sub-corpora in our case. We can do this by calculating the log odds ratio of each lemma in each modality.
 
-The **log odds ratio** is a measure that quantifies the difference between the frequencies of a type in two corpora or sub-corpora. In spirit and in name, it compares the odds of a type occurring in one corpus versus the other. The values range from negative to positive infinity, with negative values indicating that the type is more frequent in the first corpus and positive values indicating that the lemma is more frequent in the second corpus. The magnitude of the value indicates the strength of the association.
+The **log odds ratio**\index{log odds ratio} is a measure that quantifies the difference between the frequencies of a type in two corpora or sub-corpora. In spirit and in name, it compares the odds of a type occurring in one corpus versus the other. The values range from negative to positive infinity, with negative values indicating that the type is more frequent in the first corpus and positive values indicating that the lemma is more frequent in the second corpus. The magnitude of the value indicates the strength of the association.
 
-{tidylo} provides a convenient function `bind_log_odds()` to calculate the log odds ratio, and a weighed variant, for each type in each sub-corpus. The weighted log odds ratio measure provides a more robust and interpretable measure for comparing term frequencies across corpora, especially when term frequencies are low or when corpora are of different sizes. The weighting (or standardization) also makes it easier to identify terms that are particularly distinctive or characteristic of one corpus over another.
+{tidylo} provides a convenient function `bind_log_odds()` to calculate the log odds ratio, and a weighed variant, for each type in each sub-corpus. The weighted log odds ratio measure provides a more robust and interpretable measure for comparing term frequencies across corpora, especially when term frequencies are low or when corpora are of different sizes. The weighting (or standardization\index{standardization}) also makes it easier to identify terms that are particularly distinctive or characteristic of one corpus over another.
 
 Let's calculate the weighted log odds ratio for each lemma in each modality and preview the top 10 lemmas in each modality, as seen in @exm-explore-masc-log-odds-weighted.
 
+\pagebreak
+
 ::: {#exm-explore-masc-log-odds-weighted}
+
 ```{r}
 # Load package
 library(tidylo)
@@ -639,14 +706,17 @@ masc_metrics_thr <-
 # Preview top 10 lemmas in each modality
 masc_metrics_thr |>
   group_by(modality) |>
-  slice_max(n = 10, order_by = log_odds_weighted) |>
-  ungroup()
+  slice_max(n = 10, order_by = log_odds_weighted)
 ```
+
+\index{R packages!dplyr}\index{R packages!tidylo}
+\cindex{bind_log_odds()}\cindex{group_by()}\cindex{slice_max()}
 :::
 
-Let's imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regex magic. Let's use the `str_subset()` function to filter for lemmas that contain `_V` and then use `slice_max()` to extract the top 10 most indicative verb lemmas, as seen in @exm-explore-masc-log-odds-weighted-verbs.
+Let's imagine we would like to extract the most indicative verbs for each modality using the weighted log odds as our measure. We can do this with a little regex\index{regular expression (regex)} magic. Let's use the `str_subset()` function to filter for lemmas that contain `_V` and then use `slice_max()` to extract the top 10 most indicative verb lemmas, as seen in @exm-explore-masc-log-odds-weighted-verbs.
 
 ::: {#exm-explore-masc-log-odds-weighted-verbs}
+
 ```{r}
 #| label: explore--masc-log-odds-weighted-verbs
 
@@ -655,42 +725,45 @@ masc_metrics_thr |>
   group_by(modality) |>
   filter(str_detect(type, "_V")) |>
   slice_max(n = 10, order_by = log_odds_weighted) |>
-  select(-n) |>
-  ungroup()
+  select(-n)
 ```
+
+\index{R packages!dplyr}\index{R packages!stringr}
+\cindex{group_by()}\cindex{filter()}\cindex{slice_max()}\cindex{select()}
 :::
 
-Note that the log odds are larger for the spoken modality than the written modality. This indicates that theses types are more strongly indicative of the spoken modality than the types in the written modality are indicative of the written modality. This is not surprising, as the written modality is typically more diverse in terms of lexical usage than the spoken modality, where the terms tend to be repeated more often, including verbs.
+Note that the log odds are larger for the spoken modality than the written modality. This indicates that theses types are more strongly indicative of the spoken modality than the types in the written modality are indicative of the written modality. This is not surprising, as the written modality is typically more diverse in terms of lexical usage than the spoken modality, where the terms tend to be repeated more often, including verbs.\index{lexical diversity}
 
 #### Co-occurrence analysis {#sec-explore-co-occurrence}
 
-Moving forward on our task, we have a good idea of the general vocabulary that we want to include in our ELL materials and can identify lemma types that are particularly indicative of each modality. Another useful approach to complement our analysis is to identify words that co-occur with our target lemmas (verbs). In English, it is common for verbs to appear with a preposition or adverb, such as 'give up', 'look after'. These 'phrasal verbs' form a semantic unit that is distinct from the verb alone.
+Moving forward on our task, we have a general idea of the vocabulary that we want to include in our ELL materials and can identify lemma types that are particularly indicative of each modality. Another useful approach to complement our analysis is to identify words that co-occur with our target lemmas (verbs). In English, it is common for verbs to appear with a preposition or adverb, such as 'give up', 'look after'. These 'phrasal verbs' form a semantic unit that is distinct from the verb alone.
 
-In cases such as this, we are aiming to do a co-occurrence analysis. Co-occurrence analysis is a set of methods that are used to identify words that appear in close proximity to a target type.
+In a case such as this, we are aiming to do a co-occurrence analysis. Co-occurrence analysis\index{co-occurrence analysis} is a set of methods that are used to identify words that appear in close proximity to a target type.
 
 <!-- Concordances -->
 
-An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC). **KWIC** is a table that displays the target word in the center of the table and the words that appear before and after the target word within some defined window. This is a useful approach for spot identifying collocations of a target word or phrase, however it can be time-consuming to inspect and is not suitable for large datasets.
+An exploratory, primarily qualitative, approach is to display the co-occurrence of words in a Keyword in Context (KWIC) search. **KWIC**\index{Keyword in Context (KWIC)} produces a table that displays the target word in the center of the table and the words that appear before and after the target word within some defined window context. This is a useful approach for spot identifying co-occurring patterns which include the target word or phrase. However, it can be a time-consuming process to manually inspect these results and is likely not a feasible approach for large datasets.
 
 ::: {.callout .halfsize}
 **{{< fa regular hand-point-up >}} Tip**
 
-KWIC tables are a common tool in corpus linguistics and can be used either before or after a quantitative analysis. If you are interested, {quanteda} includes a function `kwic()` that can be used to create a KWIC table.
+KWIC tables are a common tool in corpus linguistics and can be used either before or after a quantitative analysis. If you are interested, {quanteda} includes a function `kwic()` that can be used to create a KWIC table.\index{R packages!quanteda}
 :::
 
 <!-- N-grams -->
 
-A straightforward quantitative way to explore co-occurrence is to set the unit of observation to an ngram of terms. Then, the frequency and dispersion metrics can be calculated for each ngram. Yet, there is an issue with this approach for our purposes. The frequency and dispersion of ngrams does not necessarily relate to whether the two words form a semantic unit.
+A straightforward quantitative way to explore co-occurrence is to set the unit of observation\index{unit of observation} to an ngram\index{ngrams} of word terms. Then, the frequency and dispersion metrics can be calculated for each ngram. Yet, there is an issue with this approach for our purposes. The frequency and dispersion of ngrams does not necessarily relate to whether the two words form a semantic unit. For example, in any given corpus there will be highly frequent pairings of function words, such as 'of the', 'in the', 'to the', *etc*. These combinations our bound to occur frequently in large part because the high frequency of each individual word. However, these combinations do not have the same semantic cohesion as other, likely lower-frequency, ngrams such as 'look after', 'give up', *etc*.
 
 <!-- Collocation -->
 
-To address better address our question, we can use a statistical measures to estimate collocational strength between two words. A **collocation** is a sequence of words that co-occur more often than would be expected by chance. A common measure of collocation is the **pointwise mutual information** (PMI) measure. PMI estimates how much more (or less) two words co-occur in reality compared to what you'd expect by chance if they were independent. A high PMI indicates a strong semantic association between the words.
+To better address our question, we can use a statistical measure to estimate collocational strength between two words. A **collocation**\index{collocation} is a sequence of words that co-occur more often than would be expected by chance. A common measure of collocation is the **pointwise mutual information** (PMI)\index{pointwise mutual information (PMI)} measure. PMI scores reflect the likelihood of two words occurring together given their individual frequencies and compares this to the actual co-occurrence frequency. A high PMI indicates a strong semantic association between the words.
 
-One consideration that we need to take for our goal to identify verb particle constructions, is how we ultimately want to group our `lemma_pos` values. This is particularly important given the fact that our `pos` tags for verbs include information about the verb's tense and person. This means that a verb in a verb particle bigram, such as 'look after', will be represented by multiple `lemma_pos` values, such as `look_VB`, `look_VBP`, `look_VBD`, and `look_VBG`. We want to group the verb particle bigrams by a single verb value, so we need to recode the `pos` values for verbs. We can do this with the `case_when()` function from {dplyr}.
+One consideration that we need to take into account for our goal to identify verb particle constructions, is how we ultimately want to group our `lemma_pos` values. This is particularly important given the fact that our `pos` tags for verbs include information about the verb's tense and person attributes. This means that a verb in a verb particle bigram, such as 'look after', will be represented by multiple `lemma_pos` values, such as `look_VB`, `look_VBP`, `look_VBD`, and `look_VBG`. We want to group the verb particle bigrams by a single verb value, so we need to reclassify\index{feature reclassification} the `pos` values for verbs. We can do this with the `case_when()` function from {dplyr}.
 
 In @exm-explore-masc-lemma-pos, I recode the `pos` values for verbs to `V` and then join the `lemma` and `pos` columns into a single string.
 
 ::: {#exm-explore-masc-lemma-pos}
+
 ```{r}
 #| label: explore--masc-bigrams-prep
 masc_lemma_pos_tbl <-
@@ -703,13 +776,38 @@ masc_lemma_pos_tbl <-
   mutate(lemma_pos = str_c(lemma, pos, sep = "_")) |>
   ungroup()
 ```
+
+\index{R packages!dplyr}\index{R
+packages!stringr}
+\cindex{mutate()}\cindex{case_when()}\cindex{str_c()}\cindex{group_by()}\cindex{ungroup()}
 :::
 
 Let's calculate the PMI for all the bigrams in the MASC dataset. We can use the `calc_assoc_metrics()` function from {qtkit}. We need to specify the `association` argument to `pmi` and the `type` argument to `bigrams`, as seen in @exm-explore-masc-bigrams-pmi.
 
 ::: {#exm-explore-masc-bigrams-pmi}
+```r
+masc_lemma_pos_assoc <-
+  masc_lemma_pos_tbl |>
+  calc_assoc_metrics(
+    doc_index = doc_id,
+    token_index = term_num,
+    type = lemma_pos,
+    association = "pmi"
+  )
+
+# Preview
+masc_lemma_pos_assoc |>
+  arrange(desc(pmi)) |>
+  slice_head(n = 10)
+```
+
+::: {.content-visible when-format="pdf"}
+\vspace{3em}
+:::
+
 ```{r}
-#| label: explore--masc-bigrams-pmi
+#| label: explore-masc-bigrams-pmi
+#| echo: false
 
 masc_lemma_pos_assoc <-
   masc_lemma_pos_tbl |>
@@ -725,30 +823,36 @@ masc_lemma_pos_assoc |>
   arrange(desc(pmi)) |>
   slice_head(n = 10)
 ```
+
+\index{R packages!qtkit}\index{R packages!dplyr}
+\cindex{calc_assoc_metrics()}\cindex{arrange()}\cindex{slice_head()}
 :::
 
-One caveat to using the PMI measure is that it is sensitive to the frequency of the words. If the words in a bigram pair are infrequent, and especially if they only occur once, then the PMI measure will be inflated. To mitigate this issue, we can apply a frequency threshold to the bigrams before calculating the PMI measure. Let's filter out bigrams that occur less than 10 times, and while we are at it, let's also filter `x` and `y` for the appropriate forms we are targeting that have a positive PMI value, as seen @exm-explore-masc-bigrams-pmi-filtered.
+One caveat to using the PMI\index{pointwise mutual information (PMI)} measure is that it is sensitive to the frequency of the words. If the words in a bigram pair are infrequent, and especially if they only occur once, then the PMI measure will be unduly inflated. To mitigate this issue, we can apply a frequency threshold to the bigrams before calculating the PMI measure. Let's filter out bigrams that occur less than 10 times and have a positive PMI, and while we are at it, let's also filter `x` and `y` for the appropriate forms we are targeting, either `_V` and `_IN`, as seen @exm-explore-masc-bigrams-pmi-filtered.
 
 ::: {#exm-explore-masc-bigrams-pmi-filtered}
+
 ```{r}
-#| label: explore--masc-bigrams-pmi-filtered
+#| label: explore-masc-bigrams-pmi-filtered
 
 # Filter for target bigrams
 masc_verb_part_assoc <-
   masc_lemma_pos_assoc |>
-  filter(n >= 10) |>
+  filter(n >= 10 & pmi > 0) |>
   filter(str_detect(x, "_V")) |>
-  filter(str_detect(y, "_IN")) |>
-  filter(pmi > 0) |>
-  arrange(desc(pmi), x)
+  filter(str_detect(y, "_IN"))
 
 # Preview
 masc_verb_part_assoc |>
-  slice_head(n = 10)
+  slice_max(order_by = pmi, n = 10)
 ```
+
+\index{R packages!dplyr}\index{R
+packages!stringr}
+\cindex{filter()}\cindex{arrange()}\cindex{slice_head()}\cindex{str_detect()}\cindex{desc()}
 :::
 
-We have a working method for identify verb particle constructions. We can clean up the results a bit by removing the POS tags from the `x` and `y` variables, up our minimum PMI value, and create a network plot to visualize the results. A **network plot** is a type of graph that shows relationships between entities. In this case, the entities are verbs and particles, and the relationships are the PMI values between them. The connections between are represented by edges, and the thickness of the edges is proportional to the PMI value.
+We have a working method for identify verb particle constructions. We can clean up the results a bit by removing the POS tags from the `x` and `y` variables, up our minimum PMI value, and create a network plot to visualize the results. A **network plot**\index{network plot} is a type of graph that shows relationships between entities. In this case, the entities are verbs and particles, and the relationships are the PMI values between them. The connections between are represented by edges, and the thickness of the edges is proportional to the PMI value.
 
 ```{r}
 #| label: fig-explore-masc-verb-part-network
@@ -758,10 +862,11 @@ We have a working method for identify verb particle constructions. We can clean 
 #| fig-asp: 0.75
 #| echo: false
 
-# Clean up results removing POS tags
+# Clean up results 
 masc_verb_part_assoc_plot <-
   masc_verb_part_assoc |>
   filter(pmi >= 2) |>
+  filter(str_detect(y, "that_|whether_", negate = TRUE)) |>
   mutate(
     x = str_remove(x, "_V.*"),
     y = str_remove(y, "_IN")
@@ -793,13 +898,13 @@ masc_verb_part_assoc_plot |>
 {ggplot2} cannot create network plots directly, so we use {ggraph} [@R-ggraph] and {igraph} [@R-igraph] to create the network plot. For more information on creating network plots, see the {ggraph} documentation.
 :::
 
-From @fig-explore-masc-verb-part-network, and from the underlying data, we can explore verb particle constructions. We could go further and apply our co-occurrence methods to each modality separately, if we wanted to identify verb particle constructions that are distinctive to each modality. We could also apply our co-occurrence methods to other parts-of-speech, such as adjectives and nouns, to identify collocations of these parts-of-speech. There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be addressed.
+From @fig-explore-masc-verb-part-network, and from the underlying data, we can explore verb particle constructions. We could go further and apply our co-occurrence methods to each modality separately, if we wanted to identify verb particle constructions that are distinctive to each modality. We could also apply our co-occurrence methods to other parts of speech, such as adjectives and nouns, to identify collocations of these parts of speech. There is much more to explore with co-occurrence analysis, but this should give you a good idea of the types of questions that can be addressed.
 
 ### Unsupervised learning {#sec-explore-unsupervised}
 
-Aligned in purpose with descriptive approaches, unsupervised learning approaches to exploratory data analysis are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include principle component analysis, clustering, and vector space modeling.
+Aligned in purpose with descriptive approaches, unsupervised learning\index{unsupervised learning} approaches to exploratory data analysis\index{exploratory data analysis (EDA)} are used to identify patterns in the data from an algorithmic perspective. Common methods in text analysis include principal component analysis, clustering, and vector space modeling.
 
-We will continue to use the MASC dataset as we develop materials for our ELL textbook to illustrate unsupervised learning methods. In the process, we will explore the following questions:
+We will continue to use the MASC dataset\index{Manually Annotated Sub-Corpus of American English (MASC)} as we develop materials for our ELL textbook to illustrate unsupervised learning methods. In the process, we will explore the following questions:
 
 - Can we identify and group documents based on linguistic features or co-occurrence patterns of the data itself?
 - Do the groups of documents relate to categories in the dataset?
@@ -809,19 +914,19 @@ Through these questions we will build on our knowledge of frequency, dispersion,
 
 #### Clustering {#sec-explore-clustering}
 
-**Clustering** is a unsupervised learning technique that can be used to group similar items in the text data, helping to organize the data into distinct categories and discover relationships between different elements in the text. The main steps in the procedure includes identifying the relevant linguistic features to use for clustering, representing the features in a way that can be used for clustering, applying a clustering algorithm to the data, and then interpreting the results.
+**Clustering**\index{clustering} is an unsupervised learning technique that can be used to group similar items in the text data, helping to organize the data into distinct categories and discover relationships between different elements in the text. The main steps in the procedure includes identifying the relevant linguistic features\index{feature selection} to use for clustering, representing the features\index{feature engineering} in a way that can be used for clustering, applying a clustering algorithm to the data, and then interpreting the results.
 
-In our ELL textbook task, we may very well want to explore the similiarities and/ or differences between the documents based on the distribution of linguistic features. This provides us a view to evaluate to what extent the variables in the dataset, say genre for this demonstration, map to the distribution of linguistic features. Based on this evaluation, we may want to consider re-categorizing the documents, collapsing categories, or even adding new categories.
+In our ELL textbook task, we may very well want to explore the similarities and/or differences between the documents based on the distribution of linguistic features. This provides us a view to evaluate to what extent the variables in the dataset, say genre for this demonstration, map to the distribution of linguistic features. Based on this evaluation, we may want to consider re-categorizing the documents, collapsing categories, or even adding new categories.
 
-Instead of relying entirely on the variables' values in the MASC dataset, we can let the data itself say something about how documents may or may not be related. Yet, a pivotal question is what linguistic features will use, otherwise known as **feature selection**. We could use terms or lemmas, but we may want to consider other features, such as parts of speech or some co-occurrence pattern. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results.
+Instead of relying entirely on the variables' values in the MASC dataset, we can let the data itself say something about how documents may or may not be related. Yet, a pivotal question is what linguistic features we will use, otherwise known as **feature selection**\index{feature selection}. We could use terms or lemmas, but we may want to consider other features, such as parts of speech or some co-occurrence pattern. We are not locked into using one criterion, and we can perform clustering multiple times with different features, but we should consider the implications of our feature selection for our interpretation of the results\index{research interpretation}.
 
-Imagine that among the various features that we are interested in associating documents, we consider lemma use and POS use. However, we need to operationalize what we mean by 'use'. In machine learning, this process is known as **feature engineering**. We likely want use some measure of frequency. Since we are comparing documents, a relative frequency measure will be most useful. Another consideration is what does it mean to use lemmas or POS tags as our features. Each represents a different linguistic of the documents. Lemmas represent the lexical diversity of the documents while POS tags approximate the grammatical diversity of the documents [@Petrenz2011].
+Imagine that among the various features that we are interested in associating documents, we consider lemma use and POS use. However, we need to operationalize\index{operationalize} what we mean by 'use'. In machine learning, this process is known as **feature engineering**\index{feature engineering}. We likely want to use some measure of frequency. Since we are comparing documents, a relative frequency measure will be most useful. Another consideration it means to use lemmas or POS tags as our features. Each represents a different linguistic of the documents. Lemmas represent the lexical diversity\index{lexical diversity} of the documents while POS tags approximate the grammatical diversity\index{grammatical diversity} of the documents [@Petrenz2011].
 
-Let's assume that our interest is to gauge the grammatical diversity of the documents, so we will go with POS tags. With this approach, we aim to distinguish between documents in a way that may allow us to use consider whether genre-document categories are meaningful, along grammatical lines.
+Let's assume that our interest is to gauge the grammatical diversity of the documents, so we will go with POS tags. With this approach, we aim to distinguish between documents in a way that may allow us to consider whether genre-document categories are meaningful, along grammatical lines.
 
-The next question to address in any analysis is how to represent the features. In machine learning, the most common way to represent document- feature relationsips is in a matrix. In our case, we want to create a matrix with the documents in the rows and the features in the columns. The values in the matrix will be the operationalization of grammatical diversity in each document. This configuration is known as a **document-term matrix** (DTM).
+The next question to address in any analysis is how to represent the features. In machine learning, the most common way to represent \mbox{document-feature} relationships is in a matrix\index{matrix}. In our case, we want to create a matrix with the documents in the rows and the features in the columns. The values in the matrix will be the operationalization\index{operationalize} of grammatical diversity in each document. This configuration is known as a **document-term matrix** (DTM)\index{document-term matrix (DTM)}.
 
-To recast a data frame into a DTM, we can use the `cast_dtm()` function from {tidytext}. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of POS tags into a matrix and then normalize the matrix by documents.
+To recast a data frame into a DTM, we can use the `cast_dtm()` function from {tidytext}. This function takes a data frame with a document identifier, a feature identifier, and a value for each observation and casts it into a matrix. Operations such as normalization are easily and efficiently performed in R on matrices, so initially we can cast a frequency table of POS tags into a matrix and then normalize the matrix by documents.\index{R packages!tidytext}\index{standardization}
 
 Let's see how this works with the MASC dataset in @exm-explore-masc-dtms.
 
@@ -837,7 +942,8 @@ masc_tbl <-
 
 ::: {#exm-explore-masc-dtms}
 ```{r}
-#| label: explore--masc-dtms
+#| label: explore-masc-dtms
+#| results: hold
 
 # Load package
 library(tidytext)
@@ -849,19 +955,22 @@ masc_pos_dtm <-
   cast_dtm(doc_id, pos, n) |>
   as.matrix()
 
-# Inpsect
+# Inspect
 dim(masc_pos_dtm)
 
 # Preview
 masc_pos_dtm[1:5, 1:5]
 ```
+\index{R packages!tidytext}
+\cindex{count()}\cindex{cast_dtm()}\cindex{as.matrix()}\cindex{dim()}\cindex{library()}
 :::
 
-The matrix `masc_pos_dtm` has `r nrow(masc_pos_dtm)` documents and `r ncol(masc_pos_dtm)` POS tags. The values in the matrix are the frequency of each POS tag in each document. Note preview the a subset of the contents of a matrix, such as in @exm-explore-masc-dtms, we use bracket syntax `[]` instead of the `head()` function.
+The matrix `masc_pos_dtm` has `r nrow(masc_pos_dtm)` documents and `r ncol(masc_pos_dtm)` POS tags. The values in the matrix are the frequency of each POS tag in each document. Note to preview a subset of the contents of a matrix, such as in @exm-explore-masc-dtms, we use bracket syntax `[]` instead of the `head()` function.\cindex{[]}
 
-We can now normalize the matrix by documents. We can do this by dividing each feature count by the total count in each document. This is a row-wise transformation, so we can use the `rowSums()` function from base R to calculate the total count in each document. Then each count divided by its row's total count, as seen in @exm-explore-masc-dtms-normalized.
+We can now normalize the matrix by documents. We can do this by dividing each feature count by the total count in each document. This is a row-wise transformation, so we can use the `rowSums()` function from base R to calculate the total count in each document. Then each count divided by its row's total count, as seen in @exm-explore-masc-dtms-normalized.\index{transformation}
 
 ::: {#exm-explore-masc-dtms-normalized}
+
 ```{r}
 #| label: explore--masc-dtms-normalized
 
@@ -869,31 +978,33 @@ We can now normalize the matrix by documents. We can do this by dividing each fe
 masc_pos_dtm <-
   masc_pos_dtm / rowSums(masc_pos_dtm)
 ```
+\cindex{rowSums()}
 :::
 
-There are two concerns to address before we can proceed with clustering. First, clustering algorithm performance tends to degrade with the number of features. Second, clustering algorithms perform better with more informative features. That is to say, features that are more distinct across the documents provide better information for deriving useful clusters.
+There are two concerns to address before we can proceed with clustering.\index{clustering} First, clustering algorithm performance tends to degrade with the number of features. Second, clustering algorithms perform better with more informative features. That is to say, features that are more distinct across the documents provide better information for deriving useful clusters.
 
-We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use dimensionality reduction. **Dimensionality reduction** is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is **principle component analysis** (PCA). PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principle components. The principle components are ordered by the amount of variance that they explain in the data. The first principle component explains the most variance, the second principle component explains the second most variance, and so on.
+We can address both of these concerns by reducing the number of features and increasing the informativeness of the features. To accomplish this is to use dimensionality reduction. **Dimensionality reduction**\index{dimensionality reduction} is a set of methods that are used to reduce the number of features in a dataset while retaining as much information as possible. The most common method for dimensionality reduction is **principal component analysis** (PCA)\index{principal component analysis (PCA)}. PCA is a method that transforms a set of correlated variables into a set of uncorrelated variables, known as principal components. The principal components are ordered by the amount of variance that they explain in the data. The first principal component explains the most variance, the second principal component explains the second most variance, and so on.
 
 We can apply PCA to the matrix and assess how well it accounts for the variation in the data and how the variation is distributed across components. The `prcomp()` function from base R can be used to perform PCA.
 
 Let's apply PCA to the matrix, as seen in @exm-explore-masc-dtms-pca.
 
 ::: {#exm-explore-masc-dtms-pca}
+
 ```{r}
 #| label: explore--masc-dtms-pca
 
-# Set seed
-set.seed(123)
+set.seed(123) # for reproducibility
 
 # Apply PCA to matrix
 masc_pos_pca <-
   masc_pos_dtm |>
   prcomp()
 ```
+\cindex{prcomp()}
 :::
 
-We can visualize the amount of variance explained by each principle component with a scree plot. A **scree plot** is a bar plot ordered by the amount of variance explained by each principle component. The `fviz_eig()` function from {factoextra} implements a scree plot on a PCA object. We can set the number of number of components to visualize with `ncp =`.
+We can visualize the amount of variance explained by each principal component with a scree plot. A **scree plot**\index{scree plot} is a bar plot\index{bar plot} ordered by the amount of variance explained by each principal component. The `fviz_eig()` function from {factoextra} implements a scree plot on a PCA object. We can set the number of components to visualize with `ncp =`, as seen in @exm-explore-masc-dtms-pca-scree.
 
 ::: {#exm-explore-masc-dtms-pca-scree}
 
@@ -904,11 +1015,12 @@ library(factoextra)
 # Scree plot: POS relative frequency
 fviz_eig(masc_pos_pca, ncp = 10)
 ```
-
+\index{R packages!factoextra}
+\cindex{fviz_eig()}
 ```{r}
 #| label: fig-explore-masc-dtms-pca-scree
-#| fig-cap: "Scree plot of the principle components of the POS relative frequency"
-#| fig-alt: "A scree plot which is a bar plot ordered by the amount of variance explained by each principle component. The plot shows the first 10 principle components and the amount of variance explained by each component. The first two components explain almost 50% of the variance."
+#| fig-cap: "Scree plot of the principal components of the POS relative frequency"
+#| fig-alt: "A scree plot which is a bar plot ordered by the amount of variance explained by each principal component. The plot shows the first 10 principal components and the amount of variance explained by each component. The first two components explain almost 50% of the variance."
 #| fig-width: 6
 #| fig-asp: 0.5
 #| echo: false
@@ -918,42 +1030,45 @@ library(factoextra)
 
 # Scree plot: POS relative frequency
 fviz_eig(masc_pos_pca, ncp = 10, barfill = "grey50", barcolor = "grey50") +
-labs(title = "", y = "Variance explained (%)") + theme_qtalr(font_size = 10) + scale_y_continuous(labels = scales::label_percent(scale = 1))
+  labs(title = "", y = "Variance explained (%)") + 
+  scale_y_continuous(labels = scales::label_percent(scale = 1)) + 
+  theme_qtalr(font_size = 10) 
 ```
 :::
-
-<!-- [ ] tmp fmt -->
-\pagebreak
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
-As with many modeling techniques we will encounter, it is possible to extract the importance of features that contribute to the model. In the case of PCA, we can extract the feature values from the principle components using the `get_pca_var()` function from {factoextra}. Feature importance provides more detailed insight into the inner workings of the algorithms we employ in our research and therefore can serve to inform our interpretation of the results.
+As with many modeling techniques we will encounter, it is possible to extract the importance of features that contribute to the model\index{feature importance}. In the case of PCA, we can extract the feature values from the principal components using the `get_pca_var()` function from {factoextra}. Feature importance provides more detailed insight into the inner workings of the algorithms we employ in our research and therefore can serve to inform our interpretation of the results.
 :::
 
-From the scree plot for the matrix, in @fig-explore-masc-dtms-pca-scree, we can see that the first component shows the most variance explained, around just over 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method to identify the number of dimensions to use for clustering. It appears the variance explained decreases after 4 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
+From the scree plot for the matrix in @fig-explore-masc-dtms-pca-scree, we can see that the first component shows the most variance explained, around just over 30%, and then drops for subsequent drops as the number of dimensions increase. Visually we will apply the elbow method\index{elbow method} to identify the number of dimensions to use for clustering\index{clustering}. It appears the variance explained decreases after 4 dimensions. This is a good indication that we should use 4 dimensions for our clustering algorithm.
 
-Let's go ahead and create a matrix of the first four principle components for the POS data, as seen in @exm-explore-masc-pos-pca-pc.
+Let's go ahead and create a matrix of the first four principal components for the POS data, as seen in @exm-explore-masc-pos-pca-pc.
 
 ::: {#exm-explore-masc-pos-pca-pc}
+
 ```{r}
 #| label: explore--masc-pos-pca-pc
 
-# Create a matrix of the first four principle components
+# Create a matrix of the first four principal components
 masc_pos_pca_pc <-
   masc_pos_pca$x[, 1:4]
 ```
+
 :::
 
-Now that we have identified assessed the features that we want to use for clustering and we have represented the features in a way that can be used for clustering, we can apply a clustering algorithm to the data.
+Now that we have identified the features that we want to use for clustering and we have represented the features in a way that can be used for clustering, we can apply a clustering algorithm to the data.
 
-Some algorithms are better suited for certain types of data and certain types of tasks. For example, **Hierarchical clustering** is a good choice when we are not sure how many clusters we want to identify, as it does not require us to specify the number of clusters from the outset. However, it is not a good choice when we have a large dataset, as it can be computationally expensive compared to some other algorithms. **K-means clustering**, on the other hand, is a good choice when we want to identify a pre-defined number of clusters, and the aim is to gauge how well the data fit the clusters. These two clustering techniques, therefore, complement each other with Hierarchical clustering being a good choice for initial exploration and K-means clustering being a good choice for targeted evaluation.
+Some algorithms are better suited for certain types of data and certain types of tasks. For example, **hierarchical clustering**\index{hierarchical clustering} is best when we are not sure how many clusters we want to identify, as it does not require us to specify the number of clusters from the outset. However, it is not ideal when we have a large dataset, as it can be computationally expensive compared to some other algorithms. **k-means clustering**\index{k-means clustering}, on the other hand, is a good choice when we want to identify a pre-defined number of clusters, and the aim is to gauge how well the data fit the clusters. These two clustering techniques, therefore, complement each other, with hierarchical clustering being favored for initial exploration and k-means clustering being better suited for targeted evaluation.
 
-Since we are exploring the usefulness of the 18 genre labels used in the MASC dataset we have a good idea of how many clusters we want to start with. This is a good case to employ the K-means clustering algorithm.
+\pagebreak
 
-In K-means clustering, we specify the number of clusters that we want to identify. For each cluster number, a random center is generated. Then each observation is assigned to the cluster with the nearest center. The center of each cluster is then recalculated based on the distribution of the observations in the cluster. This process is iterates either a pre-defined number of times, or until the centers converge (*i.e* observations stop switching clusters).
+Since we are exploring the usefulness of the 18 genre labels used in the MASC dataset we have an idea of how many clusters we want to start with. This is a good case to employ the k-means clustering algorithm.
 
-The `kmeans()` function from base R takes the matrix of features as its first argument and the number of clusters as its second argument. We can specify the number of clusters with the `centers` argument. Other arguments `nstart` and `iter.max` can be used to specify the number of random starts and the maximum number of iterations, respectively. Since the starting point for centers is random, it is a good idea to run the algorithm multiple times with different starting points. And we limit the interations to avoid the algorithm running indefinitely.
+In k-means clustering, we specify the number of clusters that we want to identify. For each cluster number, a random center is generated. Then each observation is assigned to the cluster with the nearest center. The center of each cluster is then recalculated based on the distribution of the observations in the cluster. This process iterates either a pre-defined number of times, or until the centers converge (*i.e.* observations stop switching clusters).
+
+The `kmeans()` function from base R takes the matrix of features as its first argument and the number of clusters as its second argument. We can specify the number of clusters with the `centers` argument. Other arguments `nstart` and `iter.max` can be used to specify the number of random starts and the maximum number of iterations, respectively. Since the starting point for centers is random, it is recommendable to run the algorithm multiple times with different starting points. Furthermore, we will limit the iterations to avoid the algorithm running indefinitely.
 
 Our goal, then, will be to assess how well this number of clusters fits the data. After finding the optimal number of clusters, we can then compare the results with the genre variable to see how well the clusters map to the values of this variable.
 
@@ -961,7 +1076,11 @@ One way to assess the fit of the clustering algorithm is to visualize the result
 
 We will take the later approach and plot the **within-cluster sum of squares** (WSS) for a range of values for $k$. The WSS is the sum of the squared distance between each observation and its cluster center. With a plot of the WSS for a range of values for $k$, we can identify the value for $k$ where the WSS begins to level off, using the elbow method. It is not always clear where the elbow is, yet it is a good starting point for identifying the optimal number of clusters.
 
-The `fviz_nbclust()` function can be used to plot the WSS for a range of values for $k$. The `fviz_nbclust()` function takes the `kmeans()` function as its first argument and the matrix of features as its second argument. The `fviz_nbclust()` function also takes arguments `method = "wss"` to specify the WSS method and `k.max = 20` to specify the maximum number of clusters to plot. Let's plot the WSS for a range of values for $k$, as seen in @fig-explore-masc-pos-kmeans-elbow.
+The `fviz_nbclust()` function can be used to plot the WSS for a range of values for $k$. The `fviz_nbclust()` function takes the `kmeans()` function as its first argument and the matrix of features as its second argument. The `fviz_nbclust()` function also takes arguments `method = "wss"` to specify the WSS method and `k.max = 20` to specify the maximum number of clusters to plot. Let's plot the WSS for a range of values for $k$, as seen in @fig-explore-masc-pos-kmeans-elbow, using the code in @exm-explore-masc-pos-kmeans-elbow.
+
+\pagebreak
+
+::: {#exm-explore-masc-pos-kmeans-elbow}
 
 ```r
 masc_pos_pca_pc |>
@@ -973,10 +1092,11 @@ masc_pos_pca_pc |>
     iter.max = 20
   )
 ```
+:::
 
 ```{r}
 #| label: fig-explore-masc-pos-kmeans-elbow
-#| fig-cap: "Elbow method for $k$-means clustering"
+#| fig-cap: "Elbow method for k-means clustering"
 #| fig-alt: "A line plot showing the within-cluster sum of squares for a range of values for $k$ in the MASC dataset. The plot shows the WSS for $k$ ranging from 1 to 20. The plot shows that the WSS decreases rapidly from 1 to 4 clusters and then levels off after 5-7 clusters."
 #| fig-width: 6
 #| fig-asp: 0.5
@@ -992,25 +1112,22 @@ masc_pos_pca_pc |>
     iter.max = 20,
     linecolor = "black"
   ) +
-  labs(title = "") +
-  theme_qtalr(font_size = 11)
+  labs(title = "", y = "Total within sum of squares") +
+  theme_qtalr(font_size = 10)
 ```
 
-It is clear that there is significant gains in cluster fit from 1 to 4 clusters, but the gains begin to level off after 5 clusters.
+It is clear that there are significant gains in cluster fit from 1 to 4 clusters, but the gains begin to level off after 5 clusters.
 
 Now we have an informed selection for $k$. Let's use 4 clusters in the `kmeans()` function and collect the results, as seen in @exm-explore-masc-pos-kmeans-fit.
 
-<!-- [ ] tmp fmt -->
-\pagebreak
-
 ::: {#exm-explore-masc-pos-kmeans-fit}
+
 ```{r}
 #| label: explore--masc-pos-kmeans-fit
 
-# Set seed
-set.seed(123)
+set.seed(123) # for reproducibility
 
-# K-means: for 4 clusters
+# k-means: for 4 clusters
 masc_pos_kmeans_fit <-
   masc_pos_pca_pc |>
   kmeans(
@@ -1022,19 +1139,22 @@ masc_pos_kmeans_fit <-
 # Preview
 masc_pos_kmeans_fit$cluster[1:10]
 ```
+\index{R packages!base}
+\cindex{kmeans()}\cindex{set.seed()}\cindex{\$}
 :::
 
 The preview from @exm-explore-masc-pos-kmeans-fit shows the cluster assignments for the first 10 documents (`doc_id`) in the dataset.
 
-From this point we can join document-cluster pairings produced by the $k$-means algorithm with the original dataset. We can then explore the clusters in terms of the original features. We can also explore the clusters in terms of the original labels.
+From this point we can join document-cluster pairings produced by the k-means algorithm with the original dataset. We can then explore the clusters in terms of the original features. We can also explore the clusters in terms of the original labels.\index{feature importance}\index{research interpretation}
 
 Let's join the cluster assignments to the original dataset, as seen in @exm-explore-masc-pos-kmeans-join.
 
 ::: {#exm-explore-masc-pos-kmeans-join}
+
 ```{r}
 #| label: explore--masc-pos-kmeans-join
 
-# Organize $k$-means clusters into a tibble
+# Organize k-means clusters into a tibble
 masc_pos_cluster_tbl <-
   tibble(
     doc_id = names(masc_pos_kmeans_fit$cluster),
@@ -1053,11 +1173,15 @@ masc_cluster_tbl <-
 masc_cluster_tbl |>
   slice_head(n = 5)
 ```
+\index{R packages!dplyr}
+\cindex{tibble()}\cindex{left_join()}\cindex{slice_head()}
+\index{joining datasets!left join}
 :::
 
-We now see that the cluster assignments from the $k$-means algorithm have been joined to the original dataset. We can now explore the clusters in terms of the original features. For example, let's look at the distribution of the clusters across genre, as seen in @exm-explore-masc-pos-kmeans-genre. To do this, we first need to reduce our dataset to the distinct combinations of genre and cluster. Then, we can use {janitor}'s `tabyl()` function to provided formatted percentages.
+We now see that the cluster assignments from the k-means algorithm have been joined to the original dataset. We can now explore the clusters in terms of the original features. For example, let's look at the distribution\index{distribution} of the clusters across genre, as seen in @exm-explore-masc-pos-kmeans-genre. To do this, we first need to reduce our dataset to the distinct combinations of genre and cluster. Then, we can use {janitor}'s `tabyl()` function to provided formatted percentages.
 
 ::: {#exm-explore-masc-pos-kmeans-genre}
+
 ```{r}
 #| label: tbl-explore-masc-pos-kmeans-genre
 #| tbl-cap: "Distribution of clusters by genre"
@@ -1074,17 +1198,18 @@ masc_meta_tbl <-
 # Tabulate: cluster by genre
 masc_meta_tbl |>
   tabyl(genre, cluster) |>
-  adorn_totals("row") |>
   adorn_percentages("col") |>
   adorn_pct_formatting(digits = 1) |>
   as_tibble() |>
   tt(width = 1)
 ```
+\index{R packages!janitor} \index{R packages!tibble}
+\cindex{distinct()}\cindex{tabyl()}\cindex{adorn_totals()}\cindex{adorn_percentages()}\cindex{adorn_pct_formatting()}\cindex{as_tibble()}\cindex{tt()}
 :::
 
 From @exm-explore-masc-pos-kmeans-genre, we can see that the clusters are not evenly distributed across the genres. In particular, cluster 2 tends to be more associated with 'blog', 'email', 'letters', 'twitter', and 'newspaper'. Another interesting cluster is cluster 4, which is more associated with 'non-fiction', and interestingly, 'email' and 'newspaper'. This suggest that the clusters are capturing some of the variation in the across the genres and potential within some of the genres.
 
-We could continue to explore genre, but we could also entertain the possibility that the clusters may capture differences between modality --even some interaction between modality and genre! This highlights how exploratory data analysis through clustering can be used to identify new questions and new variables of interest.
+We could continue to explore genre, but we could also entertain the possibility that the clusters may capture differences between modality ---even some interaction between modality and genre! This highlights how exploratory data analysis through clustering can be used to identify new questions and new variables of interest.
 
 ::: {.callout .halfsize}
 **{{< fa regular lightbulb >}} Consider this**
@@ -1094,21 +1219,21 @@ Given the cluster assignments derived using the distribution of POS tags, what o
 
 #### Vector space models {#sec-explore-vector-space-models}
 
-In our discussion of clustering, we targeted associations between documents based on the distribution of linguistic features. We now turn to targeting associations between linguistic features based on their distribution across documents. The technique we will introduce is known as **vector space modeling**. Vector space modeling aims to represent linguistic features as numerical vectors which reflect the various linguistic contexts in which the features appear. Together these vectors form a feature-context space in which features with similar contextual distributions are closer together.
+In our discussion of clustering, we targeted associations between documents based on the distribution of linguistic features. We now turn to targeting associations between linguistic features based on their distribution across documents. The technique we will introduce is known as **vector space modeling**\index{vector space model (VSM)}. Vector space modeling aims to represent linguistic features as numerical vectors which reflect the various linguistic contexts in which the features appear. Together these vectors form a feature-context space in which features with similar contextual distributions are closer together.
 
-An interesting property of vector space models is that are able to capture semantic and/ or syntactic relationships between features based on their distribution. In this way, vector space modeling can be seen as an implementation of the **distributional hypothesis** --that is, terms that appear in similar linguistic contexts tend to have similar meanings [@Harris1954]. As @Firth1957 states, "you shall know a word by the company it keeps".
+An interesting property of vector space models is that they are able to capture semantic and/or syntactic relationships between features based on their distribution. In this way, vector space modeling can be seen as an implementation of the **distributional hypothesis**\index{distributional hypothesis} ---that is, terms that appear in similar linguistic contexts tend to have similar meanings [@Harris1954]. As @Firth1957 states, "you shall know a word by the company it keeps".
+
+Let's assume in our textbook project we are interested in gathering information about English's expression of the semantic concepts of manner and motion. For learners of English, this can be an area of difficulty as languages differ in how these semantic properties are expressed. English is an example of a "satellite-framed" language, that is that manner and motion are often encoded in the same verb with a particle encoding the motion path ("rush out", "climb up"). Other languages such as Spanish, Turkish, and Japanese are "verb-framed" languages, that is that motion but not manner is encoded in the verb ("salir corriendo", "koşarak çıkmak", "走り出す").
 
 ::: {.callout .halfsize}
 **{{< fa regular file-alt >}} Case study**
 
-@Garg2018 quantify and compare gender and ethnic stereotypes over time using word embeddings. The authors explore the temporal dynamics of stereotypes using word embeddings as a quantitative measure of bias. The data used includes word embeddings from the Google News dataset for contemporary analysis, as well as embeddings from the COHA and Google Books datasets for historical analysis. Additional validation is done using embeddings from the New York Times Annotated Corpus. Several word lists representing gender, ethnicity, and neutral words are collated for analysis. The main finding is that language reflects and perpetuates cultural stereotypes, and the analysis shows consistency in the relationships between embedding bias and external metrics across datasets over time. The results also highlight the impact of historical events, such as the women’s movement of the 1960s, on the encoding of stereotypes.
+@Garg2018 quantify and compare gender and ethnic stereotypes over time using word embeddings. The authors explore the temporal dynamics of stereotypes using word embeddings as a quantitative measure of bias. The data used includes word embeddings from the Google News dataset for contemporary analysis, as well as embeddings from the COHA and Google Books datasets for historical analysis. Additional validation is done using embeddings from the New York Times Annotated Corpus. Several word lists representing gender, ethnicity, and neutral words are collated for analysis. The main finding is that language reflects and perpetuates cultural stereotypes, and the analysis shows consistency in the relationships between embedding bias and external metrics across datasets over time. The results also highlight the impact of historical events, such as the women’s movement of the 1960s, on the encoding of stereotypes\index{sociolinguistics}.
 :::
 
-Let's assume in our textbook project we are interested in gathering information about English's expression of the semantic concepts of manner and motion. For learners of English, this can be an area of difficulty as languages differ in how these semantic properties are expressed. English is a good example of a "satellite-framed" language, that is that manner and motion are often encoded in the same verb with a particle encoding the motion path ("rush out", "climb up"). Other languages such as Spanish, Turkish, and Japanese are "verb-framed" languages, that is that motion but not manner is encoded in the verb ("salir corriendo", "koşarak çıkmak", "走り出す").
+We can use vector space modeling to attempt to represent the distribution of verbs in the MASC dataset and then target the concepts of manner and motion to then explore how English encodes these concepts. The question will be what our features will be. They could be terms, lemmas, POS tags, *etc*. Or they could be some combination. Considering the task at hand, which we will ultimately want to know something about verbs, it makes sense to include the POS information in combination with either the term or the lemma.
 
-We can use vector space modeling to attempt to represent the distribution of verbs in the MASC dataset and then target the concepts of manner and motion to then explore how English encodes these concepts. The question will be what will our features be. They could be terms, lemmas, POS tags, *etc*. Or they could be some combination. Considering the task at hand which we will ultimately want to know something about verbs, it makes sense to include the POS information in combination with either the term or the lemma.
-
-If we include term and POS then we have a feature for every morphological variant of the term (*e.g.* house_VB, housed_VBD, housing_VBG). This can make the model more sizeable than it needs to be. If we include lemma and POS then we have a feature for every lemma with a distinct grammatical category (*e.g.* house_NN, house_VB). Note that as the POS tags are from the Penn tagset, many morphological variants appear in the tag itself (*e.g.* house_VB, houses_VBZ, housing_VBG). This is a good example of how the choice of features can impact the size of the model. In our case, it is not clear that we need to include the morphological variants of the verbs, so I will use lemmas and recode the POS variables as a simplified tagset.
+If we include term and POS then we have a feature for every morphological variant of the term (*e.g.* house_VB, housed_VBD, housing_VBG). This can make the model larger than it needs to be. If we include lemma and POS then we have a feature for every lemma with a distinct grammatical category\index{part of speech (POS)} (*e.g.* house_NN, house_VB). Note that as the POS tags are from the Penn tagset, many morphological variants appear in the tag itself (*e.g.* house_VB, houses_VBZ, housing_VBG). This demonstrates how the choice of features can impact the size of the model. In our case, it is not clear that we need to include the morphological variants of the verbs, so I will use lemmas and recode the POS variables as a simplified tagset.
 
 ```{r}
 #| label: explore--masc-vsm-lemma-pos
@@ -1154,21 +1279,22 @@ masc_tbl <-
   mutate(lemma_pos = str_c(lemma, xpos, sep = "_"))
 ```
 
-After simplifying the features, we can then apply the vector space model to the MASC dataset. When VSM is applied to words, it is known as **word embedding**. To calculate word embeddings there are various algorithms that can be used (BERT, word2vec, GloVe, *etc.*) We will use the **word2vec** [@Mikolov2013b] algorithm. Word2vec is a neural network-based algorithm that learns word embeddings from a large corpus of text. In the word2vec algorithm, the researcher can choose to learn embeddings from a **Continuous Bag of Words** (CBOW) or a **Skip-gram model**. The CBOW model predicts a target word based on the context words. The Skip-gram model predicts the context words based on the target word. The CBOW model is faster to train and is better for frequent words. The Skip-gram model is slower to train and is better for infrequent words.
+After simplifying the features, we can then apply the vector space model (VSM)\index{vector space model (VSM)} to the MASC dataset. When VSM is applied to words, it is known as **word embedding**\index{word embeddings}. To calculate word embeddings there are various algorithms that can be used (BERT, word2vec, GloVe, *etc.*) We will use the **word2vec**\index{word2vec} [@Mikolov2013b] algorithm. Word2vec is a neural network-based algorithm that learns word embeddings from a large corpus of text. In the word2vec algorithm, the researcher can choose to learn embeddings from a **Continuous Bag of Words** (CBOW)\index{continuous bag of words (CBOW)} or a **Skip-gram model**\index{skip-gram model}. The CBOW model predicts a target word based on the context words. The Skip-gram model predicts the context words based on the target word. The CBOW model is faster to train and is better for frequent words. The Skip-gram model is slower to train and is better for infrequent words.
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
-Choosing window size and dimensions for word2vec models is another important consideration. The window size is the number of words that the model will consider as context for the target word. Smaller window sizes tend to capture more syntactic information, while larger window sizes tend to capture more semantic information.
+Choosing window size and dimensions for word2vec\index{word2vec} models is another important consideration. The window size is the number of words that the model will consider as context for the target word. Smaller window sizes tend to capture more syntactic information, while larger window sizes tend to capture more semantic information.
 
-The number of dimensions is the number of features that the model will learn. More dimensions can capture more information, but can also lead to overfitting --picking up on nuances that are particular to the dataset and that do not generalize well. Fewer dimensions can capture less information, but can also lead to underfitting --not picking up on nuances that are particular to the dataset and that do generalize well. The number of dimensions is a hyperparameter that can be tuned to optimize the model for the task at hand.
+The number of dimensions is the number of features that the model will learn. More dimensions can capture more information, but can also lead to **overfitting**\index{overfitting} ---picking up on nuances that are particular to the dataset and that do not generalize well. Fewer dimensions can capture less information, but can also lead to **underfitting**\index{underfitting} ---*not* picking up on nuances that are particular to the dataset and that do generalize well. The number of dimensions is a hyperparameter that can be tuned to optimize the model for the task at hand.
 :::
 
-Another consideration to take into account is the size of the corpus used to train the model. VSM provide more reliable results when trained on larger corpora. The MASC dataset is relatively small. We've simplified our features in order to have a smaller vocabulary in hopes to offset this limitation to a degree. But the choice of either CBOW or Skip-gram can also help to offset this limitation. CBOW can be better for smaller corpora as it aggregates context infomation. Skip-gram can be better for larger corpora as it can capture more nuanced relationships between words.
+Another consideration to take into account is the size of the corpus used to train the model. VSM provide more reliable results when trained on larger corpora. The MASC dataset is relatively small. We've simplified our features in order to have a smaller vocabulary in hopes to offset this limitation to a degree. But the choice of either CBOW or Skip-gram can also help to offset this limitation. CBOW can be better for smaller corpora as it aggregates context information. Skip-gram can be better for larger corpora as it can capture more nuanced relationships between words.
 
 To implement the word2vec algorithm on our lemma + POS features, we will use {word2vec}. The `word2vec()` function takes a text file and uses it to train the vector representations. To prepare the MASC dataset for training, we will need to write the lemma + POS features to a text file as a single character string. We can do this by first collapsing the `lemma_pos` variable into a single string for the entire corpus using the `str_c()` function. Then we can use the `write_lines()` function to write the string to a text file, as in @exm-explore-masc-vsm-write-txt.
 
 ::: {#exm-explore-masc-vsm-write-txt}
+
 ```r
 # Write lemma + POS to text file
 masc_tbl |>
@@ -1178,6 +1304,7 @@ masc_tbl |>
     file = "../data/analysis/masc_lemma_pos.txt"
   )
 ```
+
 ```{r}
 #| label: explore--masc-vsm-write-txt
 #| include: false
@@ -1190,11 +1317,14 @@ masc_tbl |>
     file = "data/masc_lemma_pos.txt"
   )
 ```
+\index{R packages!dplyr}\index{R packages!stringr}\index{R packages!readr}
+\cindex{summarize()}\cindex{str_c()}\cindex{pull()}\cindex{write_lines()}
 :::
 
-With the single line text file on disk, we will read it in, apply the word2vec algorithm using {word2vec} [@R-word2vec], and write the model to disk. By default, te `word2vec()` function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let's apply the default algorithm to the text file spliting features by sentence punctuation, as seen in @exm-explore-masc-vsm-word2vec-train.
+With the single line text file on disk, we will read it in, apply the word2vec algorithm using {word2vec} [@R-word2vec], and write the model to disk. By default, the `word2vec()` function applies the CBOW model, with 50 dimensions, a window size of 5, and a minimum word count of 5. We can change these parameters as needed, but let's apply the default algorithm to the text file splitting features by sentence punctuation, as seen in @exm-explore-masc-vsm-word2vec-train.
 
 ::: {#exm-explore-masc-vsm-word2vec-train}
+
 ```r
 # Load package
 library(word2vec)
@@ -1221,8 +1351,7 @@ write.word2vec(
 #| eval: false
 #| echo: false
 
-# Set seed
-set.seed(1234)
+set.seed(1234) # for reproducibility
 
 # Load package
 library(word2vec)
@@ -1243,13 +1372,16 @@ write.word2vec(
   file = "data/masc_lemma_pos.bin"
 )
 ```
+\index{R packages!word2vec}
+\cindex{library()}\cindex{word2vec()}\cindex{write.word2vec()}
 :::
 
-Writing the model to disk is important as it allows us to read the model in without having to retrain it. In cases where the corpus is large, this can save a lot of computational time.
+Writing the model to disk is important as it allows us to read the model in without having to retrain it. In cases where the corpus is large, this can save a lot of computational time.\index{computing environment}
 
-Now that we have a trained model, we can read it in with the `read.vectors()` function from {wordVectors}.
+Now that we have a trained model, we can read it in with the `read.vectors()` function from {wordVectors} as in @exm-explore-masc-vsm-word2vec-read.
 
 ::: {#exm-explore-masc-vsm-word2vec-read}
+
 ```r
 # Load package
 library(wordVectors)
@@ -1274,13 +1406,16 @@ masc_model <-
     filename = "data/masc_lemma_pos.bin"
   )
 ```
+\cindex{read.vectors()}\cindex{library()}
 :::
 
 The `read.vectors()` function returns a matrix where each row is a term in the model and each column is a dimension in the vector space, as seen in @exm-explore-masc-vsm-word2vec-vector-object.
 
 ::: {#exm-explore-masc-vsm-word2vec-vector-object}
+
 ```{r}
 #| label: explore--masc-vsm-word2vec-vector-object
+#| results: hold
 
 # Inspect
 dim(masc_model)
@@ -1288,6 +1423,7 @@ dim(masc_model)
 # Preview
 masc_model[1:5, 1:5]
 ```
+\cindex{dim()}
 :::
 
 The row-wise vector in the model is the vector representation of each feature. The notion is that these values can now be compared with other features to explore distributional relatedness. We can extract specific features from the matrix using the `[]` operator.
@@ -1311,24 +1447,18 @@ terms <-
 # Remove placeholders
 masc_model <- masc_model[terms, ]
 ```
+\cindex{str_subset()}\cindex{str_c()}\cindex{rownames()}\cindex{[]}
 
-As an example, let's compare the vectors for noun-verb pairs for the lemmas 'run' and 'walk'. To do this we extract these features from the model. To appreciate the relatedness of these features it is best to visualize them. We can do this by first reducing the dimensionality of the vectors using principal components analysis. We can then plot the first two principle components, as seen in @fig-explore-masc-vsm-word2vec-similarity.
+As an example, let's compare the vectors for noun-verb pairs for the lemmas\index{lemmas} 'run' and 'walk'. To do this we extract these features from the model. To appreciate the relatedness of these features it is best to visualize them. We can do this by first reducing the dimensionality of the vectors using principal components analysis\index{principal component analysis (PCA)}. We can then plot the first two principal components with the code in @exm-explore-masc-vsm-word2vec-similarity which produces @fig-explore-masc-vsm-word2vec-similarity.
 
 ::: {#exm-explore-masc-vsm-word2vec-similarity}
-```{r}
-#| label: fig-explore-masc-vsm-word2vec-similarity
-#| fig-cap: "Similarity between 'run' and 'walk'"
-#| fig-alt: "A scatter plot showing the similarity between 'run' and 'walk' in the MASC dataset. The plot shows the first two principle components of the vectors for 'run' and 'walk', as nouns and as verbs."
-#| fig-width: 2.75
-#| fig-asp: 1
-
+```r
 # Extract vectors
 word_vectors <-
   masc_model[c("run_VERB", "walk_VERB", "run_NOUN", "walk_NOUN"), ] |>
   as.matrix()
 
-# Set seed for reproducibility
-set.seed(123)
+set.seed(123) # for reproducibility
 
 pca <-
   word_vectors |>
@@ -1341,21 +1471,55 @@ pca_tbl <-
 
 pca_tbl |>
   ggplot(aes(x = PC1, y = PC2, label = word)) +
-  geom_point() +
+  geom_point(size = 1) +
+  ggrepel::geom_text_repel(size = 2)
+```
+
+```{r}
+#| label: fig-explore-masc-vsm-word2vec-similarity
+#| fig-cap: "Similarity between 'run' and 'walk'"
+#| fig-alt: "A scatterplot showing the similarity between 'run' and 'walk' in the MASC dataset. The plot shows the first two principal components of the vectors for 'run' and 'walk', as nouns and as verbs."
+#| fig-width: 2.75
+#| fig-asp: 1
+#| echo: false
+
+# Extract vectors
+word_vectors <-
+  masc_model[c("run_VERB", "walk_VERB", "run_NOUN", "walk_NOUN"), ] |>
+  as.matrix()
+
+set.seed(123) # for reproducibility
+
+pca <-
+  word_vectors |>
+  scale() |>
+  prcomp()
+
+pca_tbl <-
+  as_tibble(pca$x[, 1:2]) |>
+  mutate(word = rownames(word_vectors))
+
+pca_tbl |>
+  ggplot(aes(x = PC1, y = PC2, label = word)) +
+  geom_point(size = 1) +
   ggrepel::geom_text_repel(size = 2) +
   theme_qtalr(font_size = 8)
 ```
+\index{R packages!ggplot2}\index{R packages!dplyr}
+\cindex{ggplot()}\cindex{geom_point()}\cindex{geom_text_repel()}\cindex{scale()}\cindex{as_tibble()}\cindex{prcomp()}
 :::
 
-From @fig-explore-masc-vsm-word2vec-similarity, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC1, we can see that there is a distinction between POS. Looking along PC2, we see some pariety between lemma meanings. Given these features, we can see that meaning and grammatical category can be approximated in the vector space.
+From @fig-explore-masc-vsm-word2vec-similarity, we can see that each of these features occupies a distinct position in the reduced vector space. But on closer inspection, we can see that there is a relationship between the lemma pairs. Remember that PCA reduces the dimensionality\index{dimensionality reduction} of the data by identifying the dimensions that capture the greatest amount of variance in the data. This means that of the 50 dimensions in the model, the PC1 and PC2 correspond to orthogonal dimensions that capture the greatest amount of variance in the data. If we look along PC1, we can see that there is a distinction between POS. Looking along PC2, we see some parity between lemma meanings. Given these features, we can see that meaning and grammatical category can be approximated in the vector space\index{vector space model (VSM)}.
 
 An interesting property of vector space models is that we can build up a dimension of meaning by adding vectors that we expect to approximate that meaning. For example, we can add the vectors for typical motion verbs to create a vector for motion-similarity and one for manner-similarity. We can then compare the feature vectors for all verbs and assess their motion-similarity and manner-similarity.
 
-To do this let's first subset the model to only include verbs, as in @exm-explore-masc-vsm-word2vec-verbs. We will also remove the POS tags from the rownames of the matrix as they are no longer needed.
+To do this let's first subset the model to only include verbs, as in @exm-explore-masc-vsm-word2vec-verbs. We will also remove the POS tags from the row names of the matrix as they are no longer needed.\index{matrix}
 
 ::: {#exm-explore-masc-vsm-word2vec-verbs}
+
 ```{r}
 #| label: explore--masc-vsm-word2vec-verbs
+#| results: hold
 
 # Filter to verbs
 verbs <- str_subset(rownames(masc_model), ".*_VERB")
@@ -1373,13 +1537,19 @@ dim(verb_vectors)
 # Preview
 verb_vectors[1:5, 1:5]
 ```
+\index{R packages!stringr}\index{R packages!dplyr}
+\cindex{str_remove_all()}\cindex{str_subset()}\cindex{str_replace_all()}\cindex{str_replace()}\cindex{str_remove()}\cindex{dim()}
 :::
 
-We now have `verb_vectors` which includes the vector representations for all verbs `r format(nrow(verb_vectors), big.mark = ",")` in the MASC dataset. Next, let's seed the vectors for motion-similarity and manner-similarity and calculate the vector 'closeness' to the motion and manner seed vectors with the `closest_to()` function from the `wordVectors()` package.
+We now have `verb_vectors` which includes the vector representations for all verbs `r format(nrow(verb_vectors), big.mark = ",")` in the MASC dataset. Next, let's seed the vectors for motion-similarity and manner-similarity and calculate the vector 'closeness' to the motion and manner seed vectors with the `closest_to()` function from {wordVectors} package, in @exm-explore-masc-vsm-word2vec-manner-motion.
+
+\pagebreak
 
 ::: {#exm-explore-masc-vsm-word2vec-manner-motion}
+
 ```{r}
 #| label: fig-explore-masc-vsm-word2vec-add
+#| results: hold
 
 # Add vectors for motion-similarity and manner-similarity
 motion <-
@@ -1389,7 +1559,7 @@ motion_similarity <-
   verb_vectors |> closest_to(motion, n = Inf)
 
 # Preview
-motion_similarity |> glimpse()
+glimpse(motion_similarity)
 
 manner <-
   c("run", "walk", "jump", "crawl", "swim", "fly", "drive", "ride")
@@ -1398,13 +1568,16 @@ manner_similarity <-
   verb_vectors |> closest_to(manner, n = Inf)
 
 # Preview
-manner_similarity |> glimpse()
+glimpse(manner_similarity)
 ```
+\index{R packages!wordVectors}
+\cindex{closest_to()}\cindex{glimpse()}
 :::
 
 The `motion_similarity` and `manner_similarity` data frames each contain all the verbs with a corresponding closeness measure. We can join these two data frames by feature to create a single data frame with the motion-similarity and manner-similarity measures, as seen in @exm-explore-masc-vsm-word2vec-manner-motion.
 
 ::: {#exm-explore-masc-vsm-word2vec-manner-motion}
+
 ```{r}
 #| label: explore--masc-vsm-word2vec-manner-motion
 
@@ -1414,27 +1587,29 @@ manner_motion_similarity <-
   inner_join(motion_similarity)
 
 # Preview
-manner_motion_similarity |> glimpse()
+glimpse(manner_motion_similarity)
 ```
+\index{R packages!dplyr}
+\cindex{inner_join()}\cindex{glimpse()}
+\index{joining datasets!inner join}
 :::
-
 
 The result of @exm-explore-masc-vsm-word2vec-manner-motion is a data frame with the motion-similarity and manner-similarity measures for all verbs in the MASC dataset. We can now visualize the distribution of motion-similarity and manner-similarity measures, as seen in @fig-explore-masc-vsm-word2vec-manner-motion-compare.
 
 ```{r}
 #| label: fig-explore-masc-vsm-word2vec-manner-motion-compare
 #| fig-cap: "Motion-similarity and manner-similarity of verbs"
-#| fig-alt: "A scatter plot showing the motion-similarity and manner-similarity of verbs in the MASC dataset. The plot shows the similarity to motion on the x-axis and the similarity to manner on the y-axis. The plot shows the motion-similarity and manner-similarity of 50 randomly sampled verbs from the dataset, as well as the motion and manner seed vectors."
+#| fig-alt: "A scatterplot showing the motion-similarity and manner-similarity of verbs in the MASC dataset. The plot shows the similarity to motion on the x-axis and the similarity to manner on the y-axis. The plot shows the motion-similarity and manner-similarity of 50 randomly sampled verbs from the dataset, as well as the motion and manner seed vectors."
 #| fig-width: 6
 #| fig-asp: 1
 #| echo: false
 
-# Set seed
-set.seed(1234)
+set.seed(1234) # for reproducibility
 
 # Sample verbs
 manner_motion_sample <-
   manner_motion_similarity |>
+  filter(!word %in% c(motion, manner)) |>
   sample_n(size = 50)
 
 # Get the motion vectors
@@ -1442,6 +1617,7 @@ seed_motion_vectors <-
   manner_motion_similarity |>
   filter(word %in% manner)
 
+# Get the manner vectors
 seed_manner_vectors <-
   manner_motion_similarity |>
   filter(word %in% motion)
@@ -1449,20 +1625,32 @@ seed_manner_vectors <-
 # Load package
 library(ggrepel)
 
-# Visualize
+create_repel_layer <- function(data, box_padding = 0.4, text_size = 2.75, min_segment_len = 0.75) {
+  geom_text_repel(
+    data = data,
+    aes(label = word),
+    size = text_size,
+    color = "black",
+    segment.color = "grey",
+    box.padding = box_padding,
+    min.segment.length = min_segment_len,
+    max.overlaps = Inf,
+    force = 10,
+    max.iter = 50000,
+    direction = "both",
+    nudge_x = 0.05,
+    nudge_y = 0.05
+  )
+}
+
 manner_motion_similarity |>
   ggplot(aes(
     x = `similarity to manner`,
     y = `similarity to motion`,
   )) +
   geom_point(alpha = 0.1) +
-  geom_vline(xintercept = mean(manner_motion_similarity$`similarity to manner`)) +
-  geom_hline(yintercept = mean(manner_motion_similarity$`similarity to motion`)) +
-  geom_text_repel(
-    data = manner_motion_sample,
-    aes(label = word),
-    size = 3
-  ) +
+  geom_vline(xintercept = mean(manner_motion_similarity$`similarity to manner`), color = "grey") +
+  geom_hline(yintercept = mean(manner_motion_similarity$`similarity to motion`), color = "grey") +
   geom_point(
     data = manner_motion_sample,
     aes(
@@ -1487,23 +1675,17 @@ manner_motion_similarity |>
     ),
     shape = 17
   ) +
-  geom_text_repel(
-    data = seed_motion_vectors,
-    aes(label = word),
-    size = 3
-  ) +
-  geom_text_repel(
-    data = seed_manner_vectors,
-    aes(label = word),
-    size = 3
-  ) +
+  create_repel_layer(manner_motion_sample) +
+  create_repel_layer(seed_motion_vectors) +
+  create_repel_layer(seed_manner_vectors) +
   labs(x = "Similarity to manner", y = "Similarity to motion") +
-  coord_fixed(xlim = c(-0.3, 1), ylim = c(-0.3, 1))
+  coord_fixed(xlim = c(-0.3, 1), ylim = c(-0.3, 1)) +
+  theme_qtalr(font_size = 10)
 ```
 
-From @fig-explore-masc-vsm-word2vec-manner-motion-compare, we can see that the   manner-similarity is plotted on the x-axis and the motion-similarity on the y-axis. I've added horizontal and vertical lines to break the scatterplot into quadrants --the top-right corresponding to high manner- and motion-similiarity and the bottom-left corresponding to low manner- and motion-similarity. This captures the majority of the verbs in the dataset. The verbs in the top-left quadrant have high motion-similarity but lower manner similarity, and verbs in the bottom-right quadrant have high manner-similarity but lower motion-similarity.
+From @fig-explore-masc-vsm-word2vec-manner-motion-compare, we see that manner-similarity is plotted on the x-axis and motion-similarity on the y-axis. I’ve added lines to divide the scatterplot into quadrants: the top-right shows high manner- and motion-similarity, while the bottom-left shows low manner- and motion-similarity. Verbs in the top-left quadrant have high motion-similarity but low manner-similarity, and verbs in the bottom-right quadrant have high manner-similarity but low motion-similarity.
 
-I've randomly sampled 50 verbs from the dataset and plotted them as text labels. I've also plotted the motion and manner seed vectors as triangle and box points, respectively. We can see that motion- and manner-similiarity seed verbs are found in the top-left quandrant together, showing that they are semantically related. Verbs in the other quadrants are either lower in motion- or manner-similarity, or both. From a qualitative point of view it appears that many of the verbs coincide with inuition. Some, however, less so. This is to be expected to some degree as the model is trained on a relatively small corpus. All in all, this serves as an example of how vector space modeling can be used to explore semantic relationships between linguistic features.
+I've randomly sampled 50 verbs from the dataset and plotted them with text labels, along with the motion and manner seed vectors as triangle and box points, respectively. Motion- and manner-similarity seed verbs appear together in the top-right quadrant, indicating their semantic relationship. Verbs in other quadrants exhibit lower similarity in either manner or motion, or both. Qualitatively, many verbs align with intuition, though some do not, which is expected given the model’s training on a relatively small corpus\index{sampling frame}. This example demonstrates how vector space modeling can explore semantic relationships between linguistic features.
 
 ## Activities {.unnumbered}
 
@@ -1527,4 +1709,5 @@ Exploratory analysis is a wide-ranging term that encompasses many different meth
 
 ## Summary {.unnumbered}
 
-In this chapter, we surveyed a range of methods for uncovering insights from data, particularly when we do not have a predetermined hypothesis. We broke the chapter discussion along the two central branches of exploratory data analysis: descriptive analysis and unsupervised learning. Descriptive analysis offers statistical or visual summaries of datasets through frequency, dispersion, and co-occurrence measures, while unsupervised learning utilizes machine learning techniques to uncover patterns without predefining variable relationships. Here we covered a few unsupervised learning methods including clustering, diminensionality reduction, and vector space modeling. Through either descriptive or unsupervised learning methodologies, we probe questions in a data-driven fashion and apply methods to summarize, reduce, and sort complex datasets. This in turn facilitates novel, quantitative perspectives that can subsequently be evaluated qualitatively, offering us a robust approach to exploring and generating research questions.
+In this chapter, we surveyed a range of methods for uncovering insights from data, particularly when we do not have a predetermined hypothesis. We broke the chapter discussion along the two central branches of exploratory data analysis: descriptive analysis and unsupervised learning. Descriptive analysis offers statistical or visual summaries of datasets through frequency, dispersion, and co-occurrence measures, while unsupervised learning utilizes machine learning techniques to uncover patterns without pre-defining variable relationships. Here we covered a few unsupervised learning methods including clustering, dimensionality reduction, and vector space modeling. Through either descriptive or unsupervised learning methodologies, we probe questions in a data-driven fashion and apply methods to summarize, reduce, and sort complex datasets. This in turn facilitates novel, quantitative perspectives that can subsequently be evaluated qualitatively, offering us a robust approach to exploring and generating research questions.
+

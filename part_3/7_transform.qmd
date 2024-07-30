@@ -2,7 +2,7 @@
 execute:
   echo: true
 ---
-<!-- TODO: add index/ description of the `==` and `!=`, etc. operators   -->
+
 ::: {.content-visible when-format="pdf"}
 
 ```{=latex}
@@ -28,12 +28,6 @@ execute:
 - Recognize the importance of planning and documenting the transformation process.
 :::
 
-```{r}
-#| label: transform-data-packages
-#| echo: false
-
-```
-
 In this chapter, we will focus on transforming curated datasets to refine and possibly expand their relational characteristics to align with our research. I will approach the transformation process by breaking it down into two sub-processes: preparation and enrichment. The preparation process involves normalizing and tokenizing text. The enrichment process involves generating, recoding, and integrating variables. These processes are not sequential but may occur in any order based on the researcher's evaluation of the dataset characteristics and the desired outcome.
 
 ::: {.callout}
@@ -46,7 +40,7 @@ In this chapter, we will focus on transforming curated datasets to refine and po
 
 ## Preparation {#sec-transform-preparation}
 
-In this section, we will cover the processes of normalization and tokenization. These processes are particularly relevant for text analysis, as text conventions can introduce unwanted variability in the data and the unit of observation may need to be adjusted to align with the research question.
+In this section, we will cover the processes of normalization and tokenization. These processes are particularly relevant for text analysis, as text conventions can introduce unwanted variability in the data and, therefore, the unit of observation may need to be adjusted to align with the research question.
 
 To illustrate these processes, we will use a curated version of the Europarl Parallel Corpus [@Koehn2005]\index{Europarl Parallel Corpus}. This dataset contains transcribed source language (Spanish) and translated target language (English) from the proceedings of the European Parliament. The unit of observation\index{unit of observation} is the `lines` variable whose values are lines of dialog. We will use this dataset to explore the normalization and tokenization processes.\index{text normalization}\index{text tokenization}
 
@@ -55,6 +49,7 @@ The contents of the data dictionary for this dataset appears in @tbl-transform-e
 ```{r}
 #| label: tbl-transform-europarl-dd
 #| tbl-cap: "Data dictionary for the curated Europarl Parallel Corpus."
+#| tbl-colwidths: [7, 22, 13, 58]
 #| echo: false
 
 read_csv(file = "data/curate-europarl_curated_dd.csv") |>
@@ -74,10 +69,8 @@ europarl_tbl <-
 europarl_tbl |>
   slice_head(n = 10)
 ```
-
 \index{R packages!readr}\index{R packages!dplyr}
 \cindex{read_csv()}\cindex{slice_head()}
-
 ```{r}
 #| label: transform-europarl-read
 #| echo: false
@@ -90,20 +83,19 @@ europarl_tbl <-
 europarl_tbl |>
   slice_head(n = 10)
 ```
-
 :::
 
 This dataset includes `r format(nrow(europarl_tbl), big.mark = ",")` observations\index{observations} and four variables.\index{variables} The key variable for our purposes is the `lines` variable. This variable contains the text we will be working with. The other variables are metadata\index{metadata} that may be of interest for our analyses.
 
 ### Normalization {#sec-transform-normalization}
 
-The process of normalizing datasets in essence is to sanitize the values of variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization but more often than not linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis.\index{text normalization}\index{transform datasets}
+The process of normalizing datasets in essence is to sanitize the values of a variable or set of variables such that there are no artifacts that will contaminate subsequent processing. It may be the case that non-linguistic metadata may require normalization, but more often than not, linguistic information is the most common target for normalization as text often includes artifacts from the acquisition process which will not be desired in the analysis.\index{text normalization}\index{transform datasets}
 
 Simply looking at the first 10 lines of the dataset from @exm-transform-europarl-preview gives us a clearer sense of the dataset structure, but, in terms of normalization procedures we might apply, it is likely not sufficient. We want to get a sense of any potential inconsistencies in the dataset, in particular in the `lines` variable. Since this is a large dataset with `r format(nrow(europarl_tbl), big.mark = ",")` observations, we will need to explore the dataset in more detail using procedures for summarizing and filtering data.
 
 After exploring variations in the `lines` variable, I identified a number of artifacts in this dataset that we will want to consider addressing. These are included in @tbl-transform-europarl-normalization.
 
-::: {#tbl-transform-europarl-normalization tbl-colwidths="[40, 60]"}
+::: {#tbl-transform-europarl-normalization tbl-colwidths="[35, 65]"}
 
 | Description | Examples |
 |:---|:---|
@@ -116,27 +108,42 @@ After exploring variations in the `lines` variable, I identified a number of art
 Characteristics of the Europarl Parallel Corpus dataset that may require normalization
 :::
 
-These artifacts either may not be of interest or may introduce unwanted variability in the that could prove problematic for subsequent processing (*e.g* tokenization, calculating frequencies, *etc.*).
+These artifacts either may not be of interest or may introduce unwanted variability that could prove problematic for subsequent processing (*e.g* tokenization, calculating frequencies, *etc.*).
 
-The majority of text normalization procedures incorporate {stringr} [@R-stringr]. This package provides a number of functions for manipulating text strings. The workhorse functions we will use for our tasks are the `str_remove()` and `str_replace()` functions. As the these functions give us the ability to remove or replace text based on literal strings, actual text, or Regular Expressions.\index{regular expression (regex)} **Regular Expressions** (regex, *pl.* regexes) are a powerful tool for pattern matching and text manipulation which employs a syntax that allows for the specification of complex search patterns.\index{R packages!stringr}
+The majority of text normalization procedures incorporate {stringr} [@R-stringr]. This package provides a number of functions for manipulating text strings. The workhorse functions we will use for our tasks are the `str_remove()` and `str_replace()` functions. These functions give us the ability to remove or replace text based on literal strings, actual text, or Regular Expressions.\index{regular expression (regex)} **Regular Expressions** (regex, *pl.* regexes) are a powerful tool for pattern matching and text manipulation which employs a syntax that allows for the specification of complex search patterns.\index{R packages!stringr}
 
-Our first step, however, is to identify the patterns we want to remove or replace. For demonstration purposes, let's focus on removing non-speech annotations from the `lines` variable. Do develop a search pattern to identify these annotations, there are various possibilities, `str_view()`, `str_detect()` inside a `filter()` call, or `str_extract()` inside a `mutate()` call. No matter which approach we choose, we need to be sure that our search pattern does not over- or under-generalize the text we want to remove or replace. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.\index{R packages!dplyr}
+Our first step, however, is to identify the patterns we want to remove or replace. For demonstration purposes, let's focus on removing non-speech annotations from the `lines` variable. To develop a search pattern to identify these annotations, there are various possibilities, `str_view()`, `str_detect()` inside a `filter()` call, or `str_extract()` inside a `mutate()` call. No matter which approach we choose, we need to be sure that our search pattern does not over- or under-generalize the text we want to remove or replace. If we are too general, we may end up removing or replacing text that we want to keep. If we are too specific, we may not remove or replace all the text we want to remove or replace.\index{R packages!dplyr}
 
-In @exm-transform-europarl-search-non-speech, I've used `str_detect()` which detects a pattern in a character vector and returns a logical vector, `TRUE` if the pattern is detected and `FALSE` if it is not. In combination with `filter()` we can identify a variable with rows that match a pattern. I've added the `slice_sample()` function at then end to return a small, random sample of the dataset to get a better sense how well our pattern works across the dataset.
+In @exm-transform-europarl-search-non-speech, I've used `str_detect()` which detects a pattern in a character vector and returns a logical vector, `TRUE` if the pattern is detected and `FALSE` if it is not. In combination with `filter()` we can identify a variable with rows that match a pattern. I've added the `slice_sample()` function at the end to return a small, random sample of the dataset to get a better sense how well our pattern works across the dataset.
 
-Now, how about our search pattern? From the examples above, we can see that these instances are wrapped with parentheses `(` and `)`. The text within the parentheses can vary, so we need a regex to do the heavy lifting. To start out we can match any one or multiple characters with `.+`. But it is important to recognize the `+` (and also the `*`) operators are '**greedy**'\index{regular expression (regex)!greedy}, meaning that if there are multiple matches (in this case multiple sets of parentheses) in a single line of text, the longest match will be returned. That is, the match will extend as far as possible. This is not what we want in this case. We want to match the shortest match. To do this we can append the `?` operator to make the `+` operator '**lazy**'. This will match the shortest match.\index{regular expression (regex)!lazy}
+Now, how about our search pattern? From the examples in @tbl-transform-europarl-normalization above, we can see that the instances of non-speech are wrapped with parentheses `(` and `)`. The text within the parentheses can vary, so we need a regex to do the heavy lifting. To start out we can match any one or multiple characters with `.+`. But it is important to recognize the `+` (and also the `*`) operators are '**greedy**'\index{regular expression (regex)!greedy}, meaning that if there are multiple matches (in this case multiple sets of parentheses) in a single line of text, the longest match will be returned. That is, the match will extend as far as possible. This is not what we want in this case. We want to match the shortest match. To do this we can append the `?` operator to make the `+` operator '**lazy**'. This will match the shortest match.\index{regular expression (regex)!lazy}
 
 ```{r}
 #| label: set-seed-sample-3
 #| echo: false
 
-set.seed(111)
+set.seed(111) # for reproducibility
 ```
 
 ::: {#exm-transform-europarl-search-non-speech}
+```r
+# Load package
+library(stringr)
+
+# Identify non-speech lines
+europarl_tbl |>
+  filter(str_detect(lines, "\\(.+?\\)")) |>
+  slice_sample(n = 10)
+```
+:::
+
+::: {.content-visible when-format="pdf"}
+\vspace{4em}
+:::
 
 ```{r}
 #| label: transform-europarl-search-non-speech
+#| echo: false
 
 # Load package
 library(stringr)
@@ -146,10 +153,8 @@ europarl_tbl |>
   filter(str_detect(lines, "\\(.+?\\)")) |>
   slice_sample(n = 10)
 ```
-
 \index{regular expression (regex)!lazy}
 \cindex{library()}\cindex{str_detect()}\cindex{filter()}\cindex{slice_sample()}
-:::
 
 The results from @exm-transform-europarl-search-non-speech show that we have identified the lines that contain at least one of the parliamentary session description annotations. A more targeted search to identify specific instances of the parliamentary session descriptions can be accomplished adding the `str_extract_all()` function as seen in @exm-transform-europarl-search-non-speech-2.
 
@@ -157,10 +162,8 @@ The results from @exm-transform-europarl-search-non-speech show that we have ide
 #| label: set-seed-sample-4
 #| echo: false
 
-# Set seed
-set.seed(111)
+set.seed(111) # for reproducibility
 ```
-
 ::: {#exm-transform-europarl-search-non-speech-2}
 
 ```{r}
@@ -208,7 +211,6 @@ europarl_tbl <-
   europarl_tbl |>
   filter(!is.na(lines))
 ```
-
 \cindex{filter()}\cindex{is.na()}
 :::
 
@@ -218,7 +220,7 @@ Normalization goals will vary from dataset to dataset but the procedures often f
 
 Tokenization is the process of segmenting units of language into components relevant for the research question. This includes breaking text in curated datasets into smaller units, such as words, ngrams, sentences, *etc.* or combining smaller units into larger units.\index{text tokenization}
 
-The process of tokenization is fundamentally row-wise. Changing the unit of observation\index{unit of observation} changes the number of rows. It is important both for the research and the text processing to operationalize\index{operationalize} our language units beforehand For example, while it may appear obvious to you what 'word' or 'sentence' means, a computer, and your reproducible research, needs a working definition. This can prove trickier than it seems. For example, in English, we can segment text into words by splitting on whitespace. This works fairly well but there are some cases where this is not ideal. For example, in the case of contractions, such as `don't`, `won't`, `can't`, *etc.* the apostrophe is not a whitespace character. If we want to consider these contractions as separate words, then perhaps we need to entertain a different tokenization strategy.
+The process of tokenization is fundamentally row-wise. Changing the unit of observation\index{unit of observation} changes the number of rows. It is important both for the research and the text processing to operationalize\index{operationalize} our language units beforehand For example, while it may appear obvious to you what 'word' or 'sentence' means, a computer, and your reproducible research, needs a working definition. This can prove trickier than it seems. For example, in English, we can segment text into words by splitting on whitespace. This works fairly well, but there are some cases where this is not ideal. For example, in the case of contractions, such as `don't`, `won't`, `can't`, *etc.* the apostrophe is not a whitespace character. If we want to consider these contractions as separate words, then perhaps we need to entertain a different tokenization strategy.
 
 ::: {.callout}
 **{{< fa regular lightbulb >}} Consider this**
@@ -230,7 +232,7 @@ Consider the following paragraph:
 What text conventions would pose issues for word tokenization based on a whitespace criterion?
 :::
 
-Furthermore, tokenization strategies can vary between languages. For German words are often compounded together, meaning many 'words' will not be captured by the whitespace convention. Whitespace may not even be relevant for word tokenization in logographic writing systems, such as Chinese characters. The take home message is there is no one-size-fits-all tokenization strategy.
+Furthermore, tokenization strategies can vary between languages. In German, for example, words are often compounded together, meaning many 'words' will not be captured by the whitespace convention. Whitespace may not even be relevant for word tokenization in logographic writing systems, such as Chinese characters. The take-home message is there is no one-size-fits-all tokenization strategy.
 
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
@@ -255,9 +257,9 @@ Example of tokenizing the `lines` variable into word tokens
 
 Comparing @tbl-transform-europarl-tokenization-words-example to the fourth row of the output of @exm-transform-europarl-preview, we can see that we want to segment the words in `lines` and then have each segment appear as a separate observation, retaining the relevant metadata variables.\index{observations}\index{metadata}
 
-Tokenization that maintains the tidy dataset structure very common strategy in text analysis using R.\index{tidy format} So common, in fact, that {tidytext} [@R-tidytext] includes a function, `unnest_tokens()` that tokenizes text in just such a way. Various tokenization types can be specified including 'characters', 'words', 'ngrams', 'sentences' among others. We will use the 'word' tokenization type to recreate the structure we envisioned in @tbl-transform-europarl-tokenization-words-example.\index{R packages!tidytext}
+Tokenization that maintains the tidy dataset structure is a very common task in text analysis using R.\index{tidy format} So common, in fact, that {tidytext} [@R-tidytext] includes a function, `unnest_tokens()` that tokenizes text in just such a way. Various tokenization types can be specified including 'characters', 'words', 'ngrams', 'sentences' among others. We will use the 'word' tokenization type to recreate the structure we envisioned in @tbl-transform-europarl-tokenization-words-example.\index{R packages!tidytext}
 
-In @exm-transform-europarl-tokenization-words-tidytext, we see set our output variable to `token` and our input variable to `lines`.
+In @exm-transform-europarl-tokenization-words-tidytext, we set our output variable to `token` and our input variable to `lines`.
 
 ::: {#exm-transform-europarl-tokenization-words-tidytext}
 
@@ -329,12 +331,11 @@ europarl_bigrams_tbl |>
   filter(type == "Target", line_id == 2) |>
   slice_head(n = 10)
 ```
-
 \cindex{==}
 \cindex{unnest_tokens()}
 :::
 
-The two-word token sequences for lines appear as observations in the `europarl_bigrams_tbl` dataset.
+\pagebreak
 
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
@@ -382,6 +383,7 @@ The data dictionary for the curated native dataset appears in @tbl-transform-enn
 ```{r}
 #| label: tbl-transform-enntt-native-dd
 #| tbl-cap: "Data dictionary for the curated native ENNTT dataset."
+#| tbl-colwidths: [13, 22, 13, 52]
 #| echo: false
 
 read_csv(file = "data/enntt_natives_curated_dd.csv") |>
@@ -406,7 +408,7 @@ An idealized transformed dataset dictionary for this investigation should look s
 Idealized transformed dataset for the syntactic simplification investigation
 :::
 
-We will be using the native and translated datasets for our purposes so let's go ahead and read in these datasets.
+We will be using the native and translated datasets for our purposes, so let's go ahead and read in these datasets.
 
 ```{r}
 #| label: transform-enntt-dataset-read
@@ -431,9 +433,9 @@ The most common type of operation involved in the generation process is the addi
 
 To identify the main clauses and their subordinate clauses in our datasets, we will need to derive syntactic annotation information from the ENNTT `text` variable.
 
-As fun as it would be to hand-annotate the ENNTT corpus, we will instead turn to automatic linguistic annotation. Specifically, we will use {udpipe} [@R-udpipe] which provides an interface for annotating text using pre-trained models from the [Universal Dependencies](https://universaldependencies.org/) (UD) project [@Nivre2020]. The UD project is an effort to develop cross-linguistically consistent treebank annotation for a variety of languages.\index{R packages!udpipe}\index{Natural Language Processing (NLP)}
+As fun as it would be to hand-annotate the ENNTT corpus, we will instead turn to automatic linguistic annotation. {udpipe} [@R-udpipe] provides an interface for annotating text using pre-trained models from the [Universal Dependencies](https://universaldependencies.org/) (UD) project [@Nivre2020]. The UD project is an effort to develop cross-linguistically consistent syntactic annotation for a variety of languages.\index{R packages!udpipe}\index{Natural Language Processing (NLP)}
 
-Our first step, then, is to peruse the available pre-trained models for the languages we are interested in and selected the most register-aligned models.\index{language models} The models, model names, and licensing information are documented in {udpipe} and can be accessed by running `?udpipe::udpipe_download_model()` in the R console.\index{terms of use} For illustrative purposes, the `english` treebank model from the *<https://github.com/bnosac/udpipe.models.ud>* repository which is released under the [CC-BY-SA license](https://creativecommons.org/licenses/by-sa/4.0/). This model is trained on various sources including news, Wikipedia, and web data of various genres.
+Our first step, then, is to peruse the available pre-trained models for the languages we are interested in and selected the most register-aligned models.\index{language models} The models, model names, and licensing information are documented in the {udpipe} documentation for the `udpipe_download_model()` function.\index{terms of use} For illustrative purposes, we will use the `english` treebank model from the *<https://github.com/bnosac/udpipe.models.ud>* repository which is released under a [CC-BY-SA license](https://creativecommons.org/licenses/by-sa/4.0/). This model is trained on various sources including news, Wikipedia, and web data of various genres.
 
 Let's set the stage by providing an overview of the annotation process.
 
@@ -442,19 +444,19 @@ Let's set the stage by providing an overview of the annotation process.
 3. Prepare the dataset to be annotated (if necessary). This includes ensuring that the dataset has a column of text to be annotated and a grouping column. By default, the names of these columns are expected to be `text` and `doc_id`, respectively. The `text` column needs to be a character vector and the `doc_id` column needs to be a unique index for each text to be annotated.
 4. Annotate the dataset. The result returns a data frame.
 
-Steps 3 and 4 are repeated for the `enntt_natives_tbl` and the `enntt_translations_tbl` datasets. For brevity, I will only show the code for the dataset for the natives. Additionally, I will subset the dataset to 10,000 randomly selected lines for both datasets for the natives. Syntactic annotation is a computationally expensive operation and the natives and translations datasets contain 116,341 and 738,597 observations, respectively.
+Since we are working with two datasets, steps 3 and 4 will be repeated. For brevity, I will only show the code for the dataset for the natives. Additionally, I will subset the dataset to 10,000 randomly selected lines for both datasets. Syntactic annotation is a computationally expensive operation and the natives and translations datasets contain 116,341 and 738,597 observations, respectively. This subset will suffice for illustrative purposes.
 
 ::: {.callout}
 **{{< fa medal >}} Dive deeper**
 
-In your own research computationally expensive cannot be avoided, but it can be managed.\index{computing environment} One strategy is to work with a subset of the data until your code is working as expected. Once you are confident that your code is working as expected, then you can scale up to the full dataset. If you are using Quarto, you can use the `cache: true` metadata field in your code blocks to cache the results of computationally expensive code blocks. This will allow you to run your code once and then use the cached results for subsequent runs. Parallel processing is another strategy for managing computationally expensive code. Some packages, such as {udpipe}, have built-in support for parallel processing. Other packages, such as {tidytext}, do not. In these cases, you can use {future} [@R-future] to parallelize your code.
+In your own research computationally expensive operations cannot be avoided, but they can be managed.\index{computing environment} One strategy is to work with a subset of the data until your code is working as expected. Once you are confident that your code is working as expected, then you can scale up to the full dataset. If you are using Quarto, you can use the `cache: true` metadata field in your code blocks to cache the results of computationally expensive code blocks. This will allow you to run your code once and then use the cached results for subsequent runs. Parallel processing is another strategy for managing computationally expensive code. Some packages, such as {udpipe}, have built-in support for parallel processing. Other packages, such as {tidytext}, do not. In these cases, you can use {future} [@R-future] to parallelize your code.
 :::
 
 ```{r}
 #| label: set-seed-sample-7
 #| include: false
 
-set.seed(1234)
+set.seed(1234) # for reproducibility
 ```
 
 ```{r}
@@ -471,7 +473,7 @@ enntt_natives_tbl <-
 #| label: set-seed-sample-8
 #| include: false
 
-set.seed(1234)
+set.seed(1234) # for reproducibility
 ```
 
 ```{r}
@@ -484,7 +486,7 @@ enntt_translations_tbl <-
   slice_sample(n = 10000)
 ```
 
-With the subsetted `enntt_natives_tbl` object, let's execute steps 1-4, as seen in @exm-transform-generation-udpipe-natives.
+With the subsetted `enntt_natives_tbl` object, let's execute steps 1 through 4, as seen in @exm-transform-generation-udpipe-natives.
 
 ::: {#exm-transform-generation-udpipe-natives}
 
@@ -585,15 +587,15 @@ glimpse(enntt_translations_ann_tbl)
 
 There is quite a bit of information which is returned from `udpipe()`. Note that the input lines have been tokenized by word.\index{text tokenization} Each token includes the `token`, `lemma`, part of speech\index{part-of-speech tagging} (`upos` and `xpos`)[^upos], morphological features\index{morphological features} (`feats`), and syntactic relationships\index{syntactic constituents} (`head_token_id` and `dep_rel`). The `token_id` keeps track of the token's position in the sentence and the `sentence_id` keeps track of the sentence's position in the original text. Finally, the `doc_id` column and its values correspond to the `doc_id` in the `enntt_natives_tbl` dataset.
 
-[^upos]: The [Universal POS tags](https://universaldependencies.org/u/pos/) are defined by the Universal Dependencies project\index{Universal Dependencies (UD) project. The `upos` tag is a coarse-grained POS tag and the `xpos` (Penn) tag is a fine-grained POS tag.
+[^upos]: The Universal POS tags are defined by the Universal Dependencies project. The `upos` tag is a coarse-grained POS tag and the `xpos` (Penn) tag is a fine-grained POS tag. For more information, see the UD Project <https://universaldependencies.org/u/pos/>.
 
 The number of variables in the `udpipe()` annotation output is quite overwhelming. However, these attributes come in handy for manipulating, extracting, and plotting information based on lexical and syntactic patterns. See the dependency tree in @fig-transform-generation-udpipe-english-plot-tree for an example of the syntactic information that can be extracted from the `udpipe()` annotation output.
 
 ```{r}
 #| label: fig-transform-generation-udpipe-english-plot-tree
 #| fig-cap: "Plot of the syntactic tree for a sentence in the ENNTT natives dataset"
-#| fig-alt: "A sentactic dependency parse tree which allows to inspect the annotation output from the {udpipe} annotation."
-#| fig-width: 8
+#| fig-alt: "A syntactic dependency parse tree which allows to inspect the annotation output from the {udpipe} annotation."
+#| fig-width: 6
 #| fig-asp: 0.75
 #| echo: false
 
@@ -608,25 +610,25 @@ enntt_natives_ann_tbl |>
     upos,
     use_color = FALSE,
     viewer_mode = FALSE,
-    textsize = 0.8
+    textsize = 1
   )
 ```
 
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
-The plot in @fig-transform-generation-udpipe-english-plot-tree was created using {rsyntax} [@R-rsyntax]. In addition to creating dependency tree plots, {rsyntax} can be used to extract syntactic patterns from the `udpipe()` annotation output. [See the documentation for more information](https://github.com/vanatteveldt/rsyntax).
+The plot in @fig-transform-generation-udpipe-english-plot-tree was created using {rsyntax} [@R-rsyntax]. In addition to creating dependency tree plots, {rsyntax} can be used to extract syntactic patterns from the `udpipe()` annotation output. 
 :::
 
-In @fig-transform-generation-udpipe-english-plot-tree we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the `token_id` which provides the linear ordering of the sentence. Above the nodes the `dep_relation`, or dependency relationship label is provided. These labels are based on the UD project's [dependency relations](https://universaldependencies.org/u/dep/index.html). We can see that the 'ROOT' relation is at the top of the tree and corresponds to the verb 'brought'. 'ROOT' relations mark predicates in the sentence. Not seen in the example tree, 'cop' relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units.
+In @fig-transform-generation-udpipe-english-plot-tree we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the `token_id` which provides the linear ordering of the sentence. Above the nodes the `dep_relation`, or dependency relationship label is provided. These labels are based on the UD project's dependency relations. We can see that the 'ROOT' relation is at the top of the tree and corresponds to the verb 'brought'. 'ROOT' relations mark predicates in the sentence. Not seen in the example tree, 'cop' relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units.
 
 ### Recoding {#sec-transform-recoding}
 
 Recoding processes can be characterized by the creation of structural changes which are derived from values in variables effectively recasting values as new variables to enable more direct access in our analyses.\index{variable recoding}
 
-Specifically, we will need to identify\index{feature extraction} and count the main clauses and their subordinate clauses to create a variable `t_units` from our natives and translations annotations objects.\index{feature calculation} In the UD project's listings, the relations 'ccomp' (clausal complement), 'xcomp' (open clausal complement), and 'acl:relcl' (relative clause), as seen in @fig-transform-generation-udpipe-english-plot-tree are subordinate clauses. Furthermore, we will also need to count the number of words in each sentence to create a variable `word_len`.
+Specifically, we will need to identify\index{feature extraction} and count the main clauses and their subordinate clauses to create a variable `t_units` from our natives and translations annotations objects.\index{feature calculation} In the UD project's listings, the relations 'ccomp' (clausal complement), 'xcomp' (open clausal complement), and 'acl:relcl' (relative clause) are subordinate clauses. Furthermore, we will also need to count the number of words in each sentence to create a variable `word_len`.
 
-To calculate T-units and words per sentence we turn to {dplyr}. We will use the `group_by()` function to group the dataset by `doc_id` and `sentence_id` and then use the `summarize()` function to calculate the number of T-units and words per sentence, where a T-unit is the combination of the sum of main clauses and sum of subordinante clauses. The code is seen in @exm-transform-generation-udpipe-natives-tunits-words.
+To calculate T-units and words per sentence we turn to {dplyr}. We will use the `group_by()` function to group the dataset by `doc_id` and `sentence_id` and then use the `summarize()` function to calculate the number of T-units and words per sentence, where a T-unit is the combination of the sum of main clauses and sum of subordinate clauses. The code is seen in @exm-transform-generation-udpipe-natives-tunits-words.
 
 ::: {#exm-transform-generation-udpipe-natives-tunits-words}
 
@@ -675,7 +677,7 @@ A quick spot check of some sentences calculations `enntt_natives_syn_comp_tbl` d
 ```{r}
 #| label: fig-transform-generation-udpipe-natives-tunits
 #| fig-cap: "Sentence with a word length of 13 and a T-unit value of 5"
-#| fig-alt: "A sentactic dependency parse tree which allows to inspect and verify that there are 13 words and 5 T-units in the sentence."
+#| fig-alt: "A syntactic dependency parse tree which allows to inspect and verify that there are 13 words and 5 T-units in the sentence."
 #| fig-width: 6
 #| fig-asp: 0.75
 #| echo: false
@@ -692,6 +694,8 @@ enntt_natives_ann_tbl |>
 ```
 
 Now we can drop the intermediate columns we created to calculate our key syntactic complexity measures using `select()` to indicate those that we do want to keep, as seen in @exm-transform-generation-udpipe-natives-tunits-words-select.
+
+\pagebreak
 
 ::: {#exm-transform-generation-udpipe-natives-tunits-words-select}
 
@@ -793,7 +797,6 @@ A **full join**\index{joining datasets!full join} retains all observations in bo
 
 full_join(x = a_tbl, y = b_tbl)
 ```
-
 \cindex{full_join()}
 :::
 
@@ -833,43 +836,38 @@ In addition to datasets that are part of an acquired resource or derived from a 
 
 With this in mind, let's return to our syntactic simplification investigation. Recall that we started with two curated ENNTT datasets: the natives and translations.\index{Europarl corpus of native, non-native and translated texts (ENNTT)} We manipulated these datasets subsetting them to 10,000 randomly selected lines, prepped them for annotation by adding a `doc_id` column and dropping all columns except `text`, and then annotated them using {udpipe}. We then calculated the number of T-units and words per sentence and created the variables `t_units` and `word_len` for each.
 
-These steps produced two datasets for both the natives and for the translations. The first dataset for each is the annotated data frame. The second is the data frame with the syntactic complexity measures we calculated. The annotated data frames are named `enntt_natives_ann_tbl` and `enntt_translations_ann_tbl`. The data frames with the syntactic complexity measures are named `enntt_natives_syn_comp_tbl` and `enntt_translations_syn_comp_tbl`.
+These steps produced two datasets for both the natives and for the translations. The first dataset for each is the annotated data frame. The second is the data frame with the syntactic complexity measures we calculated. The `enntt_natives_ann_tbl` and `enntt_translations_ann_tbl` contain the annotations and `enntt_natives_syn_comp_tbl` and `enntt_translations_syn_comp_tbl` the syntactic complexity measures. In the end, we want a dataset that take the form in @tbl-transform-integration-idealized.
 
-In the end, we want a dataset that looks something like @tbl-transform-integration-idealized.
-
-::: {#tbl-transform-integration-idealized tbl-colwidths="[15, 15, 15, 15, 40]"}
+::: {#tbl-transform-integration-idealized tbl-colwidths="[10, 15, 10, 13, 52]"}
 
 | doc_id | type        | t_units | word_len | text                                                   |
 | ------ | ----------- | ------- | -------- | ------------------------------------------------------ |
 | 1      | natives     | 1       | 5        | I am happy right now.                                  |
 | 2      | translation | 3       | 11       | I think that John believes that Mary is a good person. |
 
-Idealized integrated dataset for the syntactic simplification investigation
+Idealized integrated dataset for the syntactic simplification 
 :::
 
 To create this unified dataset, we will need to apply joins and concatenation. First, we will join the prepped datasets with the annotated datasets. Then, we will concatenate the two resulting datasets.
 
-Let's start by joining the annotated datasets (`enntt_natives_ann_tbl` and `enntt_translations_ann_tbl`) with the datasets with the syntactic complexity calculations (`enntt_natives_syn_comp_tbl` and `enntt_translations_syn_comp_tbl`). In these joins, we can see that the prepped and calculated datasets share a couple variables, `doc_id` and `sentence_id`, in @exm-transform-merging-join-prepped-syn-comp.\index{joining datasets}
+Let's start first by joining the annotated datasets with the datasets with the syntactic complexity calculations. In these joins, we can see that the prepped and calculated datasets share a couple of variables, `doc_id` and `sentence_id`, in @exm-transform-merging-join-prepped-syn-comp.\index{joining datasets}
 
 ::: {#exm-transform-merging-join-prepped-syn-comp}
 
 ```{r}
 #| label: transform-merging-join-prepped-syn-comp
+#| results: hold
 
 # Preview datasets to join
-enntt_natives_ann_tbl |>
-  slice_head(n = 3)
-
-enntt_natives_syn_comp_tbl |>
-  slice_head(n = 3)
+glimpse(enntt_natives_ann_tbl)
+glimpse(enntt_natives_syn_comp_tbl)
 ```
-
 \cindex{slice_head()}
 :::
 
 The `doc_id` and `sentence_id` variables are both keys that we will use to join the datasets. The reason being that if we only use one of the two we will not align the two datasets at the sentence level. Only the combination of `doc_id` and `sentence_id` isolates the sentences for which we have syntactic complexity measures.
 
-Beyond a having common variable (or variables in our case), we must also ensure that join key variables are of the same vector type\index{vector types} in both data frames and that we are aware of any differences in the values. From the output in @exm-transform-merging-join-prepped-syn-comp, we can see that the `doc_id` and `sentence_id` variables aligned in terms of vector type; `doc_id` is character and `sentence_id` is integer in both data frames. If they happened not to be, their types would need to be adjusted.
+Beyond having a common variable (or variables in our case), we must also ensure that join key variables are of the same vector type\index{vector types} in both data frames and that we are aware of any differences in the values. From the output in @exm-transform-merging-join-prepped-syn-comp, we can see that the `doc_id` and `sentence_id` variables aligned in terms of vector type; `doc_id` is character and `sentence_id` is integer in both data frames. If they happened not to be, their types would need to be adjusted.
 
 Now, we need to check for differences in the values. We can do this by using the `setequal()` function. This function returns `TRUE` if the two vectors are equal and `FALSE` if they are not. If the two vectors are not equal, the function will return the values that are in one vector but not the other. So if one has `10001` and the other doesn't we will get `FALSE`. Let's see this in practice, as seen in @exm-transform-merging-join-prepped-syn-comp-check.
 
@@ -877,6 +875,7 @@ Now, we need to check for differences in the values. We can do this by using the
 
 ```{r}
 #| label: transform-merging-join-prepped-syn-comp-check
+#| results: hold
 
 # Check for differences in the values
 setequal(
@@ -899,6 +898,7 @@ So the values are the same. The final check is to see if the vectors are of the 
 
 ```{r}
 #| label: transform-merging-join-prepped-syn-comp-length
+#| results: hold
 
 # Check for differences in the length
 length(enntt_natives_ann_tbl$doc_id) ==
@@ -949,12 +949,11 @@ enntt_translations_ann_distinct <-
 \cindex{distinct()}
 :::
 
-We now have two datasets that are ready to be joined with the recoded datasets. The next step is to join the two. We will employ a left join\index{joining datasets!left join} where the syntactic complexity data frames are on the left and the join variables will be both the `doc_id` and `sentence_id` variables. The code is seen in @exm-transform-merging-join-left-syn-comp.
+We now have two datasets that are ready to be joined with the recoded datasets. The next step is to join the two. We will employ a left join\index{joining datasets!left join} where the syntactic complexity data frames are on the left and the join variables will be both the `doc_id` and `sentence_id` variables. The code is seen in [Examples @exm-transform-merging-join-left-syn-comp-natives] and [-@exm-transform-merging-join-left-syn-comp-translations].
 
-::: {#exm-transform-merging-join-left-syn-comp}
-
+::: {#exm-transform-merging-join-left-syn-comp-natives}
 ```{r}
-#| label: transform-merging-join-left-syn-comp
+#| label: transform-merging-join-left-syn-comp-natives
 
 # Join the native datasets
 enntt_natives_transformed_tbl <-
@@ -966,6 +965,14 @@ enntt_natives_transformed_tbl <-
 
 # Preview
 glimpse(enntt_natives_transformed_tbl)
+```
+:::
+
+\pagebreak
+
+::: {#exm-transform-merging-join-left-syn-comp-translations}
+```{r}
+#| label: transform-merging-join-left-syn-comp-translations
 
 # Join the translations datasets
 enntt_translations_transformed_tbl <-
@@ -1022,7 +1029,7 @@ glimpse(enntt_transformed_tbl)
 \cindex{mutate()}\cindex{bind_rows()}\cindex{row_number()}\cindex{select()}
 :::
 
-The output of @exm-transform-merging-concatenation now looks like @tbl-transform-integration-idealized. We have a dataset that has the syntactic complexity measures for both the natives and the translations. We can now write this dataset to disk and document it in the data dictionary.\index{data dictionary}
+The output of @exm-transform-merging-concatenation now looks structurally like the idealized form in @tbl-transform-integration-idealized. We have a dataset that has the syntactic complexity measures for both the natives and the translations. We can now write this dataset to disk and document it in the data dictionary.\index{data dictionary}
 
 ## Activities {.unnumbered}
 
@@ -1033,7 +1040,7 @@ In the following activities, you will review the concept of transforming data to
 
 **What**: Transforming and documenting datasets\
 **How**: Read Recipe 7, complete comprehension check, and prepare for Lab 7.\
-**Why**: To work with to primary types of transformations, tokenization and joins. Tokenization is the process of recasting textual units into units of other sizes. The process of joining datasets aims to incorporate other datasets to augment or filter the dataset of interest.
+**Why**: To work with two primary types of transformations, tokenization and joins. Tokenization is the process of recasting textual units into units of other sizes. The process of joining datasets aims to incorporate other datasets to augment or filter the dataset of interest.
 :::
 
 <!-- [ ] tmp fmt -->

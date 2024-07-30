@@ -514,11 +514,11 @@
   \vfil
     % Add the image at the left bottom (JCF 2024-05-31 09:55:40)
   \begin{minipage}{0.45\textwidth}
-      \includegraphics[width=\textwidth]{assets/images/routledge.eps}
+      \includegraphics[width=\textwidth]{assets/images/routledge.pdf}
   \end{minipage}
   \hfill
   \begin{minipage}{0.45\textwidth}
-      \includegraphics[width=\textwidth]{assets/images/open-access.eps}
+      \includegraphics[width=\textwidth]{assets/images/open-access.pdf}
   \end{minipage}
   \null
   \end{titlepage}%

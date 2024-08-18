@@ -66,10 +66,12 @@
           textrecipes
           textstem
           tibble
+          tidylo
           tidymodels
           tidyr
           tidytext
           tinytable
+          tm
           torch
           udpipe
           vip

@@ -171,8 +171,9 @@ create_data_dictionary(belc_essay_tbl, "data/analysis-belc_essay_tbl_dd.csv", mo
 # Dataset in rds format for vector types
 belc_essay_tbl <- read_rds("data/analysis-belc_essay_tbl.rds")
 
-# Data dictionary
+# Data dictionary for the BELC dataset
 belc_essay_dd <- read_csv("data/analysis-belc_essay_tbl_dd.csv")
+
 ```
 
 ## Describe {#sec-analysis-describe}
@@ -201,7 +202,7 @@ In @tbl-analysis-belc-dd we see the data dictionary\index{data dictionary} for t
 
 # Data dictionary ----
 belc_essay_dd |>
-  tt(width = 1)
+  kable()
 ```
 
 Now, let's take a look at the first few observations of the BELC dataset to get another perspective on the dataset as we view the values of the dataset.
@@ -214,7 +215,7 @@ Now, let's take a look at the first few observations of the BELC dataset to get 
 # View data ----
 belc_essay_tbl |>
   slice_head(n = 5) |>
-  tt(width = 1)
+  kable()
 ```
 
 ::: {.callout .halfsize}
@@ -266,7 +267,7 @@ calculate_norm_entropy <- function(x) {
 
 The central tendency\index{central tendency} is a  measure which aims to summarize the data points in a variable as the most representative, middle, or most typical value. There are three common measures of central tendency: the mode, mean and median. Each differ in how they summarize the data points.
 
-The **mode**\index{mode} is the value that appears most frequently in a set of values. If there are multiple values with the highest frequency\index{frequency}, then the variable is said to be multimodal. A versatile central tendency measure, the mode can be applied all levels of measurement. However, in practice is almost exclusively used to summarize categorical variables. 
+The **mode**\index{mode} is the value that appears most frequently in a set of values. If there are multiple values with the highest frequency\index{frequency}, then the variable is said to be multimodal. A versatile central tendency measure, the mode can be applied all levels of measurement. However, in practice is almost exclusively used to summarize categorical variables.
 
 The most common central tendency measures for numeric variables are the mean and the median. The **mean**\index{mean} is a summary statistic calculated by summing all the values and dividing by the number of values. The **median**\index{median} is calculated by sorting all the values in the variable and then selecting the middle value.
 
@@ -318,7 +319,7 @@ belc_essay_tbl |>
   select(variable = skim_variable, everything()) |>
   tibble() |>
   to_titlecase() |>
-  tt(width = 1, digits = 2)
+  kable()
 
 belc_essay_tbl |>
   aa_skim() |>
@@ -328,7 +329,7 @@ belc_essay_tbl |>
   tibble() |>
   select(variable, mean, median) |>
   to_titlecase() |>
-  tt(width = 1, digits = 2)
+  kable()
 ```
 
 As the mode is the most frequent value, the `top_counts` measure in @tbl-analysis-belc-central-tendency provides the most frequent value for the categorical variables.\index{categorical variables} Mean\index{mean} and median\index{median} appear but we notice that the mean and median are not the same for the numeric variables. Differences that appear between the mean and median will be of interest to us later in this chapter.
@@ -368,7 +369,7 @@ belc_essay_tbl |>
   tibble() |>
   select(variable, norm_entropy) |>
   to_titlecase() |>
-  tt(width = 1, digits = 2)
+  kable()
 
 belc_essay_tbl |>
   aa_skim() |>
@@ -378,7 +379,7 @@ belc_essay_tbl |>
   tibble() |>
   select(variable, sd, iqr) |>
   to_titlecase() |>
-  tt(width = 1, digits = 2)
+  kable()
 ```
 
 ::: {.callout .halfsize}
@@ -418,14 +419,14 @@ belc_essay_tbl |>
   tibble() |>
   select(sex, frequency = n, proportion = percent) |>
   to_titlecase(blacklist = c("sex")) |>
-  tt(width = 1)
+  kable()
 
 belc_essay_tbl |>
   tabyl(group) |>
   tibble() |>
   select(group, frequency = n, proportion = percent) |>
   to_titlecase(blacklist = c("group")) |>
-  tt(width = 1)
+  kable()
 ```
 
 A **bar plot**\index{bar plot} is a type of plot where the x-axis is a categorical variable and the y-axis is the frequency of the values. The frequency\index{frequency} is represented by the height of the bar. The variables can be ordered by frequency, alphabetically, or some other order. @fig-analysis-belc-barplots is a bar chart for the variables `sex` and `group` ordered alphabetically.
@@ -600,7 +601,7 @@ p2 <-
 p2
 ```
 
-In @fig-analysis-belc-histogram-boxplot-2 we see a boxplot for `ttr` variable. The box in the middle of the plot represents the interquartile range (IQR)\index{interquartile range (IQR)} which is the range of values between the first quartile and the third quartile. The solid line in the middle of the box represents the median. The lines extending from the box are called 'whiskers' and provide the range of values which are within 1.5 times the IQR. Values outside of this range are plotted as individual points. 
+In @fig-analysis-belc-histogram-boxplot-2 we see a boxplot for `ttr` variable. The box in the middle of the plot represents the interquartile range (IQR)\index{interquartile range (IQR)} which is the range of values between the first quartile and the third quartile. The solid line in the middle of the box represents the median. The lines extending from the box are called 'whiskers' and provide the range of values which are within 1.5 times the IQR. Values outside of this range are plotted as individual points.
 
 Now let's consider boxplots from another angle. Just above in @fig-analysis-belc-histogram-boxplot-1 I've plotted a histogram. In this view, we can see that a boxplot is a simplified histogram augmented with central tendency and dispersion statistics. While histograms focus on the frequency distribution of data points, boxplots focus on the data's quartiles and potential outliers.
 
@@ -737,7 +738,7 @@ The directionality of a relationship will take the form of a tabular or graphic 
 ::: {#tbl-analysis-summary-types tbl-colwidths="[17, 27, 28, 28]"}
 
 |                 | Categorical       | Ordinal                     | Numeric              |
-|-----------------|-------------------|-----------------------------|----------------------|
+|:----------------|:------------------|:----------------------------|:---------------------|
 | **Categorical** | Contingency table | Contingency table/ Bar plot | Pivot table/ boxplot |
 | **Ordinal**     | -                 | Contingency table/ Bar plot | Pivot table/ boxplot |
 | **Numeric**     | -                 | -                           | scatterplot          |
@@ -767,7 +768,7 @@ belc_essay_tbl |>
   tabyl(group, sex) |>
   adorn_totals(c("row", "col")) |>
   as_tibble() |>
-  tt(width = 1, digits = 0)
+  kable()
 
 belc_essay_tbl |>
   tabyl(group, sex) |>
@@ -775,7 +776,7 @@ belc_essay_tbl |>
   adorn_percentages("row") |>
   adorn_pct_formatting(digits = 2) |>
   as_tibble() |>
-  tt(width = 1, digits = 0)
+  kable()
 ```
 
 It is sometimes helpful to visualize a contingency table as a bar plot when there are a larger number of levels in either or both of the variables. Again, looking at the relationship between `sex` and `group`, we see that we can plot the counts or the proportions. In @fig-analysis-belc-bar-plots, we see both.
@@ -821,7 +822,7 @@ In @tbl-analysis-belc-pivot-table, we see a pivot table for the relationship bet
 belc_essay_tbl |>
   group_by(group) |>
   summarise(mean_tokens = mean(tokens)) |>
-  tt(width = 1)
+  kable()
 ```
 
 Although a pivot table may be appropriate for targeted numeric summaries, a visualization is often more informative for assessing the dispersion\index{dispersion} and distribution\index{distribution}  of a numeric variable by a categorical or ordinal variable. There are two main types of visualizations for this type of relationship: a boxplot\index{boxplot} and a **violin plot**\index{violin plot}. A violin plot is a visualization that summarizes the distribution of a numeric variable by a categorical or ordinal variable, adding the overall shape of the distribution, much as a density plot\index{density plot} does for histograms.\index{histogram}.
@@ -891,7 +892,7 @@ In this section, I will elaborate briefly on the distinctions between analysis t
 ::: {#tbl-analysis-analysis-types tbl-colwidths="[15, 19, 22, 22, 22]"}
 
 | Type | Aims | Approach | Methods | Evaluation |
-|------|------|----------|---------|------------|
+|:-----|:-----|:---------|:--------|:-----------|
 | Exploratory | Explore: gain insight | Inductive, data-driven, and iterative | Descriptive, pattern detection with machine learning (unsupervised) | Associative |
 | Predictive | Predict: validate associations | Semi-deductive, data-/ theory-driven, and iterative | Predictive modeling with machine learning (supervised) | Model performance, feature importance, and associative |
 | Inferential | Explain: test hypotheses | Deductive, theory-driven, and non-iterative | Hypothesis testing with statistical tests | Causal |
@@ -921,7 +922,7 @@ By the same token, approaches for interrogating the dataset can differ significa
 ::: {#tbl-eda-methods tbl-colwidths="[50, 50]"}
 
 | Descriptive Methods | Unsupervised Learning Methods |
-|---------------------|-----------------------------|
+|:--------------------|:----------------------------|
 | Frequency analysis  | Cluster analysis            |
 | Co-occurence analysis | Principal component analysis |
 | Keyness analysis    | Topic Modeling              |
@@ -997,7 +998,7 @@ Roles of variables in inferential data analysis
 The type of statistical test that one chooses is based on (1) the informational value\index{informational types} of the dependent variable and (2) the number of predictor variables\index{predictor variables} included in the analysis. Together these two characteristics go a long way in determining the appropriate class of statistical test (see @Gries2013a and @Paquot2020a for a more exhaustive description).
 
 IDA relies heavily on quantitative evaluation methods to draw conclusions that can be generalized to the target population. It is key to understand that our goal in hypothesis testing is not to find evidence in support of $H_1$\index{alternative hypothesis}, but rather to assess the likelihood that we can reliably reject $H_0$.\index{null hypothesis}
- 
+
 Traditionally, $p$-values have been used to determine the likelihood of rejecting $H_0$. A **p-value**\index{p-value} is the probability of observing a test statistic as extreme as the one observed, given that $H_0$ is true. However, $p$-values are not the only metric used to evaluate the likelihood of rejecting $H_0$. Other metrics, such as effect size\index{effect size} and confidence intervals\index{confidence interval}, are also used to interpret the results of hypothesis tests.
 
 ## Communicate {#sec-analysis-communicate}

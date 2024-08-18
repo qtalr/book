@@ -62,7 +62,7 @@ The methodological approach to IDA\index{inferential data analysis (IDA)} is the
 ::: {#tbl-infer-workflow tbl-colwidths="[5, 15, 80]"}
 
 | Step | Name | Description |
-|:-----|:-----|:------------|
+|:----:|:-----|:------------|
 | 1 | Identify | Identify and map the hypothesis statement to the appropriate response and explanatory variables |
 | 2 | Inspect | Assess the distribution of the variable(s) with the appropriate descriptive statistics and visualizations. |
 | 3 | Interrogate | Apply the appropriate statistical procedure to the dataset. |
@@ -118,7 +118,7 @@ The steps for implementing a simulation-based approach to significance testing a
 ::: {#tbl-infer-simulation tbl-colwidths="[5, 30, 65]"}
 
 | Step | Name | Description |
-|:-----|:-----|:------------|
+|:----:|:-----|:------------|
 | 1 | Specify | Specify the variables of interest and their relationship |
 | 2 | Calculate | Calculate the observed statistic |
 | 3 | Hypothesize | Generate the null hypothesis distribution |
@@ -182,7 +182,7 @@ We will use a derived version of the `dative` dataset from {languageR} [@R-langu
 
 # Data dictionary for the `dative_tbl` dataset
 read_csv("data/dative_ida_dd.csv") |>
-  tt(width = 1)
+  kable()
 ```
 
 We see that this dataset has four variables, two categorical and two numeric. In our demonstrations we are going to use the `rcp_real` as the response variable, the variable whose variation we are investigating.\index{response variable}
@@ -240,7 +240,7 @@ In preparation for statistical analysis, I performed a statistical overview and 
 ```{r}
 #| label: infer-cat-dative-preview
 
-# Preview 
+# Preview
 glimpse(dative_tbl)
 ```
 :::
@@ -255,7 +255,7 @@ The univariate analysis is the simplest statistical design and analysis. It incl
 
 This hypothesis can be tested using a **difference in proportion test**\index{difference in proportion test}. The null hypothesis\index{null hypothesis} is that there is no difference in the proportion of NP and PP realizations of the recipient clause. The alternative hypothesis\index{alternative hypothesis} is that NP realizations of the recipient clause are more frequent than PP realizations of the recipient clause.
 
-Before we get into statistical analysis, it is always a good idea to cross-tabulate\index{contingency table} or visualize the question, depending on the complexity of the relationship. In @exm-infer-cat-univariate-tbl, we see the code shows the distribution of the levels of the `rcp_real` variable in a contingency table. 
+Before we get into statistical analysis, it is always a good idea to cross-tabulate\index{contingency table} or visualize the question, depending on the complexity of the relationship. In @exm-infer-cat-univariate-tbl, we see the code shows the distribution of the levels of the `rcp_real` variable in a contingency table.
 
 ::: {#exm-infer-cat-univariate-tbl}
 ```r
@@ -278,7 +278,7 @@ dative_tbl |>
   tabyl(rcp_real) |>
   adorn_pct_formatting(digits = 2) |>
   as_tibble() |>
-  tt(width = 1)
+  kable()
 ```
 :::
 
@@ -373,8 +373,8 @@ visualize(dative_null)
 #| echo: false
 
 # Visualize the null hypothesis distribution
-dative_null |> 
-  visualize() + 
+dative_null |>
+  visualize() +
   labs(title = "", y = "Count", x = "Statistic") +
   theme_qtalr(font_size = 10)
 ```
@@ -591,7 +591,7 @@ dative_tbl |>
   adorn_ns() |> # add observation number
   adorn_title("combined") |> # add a header title
   as_tibble() |>
-  tt(width = 1)
+  kable()
 ```
 :::
 
@@ -798,7 +798,7 @@ dative_tbl |>
 #|  - "RCP by modality"
 #|  - "RCP by length ratio"
 #| layout-ncol: 2
-#| echo: false 
+#| echo: false
 
 # Visualize the proportion of `rcp_real` by `modality`
 dative_tbl |>
@@ -809,7 +809,7 @@ dative_tbl |>
     x = "Realization of recipient clause",
     y = "Proportion",
     fill = "Modality"
-  ) + 
+  ) +
   theme_qtalr(font_size = 10)
 
 # Visualize the relationship between `rcp_real` and `length_ratio_log`
@@ -819,7 +819,7 @@ dative_tbl |>
   labs(
     x = "Realization of recipient clause",
     y = "Length ratio"
-  ) + 
+  ) +
   theme_qtalr(font_size = 10)
 ```
 \index{R packages!ggplot2}
@@ -860,7 +860,7 @@ The reference level in R is assumed to be the first level alphabetically, unless
 
 Note I pointed out statistics, not statistic. In logistic regression models, the number of statistic reported depends on the number of explanatory variables. If there are two variables there will be at least three terms, one for each variable and the intercept term. If one or more variables are categorical, however, there will be additional terms when the categorical variable has three or more levels.
 
-In our case, the `modality` variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the `length_ratio_log` is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the `length_ratio_log` is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the `length_ratio_log` is 1 in the written modality. Notably, the spoken modality does not explicitly appear but is implicitly represented by the `modalitywritten` term statistic. `modalityspoken` is used as the reference level for the `modality` variable. For categorical variables, one of the levels is used as the point of reference, or **reference level**\index{reference level}, for which every other level is compared. 
+In our case, the `modality` variable has two levels, so there are three terms. The first term is the intercept term, which is the log odds of the proportion of NP realizations of the recipient clause in the written modality when the `length_ratio_log` is 1. The second term is the log odds of the proportion of NP realizations of the recipient clause in the spoken modality when the `length_ratio_log` is 1. The third term is the log odds of the proportion of NP realizations of the recipient clause when the `length_ratio_log` is 1 in the written modality. Notably, the spoken modality does not explicitly appear but is implicitly represented by the `modalitywritten` term statistic. `modalityspoken` is used as the reference level for the `modality` variable. For categorical variables, one of the levels is used as the point of reference, or **reference level**\index{reference level}, for which every other level is compared.
 
 Now let's generate the null hypothesis distribution\index{null hypothesis distribution} and calculate the $p$-value for each of the terms, as seen in @exm-infer-cat-null-hypothesis-logistic-regression.
 
@@ -1000,7 +1000,7 @@ The dataset we will use is drawn from the Switchboard Dialog Act Corpus [@SWDA20
 
 # Data dictionary for the `fillers_tbl` dataset
 read_csv("data/swda_fillers_ida_dd.csv") |>
-  tt(width = 1)
+  kable()
 ```
 
 We see the dataset has seven variables. The `fillers_orf` will be used as our response variable and corresponds to the rate of filler usage per speaker, normalized by the number of utterances. The other variables we will consider as explanatory variables are `age`, `sex`, and `education`, providing us a mix of numeric and categorical variables.
@@ -1091,7 +1091,7 @@ The mean\index{mean} `mu` is not the only statistic we can specify for a numeric
 In our case, we do not have *a priori* knowledge of the expected statistic for the `fillers_orf` variable, so we will not pursue this approach. However, it is useful to take a closer look at the distribution of a numeric variable in order to detect extreme skewing\index{skewed distribution} and/or outliers\index{outliers}. This is important because the presence of skewing and outliers can affect the results of statistical tests. We can visualize the distribution of the `fillers_orf` variable using a histogram\index{histogram} and density plot\index{density plot} as in @exm-infer-num-uni-hist-dens and rendered in @fig-infer-num-uni-hist-dens.
 
 ::: {#exm-infer-num-uni-hist-dens}
-```r 
+```r
 # Histogram-density plot
 fillers_tbl |>
   ggplot(aes(x = fillers_orf)) +
@@ -1235,7 +1235,7 @@ Let's first explore the distribution from a descriptive point of view\index{desc
 \pagebreak
 
 ::: {#exm-infer-num-bi-vis}
-```r 
+```r
 # boxplot
 fillers_tbl |>
   ggplot(aes(x = fillers_orf_log, y = sex)) +
@@ -1380,7 +1380,7 @@ fillers_tbl |>
 \cindex{ggplot()}\cindex{aes()}\cindex{geom_boxplot()}\cindex{labs()}
 :::
 
-The boxplot\index{boxplot} in @fig-infer-num-bi-edu-vis does not point to any obvious differences between the levels of the `education` variable. There are a fair number of outliers, however, in the two most educated groups. These outliers are likely due to the random noise added to the 0-rate speakers and it is interesting that they are concentrated in the two most educated groups. 
+The boxplot\index{boxplot} in @fig-infer-num-bi-edu-vis does not point to any obvious differences between the levels of the `education` variable. There are a fair number of outliers, however, in the two most educated groups. These outliers are likely due to the random noise added to the 0-rate speakers and it is interesting that they are concentrated in the two most educated groups.
 
 Let's now submit these variables to the simulation-based hypothesis testing workflow to quantify the uncertainty of the observed statistic and determine if the observed difference is statistically significant. Again, the first steps are found in @exm-infer-num-bi-edu.
 

@@ -53,7 +53,8 @@ The contents of the data dictionary for this dataset appears in @tbl-transform-e
 #| echo: false
 
 read_csv(file = "data/curate-europarl_curated_dd.csv") |>
-  tt(width = 1)
+  kable()
+
 ```
 
 Let's read in the dataset CSV file with `read_csv()` and inspect the first lines of the dataset with `slice_head()` in @exm-transform-europarl-preview.
@@ -245,7 +246,7 @@ Let's continue to work with the Europarl Parallel Corpus\index{Europarl Parallel
 ::: {#tbl-transform-europarl-tokenization-words-example tbl-colwidths="[25, 25, 25, 25]"}
 
 |  doc_id   | type | line_id | token |
-|----------|--------|----------|------|
+|:---------|:-------|:---------|:-----|
 | 1 | Target | 2 | I |
 | 1 | Target | 2 | declare |
 | 1 | Target | 2 | resumed |
@@ -387,7 +388,7 @@ The data dictionary for the curated native dataset appears in @tbl-transform-enn
 #| echo: false
 
 read_csv(file = "data/enntt_natives_curated_dd.csv") |>
-  tt(width = 1)
+  kable()
 ```
 
 All three curated datasets have the same variables. The unit of observation\index{unit of observation} for each dataset is the `text` variable.
@@ -399,7 +400,7 @@ An idealized transformed dataset dictionary for this investigation should look s
 ::: {#tbl-transform-generation-idealized tbl-colwidths="[15, 20, 10, 55]"}
 
 | variable | name | type | description |
-|----------|------|------|-------------|
+|:---------|:-----|:-----|:------------|
 | doc_id | Document ID | integer | Unique identifier for each document. |
 | type | Type | character | Type of text (native or translated). |
 | t_units | T-units | integer | Number of T-units in the text. |
@@ -617,7 +618,7 @@ enntt_natives_ann_tbl |>
 ::: {.callout .halfsize}
 **{{< fa medal >}} Dive deeper**
 
-The plot in @fig-transform-generation-udpipe-english-plot-tree was created using {rsyntax} [@R-rsyntax]. In addition to creating dependency tree plots, {rsyntax} can be used to extract syntactic patterns from the `udpipe()` annotation output. 
+The plot in @fig-transform-generation-udpipe-english-plot-tree was created using {rsyntax} [@R-rsyntax]. In addition to creating dependency tree plots, {rsyntax} can be used to extract syntactic patterns from the `udpipe()` annotation output.
 :::
 
 In @fig-transform-generation-udpipe-english-plot-tree we see the syntactic tree for a sentence in the ENNTT natives dataset. Each node is labeled with the `token_id` which provides the linear ordering of the sentence. Above the nodes the `dep_relation`, or dependency relationship label is provided. These labels are based on the UD project's dependency relations. We can see that the 'ROOT' relation is at the top of the tree and corresponds to the verb 'brought'. 'ROOT' relations mark predicates in the sentence. Not seen in the example tree, 'cop' relation is a copular, or non-verbal predicate and should be included. These are the key syntactic pattern we will use to identify main clauses for T-units.
@@ -731,15 +732,20 @@ Of the two types, joins are the most powerful and sometimes more difficult to un
 
 There are a number of join types. The most common are left, full, semi, and anti. The type of join determines which observations are retained in the resulting dataset. Let's see this in practice. First, let's create two datasets to join with a common variable `key`, as seen in @exm-transform-merging-join-dfs.
 
-::: {#exm-transform-merging-join-dfs}
-
-::: {layout="[50, 50]" layout-valign="top"}
+:::: {#exm-transform-merging-join-dfs layout="[ 50, 50]"}
 
 ::: {#first}
 
+```{.r}
+a_tbl <-
+  tibble(
+    key = c(1, 2, 3, 5, 8),
+    a = letters[1:5]
+  )
+a_tbl
+```
 ```{r}
-#| label: transform-merging-join-a-df
-
+#| echo: false
 a_tbl <-
   tibble(
     key = c(1, 2, 3, 5, 8),
@@ -748,27 +754,29 @@ a_tbl <-
 
 a_tbl
 ```
-
 :::
 
 ::: {#second}
-
-```{r}
-#| label: transform-merging-join-b-df
-
+```{.r}
 b_tbl <-
   tibble(
     key = c(1, 2, 4, 6, 8),
     b = letters[6:10]
   )
-
 b_tbl
 ```
-
+```{r}
+#| echo: false
+b_tbl <-
+  tibble(
+    key = c(1, 2, 4, 6, 8),
+    b = letters[6:10]
+  )
+b_tbl
+```
 :::
 
-:::
-:::
+::::
 
 The `a_tbl` and the `b_tbl` datasets share the `key` variable, but the values in the `key` variable are not identical. The two datasets share values `1`, `2`, and `8`. The `a_tbl` dataset has values `3` and `5` in the `key` variable and the `b_tbl` dataset has values `4` and `6` in the `key` variable.
 
@@ -841,11 +849,11 @@ These steps produced two datasets for both the natives and for the translations.
 ::: {#tbl-transform-integration-idealized tbl-colwidths="[10, 15, 10, 13, 52]"}
 
 | doc_id | type        | t_units | word_len | text                                                   |
-| ------ | ----------- | ------- | -------- | ------------------------------------------------------ |
+|:------|:-----------|-------:|--------:|:-----------------------------------------------------------|
 | 1      | natives     | 1       | 5        | I am happy right now.                                  |
 | 2      | translation | 3       | 11       | I think that John believes that Mary is a good person. |
 
-Idealized integrated dataset for the syntactic simplification 
+Idealized integrated dataset for the syntactic simplification
 :::
 
 To create this unified dataset, we will need to apply joins and concatenation. First, we will join the prepped datasets with the annotated datasets. Then, we will concatenate the two resulting datasets.

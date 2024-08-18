@@ -47,7 +47,7 @@ The approach to conducting predictive analysis shares some commonalities with ex
 ::: {#tbl-predict-workflow tbl-colwidths="[5, 15, 80]"}
 
 | Step | Name | Description |
-|------|-------------|-------------|
+|:----:|:------------|:------------|
 | 1 | Identify | Consider the research question and aim and identify relevant variables |
 | 2 |  | Split the data into representative training and testing sets |
 | 3 |  | Apply variable selection and engineering procedures |
@@ -138,7 +138,7 @@ create_data_dictionary(
 
 # Read in the data dictionary for the CEDEL2 corpus
 read_csv("data/cedel2_transformed_dd.csv") |>
-  tt(width = 1)
+  kable()
 ```
 
 We will use data from the CEDEL2 corpus [@Lozano2022]\index{Corpus Escrito del Español como L2 (CEDEL)}. We will include a subset of the variables from this data that are relevant to our research questions\index{research question}. The data dictionary for this dataset is seen in @tbl-predict-cedel2-data-dictionary.
@@ -598,7 +598,7 @@ There are many classification algorithms to choose from with their own strengths
 ::: {#tbl-predict-class-algorithms tbl-colwidths="[15, 28, 28, 29]"}
 
 | Algorithm | Strengths | Shortcomings | Tuning Recommendation |
-|-----------|-----------|--------------|-----------------------|
+|:----------|:----------|:-------------|:----------------------|
 | Logistic regression | Interpretable, fast, high-dimensional data | Linear relationship, not for complex tasks | Cross-validate regularization strength |
 | Naive Bayes | Interpretable, fast, high-dimensional data, multi-class | Assumes feature (naive) independence, poor with small data | None |
 | Decision trees | Nonlinear, interpretable, numerical/ categorical data | Overfitting, high variance | Cross-validate maximum tree depth |
@@ -645,8 +645,6 @@ Computational engine: glmnet
 \index{R packages!parsnip}\index{R packages!glmnet}
 \cindex{logistic_reg()}\cindex{set_engine()}
 :::
-
-<!-- WARN: define hyperparameters here -->
 
 Now, different algorithms will have different parameters that can be adjusted which can affect the performance of the model (see @tbl-predict-class-algorithms). As not to confuse these parameters with the features, which are also parameters of the model, these are given the name **hyperparameters**\index{hyperparameters}. The adjustment process is called **hyperparameter tuning**\index{hyperparameter tuning} and involves fitting the model to the training set with different hyperparameters and evaluating the model's performance to determine the best hyperparameter values to use for the model.
 
@@ -814,11 +812,11 @@ cls_tune_metrics <-
 # Visualize metrics
 cls_tune_metrics |>
   filter(.metric != "brier_class") |>
-  ggplot(aes(x = penalty, y = mean)) + 
-  geom_line() + 
+  ggplot(aes(x = penalty, y = mean)) +
+  geom_line() +
   geom_point() +
-  scale_x_log10() + 
-  facet_wrap( ~ .metric, nrow = 2) + 
+  scale_x_log10() +
+  facet_wrap( ~ .metric, nrow = 2) +
   labs(x = "Amount of regularization", y = "") +
   theme_qtalr(font_size = 10)
 ```
@@ -980,7 +978,7 @@ cls_lasso_cv |>
 
 ::: {#fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion}
 
-![](figures/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion.png){width="75%" fig-alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."}
+![](figures/fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion.png){width="55%" fig-alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."}
 
 Confusion matrix for the aggregated folds of the cross-validation
 :::
@@ -997,7 +995,7 @@ Another perspective often applied to evaluate a model is the receiver operating 
 
 <!-- Model improvement: tune max tokens -->
 
-To improve supervised learning models, consider: 
+To improve supervised learning models, consider:
 
 1. Engineering the features differently
 2. Selecting different (or additional) features
@@ -1120,7 +1118,7 @@ The metrics from @exm-predict-class-tune-hyperparameters-tokenfilter-evaluate-wo
 #| label: fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion
 #| include: false
 
-# Plot confusion matrix 
+# Plot confusion matrix
 p <- cls_lasso_tokens_cv |>
   conf_mat_resampled(tidy = FALSE) |>
   autoplot(type = "heatmap") +
@@ -1143,7 +1141,7 @@ cls_lasso_tokens_cv |>
 
 ::: {#fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion}
 
-![](figures/fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion.png){width="75%" fig-alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."}
+![](figures/fig-predict-class-tune-hyperparameters-tokenfilter-evaluate-workflow-cv-confusion.png){width="55%" fig-alt="Heatmap of the confusion matrix for the aggregated folds of the cross-validation. Actual classes are on the y-axis and predicted classes are on the x-axis."}
 
 Confusion matrix for the aggregated folds of the cross-validation
 :::
@@ -1209,7 +1207,7 @@ cls_final_fit |>
 :::
 
 ::: {#fig-class-tune-hyperparameters-evaluate-workflow-cv-confusion}
-![](figures/fig-predict-class-tune-hyperparameters-evaluate-test-confusion.png){width="75%" fig-alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis."}
+![](figures/fig-predict-class-tune-hyperparameters-evaluate-test-confusion.png){width="55%" fig-alt="Heatmap of the confusion matrix for the test set. Actual classes are on the y-axis and predicted classes are on the x-axis."}
 
 Confusion matrix for the test set
 :::
@@ -1426,7 +1424,7 @@ As before, we will want to start with a simple model and then build up to more c
 ::: {#tbl-workflow tbl-colwidths="[5, 95]"}
 
 | Step | Description |
-| --- | --- |
+|:---:|:----|
 | 1 | Build a model specification with a placeholder to tune the model. |
 | 2 | Create a workflow with the recipe and the model specification. |
 | 3 | Create a grid of values for the regularization hyperparameter. |
@@ -1541,7 +1539,7 @@ collect_metrics(null_cv)
 ```
 \index{R packages!parsnip}\index{R packages!workflows}\index{R packages!tune}
 \cindex{null_model()}\cindex{set_engine()}\cindex{set_mode()}\cindex{fit_resamples()}\cindex{collect_metrics()}
-::: 
+:::
 
 ::: {.callout .halfsize}
 **{{< fa exclamation-triangle >}} Warning**

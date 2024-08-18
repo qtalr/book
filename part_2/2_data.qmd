@@ -347,7 +347,8 @@ masc_exm |>
   slice_head(n = 10) |>
   mutate(num_let = nchar(word)) |> # add num_let column
   select(doc_id, modality, date, token_id, word, pos, num_let) |>
-  tt(width = 1)
+  kable()
+
 ```
 
 We have seven variables listed as headers for each of the columns. We could go one-by-one left-to-right but let's take another tack. Instead, let's identify all those variables that cannot be numeric ---these are all the non-numeral variables\index{categorical variables}: `modality`, `word`, and `pos`. The question to ask of these variables is whether they represent an order or rank. Since modalities, words, and parts of speech are not ordered values, they are all categorical.
@@ -399,14 +400,14 @@ library(tidytext)
 
 text_df <- tibble::tribble(
   ~text_id, ~text,
-  "1", "It's a beautiful day in the US, and our group decided to visit the famous Grand Canyon. As we reached the destination, Jane said, \"I can't believe we're finally here!\" The breathtaking view left us speechless; indeed, it was a sight to behold. During our trip, we encountered tourists from different countries, sharing stories and laughter. For all of us, this experience will be cherished forever."
+  1, "It's a beautiful day in the US, and our group decided to visit the famous Grand Canyon. As we reached the destination, Jane said, \"I can't believe we're finally here!\" The breathtaking view left us speechless; indeed, it was a sight to behold. During our trip, we encountered tourists from different countries, sharing stories and laughter. For all of us, this experience will be cherished forever."
 ) |>
 unnest_tokens(sentence, text, token = "sentences", to_lower = FALSE) |>
 mutate(sent_id = row_number()) |>
 select(text_id, sent_id, sentence)
 
 text_df |>
-  tt(width = 1)
+  kable()
 ```
 
 **Text normalization**\index{text normalization} is the process of standardizing text to convert the text into a uniform format and reduce unwanted variation and noise. It is often a preliminary step in data transformation processes which include variables with text.
@@ -434,13 +435,13 @@ text_df |>
   unnest_tokens(trigram, sentence, token = "character_shingles", n = 3) |>
   select(text_id, sent_id, trigram) |>
   slice_head(n = 10) |>
-  tt(width = 1)
+  kable()
 
 text_df |>
   unnest_tokens(bigram, sentence, token = "ngrams", n = 2) |>
   select(text_id, sent_id, bigram) |>
   slice_head(n = 10) |>
-  tt(width = 1)
+  kable()
 ```
 
 ::: {.callout .halfsize}
@@ -459,18 +460,24 @@ Enrichment transformations are designed to add new attributes to the dataset.\in
 
 ```{r}
 #| label: functions-load-udpipe-model
+#| cache: true
 
-load_model_udpipe <- function(model_lang) {
-  cleanNLP::cnlp_init_udpipe(model_lang) # to download the model, if not downloaded
-  base_path <- system.file("extdata", package = "cleanNLP") # get the base path
-  model_name <- # extract the model_name
-    base_path |> # extract the base path
-    dir() |>
-    stringr::str_subset(pattern = paste0("^", model_lang))
-  model <-
-    udpipe::udpipe_load_model(file = file.path(base_path, model_name, fsep = "/"))
-  return(model)
-}
+# Load package
+library(udpipe)
+
+# Model and directory
+model <- "english"
+model_dir <- "data/"
+
+# Annotate the dataset
+annotation <-
+  text_df[2, ] |>
+  select(doc_id = text_id, sent_id, text = sentence) |>
+  udpipe(
+    object = model,
+    model_dir = model_dir,
+    parallel.cores = 4
+  )
 
 ```
 
@@ -481,19 +488,13 @@ Linguistic annotation can be done manually by linguist coders and/or done automa
 #| tbl-cap: 'Automatic linguistic annotation example'
 #| tbl-colwidths: [2, 13, 5, 70, 10]
 
-eng_model <- load_model_udpipe("english-ewt")
-
-annotation <-
-  text_df |>
-  dplyr::filter(text_id == "1" & sent_id == 2) |>
-  cleanNLP::cnlp_annotate(text_name = "sentence", doc_name = "text_id")
-
 text_annotation <-
-  left_join(annotation$document, annotation$token) |>
-  select(id = tid, token, pos = xpos, feats, relation)
+  annotation |>
+  select(id = token_id, token, pos = xpos, feats, relation = dep_rel)
 
 text_annotation |>
-  tt(width = 1) |> style_tt(align = "l")
+  kable()
+
 ```
 
 The annotated dataset in @tbl-data-generate-annotation
@@ -544,7 +545,7 @@ text_df |>
     word == "are" ~ "be",
     TRUE ~ lemma
   )) |>
-  tt(width = 1)
+  kable()
 ```
 
 ::: {.callout .halfsize}
@@ -587,7 +588,7 @@ Data acquired\index{data acquisition} from corpus resources should be accompanie
 ::: {#tbl-data-data-origin tbl-colwidths="[30, 70]"}
 
 | Information | Description |
-|-------------|-------------|
+|:------------|:------------|
 | Resource name | Name of the corpus resource. |
 | Data source | URL, DOI, *etc.* |
 | Data sampling frame | Language, language variety, modality, genre, *etc.* |
@@ -613,7 +614,7 @@ On the other hand, the data curation and transformation steps should be document
 ::: {#tbl-data-data-dictionary tbl-colwidths="[20, 80]"}
 
 | Information | Description |
-|-------------|-------------|
+|:------------|:------------|
 | Variable name | The name of the variable as it appears in the dataset, *e.g.* `participant_id`, `modality`, *etc.* |
 | Readable name | A human-readable name for the variable, *e.g.* 'Participant ID', 'Language modality', *etc.* |
 | Variable type | The type of information that the variable contains, *e.g.* 'categorical', 'ordinal', *etc.* |

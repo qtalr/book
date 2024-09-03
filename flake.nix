@@ -1,17 +1,13 @@
 {
   description = "Nix flake for R package development";
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
-
   outputs = { nixpkgs, flake-utils, ... }:
-
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-
         # Base packages
         basePackages = with pkgs; [
           bashInteractive
@@ -23,7 +19,6 @@
           R
           radianWrapper
         ];
-
         # R packages
         rPackages = with pkgs.rPackages; [
           # Utils
@@ -72,12 +67,10 @@
           tidytext
           tinytable
           tm
-          torch
           udpipe
           vip
           word2vec
         ];
-
         # Texlive packages
         texlivePackages = with pkgs; [
           (texlive.combine {
@@ -87,7 +80,6 @@
               ;
           })
         ];
-
         allPackages = basePackages ++ rPackages ++ texlivePackages;
       in
       {
@@ -96,8 +88,6 @@
           buildInputs = allPackages;
           shellHook = ''
             export R_LIBS_USER=$PWD/R/Library; mkdir -p $R_LIBS_USER;
-            echo "R development environment loaded"
-            echo "Available tools: R, radian, quarto, ..."
           '';
         };
       });

@@ -1,13 +1,13 @@
 # Install non-nix R Packages
 
-# Check if the package is already installed, if not install it with pak
+# Check if the package is already installed, if not install it
 
 if (!requireNamespace("pak", quietly = TRUE)) {
   install.packages("pak")
 }
 
-if (!requireNamespace("qtalrkit", quietly = TRUE)) {
-  pak::pak("qtalr/qtalrkit")
+if (!requireNamespace("qtkit", quietly = TRUE)) {
+  install.packages("qtkit")
 }
 
 if (!requireNamespace("wordVectors", quietly = TRUE)) {
@@ -16,5 +16,10 @@ if (!requireNamespace("wordVectors", quietly = TRUE)) {
 
 if (!requireNamespace("TBDBr", quietly = TRUE)) {
   pak::pak("TalkBank/TBDBr")
+}
+
+if (!requireNamespace("torch", quietly = TRUE)) {
+  install.packages("torch");
+  torch::install_torch();
 }
 

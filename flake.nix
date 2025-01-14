@@ -25,6 +25,7 @@
           devtools
           languageserver
           pak
+          profvis
           renv
           usethis
           knitr
@@ -42,7 +43,6 @@
           ggraph
           ggrepel
           glmnet
-          ranger
           here
           igraph
           infer
@@ -51,6 +51,7 @@
           pacman
           parsnip
           purrr
+          ranger
           readr
           reprex
           rpart
@@ -77,6 +78,7 @@
             inherit (texlive) scheme-small
               amsmath
               geometry
+              framed
               ;
           })
         ];

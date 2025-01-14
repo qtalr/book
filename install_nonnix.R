@@ -7,7 +7,8 @@ if (!requireNamespace("pak", quietly = TRUE)) {
 }
 
 if (!requireNamespace("qtkit", quietly = TRUE)) {
-  install.packages("qtkit")
+  # install.packages("qtkit")
+  devtools::install_github("qtalr/qtkit")
 }
 
 if (!requireNamespace("wordVectors", quietly = TRUE)) {

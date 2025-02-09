@@ -89,7 +89,7 @@
           name = "r-dev";
           buildInputs = allPackages;
           shellHook = ''
-            export R_LIBS_USER=$PWD/R/Library; mkdir -p $R_LIBS_USER;
+            export R_LIBS_USER="$PWD/R/Library"; mkdir -p "$R_LIBS_USER";
           '';
         };
       });

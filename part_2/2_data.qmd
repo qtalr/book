@@ -459,20 +459,10 @@ Enrichment transformations are designed to add new attributes to the dataset.\in
 
 ```{r}
 #| label: functions-load-udpipe-model
+#| message: false
 
-load_model_udpipe <- function(model_lang) {
-  cleanNLP::cnlp_init_udpipe(model_lang) # to download the model, if not downloaded
-  base_path <- system.file("extdata", package = "cleanNLP") # get the base path
-  model_name <- # extract the model_name
-    base_path |> # extract the base path
-    dir() |>
-    stringr::str_subset(pattern = paste0("^", model_lang))
+udpipe::udpipe_download_model(language = "english-ewt", "./data/", overwrite = FALSE)
 
-  model <-
-    udpipe::udpipe_load_model(file = file.path(base_path, model_name, fsep = "/"))
-
-  return(model)
-}
 ```
 
 Linguistic annotation can be done manually by linguist coders and/or done automatically using natural language processing (NLP) tools. To illustrate the process of automatic linguistic annotation, we will start with the dataset from @tbl-data-text-dataset. Applying a pre-trained English model [@Silveira2014] from the Universal Dependencies (UD) project\index{Universal Dependencies (UD) project} [@DeMarneffe2021], we can generate linguistic annotation for each word in the `sentence` variable.
@@ -482,7 +472,10 @@ Linguistic annotation can be done manually by linguist coders and/or done automa
 #| tbl-cap: 'Automatic linguistic annotation example'
 #| tbl-colwidths: [2, 13, 5, 70, 10]
 
-eng_model <- load_model_udpipe("english-ewt")
+eng_model <-
+  cleanNLP::cnlp_init_udpipe(
+    model_path = "./data/english-ewt-ud-2.5-191206.udpipe"
+  )
 
 annotation <-
   text_df |>
@@ -605,9 +598,9 @@ For many corpus resources, the corpus documentation will include all or most of 
 
 ### Data dictionaries {#sec-data-data-dictionaries}
 
-The process of organizing the data into a dataset, curation, and modifications to the dataset in preparation for analysis, transformation, each include a number of project-specific decisions. These decisions should be documented. 
+The process of organizing the data into a dataset, curation, and modifications to the dataset in preparation for analysis, transformation, each include a number of project-specific decisions. These decisions should be documented.
 
-On the one hand, each dataset that is created should have a **data dictionary** file\index{data dictionary}. A data dictionary is a document that describes the variables in a dataset including the information in @tbl-data-data-dictionary. Organizing this information in a tabular format, such as a CSV file\index{comma-separated values (CSV)} or spreadsheet\index{spreadsheet file}, can make it easy for others to read and understand your data dictionary. 
+On the one hand, each dataset that is created should have a **data dictionary** file\index{data dictionary}. A data dictionary is a document that describes the variables in a dataset including the information in @tbl-data-data-dictionary. Organizing this information in a tabular format, such as a CSV file\index{comma-separated values (CSV)} or spreadsheet\index{spreadsheet file}, can make it easy for others to read and understand your data dictionary.
 
 On the other hand, the data curation and transformation steps should be documented in the code that is used to create the dataset. This is one of the valuable features of a programmatic approach to quantitative research. The transparency of this documentation is enhanced by using **literate programming**\index{literate programming} strategies to intermingling prose descriptions and code the steps in the same, reproducible document.
 
